@@ -1,0 +1,10 @@
+Package: ShadowCAT
+Type: Package
+Title: Multidimensional Computer Adaptive Testing with the Shadow Testing Procedure
+Version: 0.1
+Date: 2015-02-17
+Author: Karel A. Kroeze
+Maintainer: Karel A. Kroeze <karel.kroeze@gmail.com>
+Description: Allows simulation and live administration of Computer Adaptive tests. Options include; 4 models (3PLM, GPCM, GRM, SM), 3 estimators (ML, MAP, EAP),
+             Fisher Information and Kullback-Leibler Distance based item selection, constraints, content balancing and exposure control with Shadow Testing.
+License: COPYRIGHTED (until I figure out what license to use.)
