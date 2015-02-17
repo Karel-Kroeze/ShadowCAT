@@ -5,14 +5,15 @@
 #' Generic
 #' 
 #' Details
-#' @param test
+#' @param items
 #' @param person Person object, will use current theta estimate of the person to obtain P values.
 #' @param theta Give a specific theta vector to use, overrides person if set.
+#' @param deriv Should we fetch derivatives and LL?
 #' @export
-prob <- function(test, person = NULL,theta = NULL){
+prob <- function(items, person = NULL,theta = NULL, deriv = FALSE){
   if (is.null(person) && is.null(theta)) {
     warning("No person or theta given - defaulting to 0 vector.")
-    theta <- rep(0,test$items$Q)
+    theta <- rep(0,items$Q)
   } 
   if (is.null(theta)) {
     theta <- person$estimate
@@ -24,22 +25,19 @@ prob <- function(test, person = NULL,theta = NULL){
   
   # set up output matrix
   out <- list()
-  P <- matrix(NA,test$items$K,test$items$M+1) # max categories + 1 for false answer.
+  P <- matrix(NA,items$K,items$M+1) # max categories + 1 for false answer.
   
   # simplify input
-  m <- test$items$pars$m
-  a <- test$items$pars$alpha
-  b <- test$items$pars$beta
-  c <- test$items$pars$guessing
-  K <- test$items$K
+  m <- items$pars$m
+  a <- items$pars$alpha
+  b <- items$pars$beta
+  c <- items$pars$guessing
+  K <- items$K
   
-  # only do derivatives when we have info - so after we have administered some items. Post items.
-  post = FALSE
   # simplify input for derivatives.
-  if ( ! is.null(person) && ! is.null(person$resp)){
-    post = TRUE
+  if (deriv){
     u <- person$resp
-    Q <- test$items$Q
+    Q <- items$Q
     l <- d <- D <- numeric(K)
   }
 
@@ -47,7 +45,7 @@ prob <- function(test, person = NULL,theta = NULL){
   at <- apply(a * drop(theta),1,sum)
   
   # Three Paramater Logistic (MultiDim) (Segall, 1996)
-  if(test$items$model=="3PLM"){
+  if(items$model=="3PLM"){
     aux <- numeric(K)
     for (i in 1:K){
       aux[i] <- -a[i,] %*% (theta - b[i,])
@@ -55,7 +53,7 @@ prob <- function(test, person = NULL,theta = NULL){
     P[,2] <- c + (1-c)/(1+exp(aux))
     P[,1] <- 1 - P[,2]
     
-    if(post){
+    if(deriv){
       # Segall (MCAT book, 1996, p.71)
       q <- P[,1]
       p <- P[,2]
@@ -67,13 +65,13 @@ prob <- function(test, person = NULL,theta = NULL){
   }
   
   # graded response model (Samejima, 1969)
-  if(test$items$model=="GRM"){
+  if(items$model=="GRM"){
     for(i in 1:K){
       Psi <- c(1,lf(at[i]-b[i,1:m[i]]),0)
       P[i,1:(m[i]+1)] <- Psi[1:(m[i]+1)] - Psi[2:(m[i]+2)]
     }
     
-    if(post){
+    if(deriv){
       # Graded Response Model (Glas & Dagohoy, 2007)
       for(i in 1:K){
         j <- u[i]+1 # no more messing about with 0 based indices.
@@ -85,7 +83,7 @@ prob <- function(test, person = NULL,theta = NULL){
   }
   
   # Sequential Model (Tutz, 1990)
-  if(test$items$model=="SM"){
+  if(items$model=="SM"){
     for(i in 1:K){
       Psi <- c(1,lf(at[i]-b[i,1:m[i]]),0)
       for(j in 1:(m[i]+1)){
@@ -93,7 +91,7 @@ prob <- function(test, person = NULL,theta = NULL){
       }
     }
     
-    if (post){
+    if (deriv){
       # TODO: Wording in Glas & Dagohoy for dij (SM) is odd. So Psi_0 = 1, right? Why 1-Psi_(m+1)=1 and not Psi_(m+1)=0?
       # TODO: also, why is there an extra set of parenthesis in the formula for dij?
       # TODO: Finally, it doesn't work. See comments in estiamte.R.
@@ -107,7 +105,7 @@ prob <- function(test, person = NULL,theta = NULL){
   }
   
   # Generalised Partial Credit Model (Muraki, 1992)
-  if(test$items$model=="GPCM"){
+  if(items$model=="GPCM"){
     for(i in 1:K){
       aux <- exp((1:m[i]) * at[i] - b[i,1:m[i]])
       aux2 <- 1 + sum(aux)
@@ -115,7 +113,7 @@ prob <- function(test, person = NULL,theta = NULL){
       P[i,1] <- 1-sum(P[i,],na.rm=TRUE)
     }
     
-    if (post) {
+    if (deriv) {
       # TODO: again, why the extra parentheses? 
       for(i in 1:K){
         mi <- 1:m[i]
@@ -129,10 +127,9 @@ prob <- function(test, person = NULL,theta = NULL){
     }
   }
   
-  if (post){
+  if (deriv){
     # create (log)likelihood (L, LL)
     LL <- sum(log(l))
-    L <- exp(LL)
     
     # create derivatives
     d1 <- apply(a * d,2,sum)
@@ -148,10 +145,11 @@ prob <- function(test, person = NULL,theta = NULL){
     if ( ! is.null(prior)) d2 <- d2 - solve(prior)
     
     # attach to output
-    out$LL <- LL
-    out$L <- L
-    out$d1 <- d1
-    out$d2 <- d2
+    out$LL <- LL # log likelihood
+    out$d <- d   # individual d terms (before summing over alpha)
+    out$d1 <- d1 # first derivative of complete set of items at theta (+prior)
+    out$D <- D   # individual D terms (before summing over alpha*alpha`)
+    out$d2 <- d2 # second derivative of complete set of items at theta (+prior)
   }
   
   out$P <- P
@@ -161,7 +159,7 @@ prob <- function(test, person = NULL,theta = NULL){
 #### Everything below here is testing code. TODO: remove!
 testit <- function(model="GRM",alpha=1,beta=0){
   theta <- seq(-3,3,length.out = 100)
-  item <- initItembank(model, alpha, beta,silent=T)
+  item <- initItembank(model, alpha, beta, silent=T)
   p <- matrix(0,100,item$M+1)
   
   for (i in seq_along(theta)){
@@ -171,8 +169,8 @@ testit <- function(model="GRM",alpha=1,beta=0){
   matplot(theta,p,type='l',main=model)
 }
 
-# par(mfrow=c(2,2))
-# testit('GPCM',1,matrix(c(1),1))
-# testit('GRM',1,matrix(c(1),1))
-# testit('SM',1,matrix(c(1),1))
-# testit('3PLM',1,1)
+par(mfrow=c(2,2))
+testit('GPCM',1,matrix(c(1),1))
+testit('GRM',1,matrix(c(1),1))
+testit('SM',1,matrix(c(1),1))
+testit('3PLM',1,1)

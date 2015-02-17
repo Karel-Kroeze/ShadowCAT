@@ -12,7 +12,7 @@
 #' @param ...
 #' @return ShadowCAT.test
 #' @export
-initTest <- function(items, start = NULL, stop = NULL, estimator = 'MAP', objective = 'PFI', selection = 'MFI', constraints = NULL, ...){
+initTest <- function(items, start = NULL, stop = NULL, estimator = 'MAP', objective = 'PFI', selection = 'MI', constraints = NULL, ...){
   # TODO: input validation
   
   # default start is randomly selecting 5 items.
@@ -21,7 +21,8 @@ initTest <- function(items, start = NULL, stop = NULL, estimator = 'MAP', object
   # default stop rule is length of 30.
   if (is.null(stop)) stop <- list(type = 'length', n = 30)
   
-  out <- list(start = start,
+  out <- list(items = items,
+              start = start,
               stop = stop,
               estimator = estimator,
               objective = objective,
