@@ -35,5 +35,3 @@ initTest <- function(items, start = NULL, stop = NULL, estimator = 'MAP', object
   
   return(invisible(out))
 }
-
-boom!
