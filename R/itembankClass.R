@@ -36,6 +36,7 @@ initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = N
   pars$alpha <- matrix(alpha, K, Q)
   pars$beta <- matrix(beta, K, M)
   if ( ! is.null(guessing)) pars$guessing <- matrix(guessing, K, 1)
+  else pars$guessing <- matrix(0, K, 1)
   if ( ! is.null(eta)) pars$eta <- matrix(eta, K, Q)
   
   pars$index <- 1:K # except for bookkeeping things...
@@ -43,8 +44,8 @@ initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = N
   
   
   # define output, list
-  out <- list(pars = pars, Q = Q, K = K, M = M)
-  attr(out, 'class') <- c("ShadowCAT.items", model)
+  out <- list(pars = pars, Q = Q, K = K, M = M, model = model)
+  attr(out, 'class') <- c("ShadowCAT.items")
   
   
   # little feedback

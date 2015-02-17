@@ -3,3 +3,4 @@
 S3method(subset,ShadowCAT.items)
 export(initItembank)
 export(initTest)
+export(prob)
