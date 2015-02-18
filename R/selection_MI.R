@@ -14,7 +14,8 @@ MI <- function(test, person){
     
     # sum over administered items, if there are any. If none, set this to 0 matrix. 
     if (length(person$administered > 0)){
-      so_far <- apply(info[,,person$administered], 3, sum)  
+      # sum over dims 1:2 -> sum over items.
+      so_far <- apply(info[,,person$administered], c(1,2), sum)  
     } else {
       so_far <- matrix(0,test$items$Q,test$items$Q)
     }

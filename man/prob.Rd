@@ -4,7 +4,7 @@
 \alias{prob}
 \title{Probability and Derivatives for a given (subset of) ShadowCAT.items itembank.}
 \usage{
-prob(items, person = NULL, theta = NULL)
+prob(items, person = NULL, theta = NULL, deriv = FALSE)
 }
 \arguments{
 \item{items}{}
@@ -12,6 +12,8 @@ prob(items, person = NULL, theta = NULL)
 \item{person}{Person object, will use current theta estimate of the person to obtain P values.}
 
 \item{theta}{Give a specific theta vector to use, overrides person if set.}
+
+\item{deriv}{Should we fetch derivatives and LL?}
 }
 \description{
 Generic
