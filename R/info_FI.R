@@ -12,10 +12,11 @@ FI <- function(test, person) {
   # minus the expectation of the second derivative of the log-likelihood
   # Expectation -> sum of derivatives for each category, 'weighted' by their probability.
   # Notice that the minuses in individual D terms are there - they seem like they shouldn't be, but the results do match up?
+  # UPDATE: ripped out negatives for SM + GRM (19-2)
   
   # simplify input
   model <- test$items$model
-  p <- prob(test$items, person)$P
+  p <- prob(test, person)$P
   a <- test$items$pars$alpha
   b <- test$items$pars$beta
   K <- test$items$K
@@ -41,7 +42,7 @@ FI <- function(test, person) {
     for(i in 1:K){
       for(j in 1:(m[i]+1)){
         Psi <- c(1,lf(at[i]-b[i,1:m[i]]),0)
-        D[i] <- D[i] + p[i,j] * -(Psi[j] * (1-Psi[j]) + Psi[j+1] * (1-Psi[j+1]))
+        D[i] <- D[i] + p[i,j] * (Psi[j] * (1-Psi[j]) + Psi[j+1] * (1-Psi[j+1]))
       }
     }
   }
@@ -52,7 +53,7 @@ FI <- function(test, person) {
     for(i in 1:K){
       for(j in 1:(m[i]+1)){
         Psi <- c(1, lf(at[i] - b[i,1:m[i]]), 0) # basically: 1, lf(at - b), 0.
-        D[i] <- D[i] + p[i,j] * -sum(Psi[2:(j+1)] * (1 - Psi[2:(j+1)]))
+        D[i] <- D[i] + p[i,j] * sum(Psi[2:(j+1)] * (1 - Psi[2:(j+1)]))
       }
     }
   }
@@ -63,10 +64,10 @@ FI <- function(test, person) {
     # article calls for j=0 ~ m, but j=0 term falls off?
     for(i in 1:K){
       mi <- 1:m[i]
-      for(j in (1:m[i])+1){ # sequence is offset -> 2:m+1, since false answer is unnecesary. mi accounts for weighting, not j.
-        mp <- sum(mi*p[i,j])
-        D[i] <- D[i] + p[i,j] * -sum((mi * p[i,j]) * (mi - mp))
-      }
+      pi <- p[i,mi+1] # remove j = 0, index is now also correct.
+      mp <- sum(mi*pi)
+      
+      D[i] <- sum((mi * pi) * (mi - mp))
     }
   }
   

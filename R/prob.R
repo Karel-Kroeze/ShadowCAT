@@ -9,16 +9,42 @@
 #' @param person Person object, will use current theta estimate of the person to obtain P values.
 #' @param theta Give a specific theta vector to use, overrides person if set.
 #' @param deriv Should we fetch derivatives and LL?
+#' @param prior If not NULL, prior to be applied to derivatives.
+#' @importFrom mvtnorm dmvnorm
 #' @export
-prob <- function(items, person = NULL,theta = NULL, deriv = FALSE){
+prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL){
+  
+  # TODO: Check input.
+  
+  # attach items directly
+  items <- test$items
+  
+  # Make sure a theta exists
   if (is.null(person) && is.null(theta)) {
     warning("No person or theta given - defaulting to 0 vector.")
     theta <- rep(0,items$Q)
   } 
-  if (is.null(theta)) {
+  
+  # if theta is not overriden, use the current estimate.
+  if (is.null(theta)) { 
     theta <- person$estimate
   }
-    # TODO: Check input.
+  
+  # if test requires a prior, and it is not set explicitly, fetch from person. 
+  # If that isn't set, raise a warning and use a multivariate standard normal
+  if (is.null(prior) && test$estimator %in% c("MAP", "EAP") && deriv == TRUE) {
+    if (is.null(person)) {
+      warning("No person or prior set - defaulting to multivariate standard normal")
+      prior <- diag(items$Q)
+    } else {
+      prior <- person$prior
+    }
+  }
+  
+  # if test does not require a theta, but it is set, raise a warning (but do use prior).
+  if ( ! is.null(prior) && test$estimator == "ML" && deriv == TRUE){
+    warning("Prior set for ML estimator - this is not standard!")
+  }
   
   # logistic function
   lf <- function(x){ exp(x)/(1+exp(x)) }
@@ -34,15 +60,15 @@ prob <- function(items, person = NULL,theta = NULL, deriv = FALSE){
   c <- items$pars$guessing
   K <- items$K
   
+  # compensatory - inner product of alpha * theta.
+  at <- a %*% matrix(theta, ncol = 1)
+    
   # simplify input for derivatives.
   if (deriv){
-    u <- person$resp
+    u <- person$responses
     Q <- items$Q
     l <- d <- D <- numeric(K)
   }
-
-  # compensatory - inner product of alpha * theta.
-  at <- apply(a * drop(theta),1,sum)
   
   # Three Paramater Logistic (MultiDim) (Segall, 1996)
   if(items$model=="3PLM"){
@@ -92,13 +118,19 @@ prob <- function(items, person = NULL,theta = NULL, deriv = FALSE){
     }
     
     if (deriv){
-      # TODO: Wording in Glas & Dagohoy for dij (SM) is odd. So Psi_0 = 1, right? Why 1-Psi_(m+1)=1 and not Psi_(m+1)=0?
-      # TODO: also, why is there an extra set of parenthesis in the formula for dij?
-      # TODO: Finally, it doesn't work. See comments in estiamte.R.
+      # TODO: Wording in Glas & Dagohoy for dij (SM) is odd. 
       for(i in 1:K){
-        j <- u[i]+1 # no more messing about with 0 based indices.
+        j <- u[i]+1 # no more messing about with zero-based indeces
         l[i] <- P[i,j]
-        d[i] <- sum((1-Psi[2:j]) - Psi[(2:j)+1])
+        
+        # Hacky solution to false answers.
+        # NOTE: if u_i == 0, only the -Psi(i(h+1)) term remains.
+        if (j == 1) {
+          aux = 0
+        } else {
+          aux = sum(1 - Psi[2:j])
+        }
+        d[i] <- aux - Psi[j+1]
         D[i] <- -sum(Psi[2:(j+1)] * (1 - Psi[2:(j+1)]))
       }
     }
@@ -120,7 +152,7 @@ prob <- function(items, person = NULL,theta = NULL, deriv = FALSE){
         pi <- P[i,mi+1] # remove j = 0, index is now also correct.
         mp <- sum(mi*pi)
         
-        l <- P[i,u[i]+1]
+        l[i] <- P[i,u[i]+1]
         d[i] <- u[i] - mp
         D[i] <- -sum((mi * pi) * (mi - mp))
       }
@@ -131,8 +163,9 @@ prob <- function(items, person = NULL,theta = NULL, deriv = FALSE){
     # create (log)likelihood (L, LL)
     LL <- sum(log(l))
     
+    # CEES: derivatives are correct for a single item, but not for K > 1?
     # create derivatives
-    d1 <- apply(a * d,2,sum)
+    d1 <- matrix(d, nrow = 1) %*% a
     
     # d2
     d2 <- matrix(0,Q,Q)
@@ -141,12 +174,16 @@ prob <- function(items, person = NULL,theta = NULL, deriv = FALSE){
     }
     
     # prior
-    if ( ! is.null(prior)) d1 <- d1 - solve(prior)%*%theta
-    if ( ! is.null(prior)) d2 <- d2 - solve(prior)
-    
+    if ( ! is.null(prior)) {
+      # Alleen variabele deel van multivariaat normaal verdeling (exp).
+      LL <- LL - (t(theta) %*% solve(prior) %*% theta) / 2
+      d1 <- d1 - t(solve(prior) %*% theta)
+      d2 <- d2 - solve(prior)
+    }
+      
     # attach to output
     out$LL <- LL # log likelihood
-    out$d <- d   # individual d terms (before summing over alpha)
+    out$d <- d   # individual d terms (befosre summing over alpha)
     out$d1 <- d1 # first derivative of complete set of items at theta (+prior)
     out$D <- D   # individual D terms (before summing over alpha*alpha`)
     out$d2 <- d2 # second derivative of complete set of items at theta (+prior)
@@ -156,21 +193,28 @@ prob <- function(items, person = NULL,theta = NULL, deriv = FALSE){
   return(invisible(out))
 }
 
-#### Everything below here is testing code. TODO: remove!
-testit <- function(model="GRM",alpha=1,beta=0){
-  theta <- seq(-3,3,length.out = 100)
-  item <- initItembank(model, alpha, beta, silent=T)
-  p <- matrix(0,100,item$M+1)
+#' Log Likelihood
+#' 
+#' Internal - fetch appropriate elements from prob for nlm optimizer
+#' @param theta
+#' @param test
+#' @param person
+#' @param should values be reversed (useful for minimization, reverses LL as well as derivatives)
+#' @return Log-Likelihood, as well as gradient and hessian attributes.
+#' @importFrom stats nlm
+LL <- function(theta, test, person, minimize = FALSE) {
+  # subset items that have a response
+  items <- subset(test$items, person$administered)
   
-  for (i in seq_along(theta)){
-    p[i,] <- prob(item,theta=theta[i])$P
-  }
+  # get LL and derivatives.
+  PROB <- prob(test, person, theta, deriv = TRUE)
   
-  matplot(theta,p,type='l',main=model)
+  # prepare output
+  out <- PROB$LL * (-1) ^ minimize
+  # used in nlm, buggy!
+  # attr(out, "gradient") <- PROB$d1 * (-1) ^ minimize
+  # attr(out, "hessian") <- PROB$d2 * (-1) ^ minimize
+  
+  # return
+  return(invisible(out))
 }
-
-par(mfrow=c(2,2))
-testit('GPCM',1,matrix(c(1),1))
-testit('GRM',1,matrix(c(1),1))
-testit('SM',1,matrix(c(1),1))
-testit('3PLM',1,1)

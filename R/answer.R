@@ -4,12 +4,21 @@
 #' 
 #' 
 #' @param person
-#' @param items
-#' @return vector responses
+#' @param test
+#' @param indeces If not NULL, answer questions with the given indeces, and update the person object.
+#' @return vector responses, or updated person object if indeces is set.
 #' @export
-answer <- function(person, items) {
+answer <- function(person, test, indeces = NULL) {
+  # attach items directly
+  items <- test$items
+  
+  if ( ! is.null(indeces)){
+    # subset items to relevant part
+    items <- subset(items, indeces)
+  }
+  
   # probabilities, generated with TRUE theta.
-  Pij <- prob(items,theta=person$theta)$P
+  Pij <- prob(test,theta=person$theta)$P
   
   # cumulative probabilities
   cp <- Pij 
@@ -19,7 +28,19 @@ answer <- function(person, items) {
   rand <- runif(items$K)
   
   # answer is the number of categories that have a cumulative probability smaller than rand
-  out <- apply(rand > cp, 1, sum, na.rm=TRUE)
+  responses <- apply(rand > cp, 1, sum, na.rm=TRUE)
+  
+  # what to return?
+  if (is.null(indeces)){
+    # vector of responses
+    out <- responses
+  } else {
+    # updated person
+    person$responses <- c(person$responses, responses)
+    person$administered <- c(person$administered, indeces)
+    person$available <- person$available[-which(person$available %in% indeces)]
+    out <- person
+  }
   
   #return
   return(out)
