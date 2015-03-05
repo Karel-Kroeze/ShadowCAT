@@ -363,8 +363,8 @@ testDeriv <- function(models = c("3PLM", "GPCM", "GRM", "SM"), dims = 1:3, eval.
             "derivatives for",Q,"dim",model,"at theta (vector)",eval.point,"\n")
         
         analytical <- list(jacobian = PROB$d1, hessian = PROB$d2)
-        numerical <- list(jacobian = jacobian(LL,eval.point,"complex",test = test, person = person),
-                          hessian = hessian(LL,eval.point,"complex",test = test, person = person))
+        numerical <- list(jacobian = jacobian(ShadowCAT:::LL,eval.point,"complex",test = test, person = person),
+                          hessian = hessian(ShadowCAT:::LL,eval.point,"complex",test = test, person = person))
         
         if(isTRUE(all.equal(analytical, numerical,tolerance = 1e-3))) {
           cat("match\n")
@@ -419,4 +419,35 @@ plotDeriv <- function(models = c("3PLM", "GRM", "SM", "GPCM"),
     
   }
   par(mfrow = c(1,1))
+}
+
+testKL <- function(model = "3PLM", Q = 1) {
+  # set up objects
+  items <- createTestBank(model, Q = Q)
+  person <- initPerson(items)
+  test <- initTest(items, estimator = "EAP")
+  
+  # get some answers
+  person <- answer(person, test, sample(items$K, 10))
+  
+  # special case GPCM
+  if (model == "GPCM"){
+    data <- GPCM
+    items <- initItembank(model = "GPCM", alpha = data[[1]], beta = data[[2]])
+    person <- initPerson(items, prior = data[[3]])
+    test <- initTest(items, estimator = "EAP")
+    person <- answer(person, test, c(1,2,20,21,190,191))
+  }
+  
+  # get fisher information
+  FI_all <- FI(test, person)
+  so_far <- apply(FI_all[,,person$administered, drop = FALSE], c(1,2), sum)
+  FI <- apply(FI_all[,,person$available, drop = FALSE], 3, function(x) det(so_far + x))
+  
+  # get KL information
+  KL <- PEKL(test, person)
+  
+  # print simplified results
+  cat("\n", cor(FI, KL))
+  return(invisible(list(FI = FI, KL = KL)))
 }
