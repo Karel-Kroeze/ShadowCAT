@@ -12,12 +12,16 @@
 #' @param prior If not NULL, prior to be applied to derivatives.
 #' @importFrom mvtnorm dmvnorm
 #' @export
-prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL){
+prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL, items = NULL){
   
   # TODO: Check input.
   
-  # attach items directly
-  items <- test$items
+  # attach item(s) directly
+  if (is.null(items)){
+    items <- test$items
+  } else {
+    items <- items
+  }
   
   # Make sure a theta exists
   if (is.null(person) && is.null(theta)) {
@@ -41,7 +45,7 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL)
     }
   }
   
-  # if test does not require a theta, but it is set, raise a warning (but do use prior).
+  # if test does not require a prior, but it is set, raise a warning (but do use prior).
   if ( ! is.null(prior) && test$estimator == "ML" && deriv == TRUE){
     warning("Prior set for ML estimator - this is not standard!")
   }
@@ -202,9 +206,9 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL)
 #' @param should values be reversed (useful for minimization, reverses LL as well as derivatives)
 #' @return Log-Likelihood, as well as gradient and hessian attributes.
 #' @importFrom stats nlm
-LL <- function(theta, test, person, minimize = FALSE) {
+LL <- function(theta, test, person, minimize = FALSE, log = TRUE) {
   # subset items that have a response
-  items <- subset(test$items, person$administered)
+  test$items <- subset(test$items, person$administered)
   
   # get LL and derivatives.
   PROB <- prob(test, person, theta, deriv = TRUE)
@@ -216,5 +220,6 @@ LL <- function(theta, test, person, minimize = FALSE) {
   # attr(out, "hessian") <- PROB$d2 * (-1) ^ minimize
   
   # return
+  if ( ! log) return(invisible(exp(out)))  
   return(invisible(out))
 }

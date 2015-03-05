@@ -1,3 +1,4 @@
+
 ####### Itembank, and everything related to it.
 #' initItembank
 #' 
@@ -71,7 +72,7 @@ subset.ShadowCAT.items <- function(items, subset) {
   
   for (par in names(items$pars)){
     if (is.null(dim(items$pars[[par]]))) { # vector
-      out$pars[[par]] <- items$pars[[par]][subset]
+      out$pars[[par]] <- items$pars[[par]][subset,drop = FALSE]
     } else { # matrix
       out$pars[[par]] <- items$pars[[par]][subset,,drop = FALSE]     
     }

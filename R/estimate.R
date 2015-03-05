@@ -7,6 +7,7 @@
 #' @param test
 #' @param ...
 #' @return person
+#' @importFrom SparseGrid createIntegrationGrid
 #' @importFrom MultiGHQuad init.quad eval.quad
 #' @export
 estimate <- function(person, test, ...) {
@@ -27,10 +28,15 @@ estimate <- function(person, test, ...) {
   
   if (test$estimator == "EAP"){
     # Multidimensional Gauss-Hermite Quadrature
+    # TODO: See if GH Quadrature is worth it at all.
+    # TODO: Likelihoods of 20+ items become extremely peaky, meaning the estimate will 'snap' to the closest quad point. 
+    #       This is excacerbated in Q-dimensional problems since we cannot use the same amount of points per dimension.
+    #       Possible fix: go adaptive.
     Q <- test$items$Q
-    QP <- init.quad(Q = Q, Sigma = person$prior, ip = max(ceiling(20/(Q*2)),3))
+    QP <- init.quad(Q = Q, Sigma = person$prior, ip = switch(Q, 50, 15, 6, 4, 3))
     person$estimate <- eval.quad(FUN = LL, X = QP, test = test, person = person)
   }
   
   return(invisible(person))
 }
+
