@@ -1,3 +1,54 @@
+#' Next item in an adaptive test. Takes a person and test object, and returns the index of the next item based 
+#' 
+#' This function is a wrapper that sends the actual work to the (hopefully) correct subroutines.
+#' 
+#' @param test
+#' @param person
+#' @return integer item index
+#' @export
+next_item <- function(test, person) {
+  # get the values of the objective function for this test/person combo
+  objective <- information(test, person)
+  
+  # pawn out the actual work, 'MI' is a simple maximum, 'Shadow' does ShadowTesting.
+  out <- switch(test$selection,
+                "MI" = MI(test, person, objective),
+                "Shadow" = Shadow(test, person, objective))
+  
+  return(out)
+}
+
+#' Obtain a vector of values of the objective function. 
+#' 
+#' @param test
+#' @param person
+#' @return vector
+#' @export
+information <- function(test, person) {
+  if (test$objective %in% c('TFI','DFI','TPFI','DPFI')) {
+    # Fisher information based criteria
+    info <- FI(test, person)
+    so_far <- apply(info[,,person$administered, drop = FALSE], c(1,2), sum)
+    
+    # add prior
+    if (test$objective %in% c('TPFI', 'DPFI')) so_far <- so_far + solve(person$prior)
+    
+    # apply function, determinant
+    if (test$objective %in% c('DFI', 'DPFI')) {
+      out <- apply(info[,,person$available, drop = FALSE], 3, function(x) det(so_far + x))
+    }
+    # trace
+    if (test$objective %in% c('TFI','TPFI')){
+      out <- apply(info[,,person$available, drop = FALSE], 3, function(x) sum(diag(so_far + x)))
+    }
+  }
+  if (test$objective == "PEKL") {
+    out <- PEKL(test, person)
+  }
+  
+  return(out)
+}
+
 #' Maximum Information item selection
 #' 
 #' Naive item selection based on maximum information only.
@@ -7,21 +58,7 @@
 #' @param person
 #' @return item index of item with the highest value of the objective function.
 #' @export
-MI <- function(test, person){
-  if (test$objective == "FI" || test$objective == "PFI") {
-    # fetch info for all items
-    info <- FI(test, person)
-    
-    # sum over administered items, if there are any. If none, set this to 0 matrix. 
-    if (length(person$administered > 0)){
-      # sum over dims 1:2 -> sum over items.
-      so_far <- apply(info[,,person$administered, drop=FALSE], c(1,2), sum)  
-    } else {
-      so_far <- matrix(0,test$items$Q,test$items$Q)
-    }
-    
-    # include prior?
-    if (test$objective == "PFI") so_far <- so_far + solve(person$prior)
+MI <- function(test, person, objective){
     
     # fetch highest information item
     max_info <- 0
@@ -30,15 +67,15 @@ MI <- function(test, person){
     max_item <- sample(person$available, 1)
     
     # loop over items, flag best matches.
-    for (i in person$available) { 
-      item_info <- det(so_far + info[,,i])
-      if (item_info > max_info){
-        max_info <- item_info
-        max_item <- i
+    for (i in 1:length(objective)) { 
+      if (objective[i] > max_info){
+        max_info <- objective[i]
+        max_item <- person$available[i]
       }
     }
     
     # return
     return(max_item)
   }
-}
+
+

@@ -4,7 +4,7 @@
 \alias{MI}
 \title{Maximum Information item selection}
 \usage{
-MI(test, person)
+MI(test, person, objective)
 }
 \arguments{
 \item{test}{}

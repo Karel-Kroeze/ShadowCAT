@@ -4,7 +4,7 @@
 \alias{LL}
 \title{Log Likelihood}
 \usage{
-LL(theta, test, person, minimize = FALSE)
+LL(theta, test, person, minimize = FALSE, log = TRUE)
 }
 \arguments{
 \item{theta}{}

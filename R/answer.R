@@ -9,13 +9,13 @@
 #' @return vector responses, or updated person object if indeces is set.
 #' @export
 answer <- function(person, test, indeces = NULL) {
+  # subset items to relevant part
+  # TODO: this is kind of awkward, we're updating the parent object with a temporary version of items. 
+  # Doesn't hurt, but not prety
+  if ( ! is.null(indeces)) test$items <- subset(test$items, indeces)
+  
   # attach items directly
   items <- test$items
-  
-  if ( ! is.null(indeces)){
-    # subset items to relevant part
-    items <- subset(items, indeces)
-  }
   
   # probabilities, generated with TRUE theta.
   Pij <- prob(test,theta=person$theta)$P

@@ -4,7 +4,8 @@
 \alias{prob}
 \title{Probability and Derivatives for a given (subset of) ShadowCAT.items itembank.}
 \usage{
-prob(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL)
+prob(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
+  items = NULL)
 }
 \arguments{
 \item{person}{Person object, will use current theta estimate of the person to obtain P values.}

@@ -38,8 +38,7 @@ ShadowCAT <- function(person, test) {
     person$responses <- rep(c(1,0), length.out = W)
     
     person <- estimate(person, test, check.analyticals = FALSE)
-    next_item <- MI(test, person)
-    person <- answer(person, test, next_item)
+    person <- answer(person, test, next_item(test, person))
   }
   
   return(person)

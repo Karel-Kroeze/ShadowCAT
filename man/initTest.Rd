@@ -5,7 +5,8 @@
 \title{Initiate ShadowCAT test object}
 \usage{
 initTest(items, start = NULL, stop = NULL, estimator = "MAP",
-  objective = "PFI", selection = "MI", constraints = NULL, ...)
+  objective = "PFI", selection = "MI", constraints = NULL,
+  lowerBound = rep(-6, items$Q), upperBound = rep(6, items$Q), ...)
 }
 \arguments{
 \item{items}{}
