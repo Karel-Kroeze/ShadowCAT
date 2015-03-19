@@ -13,6 +13,6 @@ Depends:
       stats,
       mvtnorm,
       MultiGHQuad,
-      SparseGrid,
       numDeriv,
-      plot3D
+      plot3D,
+      lpSolve

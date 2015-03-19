@@ -7,7 +7,6 @@
 #' @param test
 #' @param ...
 #' @return person
-#' @importFrom SparseGrid createIntegrationGrid
 #' @importFrom MultiGHQuad init.quad eval.quad
 #' @export
 estimate <- function(person, test, ...) {
@@ -21,7 +20,7 @@ estimate <- function(person, test, ...) {
     
     # note that prior is applied in LL (incorrectly it seems, but still).
     minimum <- nlm(f = LL, p = person$estimate, test = test, person = person,
-                   minimize = TRUE)
+                   minimize = TRUE) # passed on to LL, reverses polarity.
     
     person$estimate <- minimum$estimate
   }
@@ -32,6 +31,7 @@ estimate <- function(person, test, ...) {
     # TODO: Likelihoods of 20+ items become extremely peaky, meaning the estimate will 'snap' to the closest quad point. 
     #       This is excacerbated in Q-dimensional problems since we cannot use the same amount of points per dimension.
     #       Possible fix: go adaptive.
+    #       Easier fix; ignore marginal precision gain of GH and go Riemann sum.
     Q <- test$items$Q
     QP <- init.quad(Q = Q, Sigma = person$prior, ip = switch(Q, 50, 15, 6, 4, 3))
     person$estimate <- eval.quad(FUN = LL, X = QP, test = test, person = person)
