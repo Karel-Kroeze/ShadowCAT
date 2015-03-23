@@ -78,16 +78,3 @@ createConstraints <- function(test, characteristics = NULL, constraints = NULL) 
   test$constraints = constraints
   return(test)
 }
-
-items <- createTestBank("GPCM")
-person <- initPerson(items)
-test <- initTest(items, objective = "PEKL", selection = "Shadow")
-person <- estimate(answer(person, test, 1:5), test)
-
-chars <- data.frame(x = rnorm(50), y = rep(c('a','b','c'),length.out=50))
-constraints <- list(list(name = 'x', op = '><', target = c(0,10)),
-                    list('y/a', '=', 20),
-                    list('x','<',2))
-out <- createConstraints(test, chars, constraints)
-print(out)
-

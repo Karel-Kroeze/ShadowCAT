@@ -34,8 +34,8 @@ ShadowCAT <- function(person, test) {
   ## Start CAT
   while(go_on(test, person)) {
     # respones hack to always give 1,0,1,0 etc response pattern.
-    W <- length(person$responses)
-    person$responses <- rep(c(1,0), length.out = W)
+    # W <- length(person$responses)
+    # person$responses <- rep(c(1,0), length.out = W)
     
     person <- estimate(person, test, check.analyticals = FALSE)
     person <- answer(person, test, next_item(test, person))

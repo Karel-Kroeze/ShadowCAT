@@ -42,9 +42,10 @@ information <- function(test, person) {
       out <- apply(info[,,person$available, drop = FALSE], 3, function(x) sum(diag(so_far + x)))
     }
   }
-  if (test$objective == "PEKL") {
+  else if (test$objective == "PEKL") {
     out <- PEKL(test, person)
-  }
+  } 
+  else stop("unknown objective function.")
   
   return(out)
 }

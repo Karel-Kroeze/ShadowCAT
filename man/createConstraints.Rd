@@ -2,23 +2,24 @@
 % Please edit documentation in R/constraintsClass.R
 \name{createConstraints}
 \alias{createConstraints}
-\title{Convenience wrapper to create a constraints list for use with ShadowCAT.}
+\title{Convenience wrapper to add constraitns to a test object for use with ShadowCAT.}
 \usage{
-createConstraints(characteristics, constraints = NULL)
+createConstraints(test, characteristics = NULL, constraints = NULL)
 }
 \arguments{
-\item{characteristics}{\code{data.frame} with one characteristic per column, one item per row.
-Deals with factor, string and numeric characteristics. See Details.}
+\item{test}{ShadowCAT test object}
 
-\item{constraints}{\code{data.frame} with three columns.
-\code{characteristic} name of the characteristic in the \code{characteristics} data.frame, for categorical variables each level should have its own seperate entry in the format \code{variable.level}.
-\code{operator} Mathematical operator to be used. Can be any of \code{=, <= or >=} (\code{==, < and >} are equivalent to these).
-\code{target} The target value of the constraint.}
+\item{characteristics}{data.frame with characteristics, one row per item, one column per characteristic.}
+
+\item{constraints}{list of constraints, each constraint is a list with three named values;
+\code{name} the column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as \code{name/value}.
+\code{op} the logoical operator to be used. Valid options are "<", "=", ">" and "><".
+\code{target} the target value, numeric. If the operator is "<>", this should be a length two vector in between which the target should fall.}
 }
 \value{
-constrains, \code{data.frame} of constraints with class ShadowCAT.constraints, to be used in adaptive testing.
+test ShadowCAT test object, including the constraints set.
 }
 \description{
-Convenience wrapper to create a constraints list for use with ShadowCAT.
+Convenience wrapper to add constraitns to a test object for use with ShadowCAT.
 }
 

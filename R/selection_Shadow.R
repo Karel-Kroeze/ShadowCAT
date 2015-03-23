@@ -12,18 +12,19 @@
 #' @importFrom lpSolve lp
 Shadow <- function(test, person, objective) {
   # produce a small warning about Shadow Testing without constraints.
-  if (! exists("test$constraints")) stop("No constraints matrix given. 
+  if (is.null(test$constraints)) stop("No constraints matrix given. 
                                       Shadow Testing without constraints is equivalent to maximum information selection, but with more overhead.")
   
   # proceed to the meat of the thing.
   # user created constraints are combined with constraint to select all administered items.
+  # CRITICAL ERROR: TODO: update administered constraint
   possible <- solution <- with(test$constraints, lp(direction = 'max',
                             const.mat = cbind(lp_chars, person$administered),
                             const.dir = c(constraints$operator, '=='),
                             const.rhs = c(constraints$target, length(person$responses)),
                             objective.in = objective,
                             all.bin = TRUE,
-                            transpose.constraints = FALSE))
+                            transpose.constraints = FALSE))$solution
   
   # get the item with the highest value of the objective function
   possible[person$administered] <- FALSE

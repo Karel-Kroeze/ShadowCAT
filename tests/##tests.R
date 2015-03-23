@@ -8,28 +8,34 @@
 #' @param size
 #' @param length
 testCAT <- function(models = c('3PLM','GRM','GPCM','SM'),
-                    estimators = c('ML','MAP'),
+                    estimators = c('ML','MAP','EAP'),
+                    objectives = c('PEKL','TPFI','DPFI','TFI','DFI'),
+                    selectors = c('Shadow','MI'),
                     dims = c(1, 2, 3), between = c(TRUE, FALSE),
                     covars = NULL,
                     K = 100,
                     start = list(type = 'random', n = 5),
                     stop = list(type = 'length', n = 30)) {
   for (model in models) {
-    for (estimator in estimators) {
-      for (Q in dims) {
-        for (within in between) {
-          
-          # assumes Q is sequential from 1:X    
-          items <- createTestBank(model, K, Q, M = 4, between = !within)
-          person <- initPerson(items, rnorm(Q), diag(Q))
-          test <- initTest(items,start,stop,estimator,"PFI","MI")
-          
-          if (!within) { bet <- 'between' } else { bet <- 'within' }
-          cat(model, Q, 'dimensions', bet, estimator)
-          
-          person <- ShadowCAT(person, test)
-          print(person$estimate)
-          
+    for (Q in dims) {
+      for (within in between) {
+        
+        # assumes Q is sequential from 1:X    
+        items <- createTestBank(model, K, Q, M = 4, between = !within)
+        person <- initPerson(items, rnorm(Q), diag(Q))
+        
+        for (estimator in estimators) {
+          for (objective in objectives) {
+            for (selection in selectors) {
+              test <- initTest(items,start,stop,estimator,objective,selection)
+              test <- createConstraints(test)
+              if (!within) { bet <- 'between' } else { bet <- 'within' }
+              cat(model, Q, 'dimensions', bet, estimator, objective, selection)
+              
+              person <- ShadowCAT(person, test)
+              print(person$estimate)
+            }
+          }
         }
       }
     }
