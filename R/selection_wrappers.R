@@ -54,6 +54,15 @@ objective <- function(test, person, pad = TRUE) {
   } 
   else stop("unknown objective function.")
   
+  # If all objective values are 0, something went horribly wrong.
+  # This is made worse by lpSolve -> it will give back a full vector, not respecting constraints.
+  # TODO: check if this is ok.
+  if (all(out == 0)) {
+    out <- rep(1, length(out)) # so replace them by 1's.
+    warning("Objective is (computationally) zero for all items. Are you sure appropriate starting items are selected?")
+  } 
+  
+  # pad to full length K objective vector.
   if (pad) {
     full <- rep(0, test$items$K)
     full[person$available] <- out

@@ -31,8 +31,16 @@ Shadow <- function(test, person, objective) {
   
   # get the item with the highest value of the objective function
   possible[person$administered] <- FALSE
-  
   out <- which(objective == max(objective[as.logical(possible)]))
+  
+  # TODO: remove debugging
+  if (any(out %in% person$administered)) {
+    cat("# tada!") # stop here.
+  }
+  
+  
+  # if there's more than one, select one at random (edge case)
+  if (length(out) > 1) out <- sample(out, 1)
   
   # return index
   return(out)

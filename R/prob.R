@@ -163,14 +163,15 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
     }
   }
   
-  # likelihoods can never truly be zero
+  # likelihoods can never truly be zero, let alone negative
   # TODO: verify this fix for viability.
-  P[which(P == 0)] <- 1e-10
-  if (deriv) l[which(l == 0)] <- 1e-10
+  P[which(P <= 0)] <- 1e-10
+  if (deriv) l[which(l <= 0)] <- 1e-10
   
   if (deriv){
     # create (log)likelihood (L, LL)
-    LL <- sum(log(l))
+    ll <- log(l)
+    LL <- sum(ll)
     
     # CEES: derivatives are correct for a single item, but not for K > 1?
     # create derivatives

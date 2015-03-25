@@ -50,12 +50,12 @@ testCAT <- function(models = c('3PLM','GRM','GPCM','SM'),
               }, error = function(e) {
                 cat("\n\n", model, Q, 'dimensions', bet, estimator, objective, selection)
                 cat("\n FAILED: ", e$message)
-                cat("\n IN: ", as.character(e$call), "\n\n\n")
+                cat("\n IN: ", as.character(e$call), "items\n\n\n")
               }
               , warning = function(w) {
                 cat("\n\n", model, Q, 'dimensions', bet, estimator, objective, selection)
                 cat("\n WARNING: ", w$message)
-                cat("\n IN: ", as.character(w$call))
+                cat("\n IN: ", as.character(w$call), "items\n\n\n")
               }
               )
             }

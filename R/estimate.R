@@ -19,10 +19,20 @@ estimate <- function(person, test, ...) {
     # LL is the target function, test, person and minimize need to be passed on. We also want the value of the hessian at the final estimate.
     
     # note that prior is applied in LL (incorrectly it seems, but still).
-    minimum <- nlm(f = LL, p = person$estimate, test = test, person = person,
-                   minimize = TRUE) # passed on to LL, reverses polarity.
+    # suppress warnings and errors and do EAP instead.
+    minimum <- tryCatch( nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate, # passed on to LL, reverses polarity.
+                         error = function(e) {
+                           #message(paste0(test$estimator, " failed, trying EAP estimate."))
+                           test$estimator <- "EAP"
+                           return(estimate(person, test)$estimate)
+                         },
+                         warning = function(w) {
+                           #message(paste0(test$estimator, " failed, trying EAP estimate."))
+                           test$estimator <- "EAP"
+                           return(estimate(person, test)$estimate)
+                         })
     
-    person$estimate <- minimum$estimate
+    person$estimate <- minimum
   }
   
   if (test$estimator == "EAP"){
