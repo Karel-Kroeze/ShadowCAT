@@ -11,7 +11,7 @@
 answer <- function(person, test, indeces = NULL) {
   # subset items to relevant part
   # TODO: this is kind of awkward, we're updating the parent object with a temporary version of items. 
-  # Doesn't hurt, but not prety
+  # Doesn't hurt, but not pretty
   if ( ! is.null(indeces)) test$items <- subset(test$items, indeces)
   
   # attach items directly

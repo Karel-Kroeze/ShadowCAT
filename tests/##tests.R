@@ -16,24 +16,48 @@ testCAT <- function(models = c('3PLM','GRM','GPCM','SM'),
                     K = 100,
                     start = list(type = 'random', n = 5),
                     stop = list(type = 'length', n = 30)) {
+  
+  total <- length(models) * length(dims) * length(between) * length(estimators) * length(objectives) * length(selectors)
+  i <- 0
+  cat("Trying", total, "different permutations of options.\n")
+  
+  # progress bar
+  #pb <- txtProgressBar(0, total, style = 3)
+  
   for (model in models) {
     for (Q in dims) {
       for (within in between) {
         
         # assumes Q is sequential from 1:X    
-        items <- createTestBank(model, K, Q, M = 4, between = !within)
-        person <- initPerson(items, rnorm(Q), diag(Q))
+        items <- createTestBank(model, K, Q, M = 4, between = within)
         
         for (estimator in estimators) {
           for (objective in objectives) {
             for (selection in selectors) {
+              # output
+              i <- i + 1
+              if (within) { bet <- 'between' } else { bet <- 'within' }
+              cat("\r", i, model, Q, 'dimensions', bet, estimator, objective, selection, "                        ")
+              
+    
+              person <- initPerson(items, rnorm(Q), diag(Q))
               test <- initTest(items,start,stop,estimator,objective,selection)
               test <- createConstraints(test)
-              if (!within) { bet <- 'between' } else { bet <- 'within' }
-              cat(model, Q, 'dimensions', bet, estimator, objective, selection)
               
-              person <- ShadowCAT(person, test)
-              print(person$estimate)
+              # go on when fail
+              tryCatch({
+                person <- ShadowCAT(person, test)
+              }, error = function(e) {
+                cat("\n\n", model, Q, 'dimensions', bet, estimator, objective, selection)
+                cat("\n FAILED: ", e$message)
+                cat("\n IN: ", as.character(e$call), "\n\n\n")
+              }
+              , warning = function(w) {
+                cat("\n\n", model, Q, 'dimensions', bet, estimator, objective, selection)
+                cat("\n WARNING: ", w$message)
+                cat("\n IN: ", as.character(w$call))
+              }
+              )
             }
           }
         }

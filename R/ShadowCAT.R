@@ -24,7 +24,7 @@ ShadowCAT <- function(person, test) {
   ### Define stopping rule(s)
   go_on <- function(test, person) {
     if (test$stop$type == 'length') {
-      if (length(person$responses) > test$stop$n) return(FALSE)
+      if (length(person$responses) >= test$stop$n) return(FALSE)
     }
     
     return(TRUE)

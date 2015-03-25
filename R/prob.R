@@ -163,6 +163,11 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
     }
   }
   
+  # likelihoods can never truly be zero
+  # TODO: verify this fix for viability.
+  P[which(P == 0)] <- 1e-10
+  if (deriv) l[which(l == 0)] <- 1e-10
+  
   if (deriv){
     # create (log)likelihood (L, LL)
     LL <- sum(log(l))

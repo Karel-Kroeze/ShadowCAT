@@ -9,8 +9,12 @@
 #' @export
 PEKL <- function(test, person, theta_range = -3:3){
   # collect EAP estimate
-  test$estimator <- "EAP"
-  theta <- estimate(person, test)$estimate
+  if (test$estimator == "EAP") {
+    theta <- person$estimate
+  } else {
+    test$estimator <- "EAP"
+    theta <- estimate(person, test)$estimate
+  }
   
   # we'll perform a very basic integration over the theta range
   # expand the grid for multidimensional models (number of calculations will be length(theta_range)**Q, which can still get quite high for high dimensionalities.)
@@ -37,5 +41,7 @@ KLB <- function(theta, theta0, test, person){
   P0 <- prob(test = test, theta = theta0, items = available_items)$P
   LL <- prob(test = test, theta = theta, person = person, items = administered_items, deriv = TRUE)$LL
   
-  return(rowSums(P0 * (log(P0) - log(P)), na.rm = TRUE) * exp(LL))
+  out <- rowSums(P0 * (log(P0) - log(P)), na.rm = TRUE) * exp(LL)
+  
+  return(out)
 }

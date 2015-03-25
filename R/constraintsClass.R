@@ -10,15 +10,15 @@
 #' @export
 createConstraints <- function(test, characteristics = NULL, constraints = NULL) {
   # create characteristics data.frame, add administered and N.
-  CHARS <- data.frame(administered = rep(0, test$items$K), length = rep(1, test$items$K))
+  CHARS <- data.frame(length = rep(1, test$items$K))
   
   # create name vector
-  NAMES <- c('administered', 'length')
+  NAMES <- c('length')
   
   # create constraints for administered and N
-  CONSTS <- data.frame(name = c('administered', 'length'), 
-                       op = c('=','='), 
-                       target = c(0, test$stop$n),
+  CONSTS <- data.frame(name = 'length', 
+                       op = '=', 
+                       target = test$stop$n,
                        stringsAsFactors = FALSE)
   
   # add provided characteristics.
@@ -68,7 +68,7 @@ createConstraints <- function(test, characteristics = NULL, constraints = NULL) 
   }
   
   # build characteristics table for use in lpSolve
-  LPCHARS <- CHARS[,CONSTS$name]
+  LPCHARS <- CHARS[,CONSTS$name, drop = FALSE]
   
   # create constraints object
   constraints <- list(characteristics = CHARS, constraints = CONSTS, lp_chars = LPCHARS)
