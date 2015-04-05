@@ -15,10 +15,13 @@ createConstraints <- function(test, characteristics = NULL, constraints = NULL) 
   # create name vector
   NAMES <- c('length')
   
-  # create constraints for administered and N
+  # test stops at whichever occurs first, length stopping rule or max_n
+  max_n <- ifelse(test$stop$type == 'length', min(test$stop$n, test$max_n), test$max_n)
+  
+  # create constraints for (max) n
   CONSTS <- data.frame(name = 'length', 
                        op = '=', 
-                       target = test$stop$n,
+                       target = max_n,
                        stringsAsFactors = FALSE)
   
   # add provided characteristics.
@@ -74,7 +77,6 @@ createConstraints <- function(test, characteristics = NULL, constraints = NULL) 
   constraints <- list(characteristics = CHARS, constraints = CONSTS, lp_chars = LPCHARS)
   attr(constraints, 'class') <- "ShadowCAT.constraints"
   
-  # attach and return
-  test$constraints = constraints
-  return(test)
+  # return
+  return(constraints)
 }

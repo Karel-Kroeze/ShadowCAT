@@ -4,9 +4,10 @@
 \alias{initTest}
 \title{Initiate ShadowCAT test object}
 \usage{
-initTest(items, start = NULL, stop = NULL, estimator = "MAP",
-  objective = "PFI", selection = "MI", constraints = NULL,
-  lowerBound = rep(-6, items$Q), upperBound = rep(6, items$Q), ...)
+initTest(items, start = list(type = "random", n = 5), stop = list(type =
+  "length", n = 30), max_n = 50, estimator = "MAP", objective = "PD",
+  selection = "MI", constraints = NULL, lowerBound = rep(-6, items$Q),
+  upperBound = rep(6, items$Q), ...)
 }
 \arguments{
 \item{items}{}
@@ -15,6 +16,8 @@ initTest(items, start = NULL, stop = NULL, estimator = "MAP",
 
 \item{stop}{}
 
+\item{max_n}{}
+
 \item{estimator}{}
 
 \item{objective}{}
@@ -22,6 +25,10 @@ initTest(items, start = NULL, stop = NULL, estimator = "MAP",
 \item{selection}{}
 
 \item{constraints}{}
+
+\item{lowerBound}{}
+
+\item{upperBound}{}
 
 \item{...}{}
 }

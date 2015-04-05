@@ -5,28 +5,34 @@
 #' @param items
 #' @param start
 #' @param stop
+#' @param max_n
 #' @param estimator
 #' @param objective
 #' @param selection
 #' @param constraints
+#' @param lowerBound
+#' @param upperBound
 #' @param ...
 #' @return ShadowCAT.test
 #' @export
-initTest <- function(items, start = NULL, stop = NULL,
-                     estimator = 'MAP', objective = 'PFI', selection = 'MI', constraints = NULL,
-                     lowerBound = rep(-6, items$Q), upperBound = rep(6, items$Q), ...){
-  # TODO: input validation
-  
-  # default start is randomly selecting 5 items.
-  if (is.null(start)) start <- list(type = 'random', n = 5) 
-  
-  # default stop rule is length of 30.
-  if (is.null(stop)) stop <- list(type = 'length', n = 30)
-    
+initTest <- function(items, 
+                     start = list(type = 'random', n = 5), 
+                     stop = list(type = 'length', n = 30),
+                     max_n = 50, # utter maximum
+                     estimator = 'MAP',
+                     objective = 'PD',
+                     selection = 'MI',
+                     constraints = NULL,
+                     lowerBound = rep(-6, items$Q),
+                     upperBound = rep(6, items$Q),
+                     ...)
+  {
+
   # attach everything
   out <- list(items = items,
               start = start,
               stop = stop,
+              max_n = max_n,
               lowerBound = lowerBound,
               upperBound = upperBound,
               estimator = estimator,
@@ -35,7 +41,10 @@ initTest <- function(items, start = NULL, stop = NULL,
               constraints = constraints,
               internal = list(...))
   
-  attr(out, 'class') <- c("ShadowCAT.test")
+  attr(out, 'class') <- c("ShadowCAT.test")  
+  
+  # set up default constraints
+  out$constraints <- createConstraints(out, constraints)
   
   return(invisible(out))
 }

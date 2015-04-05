@@ -9,13 +9,12 @@
 #' @return vector responses, or updated person object if indeces is set.
 #' @export
 answer <- function(person, test, indeces = NULL) {
-  # temp debugging, TODO: remove
-  old.person <- person
-  
   # subset items to relevant part
   # TODO: this is kind of awkward, we're updating the parent object with a temporary version of items. 
   # Doesn't hurt, but not pretty
-  if ( ! is.null(indeces)) test$items <- subset(test$items, indeces)
+  if ( ! is.null(indeces)) {
+    test$items <- subset(test$items, indeces)
+  } 
   
   # attach items directly
   items <- test$items
@@ -44,15 +43,7 @@ answer <- function(person, test, indeces = NULL) {
     person$available <- person$available[-which(person$available %in% indeces)]
     out <- person
   }
-  
-  # TODO: remove
-  if (length(out$available) == 0) 
-  {
-    # stop here
-    cat("tada!")
-  }
-
-  
+    
   #return
   return(out)
 }

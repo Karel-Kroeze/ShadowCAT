@@ -11,8 +11,6 @@ FI <- function(test, person) {
   # Fisher Information
   # minus the expectation of the second derivative of the log-likelihood
   # Expectation -> sum of derivatives for each category, 'weighted' by their probability.
-  # Notice that the minuses in individual D terms are there - they seem like they shouldn't be, but the results do match up?
-  # UPDATE: ripped out negatives for SM + GRM (19-2)
   
   # simplify input
   model <- test$items$model
@@ -60,8 +58,6 @@ FI <- function(test, person) {
   
   if (model == "GPCM"){
     # Generalized Partial Credit Model (Muraki, 1992)
-    # TODO: again, why the extra parentheses? 
-    # article calls for j=0 ~ m, but j=0 term falls off?
     for(i in 1:K){
       mi <- 1:m[i]
       pi <- p[i,mi+1] # remove j = 0, index is now also correct.

@@ -15,11 +15,11 @@ next_item <- function(test, person) {
                 "MI" = MI(test, person, objective),
                 "Shadow" = Shadow(test, person, objective))
   
-  #cat("\n Next item: ", out)
-  if (is.na(out)) {
-    out <- sample(person$available, 1)
-  #  cat("\n Backup item: ", out)
-  }
+  # if there's more than one, select one at random (edge case)
+  if (length(out) > 1) out <- sample(out, 1)
+  
+  # if there's no answer for some obfuscated reason, return a random available item rather than crashing and burning.
+  if (length(out) == 0 || is.na(out)) out <- sample(person$available, 1)
   
   return(out)
 }
@@ -32,20 +32,21 @@ next_item <- function(test, person) {
 #' @return vector
 #' @export
 objective <- function(test, person, pad = TRUE) {
-  if (test$objective %in% c('TFI','DFI','TPFI','DPFI')) {
+  if (test$objective %in% c('A','D','PA','PD')) {
     # Fisher information based criteria
     info <- FI(test, person)
+    
     so_far <- apply(info[,,person$administered, drop = FALSE], c(1,2), sum)
     
     # add prior
-    if (test$objective %in% c('TPFI', 'DPFI')) so_far <- so_far + solve(person$prior)
+    if (test$objective %in% c('PA', 'PD')) so_far <- so_far + solve(person$prior)
     
     # determinant
-    if (test$objective %in% c('DFI', 'DPFI')) {
+    if (test$objective %in% c('PD', 'D')) {
       out <- apply(info[,,person$available, drop = FALSE], 3, function(x) det(so_far + x))
     }
     # trace
-    if (test$objective %in% c('TFI','TPFI')){
+    if (test$objective %in% c('PA','A')){
       out <- apply(info[,,person$available, drop = FALSE], 3, function(x) sum(diag(so_far + x)))
     }
   }
@@ -69,7 +70,9 @@ objective <- function(test, person, pad = TRUE) {
     out <- full
   }
   
-  out[is.na(out)] <- 0 # set missings to 0. I'm hoping this is underflow. TODO: investigate, (mostly occurs in 3PL weirdly enough.)
+  # set missings to 0. I'm hoping this is underflow.
+  # TODO: investigate, (mostly occurs in 3PLM weirdly enough.)
+  out[is.na(out)] <- 0  
   
   return(out)
 }

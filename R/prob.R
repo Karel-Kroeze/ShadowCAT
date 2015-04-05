@@ -150,7 +150,6 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
     }
     
     if (deriv) {
-      # TODO: again, why the extra parentheses? 
       for(i in 1:K){
         mi <- 1:m[i]
         pi <- P[i,mi+1] # remove j = 0, index is now also correct.
@@ -173,7 +172,7 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
     ll <- log(l)
     LL <- sum(ll)
     
-    # CEES: derivatives are correct for a single item, but not for K > 1?
+    # TODO: derivatives are correct for a single item, but not for K > 1?
     # create derivatives
     d1 <- matrix(d, nrow = 1) %*% a
     

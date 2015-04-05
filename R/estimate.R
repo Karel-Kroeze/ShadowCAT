@@ -47,6 +47,10 @@ estimate <- function(person, test, ...) {
     person$estimate <- eval.quad(FUN = LL, X = QP, test = test, person = person)
   }
   
+  # enforce boundaries.
+  person$estimate[which(person$estimate > test$upperBound)] <- test$upperBound[which(person$estimate > test$upperBound)]
+  person$estimate[which(person$estimate < test$lowerBound)] <- test$lowerBound[which(person$estimate < test$lowerBound)]
+  
   return(invisible(person))
 }
 

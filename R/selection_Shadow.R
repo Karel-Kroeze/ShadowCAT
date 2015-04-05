@@ -21,7 +21,7 @@ Shadow <- function(test, person, objective) {
   administered_binair[person$administered] <- 1L
     
   # user created constraints are combined with constraint to select all administered items.
-  possible <- solution <- lp(direction = 'max',
+  solution <- lp(direction = 'max',
                             const.mat = as.matrix(cbind(test$constraints$lp_chars, administered_binair)),
                             const.dir = c(test$constraints$constraints$op, '='),
                             const.rhs = c(test$constraints$constraints$target, length(person$responses)),
@@ -29,18 +29,11 @@ Shadow <- function(test, person, objective) {
                             all.bin = TRUE,
                             transpose.constraints = FALSE)$solution
   
-  # get the item with the highest value of the objective function
-  possible[person$administered] <- FALSE
-  out <- which(objective == max(objective[as.logical(possible)]))
+  # get items from the pool that have the max value from the solution set.
+  out <- which(objective == max(objective[as.logical(solution)]))
   
-  # TODO: remove debugging
-  if (any(out %in% person$administered)) {
-    cat("# tada!") # stop here.
-  }
-  
-  
-  # if there's more than one, select one at random (edge case)
-  if (length(out) > 1) out <- sample(out, 1)
+  # since it is theoretically possible that items not in the set share this value, cull them.
+  if (length(out) > 1) out <- intersect(out, person$available)
   
   # return index
   return(out)

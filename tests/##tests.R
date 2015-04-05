@@ -9,13 +9,11 @@
 #' @param length
 testCAT <- function(models = c('3PLM','GRM','GPCM','SM'),
                     estimators = c('ML','MAP','EAP'),
-                    objectives = c('PEKL','TPFI','DPFI','TFI','DFI'),
+                    objectives = c('PEKL','PA','PD','A','D'),
                     selectors = c('Shadow','MI'),
                     dims = c(1, 2, 3), between = c(TRUE, FALSE),
                     covars = NULL,
-                    K = 100,
-                    start = list(type = 'random', n = 5),
-                    stop = list(type = 'length', n = 30)) {
+                    K = 100) {
   
   total <- length(models) * length(dims) * length(between) * length(estimators) * length(objectives) * length(selectors)
   i <- 0
@@ -41,19 +39,20 @@ testCAT <- function(models = c('3PLM','GRM','GPCM','SM'),
               
     
               person <- initPerson(items, rnorm(Q), diag(Q))
-              test <- initTest(items,start,stop,estimator,objective,selection)
-              test <- createConstraints(test)
+              test <- initTest(items, estimator = estimator,objective = objective,selection = selection)
               
               # go on when fail
               tryCatch({
                 person <- ShadowCAT(person, test)
               }, error = function(e) {
-                cat("\n\n", model, Q, 'dimensions', bet, estimator, objective, selection)
+                cat("\n\n testCAT(models = '", model, "', dims = ", Q, ", between = ", within, ", estimators = '", estimator, "'",
+                    ", objectives = '", objective, "', selectors = '", selection, "')", sep = '')
                 cat("\n FAILED: ", e$message)
                 cat("\n IN: ", as.character(e$call), "items\n\n\n")
               }
               , warning = function(w) {
-                cat("\n\n", model, Q, 'dimensions', bet, estimator, objective, selection)
+                cat("\n\n testCAT(models = '", model, "', dims = ", Q, ", between = ", within, ", estimators = '", estimator, "'",
+                    ", objectives = '", objective, "', selectors = '", selection, "')", sep = '')
                 cat("\n WARNING: ", w$message)
                 cat("\n IN: ", as.character(w$call), "items\n\n\n")
               }

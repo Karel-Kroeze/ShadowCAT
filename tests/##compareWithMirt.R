@@ -22,7 +22,7 @@ compareEstimators <- function(models = c("3PLM", "GRM", "GPCM"), estimators = c(
       df <- with(items$pars, data.frame(a = alpha, d = -beta))
       colnames(df) <- c(paste0('a',1:Q), paste0('d',1:M))
       
-      # 3PL is special...
+      # 3PLM is special...
       if (model == "3PLM") {
         colnames(df) <- c(paste0('a',1:Q), 'd')
         df$d = df$d * rowSums(items$pars$alpha)

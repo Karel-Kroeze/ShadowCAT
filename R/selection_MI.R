@@ -10,21 +10,10 @@
 MI <- function(test, person, objective){
     
     # fetch highest information item
-    max_info <- 0
-    
-    # in case nothing gets flagged, preselect a random item
-    max_item <- sample(person$available, 1)
-    
-    # loop over items, flag best matches.
-    for (i in 1:length(objective)) { 
-      if (objective[i] > max_info){
-        max_info <- objective[i]
-        max_item <- person$available[i]
-      }
-    }
+    out <- which(objective == max(objective[person$available]))
     
     # return
-    return(max_item)
+    return(out)
   }
 
 
