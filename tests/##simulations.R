@@ -57,8 +57,10 @@ simCAT <- function(n = 10,
   return(invisible(results))
 }
 
-n <- 1000
 require(ShadowCAT)
-items <- createTestBank("3PLM", K = 100, Q = 2, between = FALSE)
-test <- initTest(items, estimator = "ML", selection = "MI", objective = "PD")
-simCAT(n, items = items, test = test, store = TRUE)
+models = c("GPCM", "GRM", "SM")
+for (model in models) {
+  items <- createTestBank(model, K = 100, Q = 2, between = FALSE)
+  test <- initTest(items, estimator = "MAP", selection = "MI", objective = "PD")
+  simCAT(1000, items = items, test = test, store = TRUE)
+}

@@ -1,3 +1,47 @@
+#' Done
+#' 
+#' Control function to check if the test is completed.
+#' 
+#' @param test
+#' @param person
+#' @return boolean completed
+#' @export
+stop_test <- function(person, test) {
+  if (test$stop$type == 'length') {
+    if (length(person$responses) >= test$stop$n) return(TRUE)
+  }
+  
+  return(FALSE)
+}
+
+
+#' Next item
+#' 
+#' Control function to select the next item, takes account of starting / stopping conditions.
+#' 
+#' @param person
+#' @param test
+#' @return integer item index
+#' @export
+next_item <- function(person, test) {
+  if (length(person$responses) < test$start$n) {
+    # Pre-CAT
+    if (test$start$type == 'random'){
+      out <- sample(person$available, 1)
+    }
+    
+    if (test$start$type == 'fixed'){
+      out <- test$start$indices[length(person$responses) + 1]
+    }
+    
+  } else {
+    # CAT 
+    out <- best_item(person, test)
+  }
+  
+  return(out)
+}
+
 #' ShadowCAT
 #' 
 #' Run test with a specified person, and a specified test. See initPerson and initTest.
@@ -9,36 +53,14 @@
 #' @return person
 #' @export
 ShadowCAT <- function(person, test) {
-  
-  ### Pre-CAT
-  if (test$start$type == 'random'){
-    start_items <- sample(person$available, test$start$n)
-    person <- answer(person, test, start_items)
-  }
-  
-  if (test$start$type == 'fixed'){
-    person <- answer(person, test, test$start$indeces)
-  }
-  
-  
-  ### Define stopping rule(s)
-  go_on <- function(test, person) {
-    if (test$stop$type == 'length') {
-      if (length(person$responses) >= test$stop$n) return(FALSE)
-    }
-    
-    return(TRUE)
-  }
-  
-  
   ## Start CAT
-  while(go_on(test, person)) {
+  while(! stop_test(person, test)) {
     # respones hack to always give 1,0,1,0 etc response pattern.
-    # W <- length(person$responses)
-    # person$responses <- rep(c(1,0), length.out = W)
+    # person$responses <- rep(c(1,0), length.out = length(person$responses))
+    # TODO: remove 
     
-    person <- estimate(person, test, check.analyticals = FALSE)
-    person <- answer(person, test, next_item(test, person))
+    person <- answer(person, test, next_item(person, test))
+    if (length(person$responses) > test$start$n) person <- estimate(person, test, check.analyticals = FALSE)
   }
   
   return(person)

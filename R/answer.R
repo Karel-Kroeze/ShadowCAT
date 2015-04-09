@@ -5,7 +5,7 @@
 #' 
 #' @param person
 #' @param test
-#' @param indeces If not NULL, answer questions with the given indeces, and update the person object.
+#' @param indeces If not NULL, answer questions with the given indeces, and update the person object. If NULL, answers the full test.
 #' @return vector responses, or updated person object if indeces is set.
 #' @export
 answer <- function(person, test, indeces = NULL) {

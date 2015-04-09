@@ -1,12 +1,12 @@
 #' Next item in an adaptive test. Takes a person and test object, and returns the index of the next item based 
 #' 
-#' This function is a wrapper that sends the actual work to the (hopefully) correct subroutines.
+#' This function is a wrapper that sends the actual work to the correct subroutines.
 #' 
 #' @param test
 #' @param person
 #' @return integer item index
 #' @export
-next_item <- function(test, person) {
+best_item <- function(person, test) {
   # get the values of the objective function for this test/person combo
   objective <- objective(test, person, TRUE)
   
@@ -23,6 +23,7 @@ next_item <- function(test, person) {
   
   return(out)
 }
+
 
 #' Obtain a vector of values of the objective function. 
 #' 

@@ -11,7 +11,7 @@ answer(person, test, indeces = NULL)
 
 \item{test}{}
 
-\item{indeces}{If not NULL, answer questions with the given indeces, and update the person object.}
+\item{indeces}{If not NULL, answer questions with the given indeces, and update the person object. If NULL, answers the full test.}
 }
 \value{
 vector responses, or updated person object if indeces is set.
