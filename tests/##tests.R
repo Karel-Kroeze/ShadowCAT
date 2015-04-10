@@ -12,7 +12,7 @@ testCAT <- function(models = c('3PLM','GRM','GPCM','SM'),
                     objectives = c('PEKL','PA','PD','A','D'),
                     selectors = c('Shadow','MI'),
                     dims = c(1, 2, 3), between = c(TRUE, FALSE),
-                    covars = NULL,
+                    prior_weight = 1,
                     K = 100) {
   
   total <- length(models) * length(dims) * length(between) * length(estimators) * length(objectives) * length(selectors)

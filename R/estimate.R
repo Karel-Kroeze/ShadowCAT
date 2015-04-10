@@ -20,7 +20,7 @@ estimate <- function(person, test, ...) {
     
     # note that prior is applied in LL (incorrectly it seems, but still).
     # suppress warnings and errors and do EAP instead.
-    minimum <- tryCatch( nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate, # passed on to LL, reverses polarity.
+    person$estimate <- tryCatch( nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate, # passed on to LL, reverses polarity.
                          error = function(e) {
                            #message(paste0(test$estimator, " failed, trying EAP estimate."))
                            test$estimator <- "EAP"
@@ -32,7 +32,17 @@ estimate <- function(person, test, ...) {
                            return(estimate(person, test)$estimate)
                          })
     
-    person$estimate <- minimum
+    # variance
+    # get FI
+    # TODO: We should really store info somewhere so we don't have to redo this (when using FI based selection criteria).
+    info <- FI(test, person)
+    so_far <- apply(info[,,person$administered, drop = FALSE], c(1,2), sum)
+  
+    #add prior
+    if (test$estimator == "MAP") so_far <- so_far + solve(person$prior)
+    
+    # inverse
+    attr(person$estimate, "variance") <- solve(so_far)
   }
   
   if (test$estimator == "EAP"){
