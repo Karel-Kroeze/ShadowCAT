@@ -91,9 +91,6 @@ for (model in models) {
     for (j in 1:length(theta_grid)) {
       simCAT(n, items = items, test = test_segall, fixed_theta = theta_grid[[j]], theta0 = list(mean = c(0,0), covar = prior), store = TRUE, location = paste0(getwd(), '/simulations/unconstrained'))
       #simCAT(n, items = items, test = test_shadow, fixed_theta = theta_grid[[j]], theta0 = list(mean = c(0,0), prior = prior), store = TRUE, location = paste0(getwd(), '/simulations/unconstrained'))
-      for (prior in priors){
-      simCAT(n, items = items, test = test_segall, fixed_theta = theta_grid[[j]], theta0 = list(mean = c(0,0), covar = prior), store = TRUE, location = paste0(getwd(), '/simulations/unconstrained'))
-      #simCAT(n, items = items, test = test_shadow, fixed_theta = theta_grid[[j]], theta0 = list(mean = c(0,0), prior = prior), store = TRUE)
     }
   }
 }
