@@ -3,7 +3,7 @@
 # Simulate wrapper
 simCAT <- function(n = 10,
                    store = FALSE,
-                   location = getwd(),
+                   location = paste0(getwd(), '/simulations'),
                    items = createTestBank("GPCM"),
                    test = initTest(items),
                    fixed_theta = NULL,
@@ -15,8 +15,8 @@ simCAT <- function(n = 10,
   cat("\n", items$model, test$selection, test$estimator, fixed_theta)
   
   if (store) { 
-    dir <- paste0(location,"/simulations/",paste(items$model, test$selection, test$estimator, sep="-"),"/",make.names(Sys.time()))
-    cat(" - Storing in ", location, "/simulations/", sep='')
+    dir <- paste0(location,"/",paste(items$model, test$selection, test$estimator, sep="-"),"/",make.names(Sys.time()))
+    cat(" [ Storing in", location, "]")
     dir.create(dir, TRUE, TRUE)
   }
   
@@ -70,23 +70,27 @@ simCAT <- function(n = 10,
 require(ShadowCAT)
 models = c("GPCM", "GRM", "SM")
 priors = list(matrix(c(1, .4,
-                            .4, 1), 2, 2),
-                   matrix(c(1, .8,
-                            .8, 1), 2, 2))
+                       .4, 1), 2, 2),
+              matrix(c(1, .8,
+                       .8, 1), 2, 2))
 
-theta_grid = list(NULL, c(-3,-3), c(-2,-2), c(-1,-1), c(0,0), c(1,1), c(2,2), c(3,3))
-n = 100
+theta_grid = list(c(-3,-3), c(-2,-2), c(-1,-1), c(0,0), c(1,1), c(2,2), c(3,3))
+n = 250
+n_norm = 1000
 K = 200
 Q = 2
 between = FALSE
 for (model in models) {
-    items <- createTestBank(model, K, Q, 7, between)
-    test_segall <- initTest(items, estimator = "MAP", selection = "MI", objective = "PD")
-    test_shadow <- initTest(items, estimator = "MAP", selection = "Shadow", objective = "PEKL")
+  items <- createTestBank(model, K, Q, 7, between)
+  test_segall <- initTest(items, estimator = "MAP", selection = "MI", objective = "PD")
+  test_shadow <- initTest(items, estimator = "MAP", selection = "Shadow", objective = "PEKL")
+  
+  for (prior in priors){
+    simCAT(n_norm, items = items, test = test_segall, theta0 = list(mean = c(0,0), covar = prior), store = TRUE, location = paste0(getwd(), '/simulations/unconstrained'))
+    #simCAT(n_norm, items = items, test = test_shadow, theta0 = list(mean = c(0,0), prior = prior), store = TRUE, location = paste0(getwd(), '/simulations/unconstrained'))
     for (j in 1:length(theta_grid)) {
-      for (prior in priors){
-      simCAT(n, items = items, test = test_segall, fixed_theta = theta_grid[[j]], theta0 = list(mean = c(0,0), covar = prior), store = TRUE)
-      #simCAT(n, items = items, test = test_shadow, fixed_theta = theta_grid[[j]], theta0 = list(mean = c(0,0), prior = prior), store = TRUE)
+      simCAT(n, items = items, test = test_segall, fixed_theta = theta_grid[[j]], theta0 = list(mean = c(0,0), covar = prior), store = TRUE, location = paste0(getwd(), '/simulations/unconstrained'))
+      #simCAT(n, items = items, test = test_shadow, fixed_theta = theta_grid[[j]], theta0 = list(mean = c(0,0), prior = prior), store = TRUE, location = paste0(getwd(), '/simulations/unconstrained'))
     }
   }
 }
