@@ -4,7 +4,7 @@
 \alias{ShadowCAT}
 \title{ShadowCAT}
 \usage{
-ShadowCAT(person, test, verbose = "argh!")
+ShadowCAT(person, test, verbose = FALSE)
 }
 \arguments{
 \item{person}{}
