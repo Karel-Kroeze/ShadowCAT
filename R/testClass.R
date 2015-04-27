@@ -23,8 +23,8 @@ initTest <- function(items,
                      objective = 'PD',
                      selection = 'MI',
                      constraints = NULL,
-                     lowerBound = rep(-6, items$Q),
-                     upperBound = rep(6, items$Q),
+                     lowerBound = rep(-3, items$Q),
+                     upperBound = rep(3, items$Q),
                      ...)
   {
 

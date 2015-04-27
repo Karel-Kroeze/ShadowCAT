@@ -61,7 +61,7 @@ objective <- function(test, person, pad = TRUE) {
   # TODO: check if this is ok.
   if (all(out == 0)) {
     out <- rep(1, length(out)) # so replace them by 1's.
-    warning("Objective is (computationally) zero for all items. Are you sure appropriate starting items are selected?")
+    cat("\nObjective is (computationally) zero for all items.")
   } 
   
   # pad to full length K objective vector.
@@ -72,7 +72,8 @@ objective <- function(test, person, pad = TRUE) {
   }
   
   # set missings to 0. I'm hoping this is underflow.
-  # TODO: investigate, (mostly occurs in 3PLM weirdly enough.)
+  # TODO: investigate / remove, (mostly occurs in 3PLM weirdly enough.)
+  if (any(is.na(out))) cat("\nMissing values in objective function.")
   out[is.na(out)] <- 0  
   
   return(out)

@@ -54,10 +54,12 @@ estimate <- function(person, test, ...) {
     #       Easier fix; ignore marginal precision gain of GH and go Riemann sum.
     Q <- test$items$Q
     QP <- init.quad(Q = Q, Sigma = person$prior, ip = switch(Q, 50, 15, 6, 4, 3))
-    person$estimate <- eval.quad(FUN = LL, X = QP, test = test, person = person)
+    person$estimate <- eval.quad(FUN = LL, X = QP, test = test, person = person, ...)
   }
   
   # enforce boundaries.
+  # TODO: remove testing code.
+  if (any(person$estimate > test$upperBound | person$estimate < test$lowerBound)) cat("Estimate outside boundaries (k =", length(person$responses), "estimate =", paste0(round(person$estimate, 2), collapse = ", "), ").\n")
   person$estimate[which(person$estimate > test$upperBound)] <- test$upperBound[which(person$estimate > test$upperBound)]
   person$estimate[which(person$estimate < test$lowerBound)] <- test$lowerBound[which(person$estimate < test$lowerBound)]
   

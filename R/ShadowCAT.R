@@ -61,7 +61,7 @@ ShadowCAT <- function(person, test, verbose = FALSE) {
     # TODO: remove 
     
     person <- answer(person, test, next_item(person, test))
-    if (length(person$responses) > test$start$n) person <- estimate(person, test, check.analyticals = FALSE)
+    if (length(person$responses) > test$start$n) person <- estimate(person, test, check.analyticals = TRUE)
     if (verbose > 1) cat("\r", paste0(round(person$estimate, 2), collapse = ', '), " | ", paste0(round(diag(attr(person$estimate,'variance')), 2), collapse = ', '), '         ')
   }
   

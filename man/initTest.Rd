@@ -6,8 +6,8 @@
 \usage{
 initTest(items, start = list(type = "random", n = 5), stop = list(type =
   "length", n = 30), max_n = 50, estimator = "MAP", objective = "PD",
-  selection = "MI", constraints = NULL, lowerBound = rep(-6, items$Q),
-  upperBound = rep(6, items$Q), ...)
+  selection = "MI", constraints = NULL, lowerBound = rep(-3, items$Q),
+  upperBound = rep(3, items$Q), ...)
 }
 \arguments{
 \item{items}{}
