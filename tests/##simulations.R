@@ -36,7 +36,8 @@ simCAT <- function(n = 10,
     person <- ShadowCAT(initPerson(items, theta = theta, prior = prior$covar), test, FALSE)
     
     # increment redis counter
-    redisIncr("done")
+    redisIncr('done')
+    redisSet('update', Sys.time())
     
     person
   }
@@ -103,7 +104,7 @@ require(doRedis)
 require(foreach)
 
 redis.host = '128.199.63.229'
-startLocalWorkers(n = 1, queue = "jobs", redis.host)
+startLocalWorkers(n = 8, queue = "jobs", redis.host)
 registerDoRedis("jobs", redis.host)
 
 for (model in models) {
