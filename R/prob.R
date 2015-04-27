@@ -66,7 +66,7 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
   
   # compensatory - inner product of alpha * theta.
   at <- a %*% matrix(theta, ncol = 1)
-    
+  
   # simplify input for derivatives.
   if (deriv){
     u <- person$responses
@@ -99,11 +99,9 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
     for(i in 1:K){
       Psi <- c(1,lf(at[i]-b[i,1:m[i]]),0)
       P[i,1:(m[i]+1)] <- Psi[1:(m[i]+1)] - Psi[2:(m[i]+2)]
-    }
-    
-    if(deriv){
-      # Graded Response Model (Glas & Dagohoy, 2007)
-      for(i in 1:K){
+      
+      
+      if(deriv){
         j <- u[i]+1 # no more messing about with 0 based indices.
         l[i] <- P[i,j]
         d[i] <- 1 - Psi[j] - Psi[j+1]
@@ -119,11 +117,9 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
       for(j in 1:(m[i]+1)){
         P[i,j] <- prod(Psi[1:j]) * (1 - Psi[j+1])
       }
-    }
-    
-    if (deriv){
-      # TODO: Wording in Glas & Dagohoy for dij (SM) is odd. 
-      for(i in 1:K){
+      
+      if (deriv){
+        # TODO: Wording in Glas & Dagohoy for dij (SM) is odd. 
         j <- u[i]+1 # no more messing about with zero-based indeces
         l[i] <- P[i,j]
         
@@ -163,6 +159,11 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
   }
   
   # likelihoods can never truly be zero, let alone negative
+  # TODO: remove
+  if (any(P <= 0)) {
+    cat("\nProbability <= 0 (k =", length(person$responses), ", estimate = ", paste0(round(person$estimate, 2), collapse = ", "), ").")
+  }
+  
   # TODO: verify this fix for viability.
   P[which(P <= 0)] <- 1e-10
   if (deriv) l[which(l <= 0)] <- 1e-10
@@ -184,12 +185,13 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
     
     # prior
     if ( ! is.null(prior)) {
+      # TODO: mean? 
       # Alleen variabele deel van multivariaat normaal verdeling (exp).
       LL <- LL - (t(theta) %*% solve(prior) %*% theta) / 2
       d1 <- d1 - t(solve(prior) %*% theta)
       d2 <- d2 - solve(prior)
     }
-      
+    
     # attach to output
     out$LL <- LL # log likelihood
     out$d <- d   # individual d terms (befosre summing over alpha)
@@ -220,9 +222,13 @@ LL <- function(theta, test, person, minimize = FALSE, log = TRUE) {
   
   # prepare output
   out <- PROB$LL * (-1) ^ minimize
-  # used in nlm, buggy!
-  # attr(out, "gradient") <- PROB$d1 * (-1) ^ minimize
-  # attr(out, "hessian") <- PROB$d2 * (-1) ^ minimize
+  
+  # TODO: When derivs for GRM and SM are fixed, enable all.
+  # used in nlm
+  if (test$items$model %in% c("3PLM", "GPCM")) {
+    attr(out, "gradient") <- PROB$d1 * (-1) ^ minimize
+    attr(out, "hessian") <- PROB$d2 * (-1) ^ minimize
+  }
   
   # return
   if ( ! log) return(invisible(exp(out)))  
