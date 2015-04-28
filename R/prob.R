@@ -11,6 +11,8 @@
 #' @param deriv Should we fetch derivatives and LL?
 #' @param prior If not NULL, prior to be applied to derivatives.
 #' @importFrom mvtnorm dmvnorm
+#' @importFrom Rcpp evalCpp
+#' @useDynLib ShadowCAT
 #' @export
 prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL, items = NULL){
   
@@ -50,137 +52,44 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
     warning("Prior set for ML estimator - this is not standard!")
   }
   
-  # logistic function
-  lf <- function(x){ exp(x)/(1+exp(x)) }
-  
-  # set up output matrix
-  out <- list()
-  P <- matrix(NA,items$K,items$M+1) # max categories + 1 for false answer.
-  
   # simplify input
-  m <- items$pars$m
   a <- items$pars$alpha
   b <- items$pars$beta
   c <- items$pars$guessing
-  K <- items$K
+  if (deriv) u <- person$responses
+  else u <- c(1,2,3,NA,NA,NA,NA,NA) # Batman! (in all seriousness, it just needs to be a numeric vector with one or more NA's).
   
-  # compensatory - inner product of alpha * theta.
-  at <- a %*% matrix(theta, ncol = 1)
+  res <- switch(items$model,
+                "3PLM" = PROB_3PLM(theta, a, b, c, u),
+                "GRM" = PROB_GRM(theta, a, b, u),
+                "SM" = PROB_SM(theta, a, b, u),
+                "GPCM" = PROB_GPCM(theta, a, b, u))
   
-  # simplify input for derivatives.
-  if (deriv){
-    u <- person$responses
-    Q <- items$Q
-    l <- d <- D <- numeric(K)
-  }
-  
-  # Three Paramater Logistic (MultiDim) (Segall, 1996)
-  if(items$model=="3PLM"){
-    aux <- numeric(K)
-    for (i in 1:K){
-      aux[i] <- -a[i,] %*% (theta - b[i,])
-    }
-    P[,2] <- c + (1-c)/(1+exp(aux))
-    P[,1] <- 1 - P[,2]
-    
-    if(deriv){
-      # Segall (MCAT book, 1996, p.71)
-      q <- P[,1]
-      p <- P[,2]
-      
-      l <- p^u * q^(1-u)
-      d <- ((p-c) * (u-p)) / ((1-c) * p)
-      D <- (q *(p-c)*(c*u-p^2)) / (p^2*(1-c)^2)
-    }
-  }
-  
-  # graded response model (Samejima, 1969)
-  if(items$model=="GRM"){
-    for(i in 1:K){
-      Psi <- c(1,lf(at[i]-b[i,1:m[i]]),0)
-      P[i,1:(m[i]+1)] <- Psi[1:(m[i]+1)] - Psi[2:(m[i]+2)]
-      
-      
-      if(deriv){
-        j <- u[i]+1 # no more messing about with 0 based indices.
-        l[i] <- P[i,j]
-        d[i] <- 1 - Psi[j] - Psi[j+1]
-        D[i] <- -(Psi[j] * (1-Psi[j]) + Psi[j+1] * (1-Psi[j+1]))
-      }
-    }    
-  }
-  
-  # Sequential Model (Tutz, 1990)
-  if(items$model=="SM"){
-    for(i in 1:K){
-      Psi <- c(1,lf(at[i]-b[i,1:m[i]]),0)
-      for(j in 1:(m[i]+1)){
-        P[i,j] <- prod(Psi[1:j]) * (1 - Psi[j+1])
-      }
-      
-      if (deriv){
-        # TODO: Wording in Glas & Dagohoy for dij (SM) is odd. 
-        j <- u[i]+1 # no more messing about with zero-based indeces
-        l[i] <- P[i,j]
-        
-        # Hacky solution to false answers.
-        # NOTE: if u_i == 0, only the -Psi(i(h+1)) term remains.
-        if (j == 1) {
-          aux = 0
-        } else {
-          aux = sum(1 - Psi[2:j])
-        }
-        d[i] <- aux - Psi[j+1]
-        D[i] <- -sum(Psi[2:(j+1)] * (1 - Psi[2:(j+1)]))
-      }
-    }
-  }
-  
-  # Generalised Partial Credit Model (Muraki, 1992)
-  if(items$model=="GPCM"){
-    for(i in 1:K){
-      aux <- exp((1:m[i]) * at[i] - b[i,1:m[i]])
-      aux2 <- 1 + sum(aux)
-      P[i,2:(m[i]+1)] <- aux / aux2
-      P[i,1] <- 1-sum(P[i,],na.rm=TRUE)
-    }
-    
-    if (deriv) {
-      for(i in 1:K){
-        mi <- 1:m[i]
-        pi <- P[i,mi+1] # remove j = 0, index is now also correct.
-        mp <- sum(mi*pi)
-        
-        l[i] <- P[i,u[i]+1]
-        d[i] <- u[i] - mp
-        D[i] <- -sum((mi * pi) * (mi - mp))
-      }
-    }
-  }
+  out <- list()
+  out$P <- res$P
   
   # likelihoods can never truly be zero, let alone negative
   # TODO: remove
-  if (any(P <= 0)) {
+  if (any(out$P <= 0)) {
     cat("\nProbability <= 0 (k =", length(person$responses), ", estimate = ", paste0(round(person$estimate, 2), collapse = ", "), ").")
   }
   
-  # TODO: verify this fix for viability.
-  P[which(P <= 0)] <- 1e-10
-  if (deriv) l[which(l <= 0)] <- 1e-10
+  out$P[which(out$P <= 0)] <- 1e-10
   
   if (deriv){
+    
     # create (log)likelihood (L, LL)
-    ll <- log(l)
+    ll <- log(res$l)
     LL <- sum(ll)
     
     # TODO: derivatives are correct for a single item, but not for K > 1?
     # create derivatives
-    d1 <- matrix(d, nrow = 1) %*% a
+    d1 <- matrix(res$d, nrow = 1) %*% a
     
     # d2
-    d2 <- matrix(0,Q,Q)
-    for (i in 1:K){
-      d2 <- d2 + a[i,] %*% t(a[i,]) * D[i]
+    d2 <- matrix(0,items$Q,items$Q)
+    for (i in seq_along(res$D)){
+      d2 <- d2 + a[i,] %*% t(a[i,]) * res$D[i]
     }
     
     # prior
@@ -194,13 +103,10 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
     
     # attach to output
     out$LL <- LL # log likelihood
-    out$d <- d   # individual d terms (befosre summing over alpha)
     out$d1 <- d1 # first derivative of complete set of items at theta (+prior)
-    out$D <- D   # individual D terms (before summing over alpha*alpha`)
     out$d2 <- d2 # second derivative of complete set of items at theta (+prior)
   }
   
-  out$P <- P
   return(invisible(out))
 }
 
@@ -223,12 +129,9 @@ LL <- function(theta, test, person, minimize = FALSE, log = TRUE) {
   # prepare output
   out <- PROB$LL * (-1) ^ minimize
   
-  # TODO: When derivs for GRM and SM are fixed, enable all.
-  # used in nlm
-  if (test$items$model %in% c("3PLM", "GPCM")) {
-    attr(out, "gradient") <- PROB$d1 * (-1) ^ minimize
-    attr(out, "hessian") <- PROB$d2 * (-1) ^ minimize
-  }
+  # gradient and hessian for nlm optimizer.
+  attr(out, "gradient") <- PROB$d1 * (-1) ^ minimize
+  attr(out, "hessian") <- PROB$d2 * (-1) ^ minimize
   
   # return
   if ( ! log) return(invisible(exp(out)))  

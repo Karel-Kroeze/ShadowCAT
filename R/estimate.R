@@ -53,7 +53,9 @@ estimate <- function(person, test, ...) {
     #       Possible fix: go adaptive.
     #       Easier fix; ignore marginal precision gain of GH and go Riemann sum.
     Q <- test$items$Q
-    QP <- init.quad(Q = Q, Sigma = person$prior, ip = switch(Q, 50, 15, 6, 4, 3))
+    # TODO: prior mean is currently fixed at zero, update when/if possible.
+    # TODO: Re-use switch, and allow setting through internals argument(s)
+    QP <- init.quad(Q = Q, prior = list(mu = rep(0, test$items$Q), Sigma = person$prior), ip = 6)       #switch(Q, 50, 15, 6, 4, 3))
     person$estimate <- eval.quad(FUN = LL, X = QP, test = test, person = person, ...)
   }
   

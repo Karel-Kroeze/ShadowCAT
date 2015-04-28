@@ -337,8 +337,8 @@ testDeriv <- function(models = c("3PLM", "GPCM", "GRM", "SM"), dims = 1:3, eval.
             "derivatives for",Q,"dim",model,"at theta (vector)",eval.point,"\n")
         
         analytical <- list(jacobian = PROB$d1, hessian = PROB$d2)
-        numerical <- list(jacobian = jacobian(ShadowCAT:::LL,eval.point,"complex",test = test, person = person),
-                          hessian = hessian(ShadowCAT:::LL,eval.point,"complex",test = test, person = person))
+        numerical <- list(jacobian = jacobian(ShadowCAT:::LL,eval.point,test = test, person = person),
+                          hessian = hessian(ShadowCAT:::LL,eval.point,test = test, person = person))
         
         if(isTRUE(all.equal(analytical, numerical,tolerance = 1e-3))) {
           cat("match\n")
@@ -379,10 +379,10 @@ plotDeriv <- function(models = c("3PLM", "GRM", "SM", "GPCM"),
     for (i in seq_along(theta)){
       PROB <- prob(test, person, theta = theta[i], deriv = TRUE)
       if (d == 1){
-        numeric <- jacobian(LL, theta[i], test = test, person = person)
+        numeric <- jacobian(ShadowCAT:::LL, theta[i], test = test, person = person)
         y[i,] <- c(PROB$LL, PROB$d1, numeric)
       } else {
-        numeric <- hessian(LL, theta[i], test = test, person = person)
+        numeric <- hessian(ShadowCAT:::LL, theta[i], test = test, person = person)
         y[i,] <- c(PROB$LL, PROB$d2, numeric)
       }
     }

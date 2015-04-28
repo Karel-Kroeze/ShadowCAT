@@ -9,6 +9,8 @@ Description: Allows simulation and live administration of Computer Adaptive test
              Fisher Information and Kullback-Leibler Distance based item selection, constraints, content balancing and exposure control with Shadow Testing.
 License: COPYRIGHTED (until I figure out what license to use.)
 LazyData: true
+LinkingTo: Rcpp
+Imports: Rcpp
 Depends:
       stats,
       mvtnorm,
