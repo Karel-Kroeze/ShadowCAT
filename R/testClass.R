@@ -45,7 +45,7 @@ initTest <- function(items,
   attr(out, 'class') <- c("ShadowCAT.test")  
   
   # set up default constraints
-  out$constraints <- createConstraints(out, constraints)
+  out$constraints <- createConstraints(out, constraints$characteristics, constraints$constraints)
   
   # apply ineligibility constraints (if requested).
   if(!is.null(exposure)) {
