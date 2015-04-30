@@ -47,21 +47,22 @@ estimate <- function(person, test, ...) {
   
   if (test$estimator == "EAP"){
     # Multidimensional Gauss-Hermite Quadrature
-    # TODO: See if GH Quadrature is worth it at all.
-    # TODO: Likelihoods of 20+ items become extremely peaky, meaning the estimate will 'snap' to the closest quad point. 
-    #       This is excacerbated in Q-dimensional problems since we cannot use the same amount of points per dimension.
-    #       Possible fix: go adaptive.
-    #       Easier fix; ignore marginal precision gain of GH and go Riemann sum.
     Q <- test$items$Q
     # TODO: prior mean is currently fixed at zero, update when/if possible.
-    # TODO: Re-use switch, and allow setting through internals argument(s)
-    QP <- init.quad(Q = Q, prior = list(mu = rep(0, test$items$Q), Sigma = person$prior), ip = 6)       #switch(Q, 50, 15, 6, 4, 3))
+    # TODO: allow setting ip through internals argument(s)
+    adapt <- NULL
+    if (length(person$responses) > 5 & !is.null(attr(person$estimate, 'variance'))) adapt <- list(mu = person$estimate, Sigma = as.matrix(attr(person$estimate, "variance")))
+    
+    QP <- init.quad(Q = Q,
+                    prior = list(mu = rep(0, test$items$Q), Sigma = person$prior),
+                    adapt = adapt,
+                    ip = switch(Q, 50, 15, 6, 4, 3))
     person$estimate <- eval.quad(FUN = LL, X = QP, test = test, person = person, ...)
   }
   
   # enforce boundaries.
-  # TODO: remove testing code.
-  if (any(person$estimate > test$upperBound | person$estimate < test$lowerBound)) cat("Estimate outside boundaries (k =", length(person$responses), "estimate =", paste0(round(person$estimate, 2), collapse = ", "), ").\n")
+  # TODO: make debug output toggleable
+  # if (any(person$estimate > test$upperBound | person$estimate < test$lowerBound)) cat("Estimate outside boundaries (k =", length(person$responses), "estimate =", paste0(round(person$estimate, 2), collapse = ", "), ").\n")
   person$estimate[which(person$estimate > test$upperBound)] <- test$upperBound[which(person$estimate > test$upperBound)]
   person$estimate[which(person$estimate < test$lowerBound)] <- test$lowerBound[which(person$estimate < test$lowerBound)]
   

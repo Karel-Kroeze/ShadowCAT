@@ -23,6 +23,7 @@ initTest <- function(items,
                      objective = 'PD',
                      selection = 'MI',
                      constraints = NULL,
+                     exposure = NULL,
                      lowerBound = rep(-3, items$Q),
                      upperBound = rep(3, items$Q),
                      ...)
@@ -45,6 +46,11 @@ initTest <- function(items,
   
   # set up default constraints
   out$constraints <- createConstraints(out, constraints)
+  
+  # apply ineligibility constraints (if requested).
+  if(!is.null(exposure)) {
+    out <- with(exposure, createExposureConstraint(out, exposure, eligible, feasible, total, target))
+  }
   
   return(invisible(out))
 }

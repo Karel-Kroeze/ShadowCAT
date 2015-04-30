@@ -38,12 +38,3 @@ Shadow <- function(test, person, objective) {
   # return index
   return(out)
 }
-
-# ### TEST
-# items <- createTestBank("GPCM")
-# test <- initTest(items, stop = list(type = 'length', n = 20), estimator = 'EAP', objective = 'PEKL', selection = 'Shadow')
-# test <- createConstraints(test)
-# person <- initPerson(items)
-# 
-# Shadow(test, person, abs(rnorm(test$items$K)))
-

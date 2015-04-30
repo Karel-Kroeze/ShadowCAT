@@ -69,14 +69,14 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
   out$P <- res$P
   
   # likelihoods can never truly be zero, let alone negative
-  # TODO: remove
-  if (any(out$P <= 0)) {
-    cat("\nProbability <= 0 (k =", length(person$responses), ", estimate = ", paste0(round(person$estimate, 2), collapse = ", "), ").")
-  }
-  
+  # TODO: make debug output toggleable
+  # if (any(out$P <= 0)) cat("\nProbability <= 0 (k =", length(person$responses), ", estimate = ", paste0(round(person$estimate, 2), collapse = ", "), ").")
   out$P[which(out$P <= 0)] <- 1e-10
   
+  
   if (deriv){
+    # likelihoods can never truly be zero, let alone negative
+    res$l[which(res$l <= 0)] <- 1e-10
     
     # create (log)likelihood (L, LL)
     ll <- log(res$l)
