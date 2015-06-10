@@ -13,7 +13,8 @@ initPerson <- function(items, theta = rep(0, items$Q), prior = diag(items$Q)) {
   administered <- numeric(0)
   responses <- numeric(0)
   estimate <- rep(0, items$Q)
-  variance <- matrix(NA, items$Q, items$Q)
+  attr(estimate, 'variance') <- prior
+  variance <- prior
   
   out <- list(theta = theta,
               prior = prior,

@@ -7,6 +7,7 @@
 #' @return integer item index
 #' @export
 best_item <- function(person, test) {
+  # TODO: make selection with 0 responses work as expected
   # get the values of the objective function for this test/person combo
   objective <- objective(test, person, TRUE)
   

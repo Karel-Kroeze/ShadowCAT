@@ -7,6 +7,7 @@
 #' \code{op} the logoical operator to be used. Valid options are "<", "=", ">" and "><".
 #' \code{target} the target value, numeric. If the operator is "<>", this should be a length two vector in between which the target should fall.
 #' @return test ShadowCAT test object, including the constraints set.
+#' @importFrom lpSolve lp
 #' @export
 createConstraints <- function(test, characteristics = NULL, constraints = NULL) {
   # create characteristics data.frame, add administered and N.
