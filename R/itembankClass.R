@@ -1,19 +1,43 @@
-
-####### Itembank, and everything related to it.
-#' initItembank
+#' Initialize an itembank object.
 #' 
-#' Produce an itembank object for a list of parameters
+#' Produce an itembank object from a list of parameters.
 #' 
-#' @param model
-#' @param alpha
-#' @param beta
-#' @param guessing
-#' @param eta
-#' @param m
-#' @return ShadowCAT.items
+#' This is a convenience function to create an itembank object as expected by further ShadowCAT functions.
+#' For all models, alpha is required (but may be set to a 1 vector/matrix for Rasch-type models).
+#' Beta is required for all models, but in the case of GPCM, it will be computed from Eta if Eta is given and Beta omitted.
+#' Guessing is only valid for the 3PLM model, and may safely be omitted (which implies a guessing parameter of 0 on all items).
+#' 
+#' Note that the GPCM expects Beta parameters to be category bounds rather than location parameters (Eta). That is, Beta_i = sum(Eta_1, ..., Eta_i).
+#' 
+#' TODO: model references.
+#' 
+#' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
+#' @param alpha Matrix of alpha paramteres, one column per dimension, one row per item. Note that so called within-dimensional models still use an alpha matrix, they simply 
+#' have only one non-zero loading per item.
+#' @param beta Matrix of beta parameters, one column per response category, one row per item. Note that ShadowCAT expects response categories to be sequential,
+#' and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, and equal to the position of the 'location' of the beta parameter in the Beta matrix.
+#' The matrix will have a number of columns equal to the largest number of response categories, items with fewer response categories should be 
+#' right-padded with \code{NA}. \code{NA} values between response categories are not allowed, and will lead to errors.
+#' More flexibility in Beta parameters might be added in future versions.
+#' @param guessing vector of guessing parameters per item. Optionally used in 3PLM model, ignored for all others.
+#' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others.
+#' @return ShadowCAT.items Itembank object, as used by \code{\link{initTest}} and \code{\link{initPerson}}.
 #' @export
 initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = NULL, eta = NULL, silent = FALSE){
   # TODO: Validate input.
+  
+  # check eta/beta are not mixed up
+  if (model == "GPCM" && !is.null(beta) && !is.null(eta)){
+    temp <- eta
+    for (i in 1:ncol(eta)) temp[,i] <- rowSums(eta[,1:i])
+    if (!all.equal(temp, beta)) stop("Beta and Eta parameters do not match, see details.")
+  }
+  
+  # allow calculating beta from eta.
+  if (model == "GPCM" && is.null(beta) && !is.null(eta)){
+    beta <- eta
+    for (i in 1:ncol(eta)) beta[,i] <- rowSums(eta[,1:i])
+  }
   
   # find number of items, categories
   if (is.null(dim(beta))) {
@@ -23,7 +47,6 @@ initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = N
     K <- nrow(beta) # row per item
     M <- ncol(beta) # column per option
   }
-  
   
   # find number of dimensions
   if (is.null(dim(alpha))) {

@@ -7,9 +7,9 @@
 answer(person, test, indeces = NULL)
 }
 \arguments{
-\item{person}{}
+\item{person}{Person object, see \code{\link{initPerson}}.}
 
-\item{test}{}
+\item{test}{Test object, see \code{\link{initPerson}}.}
 
 \item{indeces}{If not NULL, answer questions with the given indeces, and update the person object. If NULL, answers the full test.}
 }
@@ -18,5 +18,16 @@ vector responses, or updated person object if indeces is set.
 }
 \description{
 Given a person and (a subset of) an itembank, simulate a response pattern.
+}
+\examples{
+items <- createTestBank("GPCM")
+test <- initTest(items)
+person <- initPerson(items)
+
+# simulates responses to all questions, and returns a vector response pattern.
+answer(person, test)
+
+# simulates responses to the specified question indeces, and returns an updated person object.
+answer(person, test, sample(test$items$K, 5))
 }
 

@@ -2,10 +2,10 @@
 #' 
 #' Sympson-Hetter style exposure control. Van der Linden & Veldkamp, 2004.
 #' 
-#' This is half-implemented. The routines are here, but there is no mechanism for tracking exposure over time. 
-#' Administration of exposure will depend on the test setting, and is left to the user. 
+#' Administration of exposure will depend on the test setting, and is left to the user. This function adds exposure control constraints to an existing test object.
+#' Note that if the constraints are (re)set after exposure constraints are added, the exposure constraints will be overwritten.
 #' 
-#' ONLY WORKS WITH SHADOW TESTING!
+#' TODO: CURRENTLY ONLY WORKS WITH SHADOW TESTING!
 #' 
 #' @param test
 #' @param exposure vector of actual exposure counts.    

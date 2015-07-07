@@ -18,6 +18,10 @@ array with an information matrix for each item (QxQxK).
 Fisher Information (expected information) per item.
 }
 \details{
-The expected information is the sum of second derivatives, weighted by their probability.
+Calculates the Fisher Information (expected information) of the given (sub)set of items, and returns a three dimensional array
+of information matrices, where dimensions one and two run along the Q dimensions of the model, and three runs along items.
+
+Fisher Information is given as;
+\deqn{\mathcal{I}(\theta) = - \operatorname{E} \left[\left. \frac{\partial^2}{\partial\theta^2} \log f(X;\theta)\right|\theta \right]}{minus expectation of second derivative of the Log-Likelihood of f(theta)}
 }
 

@@ -2,9 +2,20 @@
 #' 
 #' Fisher Information (expected information) per item.
 #' 
-#' The expected information is the sum of second derivatives, weighted by their probability.
-#' @param items
-#' @param person
+#' Calculates the Fisher Information (expected information) of the given test, and returns a three dimensional array
+#' of information matrices, where dimensions one and two run along the Q dimensions of the model, and three runs along items.
+#' 
+#' Fisher Information is given as;
+#' \deqn{\mathcal{I}(\theta) = - \operatorname{E} \left[\left. \frac{\partial^2}{\partial\theta^2} \log f(X;\theta)\right|\theta \right]}{minus expectation of second derivative of the Log-Likelihood of f(theta)}
+#' 
+#' And is calculated as the weighted sum of second derivatives for all response categories. Information for multiple items is simply the sum of 
+#' the individual information matrices.
+#' 
+#' Note: FI always returns the 'raw' information, information given by prior distributions is added by the calling functions, 
+#' and FI(..) is normally called internally.
+#' 
+#' @param test Test object, see \code{\link{initTest}}.
+#' @param person Person object, see \code{\link{initPerson}}.
 #' @return array with an information matrix for each item (QxQxK).
 #' @export
 FI <- function(test, person) {

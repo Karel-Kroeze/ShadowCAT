@@ -1,12 +1,69 @@
-#' Convenience wrapper to add constraitns to a test object for use with ShadowCAT.
+#' Creates a constraints object.
 #' 
-#' @param test ShadowCAT test object
-#' @param characteristics data.frame with characteristics, one row per item, one column per characteristic.
-#' @param constraints list of constraints, each constraint is a list with three named values;
+#' Convenience wrapper to create a constraints object, which can be added to a \code{test} object.
+#' 
+#' @section Set constraints from \code{\link{initTest}}:
+#' Note that constraints can also be set with the initTest call. Simply include a list with named elements 
+#' characteristics and constraints as described above to the initTest function call.
+#' 
+#' @section Constraint specification:
+#' \code{constraints} should be specified as a list of constraints, each constraint is a list with three named values;
 #' \code{name} the column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as \code{name/value}.
 #' \code{op} the logoical operator to be used. Valid options are "<", "=", ">" and "><".
-#' \code{target} the target value, numeric. If the operator is "<>", this should be a length two vector in between which the target should fall.
-#' @return test ShadowCAT test object, including the constraints set.
+#' \code{target} the target value, numeric. If the operator is "><", this should be a length two vector in between which the target should fall. 
+#' 
+#' @section Constraints in test object:
+#' The specified constraints will be stored within a list, which can/should be saved in the test object (test$constraints). 
+#' Constraints in Shadow Tests are implemented through linear programming, for which the package \code{\link{lpSolve}} is used. 
+#' The constraints object is a list with three named elements; characterstics, constraints and lp_chars. Characteristics is a copy of the argument given, constraints and lp_chars
+#' are set up to work with lpSolve, and should not be manually edited.
+#' 
+#' @section Note about length:
+#' Note that the maximum test length (either max_length or the length stopping parameter) is always included as an additional constraint.
+#' 
+#' @examples
+#' # set up a simple itembank and test.
+#' items <- createTestBank("GPCM")
+#' test <- initTest(items, selection = "Shadow" , objective = "PEKL")
+#' 
+#' # set up some dummy characteristics.
+#' content <- sample(c('algebra','physics','calculus'), items$K, TRUE)
+#' time <- rnorm(items$K)
+#' exclusive <- rep(0, items$K)
+#' exclusive[sample(items$K, 4)] <- 1
+#' 
+#' # bind them in a data.fame
+#' characteristics <- data.frame(content, time, exclusive)
+#' 
+#' # set up the constraints
+#' constraints <- list(
+#'   list(name = 'content/algebra',
+#'        op = '><',
+#'        target = c(5,10)),
+#'   list(name = 'content/physics',
+#'        op = '><',
+#'        target = c(2,5)),
+#'   list(name = 'time',
+#'        op = '<',
+#'        target = 20),
+#'   list(name = 'exclusive',
+#'        op = '<',
+#'        target = 2))
+#' 
+#' # update the test object
+#' test$constraints <- createConstraints(test, characteristics, constraints)
+#' 
+#' # or do it all at once;
+#' test2 <- initTest(items, constraints = list(characteristics = characteristics, constraints = constraints))
+#' 
+#' # results are identical (initTest uses createConstraints internally);
+#' all.equal(test$constraints, test2$constraints)
+#' 
+#' @param test Test object, see \code{\link{initTest}}
+#' @param characteristics \code{data.frame} with characteristics, one row per item, one column per characteristic.
+#' @param constraints \code{list} of constraints, see \code{details}.
+#' 
+#' @return constraints Constraints object, see \code{details}.
 #' @importFrom lpSolve lp
 #' @export
 createConstraints <- function(test, characteristics = NULL, constraints = NULL) {
