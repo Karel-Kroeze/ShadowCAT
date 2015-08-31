@@ -1,6 +1,7 @@
 Package: ShadowCAT
 Type: Package
-Title: Multidimensional Computer Adaptive Testing with the Shadow Testing Procedure
+Title: Multidimensional Computer Adaptive Testing with the Shadow
+        Testing Procedure
 Version: 0.1
 Date: 2015-02-17
 Author: Karel A. Kroeze
@@ -11,13 +12,7 @@ License: COPYRIGHTED (until I figure out what license to use.)
 LazyData: true
 LinkingTo: Rcpp
 Imports: Rcpp
-Depends:
-      stats,
-      mvtnorm,
-      MultiGHQuad,
-      numDeriv,
-      plot3D,
-      lpSolve,
-      rredis
-Suggests:
-      testthat (>= 0.8.1)
+Depends: stats, mvtnorm, MultiGHQuad, numDeriv, plot3D, lpSolve, rredis
+Suggests: testthat (>= 0.8.1)
+NeedsCompilation: yes
+Packaged: 2015-08-31 15:00:30 UTC; rivkadevries

@@ -1,0 +1,32 @@
+
+R version 3.2.0 (2015-04-16) -- "Full of Ingredients"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> source("testthat/help_functions.R")
+> library(testthat)
+> test_check("ShadowCAT")
+Loading required package: ShadowCAT
+Loading required package: mvtnorm
+Loading required package: MultiGHQuad
+Loading required package: numDeriv
+Loading required package: plot3D
+Loading required package: lpSolve
+Loading required package: rredis
+
+> 
+> proc.time()
+   user  system elapsed 
+  0.444   0.031   0.477 

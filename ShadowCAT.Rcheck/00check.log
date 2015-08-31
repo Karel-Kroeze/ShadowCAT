@@ -1,0 +1,161 @@
+* using log directory ‘/Users/rivkadevries/roqua/ShadowCAT/ShadowCAT.Rcheck’
+* using R version 3.2.0 (2015-04-16)
+* using platform: x86_64-apple-darwin13.4.0 (64-bit)
+* using session charset: UTF-8
+* using options ‘--no-manual --no-build-vignettes’
+* checking for file ‘ShadowCAT/DESCRIPTION’ ... OK
+* checking extension type ... Package
+* this is package ‘ShadowCAT’ version ‘0.1’
+* checking package namespace information ... OK
+* checking package dependencies ... NOTE
+Depends: includes the non-default packages:
+  ‘mvtnorm’ ‘MultiGHQuad’ ‘numDeriv’ ‘plot3D’ ‘lpSolve’ ‘rredis’
+Adding so many packages to the search path is excessive and importing
+selectively is preferable.
+* checking if this is a source package ... OK
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... OK
+* checking for portable file names ... OK
+* checking for sufficient/correct file permissions ... OK
+* checking whether package ‘ShadowCAT’ can be installed ... OK
+* checking installed package size ... OK
+* checking package directory ... OK
+* checking DESCRIPTION meta-information ... WARNING
+Non-standard license specification:
+  COPYRIGHTED (until I figure out what license to use.)
+Standardizable: FALSE
+* checking top-level files ... OK
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking R files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking dependencies in R code ... NOTE
+Packages in Depends field not imported from:
+  ‘numDeriv’ ‘plot3D’ ‘rredis’
+  These packages need to be imported from (in the NAMESPACE file)
+  for when this namespace is loaded but not attached.
+* checking S3 generic/method consistency ... WARNING
+subset:
+  function(x, ...)
+subset.ShadowCAT.items:
+  function(items, subset)
+
+See section ‘Generic functions and methods’ in the ‘Writing R
+Extensions’ manual.
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... OK
+* checking Rd files ... OK
+* checking Rd metadata ... OK
+* checking Rd cross-references ... WARNING
+Missing link or links in documentation object 'createConstraints.Rd':
+  ‘lpSolve’
+
+See section 'Cross-references' in the 'Writing R Extensions' manual.
+
+* checking for missing documentation entries ... WARNING
+Undocumented code objects:
+  ‘GPCM’
+Undocumented data sets:
+  ‘GPCM’
+All user-level objects in a package should have documentation entries.
+See chapter ‘Writing R documentation files’ in the ‘Writing R
+Extensions’ manual.
+* checking for code/documentation mismatches ... OK
+* checking Rd \usage sections ... WARNING
+Documented arguments not in \usage in documentation object 'KLB':
+  ‘items’
+
+Undocumented arguments in documentation object 'LL'
+  ‘minimize’ ‘log’
+Documented arguments not in \usage in documentation object 'LL':
+  ‘should’
+
+Undocumented arguments in documentation object 'MI'
+  ‘objective’
+
+Undocumented arguments in documentation object 'ShadowCAT'
+  ‘verbose’
+
+Undocumented arguments in documentation object 'createTestBank'
+  ‘between’
+
+Undocumented arguments in documentation object 'initItembank'
+  ‘silent’
+
+Undocumented arguments in documentation object 'initTest'
+  ‘exposure’
+
+Undocumented arguments in documentation object 'prob'
+  ‘test’
+
+Functions with \usage entries need to have the appropriate \alias
+entries, and all their arguments documented.
+The \usage entries must correspond to syntactically valid R code.
+See chapter ‘Writing R documentation files’ in the ‘Writing R
+Extensions’ manual.
+* checking Rd contents ... WARNING
+Argument items with no description in Rd object 'KLB':
+  ‘theta’ ‘theta0’ ‘test’ ‘person’ ‘items’
+
+Argument items with no description in Rd object 'LL':
+  ‘theta’ ‘test’ ‘person’
+
+Argument items with no description in Rd object 'MI':
+  ‘test’ ‘person’
+
+Argument items with no description in Rd object 'Shadow':
+  ‘test’ ‘person’ ‘objective’
+
+Argument items with no description in Rd object 'ShadowCAT':
+  ‘person’ ‘test’
+
+Argument items with no description in Rd object 'best_item':
+  ‘person’ ‘test’
+
+Argument items with no description in Rd object 'createExposureConstraint':
+  ‘test’
+
+Argument items with no description in Rd object 'createTestBank':
+  ‘model’ ‘K’ ‘Q’ ‘M’
+
+Argument items with no description in Rd object 'initTest':
+  ‘items’ ‘start’ ‘stop’ ‘max_n’ ‘estimator’ ‘objective’ ‘selection’
+  ‘constraints’ ‘lowerBound’ ‘upperBound’ ‘...’
+
+Argument items with no description in Rd object 'next_item':
+  ‘person’ ‘test’
+
+Argument items with no description in Rd object 'objective':
+  ‘test’ ‘person’
+
+Argument items with no description in Rd object 'prob':
+  ‘items’
+
+Argument items with no description in Rd object 'stop_test':
+  ‘person’ ‘test’
+
+Argument items with no description in Rd object 'variance':
+  ‘person’ ‘test’
+
+* checking for unstated dependencies in examples ... OK
+* checking contents of ‘data’ directory ... OK
+* checking data for non-ASCII characters ... OK
+* checking data for ASCII and uncompressed saves ... OK
+* checking line endings in C/C++/Fortran sources/headers ... OK
+* checking compiled code ... OK
+* checking examples ... OK
+* checking for unstated dependencies in ‘tests’ ... OK
+* checking tests ... OK
+  Running ‘monitor_simulation.R’
+  Running ‘tests.R’
+  Running ‘testthat.R’
+* DONE
+Status: 6 WARNINGs, 2 NOTEs

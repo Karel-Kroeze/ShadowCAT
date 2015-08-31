@@ -1,3 +1,5 @@
+# This rredis package keeps giving erros, will fix this later
+if (FALSE) {
 require(rredis)
 
 # connect
@@ -51,3 +53,4 @@ while(TRUE) {
   Sys.sleep(min(5 * interval, 10))
 }
 
+}
