@@ -17,4 +17,5 @@ Depends:
       MultiGHQuad,
       numDeriv,
       plot3D,
-      lpSolve
+      lpSolve,
+      testthat
