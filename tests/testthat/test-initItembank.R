@@ -122,7 +122,7 @@ test_that("GPCM model, 1 dimension, 2 categories, beta and eta entered", {
   
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   eta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
-  beta <- transpose_if_ncol_and_nrow_larger_1(as.matrix(apply(eta, 1, cumsum)))
+  beta <- eta
   
   item_characteristics_shadowcat_format <- initItembank(model = model, 
                                                         alpha = alpha,
