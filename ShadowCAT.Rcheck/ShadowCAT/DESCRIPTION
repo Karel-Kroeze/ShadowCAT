@@ -16,5 +16,5 @@ Depends: stats, mvtnorm, MultiGHQuad, numDeriv, plot3D, lpSolve,
         rredis, jsonlite
 Suggests: testthat (>= 0.8.1)
 NeedsCompilation: yes
-Packaged: 2015-09-02 09:31:56 UTC; rivkadevries
-Built: R 3.2.0; x86_64-apple-darwin13.4.0; 2015-09-02 09:31:57 UTC; unix
+Packaged: 2015-09-02 11:41:56 UTC; rivkadevries
+Built: R 3.2.0; x86_64-apple-darwin13.4.0; 2015-09-02 11:41:57 UTC; unix

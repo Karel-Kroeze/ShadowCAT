@@ -28,8 +28,7 @@ initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = N
   
   # check eta/beta are not mixed up
   if (model == "GPCM" && !is.null(beta) && !is.null(eta)){
-    temp <- eta
-    for (i in 1:ncol(eta)) temp[,i] <- rowSums(eta[,1:i])
+    temp <- matrix(apply(eta, 1, cumsum), ncol = dim(eta)[2])
     if (!all.equal(temp, beta)) stop("Beta and Eta parameters do not match, see details.")
   }
   
