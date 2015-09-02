@@ -28,15 +28,13 @@ initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = N
   
   # check eta/beta are not mixed up
   if (model == "GPCM" && !is.null(beta) && !is.null(eta)){
-    temp <- matrix(apply(eta, 1, cumsum), ncol = dim(eta)[2])
-    if (!all.equal(temp, beta)) stop("Beta and Eta parameters do not match, see details.")
+    criterion_beta <- matrix(apply(eta, 1, cumsum), ncol = dim(eta)[2])
+    if (!all.equal(criterion_beta, beta)) stop("Beta and Eta parameters do not match, see details.")
   }
   
   # allow calculating beta from eta.
-  if (model == "GPCM" && is.null(beta) && !is.null(eta)){
-    beta <- eta
-    for (i in 1:ncol(eta)) beta[,i] <- rowSums(eta[,1:i])
-  }
+  if (model == "GPCM" && is.null(beta) && !is.null(eta))
+    beta <- matrix(apply(eta, 1, cumsum), ncol = dim(eta)[2])
   
   # find number of items, categories
   if (is.null(dim(beta))) {
