@@ -27,51 +27,40 @@ initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = N
   # TODO: Validate input.
   
   # check eta/beta are not mixed up
-  if (model == "GPCM" && !is.null(beta) && !is.null(eta)){
-    criterion_beta <- matrix(apply(eta, 1, cumsum), ncol = dim(eta)[2])
-    if (!all.equal(criterion_beta, beta)) stop("Beta and Eta parameters do not match, see details.")
+  if (model == "GPCM" && !is.null(beta) && !is.null(eta)) {
+    criterion_beta <- transpose_if_ncol_and_nrow_larger_1(matrix_apply(eta, 1, cumsum))
+    if (!all.equal(criterion_beta, as.matrix(beta))) stop("Beta and Eta parameters do not match, see details.")
   }
   
   # allow calculating beta from eta.
   if (model == "GPCM" && is.null(beta) && !is.null(eta))
-    beta <- matrix(apply(eta, 1, cumsum), ncol = dim(eta)[2])
-  
-  # find number of items, categories
-  if (is.null(dim(beta))) {
-    K <- length(beta) # length of vector
-    M <- 1 # vector, so couldn't be polytomous
-  } else {
-    K <- nrow(beta) # row per item
-    M <- ncol(beta) # column per option
-  }
-  
-  # find number of dimensions
-  if (is.null(dim(alpha))) {
-    Q <- 1 # this is a vector
-  } else {
-    Q <- ncol(alpha)
-  }
-  
-  pars <- list()
+    beta <- transpose_if_ncol_and_nrow_larger_1(matrix_apply(eta, 1, cumsum))
+    
   # define paramater matrices. Everything should ALWAYS be a matrix.
-  pars$alpha <- matrix(alpha, K, Q)
-  pars$beta <- matrix(beta, K, M)
-  if ( ! is.null(guessing)) pars$guessing <- matrix(guessing, K, 1)
-  else pars$guessing <- matrix(0, K, 1)
-  if ( ! is.null(eta)) pars$eta <- matrix(eta, K, Q)
+  pars <- list()
+  pars$alpha <- as.matrix(alpha)
+  pars$beta <- as.matrix(beta)
+  pars$guessing <- if (is.null(guessing))
+                     matrix(0, nrow(pars$beta), 1)
+                   else
+                     as.matrix(guessing) 
+  if (!is.null(eta)) 
+    pars$eta <- as.matrix(eta)
+  
+  # find number of items, item steps (number of categories minus 1), dimensions
+  K <- nrow(pars$beta) # row per item
+  M <- ncol(pars$beta) # column per item step
+  Q <- ncol(pars$alpha) # column per dimension
   
   pars$index <- 1:K # except for bookkeeping things...
-  pars$m <- apply(pars$beta, 1, function(x) sum(! is.na(x))) # count number of non-NA cells per row - this is m, the number of cats per row.
-  
-  
+  pars$m <- apply(pars$beta, 1, function(x) sum(!is.na(x))) # count number of non-NA cells per row - this is m, the number of cats per row.
+   
   # define output, list
   out <- list(pars = pars, Q = Q, K = K, M = M, model = model)
   attr(out, 'class') <- c("ShadowCAT.items")
-  
-  
+   
   # little feedback
-  if ( ! silent) cat("\nItembank for",model,"model.",K,"items over",Q,"dimension(s), with up to",M,"categories per item.")
-  
+  if ( ! silent) cat("\nItembank for",model,"model.",K,"items over",Q,"dimension(s), with up to",M+1,"categories per item.")
   
   # return itembank
   return(invisible(out))

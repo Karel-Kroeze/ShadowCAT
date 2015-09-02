@@ -122,7 +122,7 @@ test_that("GPCM model, 1 dimension, 2 categories, beta and eta entered", {
   
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   eta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
-  beta <- matrix((apply(eta, 1, cumsum)), ncol = dim(eta)[2])
+  beta <- transpose_if_ncol_and_nrow_larger_1(as.matrix(apply(eta, 1, cumsum)))
   
   item_characteristics_shadowcat_format <- initItembank(model = model, 
                                                         alpha = alpha,
@@ -158,7 +158,7 @@ test_that("GPCM model, 3 dimension, 4 categories, beta and eta entered", {
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   temp_vector <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
   eta <- t(apply(temp_vector, 1, function(x) x + seq(-2, 2, length.out = (number_answer_categories - 1))))
-  beta <- matrix((apply(eta, 1, cumsum)), ncol = dim(eta)[2])
+  beta <- t(apply(eta, 1, cumsum))
   
   item_characteristics_shadowcat_format <- initItembank(model = model, 
                                                         alpha = alpha,
@@ -169,8 +169,8 @@ test_that("GPCM model, 3 dimension, 4 categories, beta and eta entered", {
   
   expect_equal(round(item_characteristics_shadowcat_format$pars$alpha[5,], 3), c(1.433, .630, .644))
   expect_equal(round(item_characteristics_shadowcat_format$pars$alpha[50,], 3), c(1.272, .828, .650))
-  expect_equal(round(item_characteristics_shadowcat_format$pars$beta[1,], 3), c(-2.897, 2.636, -2.568))
-  expect_equal(round(item_characteristics_shadowcat_format$pars$beta[45, ], 3),  c(5.347, -1.362, -2.184))
+  expect_equal(round(item_characteristics_shadowcat_format$pars$beta[1,], 3), c(-2.897,-3.794, -2.691))
+  expect_equal(round(item_characteristics_shadowcat_format$pars$beta[45, ], 3),  c(-1.378, -0.755,  1.867))
   expect_equal(dim(item_characteristics_shadowcat_format$pars$alpha), c(50, 3))
   expect_equal(dim(item_characteristics_shadowcat_format$pars$beta), c(50, 3))
   expect_equal(item_characteristics_shadowcat_format$pars$guessing[c(2,26),], c(.1, .2))
@@ -219,12 +219,12 @@ test_that("GPCM model, 1 dimension, 2 categories, beta is NULL", {
   expect_equal(class(item_characteristics_shadowcat_format), "ShadowCAT.items")  
 })
 
-test_that("GPCM model, 3 dimension, 4 categories, beta is NULL", {
+test_that("GPCM model, 3 dimension, 4 categories, beta is NULL, guessing is NULL", {
   model <- 'GPCM'
   number_items <- 50
   number_dimensions <- 3
   number_answer_categories <- 4
-  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+  guessing <- NULL
   
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   temp_vector <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
@@ -240,11 +240,11 @@ test_that("GPCM model, 3 dimension, 4 categories, beta is NULL", {
   
   expect_equal(round(item_characteristics_shadowcat_format$pars$alpha[5,], 3), c(1.433, .630, .644))
   expect_equal(round(item_characteristics_shadowcat_format$pars$alpha[50,], 3), c(1.272, .828, .650))
-  expect_equal(round(item_characteristics_shadowcat_format$pars$beta[1,], 3), c(-2.897, 2.636, -2.568))
-  expect_equal(round(item_characteristics_shadowcat_format$pars$beta[45, ], 3),  c(5.347, -1.362, -2.184))
+  expect_equal(round(item_characteristics_shadowcat_format$pars$beta[1,], 3), c(-2.897, -3.794, -2.691))
+  expect_equal(round(item_characteristics_shadowcat_format$pars$beta[45, ], 3),  c(-1.378, -0.755, 1.867))
   expect_equal(dim(item_characteristics_shadowcat_format$pars$alpha), c(50, 3))
   expect_equal(dim(item_characteristics_shadowcat_format$pars$beta), c(50, 3))
-  expect_equal(item_characteristics_shadowcat_format$pars$guessing[c(2,26),], c(.1, .2))
+  expect_equal(item_characteristics_shadowcat_format$pars$guessing[1:50,], rep(0, 50))
   expect_equal(dim(item_characteristics_shadowcat_format$pars$guessing), c(50, 1))
   expect_equal(item_characteristics_shadowcat_format$pars$index, 1:50)
   expect_equal(item_characteristics_shadowcat_format$pars$m, rep(3, 50))
@@ -255,3 +255,39 @@ test_that("GPCM model, 3 dimension, 4 categories, beta is NULL", {
   expect_equal(class(item_characteristics_shadowcat_format), "ShadowCAT.items")
 })
 
+test_that("GPCM model, alpha, beta, and eta entered as vectors", {
+  model <- 'GPCM'
+  number_items <- 50
+  number_dimensions <- 1
+  number_answer_categories <- 2
+  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+  
+  alpha <- with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5)
+  beta <- with_random_seed(2, rnorm)(number_items)
+  eta <- beta
+  
+  item_characteristics_shadowcat_format <- initItembank(model = model, 
+                                                        alpha = alpha,
+                                                        beta = beta,
+                                                        guessing = guessing, 
+                                                        eta = eta,
+                                                        silent = FALSE)
+  
+  expect_equal(round(item_characteristics_shadowcat_format$pars$alpha[5], 3), 1.433)
+  expect_equal(round(item_characteristics_shadowcat_format$pars$alpha[50], 3), 1.272)
+  expect_equal(round(item_characteristics_shadowcat_format$pars$beta[1], 3), -.897)
+  expect_equal(round(item_characteristics_shadowcat_format$pars$beta[45], 3), .622)
+  expect_equal(dim(item_characteristics_shadowcat_format$pars$alpha), c(50, 1))
+  expect_equal(dim(item_characteristics_shadowcat_format$pars$beta), c(50, 1))
+  expect_equal(item_characteristics_shadowcat_format$pars$guessing[c(2,26),], c(.1, .2))
+  expect_equal(dim(item_characteristics_shadowcat_format$pars$guessing), c(50, 1))
+  expect_equal(item_characteristics_shadowcat_format$pars$index, 1:50)
+  expect_equal(item_characteristics_shadowcat_format$pars$m, rep(1, 50))
+  expect_equal(item_characteristics_shadowcat_format$Q, 1)
+  expect_equal(item_characteristics_shadowcat_format$K, 50)
+  expect_equal(item_characteristics_shadowcat_format$M, 1)
+  expect_equal(item_characteristics_shadowcat_format$model, "GPCM")
+  expect_equal(class(item_characteristics_shadowcat_format), "ShadowCAT.items")  
+})
+
+#next: pars$m if not all equal
