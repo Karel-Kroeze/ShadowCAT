@@ -13,4 +13,9 @@ ShadowCAT.Rcheck
 # R Builds
 *.tar.gz
 
+# Ruby stuff
+.ruby-version
+autovar_Rstudio_output.txt
+file*
+
 local
