@@ -27,6 +27,14 @@ Loading required package: numDeriv
 Loading required package: plot3D
 Loading required package: lpSolve
 Loading required package: rredis
+Loading required package: jsonlite
+
+Attaching package: ‘jsonlite’
+
+The following object is masked from ‘package:utils’:
+
+    View
+
 > 
 > base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
 > cleanEx()
@@ -189,10 +197,10 @@ attr(,"variance")
 > 
 > system.time(estimate(person5d, test5dEAP))
    user  system elapsed 
-  0.016   0.000   0.016 
+  0.014   0.000   0.015 
 > system.time(estimate(person5d, test5dMAP))
    user  system elapsed 
-  0.004   0.000   0.005 
+  0.003   0.001   0.003 
 > 
 > 
 > 
@@ -200,7 +208,7 @@ attr(,"variance")
 > ###
 > options(digits = 7L)
 > base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
-Time elapsed:  0.403 0.012 0.427 0 0 
+Time elapsed:  0.442 0.018 0.482 0 0 
 > grDevices::dev.off()
 null device 
           1 

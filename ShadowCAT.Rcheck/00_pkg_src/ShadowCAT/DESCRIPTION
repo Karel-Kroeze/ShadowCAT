@@ -12,7 +12,8 @@ License: COPYRIGHTED (until I figure out what license to use.)
 LazyData: true
 LinkingTo: Rcpp
 Imports: Rcpp
-Depends: stats, mvtnorm, MultiGHQuad, numDeriv, plot3D, lpSolve, rredis
+Depends: stats, mvtnorm, MultiGHQuad, numDeriv, plot3D, lpSolve,
+        rredis, jsonlite
 Suggests: testthat (>= 0.8.1)
 NeedsCompilation: yes
-Packaged: 2015-08-31 15:00:30 UTC; rivkadevries
+Packaged: 2015-09-02 09:31:56 UTC; rivkadevries

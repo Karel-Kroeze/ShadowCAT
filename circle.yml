@@ -1,0 +1,18 @@
+machine:
+  environment:
+    R_LIBS_USER: ~/lib/R/library
+    _R_CHECK_FORCE_SUGGESTS_: FALSE
+test:
+  override:
+    - R --no-save --quiet -e 'devtools::document()'
+    - R CMD INSTALL --no-multiarch --with-keep.source ~/ShadowCAT
+    - R CMD build ~/ShadowCAT
+    - R CMD check ~/ShadowCAT/ShadowCAT_0.1.tar.gz --no-manual --no-build-vignettes
+  post:
+    - mv ShadowCAT.Rcheck/tests/testthat.Rout* $CIRCLE_ARTIFACTS/.
+dependencies:
+  cache_directories:
+    - "~/lib/R"
+  pre:
+    - mkdir -p ~/lib/R/library
+    - ./inst/bash/install-package-dependencies.sh

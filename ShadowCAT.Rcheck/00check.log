@@ -10,6 +10,7 @@
 * checking package dependencies ... NOTE
 Depends: includes the non-default packages:
   ‘mvtnorm’ ‘MultiGHQuad’ ‘numDeriv’ ‘plot3D’ ‘lpSolve’ ‘rredis’
+  ‘jsonlite’
 Adding so many packages to the search path is excessive and importing
 selectively is preferable.
 * checking if this is a source package ... OK
@@ -38,7 +39,7 @@ Standardizable: FALSE
 * checking whether the namespace can be unloaded cleanly ... OK
 * checking dependencies in R code ... NOTE
 Packages in Depends field not imported from:
-  ‘numDeriv’ ‘plot3D’ ‘rredis’
+  ‘jsonlite’ ‘numDeriv’ ‘plot3D’ ‘rredis’
   These packages need to be imported from (in the NAMESPACE file)
   for when this namespace is loaded but not attached.
 * checking S3 generic/method consistency ... WARNING

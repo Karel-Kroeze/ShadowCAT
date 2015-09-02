@@ -17,6 +17,14 @@ Type 'q()' to quit R.
 
 > source("testthat/help_functions.R")
 > library(testthat)
+> library(jsonlite)
+
+Attaching package: 'jsonlite'
+
+The following object is masked from 'package:utils':
+
+    View
+
 > test_check("ShadowCAT")
 Loading required package: ShadowCAT
 Loading required package: mvtnorm
@@ -25,8 +33,8 @@ Loading required package: numDeriv
 Loading required package: plot3D
 Loading required package: lpSolve
 Loading required package: rredis
-
+...............
 > 
 > proc.time()
    user  system elapsed 
-  0.444   0.031   0.477 
+  0.513   0.034   0.548 
