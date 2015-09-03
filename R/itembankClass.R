@@ -25,20 +25,20 @@
 #' @return ShadowCAT.items Itembank object, as used by \code{\link{initTest}} and \code{\link{initPerson}}.
 #' @export
 initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = NULL, eta = NULL, silent = FALSE){  
-  result <- function() {
-    # little feedback
-    if (!silent) 
-      cat("\nItembank for",model,"model.",K,"items over",Q,"dimension(s), with up to",M+1,"categories per item.")
-    
+  result <- function() {  
     # define output, list
     # I will change Q (number of dimensions), K (number of items), M (number of item steps; number of categories 
     # minus 1), and m (in pars: the number of item steps per item) into appropriate names later, since this will affect other functions
     item_bank <- list(pars = get_parameters_list(), 
-                      Q = ncol(pars$alpha), 
-                      K = nrow(pars$beta), 
-                      M = ncol(pars$beta), 
+                      Q = get_number_items_itemsteps_dimensions()$number_dimensions, 
+                      K = get_number_items_itemsteps_dimensions()$number_items, 
+                      M = get_number_items_itemsteps_dimensions()$number_itemsteps, 
                       model = model)
     attr(item_bank, 'class') <- c("ShadowCAT.items")
+    
+    # little feedback
+    if (!silent) 
+      cat("\nItembank for",item_bank$model,"model.",item_bank$K,"items over",item_bank$Q,"dimension(s), with up to",item_bank$M+1,"categories per item.")
     
     invisible(item_bank)
   }
@@ -56,10 +56,10 @@ initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = N
     pars = list(alpha = as.matrix(alpha),
                 beta = as.matrix(get_beta()),
                 guessing = if (is.null(guessing))
-                             matrix(0, nrow(pars$beta), 1)
+                             matrix(0, nrow(as.matrix(get_beta())), 1)
                            else
                              as.matrix(guessing),
-                index = 1:K, # except for bookkeeping things...
+                index = 1:nrow(as.matrix(get_beta())), # except for bookkeeping things...
                 m = number_non_missing_cells_per_row(as.matrix(get_beta()))
            ) 
     if (!is.null(eta)) 
@@ -68,8 +68,15 @@ initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = N
     pars
   }
   
+  get_number_items_itemsteps_dimensions <- function() {
+    pars = get_parameters_list()
+    list(number_items = nrow(pars$beta), 
+         number_itemsteps = ncol(pars$beta), 
+         number_dimensions = ncol(pars$alpha))
+  }
+  
   validate <- function() {
-    if (alpha == NULL)
+    if (is.null(alpha))
       add_error("alpha", "is missing")
     if (model != "GPCM" && is.null(beta))
       add_error("beta", "is missing")

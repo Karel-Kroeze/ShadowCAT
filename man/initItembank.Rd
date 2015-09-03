@@ -13,7 +13,7 @@ initItembank(model = "3PLM", alpha = NULL, beta = NULL, guessing = NULL,
 \item{alpha}{Matrix of alpha paramteres, one column per dimension, one row per item. Note that so called within-dimensional models still use an alpha matrix, they simply
 have only one non-zero loading per item.}
 
-\item{beta}{Matrix of beta parameters, one column per response category, one row per item. Note that ShadowCAT expects response categories to be sequential,
+\item{beta}{Matrix of beta parameters, one column per item step, one row per item. Note that ShadowCAT expects response categories to be sequential,
 and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, and equal to the position of the 'location' of the beta parameter in the Beta matrix.
 The matrix will have a number of columns equal to the largest number of response categories, items with fewer response categories should be
 right-padded with \code{NA}. \code{NA} values between response categories are not allowed, and will lead to errors.
@@ -22,6 +22,8 @@ More flexibility in Beta parameters might be added in future versions.}
 \item{guessing}{vector of guessing parameters per item. Optionally used in 3PLM model, ignored for all others.}
 
 \item{eta}{Matrix of location parameters, optionally used in GPCM model, ignored for all others.}
+
+\item{silent}{if TRUE, a summary of the item bank properties is printed}
 }
 \value{
 ShadowCAT.items Itembank object, as used by \code{\link{initTest}} and \code{\link{initPerson}}.
