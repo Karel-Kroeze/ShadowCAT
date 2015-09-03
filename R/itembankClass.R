@@ -28,13 +28,13 @@ initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = N
   
   # check eta/beta are not mixed up
   if (model == "GPCM" && !is.null(beta) && !is.null(eta)) {
-    criterion_beta <- transpose_if_ncol_and_nrow_larger_1(matrix_apply(eta, 1, cumsum))
+    criterion_beta <- row_cumsum(eta)
     if (!all.equal(criterion_beta, as.matrix(beta))) stop("Beta and Eta parameters do not match, see details.")
   }
   
   # allow calculating beta from eta.
   if (model == "GPCM" && is.null(beta) && !is.null(eta))
-    beta <- transpose_if_ncol_and_nrow_larger_1(matrix_apply(eta, 1, cumsum))
+    beta <- row_cumsum(eta)
     
   # define paramater matrices. Everything should ALWAYS be a matrix.
   pars <- list()
@@ -60,7 +60,8 @@ initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = N
   attr(out, 'class') <- c("ShadowCAT.items")
    
   # little feedback
-  if ( ! silent) cat("\nItembank for",model,"model.",K,"items over",Q,"dimension(s), with up to",M+1,"categories per item.")
+  if (!silent) 
+    cat("\nItembank for",model,"model.",K,"items over",Q,"dimension(s), with up to",M+1,"categories per item.")
   
   # return itembank
   return(invisible(out))

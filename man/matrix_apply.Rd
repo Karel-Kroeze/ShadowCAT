@@ -7,13 +7,13 @@
 matrix_apply(X, margin, FUN, ...)
 }
 \arguments{
+\item{X}{a vector or matrix; if vector, the vector will be converted to a matrix}
+
 \item{margin}{a vector giving the subscripts which the function will be applied over, see ?apply for details}
 
 \item{FUN}{the funcion to be applied}
 
 \item{...}{any additional arguments to FUN}
-
-\item{a}{vector or matrix; if vector, the vector will be converted to a matrix}
 }
 \value{
 same a apply, but always in matrix format
