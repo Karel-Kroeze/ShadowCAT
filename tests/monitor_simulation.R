@@ -1,4 +1,4 @@
-# This rredis package keeps giving erros, will fix this later
+# Connection redis not working, will fix later
 if (FALSE) {
 require(rredis)
 

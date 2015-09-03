@@ -26,7 +26,7 @@ matrix_apply <- function(X, margin, FUN, ...) {
 #' @param X a vector or matrix; if vector, the vector will be converted to a matrix with one column
 #' @return matrix containing cumulative sums for each row
 #' @examples row_cumsum(matrix(1:12, ncol = 3))[2,] == c(2, 6, 10) || stop("wrong");
-#' row_cumsum(1:12) == 1:12 || stop("wrong")
+#' row_cumsum(1:12) == matrix(1:12, ncol = 1) || stop("wrong")
 #' @export
 row_cumsum <- function(X) {
   transpose_if_ncol_and_nrow_larger_1(matrix_apply(X, 1, cumsum))
