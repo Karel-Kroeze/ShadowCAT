@@ -1,14 +1,11 @@
-#' transpose matrix if number of columns is larger than 1
+#' get the number of non-NA cells per row of a matrix
 #' 
 #' @param X a matrix
-#' @return transpose of X if number of columns and number of rows are larger than 1, X otherwise
-#' @examples transpose_if_ncol_and_nrow_larger_1(matrix(1:50, ncol = 2)) == t(matrix(1:50, ncol = 2)) || stop("wrong")
+#' @return number of non-NA cells per row
+#' @examples number_non_missing_cells_per_row(matrix(c(1,2,NA,NA,2,3,NA,2,3), ncol = 3)) == c(1, 3, 2) || stop("wrong")
 #' @export
-transpose_if_ncol_and_nrow_larger_1 <- function(X) {
-  if (ncol(X) > 1 && ncol(X) > 1)
-    t(X)
-  else
-    X
+number_non_missing_cells_per_row <- function(X) {
+  apply(X, 1, function(x) sum(!is.na(x)))
 }
 
 #' apply with input and output converted to matrix
@@ -34,3 +31,20 @@ matrix_apply <- function(X, margin, FUN, ...) {
 row_cumsum <- function(X) {
   transpose_if_ncol_and_nrow_larger_1(matrix_apply(X, 1, cumsum))
 }
+
+#' transpose matrix if number of columns is larger than 1
+#' 
+#' @param X a matrix
+#' @return transpose of X if number of columns and number of rows are larger than 1, X otherwise
+#' @examples transpose_if_ncol_and_nrow_larger_1(matrix(1:50, ncol = 2)) == t(matrix(1:50, ncol = 2)) || stop("wrong")
+#' @export
+transpose_if_ncol_and_nrow_larger_1 <- function(X) {
+  if (ncol(X) > 1 && ncol(X) > 1)
+    t(X)
+  else
+    X
+}
+
+
+
+
