@@ -2,7 +2,7 @@
 '
 library(testthat)
 '
-context("3PLM model")
+context("all matrices one column")
 
 test_that("3PLM model, 1 dimension, 2 categories", {
   model <- '3PLM'
@@ -41,6 +41,7 @@ test_that("3PLM model, 1 dimension, 2 categories", {
   expect_equal(item_characteristics_subset$subset, c(2, 4, 7, 11, 20:25, 28))  
 })
 
+context("matrices three columns")
 
 test_that("GPCM model, 3 dimension, 4 categories", {
   model <- 'GPCM'
