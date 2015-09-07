@@ -141,16 +141,10 @@ createTestBank <- function(model, K = 50, Q = 1, M = 4, between = FALSE){
   if (model == "GPCM") {
     # make betas
     eta <- beta
-    for (i in 1:M) {
-      # rolling sum, apply over all items
-      beta[,i] <- apply(eta[,1:i, drop=FALSE], 1, sum)
-    }
-  }
-  
-  # create Itembank object
-  items <- initItembank(model, alpha, beta, silent = TRUE)  
+    beta <- row_cumsum(eta)
+  } 
   
   # return
-  return(invisible(items))
+  invisible(initItembank(model, alpha, beta, silent = TRUE))
 }
 
