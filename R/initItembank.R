@@ -99,36 +99,14 @@ initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = N
 }
 
 
-#' Subset method for ShadowCAT.items.
-#' 
-#' Creates a valid subset of items to work with in ShadowCAT functions. Primarily used internally.
-#' @param items  class ShadowCAT.items.
-#' @param subset indeces.
-#' @return items Subset of provided itembank, with class ShadowCAT.items, as well as any original classes. 
-#' @export
-subset.ShadowCAT.items <- function(items, subset) {
-  out <- items
-  out$subset <- subset
-  out$K <- length(subset)
-  
-  for (par in names(items$pars)){
-    if (is.null(dim(items$pars[[par]]))) { # vector
-      out$pars[[par]] <- items$pars[[par]][subset,drop = FALSE]
-    } else { # matrix
-      out$pars[[par]] <- items$pars[[par]][subset,,drop = FALSE]     
-    }
-  }
-  
-  return(out)
-}
-
 #' Create a test Itembank
 #' 
 #' Quick and simple itembanks for testing purposes.
-#' @param model
-#' @param K
-#' @param Q
-#' @param M
+#' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
+#' @param K number of items
+#' @param Q number of dimensions
+#' @param M number of item steps (number of categories minus 1)
+#' @param between is TRUE, force items to load on one dimension each.
 #' @return ShadowCAT.itembank
 #' @export
 createTestBank <- function(model, K = 50, Q = 1, M = 4, between = FALSE){
@@ -175,3 +153,4 @@ createTestBank <- function(model, K = 50, Q = 1, M = 4, between = FALSE){
   # return
   return(invisible(items))
 }
+

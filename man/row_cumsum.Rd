@@ -17,6 +17,6 @@ compute cumulative sums for each row of a matrix
 }
 \examples{
 row_cumsum(matrix(1:12, ncol = 3))[2,] == c(2, 6, 10) || stop("wrong");
-row_cumsum(1:12) == 1:12 || stop("wrong")
+row_cumsum(1:12) == matrix(1:12, ncol = 1) || stop("wrong")
 }
 

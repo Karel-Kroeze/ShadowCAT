@@ -16,9 +16,6 @@ Depends:
       mvtnorm,
       MultiGHQuad,
       numDeriv,
-      plot3D,
-      lpSolve,
-      rredis,
-      jsonlite
+      lpSolve
 Suggests:
       testthat (>= 0.8.1)
