@@ -25,9 +25,8 @@ double lf(double x) {
 
 // Three Paramater Logistic (MultiDim) (Segall, 1996)
 // [[Rcpp::export]]
-List PROB_3PLM(NumericVector theta, NumericMatrix a, NumericVector b, NumericVector c, NumericVector u) {
+List PROB_3PLM(NumericVector theta, NumericMatrix a, NumericVector b, NumericVector c, NumericVector u, bool deriv) {
   int Q = a.ncol(), K = a.nrow(), M = 2;
-  bool posterior = is_false(any(is_na(u)));
   NumericVector aux(K), l(K), d(K), D(K);
   NumericMatrix P(K, M);
   
@@ -44,10 +43,9 @@ List PROB_3PLM(NumericVector theta, NumericMatrix a, NumericVector b, NumericVec
     P(k,0) = 1 - P(k,1);
   }
   
-  if(posterior){
+  if (deriv) {
     NumericVector p = P(_,1), p2 = pow(p,2), q = P(_,0);
-    
-    
+        
     l = vec_pow(p, u) * vec_pow(q, 1 - u);
     d = ((p-c) * (u-p)) / ((1-c) * p);
     D = (q *(p-c)*(c*u-p2)) / (p2*pow(1-c,2));
@@ -63,10 +61,9 @@ List PROB_3PLM(NumericVector theta, NumericMatrix a, NumericVector b, NumericVec
 
 // graded response model (Samejima, 1969)
 // [[Rcpp::export]]
-List PROB_GRM(NumericVector theta, NumericMatrix a, NumericMatrix b, NumericVector u) {
+List PROB_GRM(NumericVector theta, NumericMatrix a, NumericMatrix b, NumericVector u, bool deriv) {
   int K = a.nrow(), M = b.ncol() + 1, m = 0;
   double at = 0;
-  bool posterior = is_false(any(is_na(u)));
   
   NumericVector l(K), d(K), D(K);
   NumericMatrix P(K, M);
@@ -95,7 +92,7 @@ List PROB_GRM(NumericVector theta, NumericMatrix a, NumericMatrix b, NumericVect
     }
     
     // build likelihood and derivatives
-    if(posterior){
+    if(deriv){
       l[k] = P(k,u[k]);
       d[k] = 1 - Psi[u[k]] - Psi[u[k]+1];
       D[k] = -(Psi[u[k]] * (1-Psi[u[k]]) + Psi[u[k]+1] * (1-Psi[u[k]+1]));
@@ -112,10 +109,9 @@ List PROB_GRM(NumericVector theta, NumericMatrix a, NumericMatrix b, NumericVect
 
 //  Sequential Model (Tutz, 1990)
 // [[Rcpp::export]]
-List PROB_SM(NumericVector theta, NumericMatrix a, NumericMatrix b, NumericVector u) {
+List PROB_SM(NumericVector theta, NumericMatrix a, NumericMatrix b, NumericVector u, bool deriv) {
   int K = a.nrow(), M = b.ncol() + 1, m = 0;
   double at = 0;
-  bool posterior = is_false(any(is_na(u)));
   
   NumericVector l(K), d(K), D(K);
   NumericMatrix P(K, M);
@@ -146,7 +142,7 @@ List PROB_SM(NumericVector theta, NumericMatrix a, NumericMatrix b, NumericVecto
       P(k, i-1) = aux * (1 - Psi[i]);
     }
     
-    if (posterior){
+    if (deriv){
       l[k] = P(k,u[k]);
       
       aux = 0;
@@ -172,10 +168,9 @@ List PROB_SM(NumericVector theta, NumericMatrix a, NumericMatrix b, NumericVecto
 
 // Generalised Partial Credit Model (Muraki, 1992)
 // [[Rcpp::export]]
-List PROB_GPCM(NumericVector theta, NumericMatrix a, NumericMatrix b, NumericVector u) {
+List PROB_GPCM(NumericVector theta, NumericMatrix a, NumericMatrix b, NumericVector u, bool deriv) {
   int K = a.nrow(), M = b.ncol() + 1, m = 0;
   double at = 0;
-  bool posterior = is_false(any(is_na(u)));
   
   NumericVector l(K), d(K), D(K);
   NumericMatrix P(K, M);
@@ -202,7 +197,7 @@ List PROB_GPCM(NumericVector theta, NumericMatrix a, NumericMatrix b, NumericVec
     }
     P(k, 0) = remainder;
   
-    if (posterior){
+    if (deriv){
       NumericVector mi = range(1,m);
       NumericMatrix pi = P(Range(k,k), Range(1,m));
       double mp = sum(mi*pi);

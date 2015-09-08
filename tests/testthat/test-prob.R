@@ -33,6 +33,7 @@ test_that("model is 3PLM, 1 dimension, 2 categories, estimator is MAP, deriv is 
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   probabilities <- prob(initiated_test, person = NULL, theta = .5, deriv = FALSE, prior = NULL, items = NULL)
+  
   expect_equal(round(probabilities$P[1,], 3), c(.293, .707))
   expect_equal(round(probabilities$P[40,], 3), c(.329, .671))
   expect_equal(dim(probabilities$P), c(50, 2))
@@ -67,7 +68,7 @@ test_that("model is 3PLM, 2 dimensions, 2 categories, estimator is ML, deriv is 
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = 0, prior = NULL)
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = NULL)
   
   probabilities <- prob(initiated_test, person = initiated_person, theta = NULL, deriv = TRUE, prior = NULL, items = NULL)
   
@@ -108,7 +109,7 @@ test_that("model is 3PLM, 1 dimension, 2 categories, estimator is MAP, deriv is 
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = .5, prior = diag(item_characteristics_shadowcat_format$Q))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = diag(item_characteristics_shadowcat_format$Q))
   
   probabilities <- prob(test = initiated_test, person = initiated_person, theta = NULL, deriv = TRUE, prior = NULL, items = NULL)
   
@@ -154,7 +155,7 @@ test_that("model is 3PLM, 3 dimensions, 2 categories, estimator is EAP, deriv is
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.4, item_characteristics_shadowcat_format$Q), prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
   
   probabilities <- prob(test = initiated_test, person = initiated_person, theta = NULL, deriv = TRUE, prior = NULL, items = NULL)
   
@@ -198,7 +199,7 @@ test_that("model is GPCM, 1 dimensions, 2 categories, estimator is MAP, deriv is
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.4, item_characteristics_shadowcat_format$Q), prior = .6)
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = .6)
   
   probabilities <- prob(initiated_test, person = initiated_person, theta = NULL, deriv = TRUE, prior = NULL, items = NULL)
   
@@ -240,7 +241,7 @@ test_that("model is GPCM, 3 dimensions, 4 categories, estimator is EAP, deriv is
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.4, item_characteristics_shadowcat_format$Q), prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
   
   probabilities <- prob(initiated_test, person = initiated_person, theta = NULL, deriv = TRUE, prior = NULL, items = NULL)
   
@@ -282,7 +283,7 @@ test_that("model is GPCM, 3 dimensions, 4 categories, estimator is ML, deriv is 
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.4, item_characteristics_shadowcat_format$Q), prior = NULL)
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = NULL)
   
   probabilities <- prob(initiated_test, person = initiated_person, theta = NULL, deriv = TRUE, prior = NULL, items = NULL)
   
@@ -293,6 +294,45 @@ test_that("model is GPCM, 3 dimensions, 4 categories, estimator is ML, deriv is 
   expect_equal(dim(probabilities$d1), c(1, 3))
   expect_equal(dim(probabilities$d2), c(3, 3))
   expect_equal(length(probabilities), 4)
+}) 
+
+test_that("model is GPCM, 3 dimensions, 4 categories, estimator is EAP, deriv is false", {
+  # create item characteristics
+  model <- 'GPCM'
+  number_items <- 50
+  number_dimensions <- 3
+  number_answer_categories <- 4
+  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+  
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  temp_vector <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  eta <- t(apply(temp_vector, 1, function(x) x + seq(-2, 2, length.out = (number_answer_categories - 1))))
+  beta <- t(apply(eta, 1, cumsum))
+  
+  item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = NULL, silent = TRUE)
+  
+  # get initiated test: adaptive test rules
+  initiated_test <- initTest(item_characteristics_shadowcat_format, 
+                             start = list(type = 'random', n = 5), 
+                             stop = list(type = 'length', n = 30),
+                             max_n = 50, # utter maximum
+                             estimator = 'EAP',
+                             objective = 'PD',
+                             selection = 'MI',
+                             constraints = NULL,
+                             exposure = NULL,
+                             lowerBound = rep(-3, item_characteristics_shadowcat_format$Q),
+                             upperBound = rep(3, item_characteristics_shadowcat_format$Q))
+  
+  # get initiated person
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
+  
+  probabilities <- prob(initiated_test, person = initiated_person, theta = NULL, deriv = FALSE, prior = NULL, items = NULL)
+  
+  expect_equal(round(probabilities$P[1,], 3), c(.013, .231, .567, .188))
+  expect_equal(round(probabilities$P[40,], 3), c(.041, .384, .491, .085))
+  expect_equal(dim(probabilities$P), c(50, 4))
+  expect_equal(length(probabilities), 1)
 }) 
 
 context("GRM model")
@@ -325,7 +365,7 @@ test_that("model is GRM, 3 dimensions, 4 categories, estimator is EAP, deriv is 
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.4, item_characteristics_shadowcat_format$Q), prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
   
   probabilities <- prob(initiated_test, person = initiated_person, theta = NULL, deriv = TRUE, prior = NULL, items = NULL)
   
@@ -366,7 +406,7 @@ test_that("model is GRM, 3 dimensions, 4 categories, estimator is ML, deriv is t
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.4, item_characteristics_shadowcat_format$Q), prior = NULL)
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = NULL)
   
   probabilities <- prob(initiated_test, person = initiated_person, theta = NULL, deriv = TRUE, prior = NULL, items = NULL)
   
@@ -377,6 +417,44 @@ test_that("model is GRM, 3 dimensions, 4 categories, estimator is ML, deriv is t
   expect_equal(dim(probabilities$d1), c(1, 3))
   expect_equal(dim(probabilities$d2), c(3, 3))
   expect_equal(length(probabilities), 4)
+}) 
+
+test_that("model is GRM, 3 dimensions, 4 categories, estimator is EAP, deriv is false", {
+  # create item characteristics
+  model <- 'GRM'
+  number_items <- 50
+  number_dimensions <- 3
+  number_answer_categories <- 4
+  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+  
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  temp_vector <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  beta <- t(apply(temp_vector, 1, function(x) x + seq(-2, 2, length.out = (number_answer_categories - 1))))
+  
+  item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = NULL, silent = TRUE)
+  
+  # get initiated test: adaptive test rules
+  initiated_test <- initTest(item_characteristics_shadowcat_format, 
+                             start = list(type = 'random', n = 5), 
+                             stop = list(type = 'length', n = 30),
+                             max_n = 50, # utter maximum
+                             estimator = 'EAP',
+                             objective = 'PD',
+                             selection = 'MI',
+                             constraints = NULL,
+                             exposure = NULL,
+                             lowerBound = rep(-3, item_characteristics_shadowcat_format$Q),
+                             upperBound = rep(3, item_characteristics_shadowcat_format$Q))
+  
+  # get initiated person
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
+  
+  probabilities <- prob(initiated_test, person = initiated_person, theta = NULL, deriv = FALSE, prior = NULL, items = NULL)
+  
+  expect_equal(round(probabilities$P[1,], 3), c(.052, .237, .461, .249))
+  expect_equal(round(probabilities$P[40,], 3), c(.096, .343, .414, .148))
+  expect_equal(dim(probabilities$P), c(50, 4))
+  expect_equal(length(probabilities), 1)
 }) 
 
 context("SM model")
@@ -409,7 +487,7 @@ test_that("model is SM, 3 dimensions, 4 categories, estimator is EAP, deriv is t
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.4, item_characteristics_shadowcat_format$Q), prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
   
   probabilities <- prob(initiated_test, person = initiated_person, theta = NULL, deriv = TRUE, prior = NULL, items = NULL)
   
@@ -423,6 +501,47 @@ test_that("model is SM, 3 dimensions, 4 categories, estimator is EAP, deriv is t
 }) 
 
 test_that("model is SM, 3 dimensions, 4 categories, estimator is ML, deriv is true", {
+  # create item characteristics
+  model <- "SM"
+  number_items <- 50
+  number_dimensions <- 3
+  number_answer_categories <- 4
+  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+  
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  temp_vector <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  beta <- t(apply(temp_vector, 1, function(x) x + seq(-2, 2, length.out = (number_answer_categories - 1))))
+  
+  item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = NULL, silent = TRUE)
+  
+  # get initiated test: adaptive test rules
+  initiated_test <- initTest(item_characteristics_shadowcat_format, 
+                             start = list(type = 'random', n = 5), 
+                             stop = list(type = 'length', n = 30),
+                             max_n = 50, # utter maximum
+                             estimator = 'ML',
+                             objective = 'PD',
+                             selection = 'MI',
+                             constraints = NULL,
+                             exposure = NULL,
+                             lowerBound = rep(-3, item_characteristics_shadowcat_format$Q),
+                             upperBound = rep(3, item_characteristics_shadowcat_format$Q))
+  
+  # get initiated person
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = NULL)
+  
+  probabilities <- prob(initiated_test, person = initiated_person, theta = NULL, deriv = TRUE, prior = NULL, items = NULL)
+  
+  expect_equal(round(probabilities$P[1,], 3), c(.052, .275, .505, .168))
+  expect_equal(round(probabilities$P[40,], 3), c(.096, .397, .433, .075))
+  expect_equal(dim(probabilities$P), c(50, 4))
+  expect_equal(length(probabilities$LL), 1)
+  expect_equal(dim(probabilities$d1), c(1, 3))
+  expect_equal(dim(probabilities$d2), c(3, 3))
+  expect_equal(length(probabilities), 4)
+}) 
+
+test_that("model is SM, 3 dimensions, 4 categories, estimator is ML, deriv is false", {
   # create item characteristics
   model <- 'SM'
   number_items <- 50
@@ -450,16 +569,12 @@ test_that("model is SM, 3 dimensions, 4 categories, estimator is ML, deriv is tr
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.4, item_characteristics_shadowcat_format$Q), prior = NULL)
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = NULL)
   
-  probabilities <- prob(initiated_test, person = initiated_person, theta = NULL, deriv = TRUE, prior = NULL, items = NULL)
+  probabilities <- prob(initiated_test, person = initiated_person, theta = NULL, deriv = FALSE, prior = NULL, items = NULL)
   
   expect_equal(round(probabilities$P[1,], 3), c(.052, .275, .505, .168))
   expect_equal(round(probabilities$P[40,], 3), c(.096, .397, .433, .075))
   expect_equal(dim(probabilities$P), c(50, 4))
-  expect_equal(length(probabilities$LL), 1)
-  expect_equal(dim(probabilities$d1), c(1, 3))
-  expect_equal(dim(probabilities$d2), c(3, 3))
-  expect_equal(length(probabilities), 4)
+  expect_equal(length(probabilities), 1)
 }) 
-
