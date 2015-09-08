@@ -1,6 +1,6 @@
 #' Initiate ShadowCAT test object
 #' 
-#' Creates an object to be used with ShadowCAT
+#' requires and returns information about adaptive test rules
 #' 
 #' @param items item characteristics as returned by init_item_bank()
 #' @param start items that are shown to the patient before adaptive proces starts; one of

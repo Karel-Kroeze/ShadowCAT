@@ -5,11 +5,13 @@
 #' Generic
 #' 
 #' Details
-#' @param items
+#' @param test 
 #' @param person Person object, will use current theta estimate of the person to obtain P values.
 #' @param theta Give a specific theta vector to use, overrides person if set.
 #' @param deriv Should we fetch derivatives and LL?
 #' @param prior If not NULL, prior to be applied to derivatives.
+#' @param items
+#' @return 
 #' @importFrom mvtnorm dmvnorm
 #' @importFrom Rcpp evalCpp
 #' @useDynLib ShadowCAT
@@ -91,7 +93,7 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
     for (i in seq_along(res$D)){
       d2 <- d2 + a[i,] %*% t(a[i,]) * res$D[i]
     }
-    
+
     # prior
     if ( ! is.null(prior)) {
       # TODO: mean? 
