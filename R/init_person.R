@@ -6,9 +6,10 @@
 #' @param items Itembank (required for bookkeeping reasons)
 #' @param theta True theta; only useful for simulations?
 #' @param prior Prior covariance matrix
+#' @param responses person responses 
 #' @return person ShadowCAT.person object
 #' @export
-initPerson <- function(items, theta = rep(0, items$Q), prior = diag(items$Q)) {
+initPerson <- function(items, theta = rep(0, items$Q), prior = diag(items$Q), responses = numeric(0)) {
   estimate <- rep(0, items$Q)
   attr(estimate, 'variance') <- prior
   
@@ -18,7 +19,7 @@ initPerson <- function(items, theta = rep(0, items$Q), prior = diag(items$Q)) {
               variance = prior, # this double variance object (attribute and separate) is confusing
               available = 1:items$K,
               administered = numeric(0),
-              responses = numeric(0))
+              responses = responses)
   
   attr(out, "class") <- "ShadowCAT.person"
   

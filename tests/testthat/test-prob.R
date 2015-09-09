@@ -42,7 +42,7 @@ test_that("model is 3PLM, 1 dimension, 2 categories, estimator is MAP, deriv is 
 
 test_that("model is 3PLM, 2 dimensions, 2 categories, estimator is ML, deriv is true", {
   # create item characteristics
-  model <- '3PLM'
+  model <- "3PLM"
   number_items <- 50
   number_dimensions <- 2
   number_answer_categories <- 2 # can only be 2 for 3PLM model
@@ -68,7 +68,7 @@ test_that("model is 3PLM, 2 dimensions, 2 categories, estimator is ML, deriv is 
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = NULL)
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = NULL, responses = rep(c(1, 0), 25))
   
   probabilities <- prob(initiated_test, person = initiated_person, theta = NULL, deriv = TRUE, prior = NULL, items = NULL)
   
@@ -80,12 +80,10 @@ test_that("model is 3PLM, 2 dimensions, 2 categories, estimator is ML, deriv is 
   expect_equal(dim(probabilities$d2), c(2, 2))
   expect_equal(length(probabilities), 4)
   
-  # estimates LL, d1, d2 are very unstable, transforming to log space might help
-  '
-  expect_equal(probabilities$LL, 0)
-  expect_equal(round(probabilities$d1, 3), matrix(c(-22.412, -22.149), ncol = 2))
-  expect_equal(round(probabilities$d2, 3), matrix(c(-7.135, -5.901, -5.901, -6.314), ncol = 2))
-  '
+  expect_equal(round(probabilities$LL, 3), -61.592)
+  expect_equal(round(probabilities$d1, 3), matrix(c(-5.115, -7.757), ncol = 2))
+  expect_equal(round(probabilities$d2, 3), matrix(c(-2.986, -3.166, -3.166, -3.833), ncol = 2))
+
 })
 
 test_that("model is 3PLM, 1 dimension, 2 categories, estimator is MAP, deriv is true", {
@@ -116,7 +114,7 @@ test_that("model is 3PLM, 1 dimension, 2 categories, estimator is MAP, deriv is 
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = diag(item_characteristics_shadowcat_format$Q))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = diag(item_characteristics_shadowcat_format$Q), responses = rep(c(1, 0), 25))
   
   probabilities <- prob(test = initiated_test, person = initiated_person, theta = NULL, deriv = TRUE, prior = NULL, items = NULL)
   
@@ -128,12 +126,10 @@ test_that("model is 3PLM, 1 dimension, 2 categories, estimator is MAP, deriv is 
   expect_equal(dim(probabilities$d2), c(1, 1))
   expect_equal(length(probabilities), 4)
   
-  # estimates LL, d1, d2 are very unstable, transforming to log space might help
-  '
-  expect_equal(probabilities$LL, matrix(0))
-  expect_equal(round(probabilities$d1, 3), matrix(-22.199))
-  expect_equal(round(probabilities$d2, 3), matrix(-10.251))
-  '
+  expect_equal(round(probabilities$LL, 3), matrix(-47.383))
+  expect_equal(round(probabilities$d1, 3), matrix(-2.446))
+  expect_equal(round(probabilities$d2, 3), matrix(-5.916))
+
 })
 
 test_that("model is 3PLM, 3 dimensions, 2 categories, estimator is EAP, deriv is true", {
@@ -175,8 +171,6 @@ test_that("model is 3PLM, 3 dimensions, 2 categories, estimator is EAP, deriv is
   expect_equal(dim(probabilities$d1), c(1, 3))
   expect_equal(dim(probabilities$d2), c(3, 3))
   expect_equal(length(probabilities), 4)
-  
-  # estimates LL, d1, d2 are very unstable, transforming to log space might help
 })
 
 context("model is GPCM")
@@ -208,7 +202,7 @@ test_that("model is GPCM, 1 dimensions, 2 categories, estimator is MAP, deriv is
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = .6)
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = .6, responses = rep(c(0,1), 50))
   
   probabilities <- prob(initiated_test, person = initiated_person, theta = NULL, deriv = TRUE, prior = NULL, items = NULL)
   
@@ -220,12 +214,9 @@ test_that("model is GPCM, 1 dimensions, 2 categories, estimator is MAP, deriv is
   expect_equal(dim(probabilities$d2), c(1, 1))
   expect_equal(length(probabilities), 4)
   
-  # estimates LL, d1, d2 are very unstable, transforming to log space might help
-  '
-  expect_equal(round(probabilities$LL, 3), matrix(-39.933))
-  expect_equal(round(probabilities$d1, 3), matrix(-22.282))
+  expect_equal(round(probabilities$LL, 3), matrix(-33.772))
+  expect_equal(round(probabilities$d1, 3), matrix(-1.824))
   expect_equal(round(probabilities$d2, 3), matrix(-11.325))
-  '
 }) 
 
 test_that("model is GPCM, 3 dimensions, 4 categories, estimator is EAP, deriv is true", {
@@ -257,7 +248,7 @@ test_that("model is GPCM, 3 dimensions, 4 categories, estimator is EAP, deriv is
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3), responses = c(rep(c(0, 1, 2), 16), 1, 1))
   
   probabilities <- prob(initiated_test, person = initiated_person, theta = NULL, deriv = TRUE, prior = NULL, items = NULL)
   
@@ -269,12 +260,9 @@ test_that("model is GPCM, 3 dimensions, 4 categories, estimator is EAP, deriv is
   expect_equal(dim(probabilities$d2), c(3, 3))
   expect_equal(length(probabilities), 4)
   
-  # estimates LL, d1, d2 are very unstable, transforming to log space might help
-  '
-  expect_equal(round(probabilities$LL, 3), matrix(-150.674))
-  expect_equal(round(probabilities$d1, 3), matrix(c(-67.23, -64.981, -65.584), ncol = 3))
+  expect_equal(round(probabilities$LL, 3), matrix(-101.251))
+  expect_equal(round(probabilities$d1, 3), matrix(c(-20.747, -21.071, -21.938), ncol = 3))
   expect_equal(round(probabilities$d2[1,], 3), c(-20.739, -19.060, -19.274))
-  '
 }) 
 
 test_that("model is GPCM, 3 dimensions, 4 categories, estimator is ML, deriv is true", {
@@ -388,7 +376,7 @@ test_that("model is GRM, 3 dimensions, 4 categories, estimator is EAP, deriv is 
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3), responses = c(rep(c(0, 1, 2), 50), 1, 1))
   
   probabilities <- prob(initiated_test, person = initiated_person, theta = NULL, deriv = TRUE, prior = NULL, items = NULL)
   
@@ -400,12 +388,9 @@ test_that("model is GRM, 3 dimensions, 4 categories, estimator is EAP, deriv is 
   expect_equal(dim(probabilities$d2), c(3, 3))
   expect_equal(length(probabilities), 4)
   
-  # estimates LL, d1, d2 are very unstable, transforming to log space might help
-  '
-  expect_equal(round(probabilities$LL, 3), matrix(-106.966))
-  expect_equal(round(probabilities$d1, 3), matrix(c(-38.11, -36.348, -37.241), ncol = 3))
-  expect_equal(round(probabilities$d2[1,], 3), c(-4.351, -5.223, -5.687))
-  '
+  expect_equal(round(probabilities$LL, 3), matrix(-84.705))
+  expect_equal(round(probabilities$d1, 3), matrix(c(-11.185, -10.826, -11.789), ncol = 3))
+  expect_equal(round(probabilities$d2[1,], 3), c(-10.704, -10.179, -10.393))
 }) 
 
 test_that("model is GRM, 3 dimensions, 4 categories, estimator is ML, deriv is true", {
@@ -517,8 +502,7 @@ test_that("model is SM, 3 dimensions, 4 categories, estimator is EAP, deriv is t
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
-  
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3), responses = c(rep(c(0, 1, 2), 50), 1, 1))
   probabilities <- prob(initiated_test, person = initiated_person, theta = NULL, deriv = TRUE, prior = NULL, items = NULL)
   
   expect_equal(round(probabilities$P[1,], 3), c(.052, .275, .505, .168))
@@ -529,12 +513,9 @@ test_that("model is SM, 3 dimensions, 4 categories, estimator is EAP, deriv is t
   expect_equal(dim(probabilities$d2), c(3, 3))
   expect_equal(length(probabilities), 4)
   
-  # estimates LL, d1, d2 are very unstable, transforming to log space might help
-  '
-  expect_equal(round(probabilities$LL, 3), matrix(-106.966))
-  expect_equal(round(probabilities$d1, 3), matrix(c(-37.821, -36.175, -37.073), ncol = 3))
-  expect_equal(round(probabilities$d2[1,], 3), c(-4.681, -5.420, -5.879))
-  '
+  expect_equal(round(probabilities$LL, 3), matrix(-84.888))
+  expect_equal(round(probabilities$d1, 3), matrix(c(-7.74, -7.28, -8.297), ncol = 3))
+  expect_equal(round(probabilities$d2[1,], 3), c(-12.905, -12.184, -12.239))
 }) 
 
 test_that("model is SM, 3 dimensions, 4 categories, estimator is ML, deriv is true", {

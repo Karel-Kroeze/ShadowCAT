@@ -36,6 +36,25 @@ double logExpXminusExpY( const double x, const double y ) {
 }
 /////// end from BayesFactor package ///////
 
+double log1mp(double logp){ 
+  if ((logp) > -M_LN2) {
+    return(log(-expm1(logp)));
+  }
+  else {
+    return(log1p(-exp(logp)));   
+  }
+}
+
+// vectorized logExpXminusExpY function
+NumericVector vec_logExpXminusExpY(NumericVector x, NumericVector y) {
+  NumericVector out = clone(x);
+  int n = out.length();
+  for(int i = 0; i < n; i++){
+    out[i] = logExpXminusExpY(x[i], y[i]);
+  }
+  return out;
+}
+
 // really vectorized power function (exponent)
 NumericVector vec_pow(NumericVector base, NumericVector exp) {
   NumericVector out = clone(base);
@@ -62,8 +81,8 @@ double lf(double x) {
 // [[Rcpp::export]]
 List PROB_3PLM(NumericVector theta, NumericMatrix a, NumericVector b, NumericVector c, NumericVector u, bool deriv) {
   int Q = a.ncol(), K = a.nrow(), M = 2;
-  NumericVector aux(K), l(K), d(K), D(K);
-  NumericMatrix P(K, M);
+  NumericVector aux(K), log_l(K), d(K), D(K);
+  NumericMatrix logP(K, M);
   
   // loop over items
   for (int k = 0; k < K; k++){
@@ -74,20 +93,20 @@ List PROB_3PLM(NumericVector theta, NumericMatrix a, NumericVector b, NumericVec
       aux[k] += -a(k,q) * (theta[q] - b[k]);
     }
     
-    P(k,1) = c[k] + (1-c[k])/(1+exp(aux[k]));
-    P(k,0) = 1 - P(k,1);
+    logP(k,1) = logExpXplusExpY(log(c[k]), (log(1-c[k]) - log1pExp(aux[k])));
+    logP(k,0) = log1mp(logP(k,1));
   }
   
-  if (deriv) {
-    NumericVector p = P(_,1), p2 = pow(p,2), q = P(_,0);
-        
-    l = vec_pow(p, u) * vec_pow(q, 1 - u);
-    d = ((p-c) * (u-p)) / ((1-c) * p);
-    D = (q *(p-c)*(c*u-p2)) / (p2*pow(1-c,2));
-  }
+if (deriv) {
+  NumericVector log_p = logP(_,1), p = exp(logP(_,1)), p2 = pow(p,2), log_q = logP(_,0), q = exp(logP(_,0));
+  log_l = u*log_p + (1 - u)*log_q;
+  //l = vec_pow(p, u) * vec_pow(q, 1 - u);
+  d = ((p-c) * (u-p)) / ((1-c) * p);
+  D = (q *(p-c)*(c*u-p2)) / (p2*pow(1-c,2));
+}
   
-  List out = List::create(_["P"] = P,
-  _["l"] = l,
+  List out = List::create(_["P"] = logP,
+  _["l"] = log_l,
   _["d"] = d,
   _["D"] = D);
   
@@ -105,7 +124,7 @@ List PROB_GRM(NumericVector theta, NumericMatrix a, NumericMatrix b, NumericVect
   for (int i = 0; i < P.ncol() * P.nrow(); i++) P[i] = NA_REAL;
   
   // loop over items
-  for(int k = 0; k < K; k++){
+  for (int k = 0; k < K; k++) {
     // no of response categories
     m = sum(!is_na(b(k,_)));
     
