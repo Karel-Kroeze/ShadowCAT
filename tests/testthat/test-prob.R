@@ -79,6 +79,13 @@ test_that("model is 3PLM, 2 dimensions, 2 categories, estimator is ML, deriv is 
   expect_equal(dim(probabilities$d1), c(1, 2))
   expect_equal(dim(probabilities$d2), c(2, 2))
   expect_equal(length(probabilities), 4)
+  
+  # estimates LL, d1, d2 are very unstable, transforming to log space might help
+  '
+  expect_equal(probabilities$LL, 0)
+  expect_equal(round(probabilities$d1, 3), matrix(c(-22.412, -22.149), ncol = 2))
+  expect_equal(round(probabilities$d2, 3), matrix(c(-7.135, -5.901, -5.901, -6.314), ncol = 2))
+  '
 })
 
 test_that("model is 3PLM, 1 dimension, 2 categories, estimator is MAP, deriv is true", {
@@ -122,9 +129,11 @@ test_that("model is 3PLM, 1 dimension, 2 categories, estimator is MAP, deriv is 
   expect_equal(length(probabilities), 4)
   
   # estimates LL, d1, d2 are very unstable, transforming to log space might help
-  #expect_equal(probabilities$LL, matrix(0))
-  #expect_equal(round(probabilities$d1, 3), matrix(-22.199))
-  #expect_equal(round(probabilities$d2, 3), matrix(-10.251))
+  '
+  expect_equal(probabilities$LL, matrix(0))
+  expect_equal(round(probabilities$d1, 3), matrix(-22.199))
+  expect_equal(round(probabilities$d2, 3), matrix(-10.251))
+  '
 })
 
 test_that("model is 3PLM, 3 dimensions, 2 categories, estimator is EAP, deriv is true", {
@@ -210,6 +219,13 @@ test_that("model is GPCM, 1 dimensions, 2 categories, estimator is MAP, deriv is
   expect_equal(dim(probabilities$d1), c(1, 1))
   expect_equal(dim(probabilities$d2), c(1, 1))
   expect_equal(length(probabilities), 4)
+  
+  # estimates LL, d1, d2 are very unstable, transforming to log space might help
+  '
+  expect_equal(round(probabilities$LL, 3), matrix(-39.933))
+  expect_equal(round(probabilities$d1, 3), matrix(-22.282))
+  expect_equal(round(probabilities$d2, 3), matrix(-11.325))
+  '
 }) 
 
 test_that("model is GPCM, 3 dimensions, 4 categories, estimator is EAP, deriv is true", {
@@ -252,6 +268,13 @@ test_that("model is GPCM, 3 dimensions, 4 categories, estimator is EAP, deriv is
   expect_equal(dim(probabilities$d1), c(1, 3))
   expect_equal(dim(probabilities$d2), c(3, 3))
   expect_equal(length(probabilities), 4)
+  
+  # estimates LL, d1, d2 are very unstable, transforming to log space might help
+  '
+  expect_equal(round(probabilities$LL, 3), matrix(-150.674))
+  expect_equal(round(probabilities$d1, 3), matrix(c(-67.23, -64.981, -65.584), ncol = 3))
+  expect_equal(round(probabilities$d2[1,], 3), c(-20.739, -19.060, -19.274))
+  '
 }) 
 
 test_that("model is GPCM, 3 dimensions, 4 categories, estimator is ML, deriv is true", {
@@ -376,6 +399,13 @@ test_that("model is GRM, 3 dimensions, 4 categories, estimator is EAP, deriv is 
   expect_equal(dim(probabilities$d1), c(1, 3))
   expect_equal(dim(probabilities$d2), c(3, 3))
   expect_equal(length(probabilities), 4)
+  
+  # estimates LL, d1, d2 are very unstable, transforming to log space might help
+  '
+  expect_equal(round(probabilities$LL, 3), matrix(-106.966))
+  expect_equal(round(probabilities$d1, 3), matrix(c(-38.11, -36.348, -37.241), ncol = 3))
+  expect_equal(round(probabilities$d2[1,], 3), c(-4.351, -5.223, -5.687))
+  '
 }) 
 
 test_that("model is GRM, 3 dimensions, 4 categories, estimator is ML, deriv is true", {
@@ -498,6 +528,13 @@ test_that("model is SM, 3 dimensions, 4 categories, estimator is EAP, deriv is t
   expect_equal(dim(probabilities$d1), c(1, 3))
   expect_equal(dim(probabilities$d2), c(3, 3))
   expect_equal(length(probabilities), 4)
+  
+  # estimates LL, d1, d2 are very unstable, transforming to log space might help
+  '
+  expect_equal(round(probabilities$LL, 3), matrix(-106.966))
+  expect_equal(round(probabilities$d1, 3), matrix(c(-37.821, -36.175, -37.073), ncol = 3))
+  expect_equal(round(probabilities$d2[1,], 3), c(-4.681, -5.420, -5.879))
+  '
 }) 
 
 test_that("model is SM, 3 dimensions, 4 categories, estimator is ML, deriv is true", {

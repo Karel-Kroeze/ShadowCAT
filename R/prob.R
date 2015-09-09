@@ -105,10 +105,11 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
   }
   
   get_second_derivative <- function(probabilities, prior, items) {
-    derivative2 <- matrix(0, items$Q, items$Q)
-    for (i in seq_along(probabilities$D)){
-      derivative2 <- derivative2 + items$pars$alpha[i,] %*% t(items$pars$alpha[i,]) * probabilities$D[i]
-    }
+    derivative2 <- sum_loop_outputs(start_object = matrix(0, items$Q, items$Q), 
+                                    loop_vector = 1:items$K, 
+                                    FUN = function(item, alpha, D) { alpha[item,] %*% t(alpha[item,]) * D[item] }, 
+                                    alpha = items$pars$alpha, 
+                                    D = probabilities$D)
     if (test$estimator == "ML")
       derivative2
     else
