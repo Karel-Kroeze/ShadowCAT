@@ -1,6 +1,7 @@
 ### probability and derivatives
 
-#' Probability and Derivatives for a given (subset of) ShadowCAT.items itembank.
+#' Probability and Derivatives for a given (subset of) ShadowCAT.items itembank. It gives the probability of 
+#' responses given theta (only useful for simulation I think), and the likelihood of given responses
 #' 
 #' Generic
 #' 
