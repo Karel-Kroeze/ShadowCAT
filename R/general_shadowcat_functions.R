@@ -32,6 +32,23 @@ row_cumsum <- function(X) {
   transpose_if_ncol_and_nrow_larger_1(matrix_apply(X, 1, cumsum))
 }
 
+#' get sum of objects returned by a loop, added to a starting object
+#' 
+#' @param start_object the object to which the sum is to be added
+#' @param loop_vector the vector to be looped over
+#' @param FUN a function of the loop_vector values, returning the object to be added to start_object at each iteration. First argument should be loop values argument
+#' @param ... any additional arguments to FUN
+#' @return sum of objects returned by a loop, added to starting object
+#' @examples X = matrix(1:6, ncol = 2);
+#' sum_loop_outputs(matrix(0, 2, 2), 1:3, FUN = function(item, X) { X[item,] %*% t(X[item,]) }, X = X) == (X[1,] %*% t(X[1,]) + X[2,] %*% t(X[2,]) + X[3,] %*% t(X[3,])) || stop("wrong")
+#' @export
+sum_loop_outputs <- function(start_object, loop_vector, FUN, ...) {
+  for (i in loop_vector) {
+    start_object <- start_object + FUN(i, ...)
+  }
+  start_object
+}
+
 #' transpose matrix if number of columns is larger than 1
 #' 
 #' @param X a matrix
@@ -45,19 +62,4 @@ transpose_if_ncol_and_nrow_larger_1 <- function(X) {
     X
 }
 
-#' get sum of objects returned by a loop, added to a starting object
-#' 
-#' @param start_object the object to which the sum is to be added
-#' @param loop_vector the vector to be looped over
-#' @param FUN a function of the loop_vector values, returning the object to be added to start_object at each iteration. First argument should be loop values argument
-#' @param ... any additional arguments to FUN
-#' @examples X = matrix(1:6, ncol = 2);
-#' sum_loop_outputs(matrix(0, 2, 2), 1:3, FUN = function(item, X) { X[item,] %*% t(X[item,]) }, X = X) == (X[1,] %*% t(X[1,]) + X[2,] %*% t(X[2,]) + X[3,] %*% t(X[3,])) || stop("wrong")
-#' @export
-sum_loop_outputs <- function(start_object, loop_vector, FUN, ...) {
-  for (i in loop_vector) {
-    start_object <- start_object + FUN(i, ...)
-  }
-  start_object
-}
 

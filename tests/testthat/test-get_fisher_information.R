@@ -3,6 +3,8 @@
 library(testthat)
 '
 
+make_random_seed_exist <- rnorm(1)
+
 context("3PLM model")
 
 test_that("model is 3PLM, 1 dimensions, 2 categories", {
