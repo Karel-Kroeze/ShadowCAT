@@ -1,11 +1,18 @@
-#' get the number of non-NA cells per row of a matrix
+#' lapply with array as output
 #' 
-#' @param X a matrix
-#' @return number of non-NA cells per row
-#' @examples number_non_missing_cells_per_row(matrix(c(1,2,NA,NA,2,3,NA,2,3), ncol = 3)) == c(1, 3, 2) || stop("wrong")
-#' @export
-number_non_missing_cells_per_row <- function(X) {
-  apply(X, 1, function(x) sum(!is.na(x)))
+#'@param X a vector or list; see ? lapply for details
+#'@param dim vector with dimensions of the returned array
+#'@param FUN function to be applied to each element of X; see ? lapply for details
+#'@param ... any additional arguments to FUN
+#'@return lapply output, with output converted to array
+#'@examples matrix_example <- matrix(1:9, ncol = 3); 
+#' lapply_return_array(1:3, 
+#'                     c(3, 3, 3), 
+#'                     FUN = function(i, matrix_example) { matrix_example[i,] %*% t(matrix_example[i,]) }, 
+#'                     matrix_example = matrix_example)[1, 1, 1] == 1 || stop("wrong")
+lapply_return_array <- function(X, dim, FUN, ...) {
+  lapply_output <- lapply(X, FUN, ...)
+  array(unlist(lapply_output), dim = dim)
 }
 
 #' apply with input and output converted to matrix
@@ -19,6 +26,16 @@ number_non_missing_cells_per_row <- function(X) {
 #' @export
 matrix_apply <- function(X, margin, FUN, ...) {
   as.matrix(apply(as.matrix(X), margin, FUN, ...))
+}
+
+#' get the number of non-NA cells per row of a matrix
+#' 
+#' @param X a matrix
+#' @return number of non-NA cells per row
+#' @examples number_non_missing_cells_per_row(matrix(c(1,2,NA,NA,2,3,NA,2,3), ncol = 3)) == c(1, 3, 2) || stop("wrong")
+#' @export
+number_non_missing_cells_per_row <- function(X) {
+  apply(X, 1, function(x) sum(!is.na(x)))
 }
 
 #' compute cumulative sums for each row of a matrix
@@ -59,8 +76,9 @@ rsapply <- function(..., fn) {
 #' @param FUN a function of the loop_vector values, returning the object to be added to start_object at each iteration. First argument should be loop values argument
 #' @param ... any additional arguments to FUN
 #' @return sum of objects returned by a loop, added to starting object
-#' @examples X = matrix(1:6, ncol = 2);
-#' sum_loop_outputs(matrix(0, 2, 2), 1:3, FUN = function(item, X) { X[item,] %*% t(X[item,]) }, X = X) == (X[1,] %*% t(X[1,]) + X[2,] %*% t(X[2,]) + X[3,] %*% t(X[3,])) || stop("wrong")
+#' @examples matrix_example = matrix(1:6, ncol = 2);
+#' sum_loop_outputs(matrix(0, 2, 2), 1:3, FUN = function(item, matrix_example) { matrix_example[item,] %*% t(matrix_example[item,]) }, matrix_example = matrix_example) == 
+#' (matrix_example[1,] %*% t(matrix_example[1,]) + matrix_example[2,] %*% t(matrix_example[2,]) + matrix_example[3,] %*% t(matrix_example[3,])) || stop("wrong")
 #' @export
 sum_loop_outputs <- function(start_object, loop_vector, FUN, ...) {
   for (i in loop_vector) {

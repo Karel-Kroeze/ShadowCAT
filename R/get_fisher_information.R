@@ -28,11 +28,11 @@ FI <- function(test, person) {
     D = get_D(test$items$model)
     
     # just dump everything back, how to deal with information is up to caller function.  
-    out <- array(0, c(test$items$Q, test$items$Q, test$items$K))
-    for (i in 1:test$items$K) {
-      out[,,i] <- (test$items$pars$alpha[i,] %*% t(test$items$pars$alpha[i,])) * D[i]
-    }
-    out
+    lapply_return_array(1:test$items$K, 
+                        dim = c(test$items$Q, test$items$Q, test$items$K), 
+                        FUN = function(item) { 
+                          (test$items$pars$alpha[item,] %*% t(test$items$pars$alpha[item,])) * D[item] 
+                        } )
   }
   
   get_D <- function(model) {
