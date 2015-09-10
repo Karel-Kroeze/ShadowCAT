@@ -22,68 +22,86 @@ FI <- function(test, person) {
   # Fisher Information
   # minus the expectation of the second derivative of the log-likelihood
   # Expectation -> sum of derivatives for each category, 'weighted' by their probability.
+  probabilities <- prob(test, person)$P
   
-  # simplify input
-  model <- test$items$model
-  p <- prob(test, person)$P
-  a <- test$items$pars$alpha
-  b <- test$items$pars$beta
-  K <- test$items$K
-  m <- test$items$pars$m
-  D <- numeric(K)
-  Q <- test$items$Q
-  
-  # define the logistic function
-  lf <- function(x) exp(x)/(1+exp(x))
-  
-  # compensatory -> inner product of alpha * theta
-  at <- apply(a * drop(person$estimate),1,sum)
-  
-  if(model == "3PLM"){
-    # exact form Segall 1997, CAT book, p. 72
-    c <- test$items$pars$guessing
-    q <- p[,1]; p <- p[,2]
-    D <- (q/p) * ((p-c)/(1-c))^2
+  result <- function() {
+    D = get_D(test$items$model)
+    
+    # just dump everything back, how to deal with information is up to caller function.  
+    out <- array(0, c(test$items$Q, test$items$Q, test$items$K))
+    for (i in 1:test$items$K) {
+      out[,,i] <- (test$items$pars$alpha[i,] %*% t(test$items$pars$alpha[i,])) * D[i]
+    }
+    out
   }
   
-  if (model == "GRM"){
+  get_D <- function(model) {
+    switch(model,
+           "3PLM" = get_D_3PLM(),
+           "GRM" = get_D_GRM(),
+           "SM" = get_D_SM(),
+           "GPCM" = get_D_GPCM())
+  }
+  
+  logistic_function <- function(x) {
+    exp(x)/(1+exp(x))
+  }
+  
+  get_D_3PLM <- function() {
+    # exact form Segall 1997, CAT book, p. 72
+    # p[,1] = q, p[, 2] = p
+    (probabilities[,1] / probabilities[,2]) * ((probabilities[,2] - test$items$pars$guessing)/(1 - test$items$pars$guessing))^2
+  }
+  
+  get_D_GRM <- function() {
     # Graded Response Model (Glas & Dagohoy, 2007)
-    for(i in 1:K){
-      for(j in 1:(m[i]+1)){
-        Psi <- c(1,lf(at[i]-b[i,1:m[i]]),0)
-        D[i] <- D[i] + p[i,j] * (Psi[j] * (1-Psi[j]) + Psi[j+1] * (1-Psi[j+1]))
+    inner_product_alpha_theta <- apply(test$items$pars$alpha * drop(person$estimate), 1, sum)
+    D <- numeric(test$items$K)
+    for (item in 1:test$items$K) {
+      for (item_step in 1:(test$items$pars$m[item] + 1)) {
+        Psi <- c(1, logistic_function(inner_product_alpha_theta[item] - test$items$pars$beta[item, 1:test$items$pars$m[item]]), 0)
+        D[item] <- D[item] + probabilities[item, item_step] * (Psi[item_step] * (1 - Psi[item_step]) + Psi[item_step + 1] * (1 - Psi[item_step + 1]))
       }
     }
+    D
   }
-  
-  if (model == "SM") {
+
+  get_D_SM <- function() {
     # Sequential Model (Tutz, xxxx)
     # TODO: triple check this.
-    for(i in 1:K){
-      for(j in 1:(m[i]+1)){
-        Psi <- c(1, lf(at[i] - b[i,1:m[i]]), 0) # basically: 1, lf(at - b), 0.
-        D[i] <- D[i] + p[i,j] * sum(Psi[2:(j+1)] * (1 - Psi[2:(j+1)]))
+    inner_product_alpha_theta <- apply(test$items$pars$alpha * drop(person$estimate), 1, sum)
+    D <- numeric(test$items$K)
+    for (item in 1:test$items$K) {
+      for (item_step in 1:(test$items$pars$m[item] + 1)) {
+        Psi <- c(1, logistic_function(inner_product_alpha_theta[item] - test$items$pars$beta[item, 1:test$items$pars$m[item]]), 0) # basically: 1, logistic_function(inner_product_alpha_theta - b), 0.
+        D[item] <- D[item] + probabilities[item, item_step] * sum(Psi[2:(item_step + 1)] * (1 - Psi[2:(item_step+1)]))
       }
     }
+    D
   }
   
-  if (model == "GPCM"){
+  get_D_GPCM <- function() {
     # Generalized Partial Credit Model (Muraki, 1992)
-    for(i in 1:K){
-      mi <- 1:m[i]
-      pi <- p[i,mi+1] # remove j = 0, index is now also correct.
-      mp <- sum(mi*pi)
-      
-      D[i] <- sum((mi * pi) * (mi - mp))
+    D <- numeric(test$items$K)
+    for (item in 1:test$items$K) {
+      mi <- 1:test$items$pars$m[item]
+      pi <- probabilities[item, mi + 1] # remove j = 0, index is now also correct.
+      mp <- sum(mi*pi)  
+      D[item] <- sum((mi * pi) * (mi - mp))
     }
+    D
   }
   
-  # just dump everything back, how to deal with information is up to caller function.
-  out <- array(0,c(Q, Q, K))
-  for (i in 1:K) {
-    out[,,i] <- (a[i,] %*% t(a[i,])) * D[i]
+  validate <- function() {
+    if (is.null(test))
+      add_error("test", "is missing")
+    if (is.null(person)) 
+      add_error("person", "is missing")
   }
   
-  # return
-  return(invisible(out))
+  invalid_result <- function() {
+    list(errors = errors())
+  }
+  
+  validate_and_run()
 }

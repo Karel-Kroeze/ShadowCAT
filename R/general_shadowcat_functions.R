@@ -32,6 +32,26 @@ row_cumsum <- function(X) {
   transpose_if_ncol_and_nrow_larger_1(matrix_apply(X, 1, cumsum))
 }
 
+#' Recursive list apply, given a bunch of vectors, creates lists of lists with the elements as keys
+#'  and values determined by fn.
+#' @param ... vectors to loop over
+#' @param fn function to execute for each leaf
+#' @examples
+#' rsapply(c('a', 'b'), c('f', 'g'), fn=function(x,y) c(x, y))
+#' #> list(a=list(f=c('a', 'f'), g=c('a', 'g')), b=list(f=c('b', 'f'), g=c('b', 'g')))
+#' @export
+rsapply <- function(..., fn) {
+  .rsapply <- function(el=NULL, ..., args=c(), fn) {
+    if(is.null(el)) return(do.call(fn, as.list(args)))
+    result <- list()
+    for(x in el) {
+      result[[x]] <- rsapply(..., args=c(args, x), fn=fn)
+    }
+    result
+  }
+  .rsapply(..., fn=fn)
+}
+
 #' get sum of objects returned by a loop, added to a starting object
 #' 
 #' @param start_object the object to which the sum is to be added
