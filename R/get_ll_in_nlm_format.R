@@ -5,10 +5,10 @@
 #' @param test
 #' @param person
 #' @param should values be reversed (useful for minimization, reverses LL as well as derivatives)
-#' @param should log of output be returned
+#' @param return_log should log of output be returned
 #' @return Log-Likelihood, as well as gradient and hessian attributes.
 #' @importFrom stats nlm
-LL <- function(theta, test, person, minimize = FALSE, log = TRUE) {
+LL <- function(theta, test, person, minimize = FALSE, return_log = TRUE) {
   # subset items that have a response
   test$items <- subset(test$items, person$administered)
   
@@ -22,7 +22,8 @@ LL <- function(theta, test, person, minimize = FALSE, log = TRUE) {
   attr(out, "gradient") <- PROB$d1 * (-1) ^ minimize
   attr(out, "hessian") <- PROB$d2 * (-1) ^ minimize
   
-  # return
-  if ( ! log) return(invisible(exp(out)))  
-  return(invisible(out))
+  if (!return_log) 
+    invisible(exp(out))
+  else
+    invisible(out)
 }
