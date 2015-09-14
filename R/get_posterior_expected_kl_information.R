@@ -15,7 +15,7 @@
 #' @param theta_range Vector of theta values to be evaluated in the numerical integration. Using a sparser range may alleviate stress in higher dimensional tests.
 #' @return Vector with PEKL information for each item.
 #' @export
-PEKL <- function(test, person, theta_range = -3:3){
+PEKL <- function(test, person, theta_range = -3:3) {
   # collect EAP estimate
   if (test$estimator == "EAP") {
     theta <- person$estimate
