@@ -5,10 +5,10 @@
 #' At each step in a CAT, a Shadow Test is created consisting of an optimal complete test meeting all constraints.
 #' The best item that was not already administrated is then selected from this test, and presented to the respondent.
 #' 
-#' @param test
-#' @param person
-#' @param objective
-#' @return integer item index
+#' @param test test object
+#' @param person person object
+#' @param objective item_information vector with information of each yet available item, with zeros for administered items (returned by objective() with pad = TRUE)
+#' @return integer item index of item with maximum information within constraints
 #' @importFrom lpSolve lp
 Shadow <- function(test, person, objective) {
   # produce a small warning about Shadow Testing without constraints.
