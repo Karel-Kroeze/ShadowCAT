@@ -5,6 +5,7 @@
 #' @param test
 #' @param person
 #' @param should values be reversed (useful for minimization, reverses LL as well as derivatives)
+#' @param should log of output be returned
 #' @return Log-Likelihood, as well as gradient and hessian attributes.
 #' @importFrom stats nlm
 LL <- function(theta, test, person, minimize = FALSE, log = TRUE) {
