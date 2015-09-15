@@ -12,7 +12,7 @@
 #' @importFrom lpSolve lp
 Shadow <- function(test, person, item_information) {
   result <- function() {
-    administered_binary <- lapply(1:length(test$items$K), FUN = function(x) { if (x %in% person$administered) 1 else 0 } )
+    administered_binary <- sapply(1:test$items$K, FUN = function(x) { if (x %in% person$administered) 1 else 0 } )
     
     # user created constraints are combined with constraint to select all administered items.
     # RM: I have removed the length = nr_items restrictions restriction; 
