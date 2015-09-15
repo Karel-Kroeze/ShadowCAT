@@ -116,7 +116,7 @@ createConstraints <- function(test, characteristics = NULL, constraints = NULL) 
       # stop if not list
       if(! is.list(con) || length(con) != 3) stop("Each constraint should be a list of three elements.")
       if(! con[[1]] %in% NAMES) stop("Each constraint name should have a matching characteristic.")
-      if(! con[[2]] %in% c("<", "=", ">", "><")) stop("Invalid operator.")
+      if(! con[[2]] %in% c("<", "=", ">", "><", "<=", ">=")) stop("Invalid operator.")
       if(! is.numeric(con[[3]])) stop("Target value must be numeric.")
       
       if (con[[2]] == "><"){
