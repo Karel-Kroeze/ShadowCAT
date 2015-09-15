@@ -61,8 +61,7 @@ test_that("available items large", {
   
   best_item <- Shadow(initiated_test, initiated_person, item_information)
   
-  expect_equal(best_item, 6)
-   
+  expect_equal(best_item, 6)  
 })
 
 test_that("available items small", {

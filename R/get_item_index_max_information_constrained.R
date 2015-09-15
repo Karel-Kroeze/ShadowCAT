@@ -12,15 +12,16 @@
 #' @importFrom lpSolve lp
 Shadow <- function(test, person, item_information) {
   result <- function() {
+    administered_binary <- lapply(1:length(test$items$K), FUN = function(x) { if (x %in% person$administered) 1 else 0 } )
+    
     # user created constraints are combined with constraint to select all administered items.
-    # RM: I have removed the administered_binair = length(responses) and length = nr_items restrictions; 
-    # I think the first one is not useful (it is already accounted for in the objective function) and may cause problems, the latter one always causes problems since it
-    # does not allow variables (Xi) to be equal to 0; i.e., the whole solution vector can only be one or zero (= no solution)
+    # RM: I have removed the length = nr_items restrictions restriction; 
+    # the restriction causes problems since it does not allow variables (Xi) to be equal to 0; i.e., the whole solution vector can only be one or zero (= no solution)
     solution <- lp(direction = 'max',
                    objective.in = item_information,
-                   const.mat = as.matrix(test$constraints$lp_chars)[, -1],
-                   const.dir = test$constraints$constraints$op[-1],
-                   const.rhs = test$constraints$constraints$target[-1],
+                   const.mat = as.matrix(cbind(test$constraints$lp_chars[, -1], administered_binary)),
+                   const.dir = c(test$constraints$constraints$op[-1], "="),
+                   const.rhs = c(test$constraints$constraints$target[-1], length(person$responses)),
                    all.bin = TRUE,
                    transpose.constraints = FALSE)$solution
     
