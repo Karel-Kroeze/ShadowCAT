@@ -9,7 +9,7 @@
 #' and handled with package \code{\link{nlm}}.
 #'  
 #' @section EAP:
-#' Estimated A-Posteriori estimates require the repeated evaluation of Q nested integrals, where Q is the dimensionality of the test.
+#' Expected A-Posteriori estimates require the repeated evaluation of Q nested integrals, where Q is the dimensionality of the test.
 #' This is performed with adaptive multidimensional Gauss-Hermite quadrature, and handled by package \code{\link{MultiGHQuad}}, see the documentation there for further details.
 #' Note that the number of quadrature points used rises exponentially with the dimensionality of the test - use of EAP estimates with 
 #' a 3+ dimensional test may not be a good idea.
@@ -53,8 +53,8 @@
 #' 
 #' @param person Person object, see \code{\link{initPerson}}.
 #' @param test Test object, see \code{\link{initTest}}.
-#' @param ... Additional parameters passed on to the underlying estimation functions. 1
-#' @return person Person object, amended with the new estimate.
+#' @param ... Additional parameters passed on to the underlying estimation functions.
+#' @return person object, amended with the new estimate.
 #' @importFrom MultiGHQuad init.quad eval.quad
 #' @export
 estimate <- function(person, test, ...) {
@@ -68,18 +68,24 @@ estimate <- function(person, test, ...) {
     
     # note that prior is applied in LL (incorrectly it seems, but still).
     # suppress warnings and errors and do EAP instead.
-    person$estimate <- tryCatch( nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate, # passed on to LL, reverses polarity.
+    person$estimate <- tryCatch(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate, # passed on to LL, reverses polarity.
                          error = function(e) {
                            #message(paste0(test$estimator, " failed, trying EAP estimate."))
-                           test$estimator <- "EAP"
-                           return(estimate(person, test)$estimate)
                          },
                          warning = function(w) {
                            #message(paste0(test$estimator, " failed, trying EAP estimate."))
-                           test$estimator <- "EAP"
-                           return(estimate(person, test)$estimate)
                          })
-    
+
+'
+    person$estimate <- tryCatch(log(-2), # passed on to LL, reverses polarity.
+                                error = function(e) {
+                                  #message(paste0(test$estimator, " failed, trying EAP estimate."))
+
+                                },
+                                warning = function(w) {
+                                  #message(paste0(test$estimator, " failed, trying EAP estimate."))
+                                })
+'    
     # variance
     # get FI
     # TODO: We should really store info somewhere so we don't have to redo this (when using FI based selection criteria).
