@@ -53,73 +53,78 @@
 #' 
 #' @param person Person object, see \code{\link{initPerson}}.
 #' @param test Test object, see \code{\link{initTest}}.
-#' @param ... Additional parameters passed on to the underlying estimation functions.
 #' @return person object, amended with the new estimate.
 #' @importFrom MultiGHQuad init.quad eval.quad
 #' @export
-estimate <- function(person, test, ...) {
-  # catch additional arguments
-  args <- list(...)
+estimate <- function(person, test) {
+  result <- function() {
+    updated_estimate <- get_updated_estimate_and_variance_attribute(test$estimator)     
+    person$estimate <- trim_estimate(updated_estimate)    
+    invisible(person)
+  }
   
-  if (test$estimator %in% c("ML", "MAP")){
+  get_updated_estimate_and_variance_nlm <- function() {
     # for now, simple nlm (TODO: look at optim, and possible reintroducing pure N-R).
     # We want a maximum, but nlm produces minima -> reverse function call. 
     # LL is the target function, test, person and minimize need to be passed on. We also want the value of the hessian at the final estimate.
     
     # note that prior is applied in LL (incorrectly it seems, but still).
-    # suppress warnings and errors and do EAP instead.
-    person$estimate <- tryCatch(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate, # passed on to LL, reverses polarity.
-                         error = function(e) {
-                           #message(paste0(test$estimator, " failed, trying EAP estimate."))
-                         },
-                         warning = function(w) {
-                           #message(paste0(test$estimator, " failed, trying EAP estimate."))
-                         })
-
-'
-    person$estimate <- tryCatch(log(-2), # passed on to LL, reverses polarity.
-                                error = function(e) {
-                                  #message(paste0(test$estimator, " failed, trying EAP estimate."))
-
-                                },
-                                warning = function(w) {
-                                  #message(paste0(test$estimator, " failed, trying EAP estimate."))
-                                })
-'    
-    # variance
-    # get FI
-    # TODO: We should really store info somewhere so we don't have to redo this (when using FI based selection criteria).
-    info <- FI(test, person)
-    so_far <- apply(info[,,person$administered, drop = FALSE], c(1,2), sum)
-  
-    #add prior
-    if (test$estimator == "MAP") so_far <- so_far + solve(person$prior)
+    # suppress warnings and errors and do EAP instead. RM I have removed this option, I don't want users to get something they think
+    # is something else. Also, if estimator was ML, the default prior is used which may not make sense.
+    person$estimate <- nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate # passed on to LL, reverses polarity.
     
+    # TODO: We should really store info somewhere so we don't have to redo this (when using FI based selection criteria).
+    fisher_information_items <- FI(test, person)
+    fisher_information_test_so_far <- if (test$estimator == "ML")
+                                        apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum)
+                                      else
+                                        apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum) +
+                                        solve(person$prior)
     # inverse
-    attr(person$estimate, "variance") <- solve(so_far)
+    attr(person$estimate, "variance") <- solve(fisher_information_test_so_far)
+    person$estimate
   }
   
-  if (test$estimator == "EAP"){
+  get_updated_estimate_and_variance_quadrature <- function() {
     # Multidimensional Gauss-Hermite Quadrature
-    Q <- test$items$Q
     # TODO: prior mean is currently fixed at zero, update when/if possible.
     # TODO: allow setting ip through internals argument(s)
-    adapt <- NULL
-    if (length(person$responses) > 5 & !is.null(attr(person$estimate, 'variance'))) adapt <- list(mu = person$estimate, Sigma = as.matrix(attr(person$estimate, "variance")))
-    
-    QP <- init.quad(Q = Q,
-                    prior = list(mu = rep(0, test$items$Q), Sigma = person$prior),
-                    adapt = adapt,
-                    ip = switch(Q, 50, 15, 6, 4, 3))
-    person$estimate <- eval.quad(FUN = LL, X = QP, test = test, person = person, ...)
+    adapt <- if (length(person$responses) > 5 & !is.null(attr(person$estimate, 'variance')))
+               list(mu = person$estimate, Sigma = as.matrix(attr(person$estimate, "variance")))           
+    Q_dim_grid_quad_points <- init.quad(Q = test$items$Q,
+                              prior = list(mu = rep(0, test$items$Q), Sigma = person$prior),
+                              adapt = adapt,
+                              ip = switch(test$items$Q, 50, 15, 6, 4, 3))
+    eval.quad(FUN = LL, X = Q_dim_grid_quad_points, test = test, person = person)
   }
   
-  # enforce boundaries.
-  # TODO: make debug output toggleable
-  # if (any(person$estimate > test$upperBound | person$estimate < test$lowerBound)) cat("Estimate outside boundaries (k =", length(person$responses), "estimate =", paste0(round(person$estimate, 2), collapse = ", "), ").\n")
-  person$estimate[which(person$estimate > test$upperBound)] <- test$upperBound[which(person$estimate > test$upperBound)]
-  person$estimate[which(person$estimate < test$lowerBound)] <- test$lowerBound[which(person$estimate < test$lowerBound)]
+  get_updated_estimate_and_variance_attribute <- function(estimator) {
+    switch(estimator,
+           ML = get_updated_estimate_and_variance_nlm(),
+           MAP = get_updated_estimate_and_variance_nlm(),
+           EAP = get_updated_estimate_and_variance_quadrature())
+  }
   
-  return(invisible(person))
+  trim_estimate <- function(estimate) {
+    # enforce boundaries.
+    # TODO: make debug output toggleable
+    # if (any(person$estimate > test$upperBound | person$estimate < test$lowerBound)) cat("Estimate outside boundaries (k =", length(person$responses), "estimate =", paste0(round(person$estimate, 2), collapse = ", "), ").\n")
+    estimate[which(estimate > test$upperBound)] <- test$upperBound[which(estimate > test$upperBound)]
+    estimate[which(estimate < test$lowerBound)] <- test$lowerBound[which(estimate < test$lowerBound)]
+    estimate
+  }
+  
+  validate <- function() {
+    if (is.null(person))
+      add_error("person", "is missing")
+    if (is.null(test))
+      add_error("test", "is missing")
+  }
+  
+  invalid_result <- function() {
+    list(errors = errors())
+  }
+  
+  validate_and_run()
 }
 
