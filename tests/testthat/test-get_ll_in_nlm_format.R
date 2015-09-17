@@ -31,9 +31,10 @@ initiated_test <- initTest(item_characteristics_shadowcat_format,
                            upperBound = rep(3, item_characteristics_shadowcat_format$Q))
 
 # get initiated person
-initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = .4, responses = rep(c(1, 0), 17))
+initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = .4)
 initiated_person$available <- c(1:5, 21:30, 50)
 initiated_person$administered <- c(6:20, 31:49)
+initiated_person$responses <- rep(c(1, 0), 17)
 
 test_that("minimize is false, log is true", {    
   ll_in_nlm_format <- LL(theta = .3, initiated_test, initiated_person, minimize = FALSE, return_log = TRUE)

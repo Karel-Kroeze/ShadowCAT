@@ -9,7 +9,7 @@
 #' @param responses person responses 
 #' @return person ShadowCAT.person object
 #' @export
-initPerson <- function(items, theta = rep(0, items$Q), prior = diag(items$Q), responses = numeric(0)) {
+initPerson <- function(items, theta = rep(0, items$Q), prior = diag(items$Q)) {
   estimate <- rep(0, items$Q)
   attr(estimate, 'variance') <- prior
   
@@ -19,7 +19,7 @@ initPerson <- function(items, theta = rep(0, items$Q), prior = diag(items$Q), re
               variance = prior, # this double variance object (attribute and separate) is confusing
               available = 1:items$K,
               administered = numeric(0),
-              responses = responses)
+              responses = numeric(0))
   
   attr(out, "class") <- "ShadowCAT.person"
   

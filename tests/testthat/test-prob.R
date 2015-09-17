@@ -209,7 +209,7 @@ test_that("model is GPCM, 1 dimensions, 2 categories, estimator is MAP, deriv is
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = .6, responses = rep(c(0,1), 50))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = .6)
   initiated_person$responses <- rep(c(0, 1), 25)
   
   probabilities <- prob(initiated_test, person = initiated_person, theta = NULL, deriv = TRUE, prior = NULL, items = NULL)

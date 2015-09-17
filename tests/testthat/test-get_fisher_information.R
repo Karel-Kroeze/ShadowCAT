@@ -35,7 +35,8 @@ test_that("model is 3PLM, 1 dimensions, 2 categories", {
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = .4, responses = rep(c(1, 0), 25))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = .4)
+  initiated_person$responses <- rep(c(1, 0), 25)
   
   fisher_information <- FI(initiated_test, initiated_person)
   
@@ -71,7 +72,8 @@ test_that("model is 3PLM, 3 dimensions, 2 categories", {
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3), responses = rep(c(1, 0), 25))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
+  initiated_person$responses <- rep(c(1, 0), 25)
   
   fisher_information <- FI(initiated_test, initiated_person)
   
@@ -110,7 +112,8 @@ test_that("model is GPCM, 1 dimensions, 2 categories", {
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = .5, prior = .6, responses = rep(c(0,1), 50))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = .5, prior = .6)
+  initiated_person$responses <- rep(c(0,1), 50)
   
   fisher_information <- FI(initiated_test, initiated_person)
   
@@ -150,7 +153,8 @@ test_that("model is GPCM, 3 dimensions, varying numbers of categories", {
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3), responses = rep(c(1, 0), 25))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
+  initiated_person$responses <- rep(c(1, 0), 25)
   
   fisher_information <- FI(initiated_test, initiated_person)
   
@@ -191,7 +195,8 @@ test_that("model is SM 1 dimensions, 2 categories", {
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = .4, responses = rep(c(1, 0), 25))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = .4)
+  initiated_person$responses <- rep(c(1, 0), 25)
   
   fisher_information <- FI(initiated_test, initiated_person)
   
@@ -227,7 +232,8 @@ test_that("model is SM, 3 dimensions, 3 dimensions, 4 categories", {
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3), responses = rep(c(1, 0), 25))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
+  initiated_person$responses <- rep(c(1, 0), 25)
   
   fisher_information <- FI(initiated_test, initiated_person)
   
@@ -269,7 +275,8 @@ test_that("model is SM, 3 dimensions, varying number of categories", {
                              lowerBound = rep(-3, item_characteristics_shadowcat_format$Q),
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3), responses = rep(c(1, 0), 25))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
+  initiated_person$responses = rep(c(1, 0), 25)
   
   fisher_information <- FI(initiated_test, initiated_person)
   
@@ -311,7 +318,8 @@ test_that("model is GRM 1 dimensions, 2 categories", {
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = .4, responses = rep(c(1, 0), 25))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = .4)
+  initiated_person$responses <- rep(c(1, 0), 25)
   
   fisher_information <- FI(initiated_test, initiated_person)
   
@@ -347,7 +355,8 @@ test_that("model is GRM, 3 dimensions, varying numbers of categories", {
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3), responses = rep(c(1, 0), 25))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
+  initiated_person$responses <- rep(c(1, 0), 25)
   
   fisher_information <- FI(initiated_test, initiated_person)
   
@@ -389,7 +398,8 @@ test_that("model is GRM, 3 dimensions, varying number of categories", {
                              lowerBound = rep(-3, item_characteristics_shadowcat_format$Q),
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3), responses = rep(c(1, 0), 25))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
+  initiated_person$responses <- rep(c(1, 0), 25)
   
   fisher_information <- FI(initiated_test, initiated_person)
   

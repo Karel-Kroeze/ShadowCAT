@@ -33,9 +33,10 @@ test_that("with padding in objective function", {
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = .4, responses = rep(c(1, 0), 17))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = .4)
   initiated_person$available <- c(6:10, 21:30, 50)
   initiated_person$administered <- c(1:5, 11:20, 31:49)
+  initiated_person$responses <- rep(c(1, 0), 17)
   
   item_information <- objective(initiated_test, initiated_person, pad = TRUE)
   item_index_max_information <- MI(initiated_test, initiated_person, item_information)

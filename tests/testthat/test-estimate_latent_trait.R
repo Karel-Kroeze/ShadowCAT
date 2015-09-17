@@ -35,10 +35,11 @@ test_that("estimator is ML, 1 dimension, 2 categories", {
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = NULL, responses = rep(c(1, 0), 17))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = NULL)
   initiated_person$available <- c(1:5, 21:30, 50)
   initiated_person$administered <- c(6:20, 31:49)
   initiated_person$estimate <- rep(.3, item_characteristics_shadowcat_format$Q)
+  initiated_person$responses <- rep(c(1, 0), 17)
   
   estimated_latent_trait <- estimate(initiated_person, initiated_test)
   
@@ -78,10 +79,11 @@ test_that("estimator is ML, 3 dimensions, varying number of categories", {
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = NULL, responses = rep(c(1, 0), 17))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = NULL)
   initiated_person$available <- c(1:5, 21:30, 50)
   initiated_person$administered <- c(6:20, 31:49)
   initiated_person$estimate <- c(2, .3, -1.2)
+  initiated_person$responses <- rep(c(1, 0), 17)
   
   estimated_latent_trait <- estimate(initiated_person, initiated_test)
   
@@ -119,9 +121,10 @@ test_that("estimator is MAP, 1 dimension, 2 categories", {
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, responses = rep(c(1, 0), 17))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format)
   initiated_person$available <- c(1:5, 21:30, 50)
   initiated_person$administered <- c(6:20, 31:49)
+  initiated_person$responses <- rep(c(1, 0), 17)
   initiated_person$estimate <- rep(.3, item_characteristics_shadowcat_format$Q)
   attr(initiated_person$estimate, "variance") <- 1.2
   
@@ -162,9 +165,10 @@ test_that("estimator is MAP, 3 dimensions, varying number of categories", {
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, responses = rep(c(1, 0), 17))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format)
   initiated_person$available <- c(1:5, 21:30, 50)
   initiated_person$administered <- c(6:20, 31:49)
+  initiated_person$responses <- rep(c(1, 0), 17)
   initiated_person$estimate <- c(2, .3, -1.2)
   attr(initiated_person$estimate, "variance") <- diag(c(1, 1.2, 1.5))
   
@@ -204,9 +208,10 @@ test_that("estimator is EAP, 1 dimension, 2 categories", {
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, responses = rep(c(1, 0), 17))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format)
   initiated_person$available <- c(1:5, 21:30, 50)
   initiated_person$administered <- c(6:20, 31:49)
+  initiated_person$responses <- rep(c(1, 0), 17)
   initiated_person$estimate <- rep(.3, item_characteristics_shadowcat_format$Q)
   attr(initiated_person$estimate, "variance") <- 1.2
   
@@ -247,9 +252,10 @@ test_that("estimator is EAP, 3 dimensions, varying number of categories", {
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = diag(c(1,1.3,1)), responses = rep(c(1, 0), 17))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = diag(c(1,1.3,1)))
   initiated_person$available <- c(1:5, 21:30, 50)
   initiated_person$administered <- c(6:20, 31:49)
+  initiated_person$responses <- rep(c(1, 0), 17)
   initiated_person$estimate <- c(2, .3, -1.2)
   attr(initiated_person$estimate, "variance") <- diag(c(2, 1.2, 1.5))
   
@@ -291,9 +297,10 @@ test_that("estimator is EAP, 3 dimensions, varying number of categories, 1 admin
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = diag(c(1,1.3,1)), responses = 1)
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = diag(c(1,1.3,1)))
   initiated_person$available <- c(2:50)
   initiated_person$administered <- c(1)
+  initiated_person$responses <- 1
   initiated_person$estimate <- c(2, .3, -1.2)
   attr(initiated_person$estimate, "variance") <- diag(c(2, 1.2, 1.5))
   
@@ -335,9 +342,10 @@ test_that("estimates exceed boundaries", {
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = diag(c(5,5,5)), responses = rep(1,50))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = diag(c(5,5,5)))
   initiated_person$available <- c()
   initiated_person$administered <- c(1:50)
+  initiated_person$responses <- rep(1,50)
   initiated_person$estimate <- c(-10, 10, 10)
   attr(initiated_person$estimate, "variance") <- diag(c(.1, .1, .1))
   

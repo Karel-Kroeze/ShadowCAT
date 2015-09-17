@@ -33,9 +33,10 @@ test_that("1 dimensions, 2 categories, estimator is ML", {
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = .4, responses = rep(c(1, 0), 17))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = .4)
   initiated_person$available <- c(1:5, 21:30, 50)
   initiated_person$administered <- c(6:20, 31:49)
+  initiated_person$responses <- rep(c(1, 0), 17)
   
   posterior_expected_kl_information <- PEKL(initiated_test, initiated_person)
   
@@ -71,9 +72,10 @@ test_that("1 dimensions, 2 categories, estimator is EAP", {
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = .4, responses = rep(c(1, 0), 17))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = .4)
   initiated_person$available <- c(1:5, 21:30, 50)
   initiated_person$administered <- c(6:20, 31:49)
+  initiated_person$responses <- rep(c(1, 0), 17)
   
   posterior_expected_kl_information <- PEKL(initiated_test, initiated_person)
   
@@ -113,9 +115,10 @@ test_that("model is GPCM, 3 dimensions, varying numbers of categories", {
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), responses = rep(c(1, 0), 17))
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q))
   initiated_person$available <- c(1:5, 21:30, 50)
   initiated_person$administered <- c(6:20, 31:49)
+  initiated_person$responses <- rep(c(1, 0), 17)
   
   posterior_expected_kl_information <- PEKL(initiated_test, initiated_person)
   
