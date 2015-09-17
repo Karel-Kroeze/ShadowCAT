@@ -63,7 +63,7 @@ estimate <- function(person, test) {
     invisible(person)
   }
   
-  get_updated_estimate_and_variance_nlm <- function() {
+  get_updated_estimate_and_variance_ml <- function() {
     # for now, simple nlm (TODO: look at optim, and possible reintroducing pure N-R).
     # We want a maximum, but nlm produces minima -> reverse function call. 
     # LL is the target function, test, person and minimize need to be passed on. We also want the value of the hessian at the final estimate.
@@ -75,17 +75,33 @@ estimate <- function(person, test) {
     
     # TODO: We should really store info somewhere so we don't have to redo this (when using FI based selection criteria).
     fisher_information_items <- FI(test, person)
-    fisher_information_test_so_far <- if (test$estimator == "ML")
-                                        apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum)
-                                      else
-                                        apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum) +
-                                        solve(person$prior)
+    fisher_information_test_so_far <- apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum)
+
     # inverse
     attr(person$estimate, "variance") <- solve(fisher_information_test_so_far)
     person$estimate
   }
   
-  get_updated_estimate_and_variance_quadrature <- function() {
+  get_updated_estimate_and_variance_map <- function() {
+    # for now, simple nlm (TODO: look at optim, and possible reintroducing pure N-R).
+    # We want a maximum, but nlm produces minima -> reverse function call. 
+    # LL is the target function, test, person and minimize need to be passed on. We also want the value of the hessian at the final estimate.
+    
+    # note that prior is applied in LL (incorrectly it seems, but still).
+    # suppress warnings and errors and do EAP instead. RM I have removed this option, I don't want users to get something they think
+    # is something else. Also, if estimator was ML, the default prior is used which may not make sense.
+    person$estimate <- nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate # passed on to LL, reverses polarity.
+    
+    # TODO: We should really store info somewhere so we don't have to redo this (when using FI based selection criteria).
+    fisher_information_items <- FI(test, person)
+    fisher_information_test_so_far <- apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum) +
+                                      solve(person$prior)
+    # inverse
+    attr(person$estimate, "variance") <- solve(fisher_information_test_so_far)
+    person$estimate
+  }
+  
+  get_updated_estimate_and_variance_eap <- function() {
     # Multidimensional Gauss-Hermite Quadrature
     # TODO: prior mean is currently fixed at zero, update when/if possible.
     # TODO: allow setting ip through internals argument(s)
@@ -100,9 +116,9 @@ estimate <- function(person, test) {
   
   get_updated_estimate_and_variance_attribute <- function(estimator) {
     switch(estimator,
-           ML = get_updated_estimate_and_variance_nlm(),
-           MAP = get_updated_estimate_and_variance_nlm(),
-           EAP = get_updated_estimate_and_variance_quadrature())
+           ML = get_updated_estimate_and_variance_ml(),
+           MAP = get_updated_estimate_and_variance_map(),
+           EAP = get_updated_estimate_and_variance_eap())
   }
   
   trim_estimate <- function(estimate) {
