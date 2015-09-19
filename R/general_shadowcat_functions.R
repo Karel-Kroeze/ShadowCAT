@@ -1,3 +1,14 @@
+#' transform categorical vector into dummy variables
+#' 
+#' @param unique_values a vector containing the unique values of the categorical vector
+#' @param categorical_vector the categorical vector to be transformed into dummy variables
+#' @return a matrix containing the dummy variables, number of columns (dummies) equals the number of unique values
+#' @examples sum(categorical_to_dummy(c("a", "b", "c"), rep(c("a", "b", "c"), 3))[1,] ==  rep(c(1, 0, 0), 3)) == 9 || stop("wrong")
+#' @export
+categorical_to_dummy <- function(unique_values, categorical_vector) {
+  sapply(unique_values, FUN = function(value) { as.numeric(categorical_vector == value) })
+}
+
 #' lapply with array as output
 #' 
 #'@param X a vector or list; see ? lapply for details
@@ -10,6 +21,7 @@
 #'                     c(3, 3, 3), 
 #'                     FUN = function(i, matrix_example) { matrix_example[i,] %*% t(matrix_example[i,]) }, 
 #'                     matrix_example = matrix_example)[1, 1, 1] == 1 || stop("wrong")
+#'@export
 lapply_return_array <- function(X, dim, FUN, ...) {
   lapply_output <- lapply(X, FUN, ...)
   array(unlist(lapply_output), dim = dim)
