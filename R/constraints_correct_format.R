@@ -1,4 +1,4 @@
-#' Creates a constraints object.
+#' Creates a constraints object which can be used in lp function from lpSolve package.
 #' 
 #' Convenience wrapper to create a constraints object, which can be added to a \code{test} object.
 #' 
@@ -64,54 +64,31 @@
 #' @param constraints \code{list} of constraints, see \code{details}.
 #' 
 #' @return constraints Constraints object, see \code{details}.
-#' @importFrom lpSolve lp
 #' @export
 createConstraints <- function(test, characteristics = NULL, constraints = NULL) {
   result <- function() {
-    # create characteristics data.frame, add administered and N.
-
-    characteristics_numeric <- if (is.null(characteristics)) 
-                                 data.frame(length = rep(1, test$items$K))
-                               else
-                                 as.data.frame(cbind(data.frame(length = rep(1, test$items$K)), 
-                                                     get_characteristics_numeric()))
-    
-    
     # test stops at whichever occurs first, length stopping rule or max_n
     max_n <- ifelse(test$stop$type == 'length', min(test$stop$n, test$max_n), test$max_n)
     
-    # create constraints for (max) n
-    CONSTS <- data.frame(name = 'length', 
-                         op = '=', 
-                         target = max_n,
-                         stringsAsFactors = FALSE)    
+    characteristics_numeric <- (if (is.null(characteristics)) 
+                                  data.frame(length = rep(1, test$items$K)) 
+                                else
+                                  as.data.frame(cbind(data.frame(length = rep(1, test$items$K)), 
+                                                     get_characteristics_numeric())))
     
-    ### add user constraints
-    if (! is.null(constraints)){
-      for(con in constraints){
-        # stop if not list
-        if(! is.list(con) || length(con) != 3) stop("Each constraint should be a list of three elements.")
-        if(! con[[1]] %in% colnames(characteristics_numeric)) stop("Each constraint name should have a matching characteristic.")
-        if(! con[[2]] %in% c("<", "=", ">", "><", "<=", ">=")) stop("Invalid operator.")
-        if(! is.numeric(con[[3]])) stop("Target value must be numeric.")
-        
-        if (con[[2]] == "><"){
-          CONSTS <- rbind(CONSTS, c(con[[1]], ">", con[[3]][1]))
-          CONSTS <- rbind(CONSTS, c(con[[1]], "<", con[[3]][2]))
-        } else {
-          CONSTS <- rbind(CONSTS, c(con[[1]], con[[2]], con[[3]]))
-        }
-      }  
-    }
+    constraints_lp <- (if (is.null(constraints))
+                         data.frame(name = 'length', op = '=', target = max_n, stringsAsFactors = FALSE)
+                       else
+                         as.data.frame(rbind(data.frame(name = 'length', op = '=', target = max_n, stringsAsFactors = FALSE),
+                                             get_constraints_lp())))
     
-    # build characteristics table for use in lpSolve
-    LPCHARS <- characteristics_numeric[,CONSTS$name, drop = FALSE]
+    characteristics_numeric_lp <- characteristics_numeric[,constraints_lp$name, drop = FALSE]
     
     # create constraints object
-    constraints <- list(characteristics = characteristics_numeric, constraints = CONSTS, lp_chars = LPCHARS)
-    attr(constraints, 'class') <- "ShadowCAT.constraints"
+    characteristics_and_constraints_lp <- list(characteristics = characteristics_numeric, constraints = constraints_lp, lp_chars = characteristics_numeric_lp)
+    attr(characteristics_and_constraints_lp, 'class') <- "ShadowCAT.constraints"
     
-    constraints
+    characteristics_and_constraints_lp
   }
   
   get_characteristics_numeric <- function() {
@@ -126,19 +103,41 @@ createConstraints <- function(test, characteristics = NULL, constraints = NULL) 
                                               matrix(characteristics[[key]], ncol = 1, dimnames = list(c(), key))
                                             } 
                                     )
-    matrix(unlist(numeric_characteristics_list), 
-           nrow = test$items$K, 
-           dimnames = list(c(), get_names_numeric_characteristics_list(numeric_characteristics_list)))
+    do.call(cbind, numeric_characteristics_list)
   }
   
   get_names_numeric_characteristics_list <- function(numeric_characteristics_list) {
     unlist(sapply(numeric_characteristics_list, 
                   FUN = function(key) { colnames(key) }))
-  } 
+  }
+  
+  get_constraints_lp <- function() {
+    constraints_lp_format_list <- sapply(constraints, FUN = function(constraint) { if (constraint$op == "><")  
+                                                                                     rbind(c(constraint$name, ">", constraint$target[1]), c(constraint$name, "<", constraint$target[2]))
+                                                                                   else
+                                                                                     c(constraint$name, constraint$op, constraint$target)
+                                                                                 }) 
+    constraints_lp_format <- do.call(rbind, constraints_lp_format_list)
+    colnames(constraints_lp_format) <- c("name", "op", "target")
+    constraints_lp_format
+  }
   
   validate <- function() {
     if (!is.null(characteristics) && (!is.data.frame(characteristics) || any(is.null(colnames(characteristics)))))
-      add_error("Characteristics", "should be a data.frame with unique column names.")
+      return(add_error("characteristics", "should be a data.frame with unique column names."))
+    if (!is.null(constraints) && any(sapply(constraints, FUN = function(constraint){ !is.list(constraint) || length(constraint) != 3 || names(constraint) != c("name", "op", "target") })))
+      return(add_error("constraints", "is of invalid structure, each constraint should be a list of three elements called name, op, and target."))
+    
+    names_characteristics_numeric <- sapply(colnames(characteristics), 
+                                            FUN = function(key) { if (is.character(characteristics[[key]]) || is.factor(characteristics[[key]]))
+                                                                    paste(key, unique(characteristics[[key]]), sep = '/')
+                                                                  else
+                                                                    key })
+    if (!is.null(characteristics) && !is.null(constraints) && any(sapply(constraints, FUN = function(constraint){ constraint$name %not_in% unlist(names_characteristics_numeric) })))
+    if (!is.null(constraints) && any(sapply(constraints, FUN = function(constraint){ constraint$op %not_in% c("<", "=", ">", "><", "<=", ">=") })))
+      add_error("constraints_operators", "containts invalid operator(s)")
+    if (!is.null(constraints) && any(sapply(constraints, FUN = function(constraint){ !is.numeric(constraint$target) })))
+      add_error("constraints_targets", "must be numeric")
   }
   
   invalid_result <- function() {

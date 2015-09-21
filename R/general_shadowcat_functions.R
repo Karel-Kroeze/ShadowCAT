@@ -40,6 +40,15 @@ matrix_apply <- function(X, margin, FUN, ...) {
   as.matrix(apply(as.matrix(X), margin, FUN, ...))
 }
 
+#' not in
+#'
+#'@param x vector or value for which it is too be checked if its elements are in vector y
+#'@param y vector for which it is too be checked if it contains the values in x
+#'@return a vector with elements equal to TRUE for each element of x that is not in y
+#'@examples c("a", "b", "g", "k", "b") %not_in% c("a", "b", "c") == c(FALSE, FALSE, TRUE, TRUE, FALSE) || stop("wrong")
+#'@export
+`%not_in%` <- function(x,y) { !(x %in% y) }
+
 #' get the number of non-NA cells per row of a matrix
 #' 
 #' @param X a matrix
