@@ -6,6 +6,8 @@ library(lpSolve)
 
 make_random_seed_exist <- rnorm(1)
 
+context("valid input")
+
 test_that("no charateristics and constraints", {
   # create item characteristics
   model <- '3PLM'
@@ -181,5 +183,191 @@ test_that("constraints 2", {
                                                                                          anxiety = c(0, 1, 0, 0, 1),
                                                                                          anxiety = c(0, 1, 0, 0, 1),
                                                                                          stressful = c(0, 0, 1, 0, 0)))) 
+})
+
+
+context("invalid input")
+
+test_that("characteristics not data frame", {
+  # create item characteristics
+  model <- '3PLM'
+  number_items <- 50
+  number_dimensions <- 1
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+  eta <- NULL # only relevant for GPCM model
+  
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  
+  item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = eta, silent = TRUE)
+  
+  #create item characteristics and constraints
+  characteristics <- list(time = with_random_seed(2, rnorm)(item_characteristics_shadowcat_format$K),
+                          type = with_random_seed(2, sample)(c('depression', 'insomnia', 'anxiety'), item_characteristics_shadowcat_format$K, TRUE),
+                          stressful = rep(c(0, 0, 1, 0, 0), 10),
+                          extra = rep(c(1, 0, 0, 0, 0), 10))
+  constraints <- list(list(name = 'time',
+                           op = '><',
+                           target = c(10, 20)),
+                      list(name = 'type/depression',
+                           op = '><',
+                           target = c(2, 5)),
+                      list(name = 'type/anxiety',
+                           op = '><',
+                           target = c(5, 10)),
+                      list(name = 'stressful',
+                           op = '<',
+                           target = 3))
+  
+  initiated_test <- initTest(item_characteristics_shadowcat_format, 
+                             start = list(type = 'fixed', indices = c(2, 4, 5), n = 3), 
+                             stop = list(type = 'length', n = 30),
+                             max_n = 50, # utter maximum
+                             estimator = 'MAP',
+                             objective = 'PD',
+                             selection = 'MI',
+                             constraints = NULL,
+                             exposure = NULL,
+                             lowerBound = rep(-3, item_characteristics_shadowcat_format$Q),
+                             upperBound = rep(3, item_characteristics_shadowcat_format$Q))
+  
+  constraints_formatted <- createConstraints(initiated_test, characteristics = characteristics, constraints = constraints)
+  expect_equal(constraints_formatted$errors$characteristics, "should be a data.frame with unique column names.")
+})
+
+test_that("constraints is not a list", {
+  # create item characteristics
+  model <- '3PLM'
+  number_items <- 50
+  number_dimensions <- 1
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+  eta <- NULL # only relevant for GPCM model
+  
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  
+  item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = eta, silent = TRUE)
+  
+  #create item characteristics and constraints
+  characteristics <- data.frame(time = with_random_seed(2, rnorm)(item_characteristics_shadowcat_format$K),
+                                type = with_random_seed(2, sample)(c('depression', 'insomnia', 'anxiety'), item_characteristics_shadowcat_format$K, TRUE),
+                                stressful = rep(c(0, 0, 1, 0, 0), 10),
+                                extra = rep(c(1, 0, 0, 0, 0), 10))
+  constraints <- data.frame(name = 2)
+  
+  initiated_test <- initTest(item_characteristics_shadowcat_format, 
+                             start = list(type = 'fixed', indices = c(2, 4, 5), n = 3), 
+                             stop = list(type = 'length', n = 30),
+                             max_n = 50, # utter maximum
+                             estimator = 'MAP',
+                             objective = 'PD',
+                             selection = 'MI',
+                             constraints = NULL,
+                             exposure = NULL,
+                             lowerBound = rep(-3, item_characteristics_shadowcat_format$Q),
+                             upperBound = rep(3, item_characteristics_shadowcat_format$Q))
+  
+  constraints_formatted <- createConstraints(initiated_test, characteristics = characteristics, constraints = constraints)
+  expect_equal(constraints_formatted$errors$constraints, "is of invalid structure, should be list of lists, each sublist containing three elements called name, op, and target.")
+})
+
+test_that("One of the lists in constraints has length 2", {
+  # create item characteristics
+  model <- '3PLM'
+  number_items <- 50
+  number_dimensions <- 1
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+  eta <- NULL # only relevant for GPCM model
+  
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  
+  item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = eta, silent = TRUE)
+  
+  #create item characteristics and constraints
+  characteristics <- data.frame(time = with_random_seed(2, rnorm)(item_characteristics_shadowcat_format$K),
+                                type = with_random_seed(2, sample)(c('depression', 'insomnia', 'anxiety'), item_characteristics_shadowcat_format$K, TRUE),
+                                stressful = rep(c(0, 0, 1, 0, 0), 10),
+                                extra = rep(c(1, 0, 0, 0, 0), 10))
+  constraints <- list(list(name = 'time',
+                           op = '><',
+                           target = c(10, 20)),
+                      list(name = 'type/depression',
+                           op = '><'),
+                      list(name = 'type/anxiety',
+                           op = '><',
+                           target = c(5, 10)),
+                      list(name = 'stressful',
+                           op = '<',
+                           target = 3))
+  
+  initiated_test <- initTest(item_characteristics_shadowcat_format, 
+                             start = list(type = 'fixed', indices = c(2, 4, 5), n = 3), 
+                             stop = list(type = 'length', n = 30),
+                             max_n = 50, # utter maximum
+                             estimator = 'MAP',
+                             objective = 'PD',
+                             selection = 'MI',
+                             constraints = NULL,
+                             exposure = NULL,
+                             lowerBound = rep(-3, item_characteristics_shadowcat_format$Q),
+                             upperBound = rep(3, item_characteristics_shadowcat_format$Q))
+  
+  constraints_formatted <- createConstraints(initiated_test, characteristics = characteristics, constraints = constraints)
+  expect_equal(constraints_formatted$errors$constraints, "is of invalid structure, should be list of lists, each sublist containing three elements called name, op, and target.")
+})
+
+test_that("constraint name is not in characteristics names, constraint operator is invalid", {
+  # create item characteristics
+  model <- '3PLM'
+  number_items <- 50
+  number_dimensions <- 1
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+  eta <- NULL # only relevant for GPCM model
+  
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  
+  item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = eta, silent = TRUE)
+  
+  #create item characteristics and constraints
+  characteristics <- data.frame(time = with_random_seed(2, rnorm)(item_characteristics_shadowcat_format$K),
+                                type = with_random_seed(2, sample)(c('depression', 'insomnia', 'anxiety'), item_characteristics_shadowcat_format$K, TRUE),
+                                stressful = rep(c(0, 0, 1, 0, 0), 10),
+                                extra = rep(c(1, 0, 0, 0, 0), 10))
+  constraints <- list(list(name = 'time',
+                           op = '+',
+                           target = c(10, 20)),
+                      list(name = 'depression',
+                           op = '><',
+                           target = c(2, 5)),
+                      list(name = 'anxiety',
+                           op = '><',
+                           target = c(5, 10)),
+                      list(name = 'stressful',
+                           op = '<',
+                           target = "5"))
+  
+  initiated_test <- initTest(item_characteristics_shadowcat_format, 
+                             start = list(type = 'fixed', indices = c(2, 4, 5), n = 3), 
+                             stop = list(type = 'length', n = 30),
+                             max_n = 50, # utter maximum
+                             estimator = 'MAP',
+                             objective = 'PD',
+                             selection = 'MI',
+                             constraints = NULL,
+                             exposure = NULL,
+                             lowerBound = rep(-3, item_characteristics_shadowcat_format$Q),
+                             upperBound = rep(3, item_characteristics_shadowcat_format$Q))
+  
+  constraints_formatted <- createConstraints(initiated_test, characteristics = characteristics, constraints = constraints)
+  expect_equal(constraints_formatted$errors$constraints_names, "should be contained in names characteristics")
+  expect_equal(constraints_formatted$errors$constraints_op, "containts invalid operator(s)")
+  expect_equal(constraints_formatted$errors$constraints_targets, "must be numeric")
+  
 })
 

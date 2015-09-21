@@ -84,7 +84,6 @@ createConstraints <- function(test, characteristics = NULL, constraints = NULL) 
     
     characteristics_numeric_lp <- characteristics_numeric[,constraints_lp$name, drop = FALSE]
     
-    # create constraints object
     characteristics_and_constraints_lp <- list(characteristics = characteristics_numeric, constraints = constraints_lp, lp_chars = characteristics_numeric_lp)
     attr(characteristics_and_constraints_lp, 'class') <- "ShadowCAT.constraints"
     
@@ -113,7 +112,8 @@ createConstraints <- function(test, characteristics = NULL, constraints = NULL) 
   
   get_constraints_lp <- function() {
     constraints_lp_format_list <- sapply(constraints, FUN = function(constraint) { if (constraint$op == "><")  
-                                                                                     rbind(c(constraint$name, ">", constraint$target[1]), c(constraint$name, "<", constraint$target[2]))
+                                                                                     rbind(c(constraint$name, ">", constraint$target[1]), 
+                                                                                           c(constraint$name, "<", constraint$target[2]))
                                                                                    else
                                                                                      c(constraint$name, constraint$op, constraint$target)
                                                                                  }) 
@@ -126,14 +126,16 @@ createConstraints <- function(test, characteristics = NULL, constraints = NULL) 
     if (!is.null(characteristics) && (!is.data.frame(characteristics) || any(is.null(colnames(characteristics)))))
       return(add_error("characteristics", "should be a data.frame with unique column names."))
     if (!is.null(constraints) && any(sapply(constraints, FUN = function(constraint){ !is.list(constraint) || length(constraint) != 3 || names(constraint) != c("name", "op", "target") })))
-      return(add_error("constraints", "is of invalid structure, each constraint should be a list of three elements called name, op, and target."))
-    
-    names_characteristics_numeric <- sapply(colnames(characteristics), 
-                                            FUN = function(key) { if (is.character(characteristics[[key]]) || is.factor(characteristics[[key]]))
-                                                                    paste(key, unique(characteristics[[key]]), sep = '/')
-                                                                  else
-                                                                    key })
-    if (!is.null(characteristics) && !is.null(constraints) && any(sapply(constraints, FUN = function(constraint){ constraint$name %not_in% unlist(names_characteristics_numeric) })))
+      return(add_error("constraints", "is of invalid structure, should be list of lists, each sublist containing three elements called name, op, and target."))
+    if (!is.null(characteristics) && !is.null(constraints) && any(sapply(constraints, 
+                                                                         FUN = function(constraint){ constraint$name %not_in% unlist(sapply(colnames(characteristics), 
+                                                                                                                                            FUN = function(key) { 
+                                                                                                                                              if (is.character(characteristics[[key]]) || is.factor(characteristics[[key]]))
+                                                                                                                                                paste(key, unique(characteristics[[key]]), sep = '/')
+                                                                                                                                              else
+                                                                                                                                                key })) 
+                                                                                                     })))
+      add_error("constraints_names", "should be contained in names characteristics")
     if (!is.null(constraints) && any(sapply(constraints, FUN = function(constraint){ constraint$op %not_in% c("<", "=", ">", "><", "<=", ">=") })))
       add_error("constraints_operators", "containts invalid operator(s)")
     if (!is.null(constraints) && any(sapply(constraints, FUN = function(constraint){ !is.numeric(constraint$target) })))
