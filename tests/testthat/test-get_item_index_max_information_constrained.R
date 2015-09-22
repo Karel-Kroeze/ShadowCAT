@@ -36,14 +36,14 @@ constraints <- list(list(name = 'content/algebra',
                          op = '<',
                          target = 2))
 
-initiated_test <- initTest(item_characteristics_shadowcat_format, 
-                           start = list(type = 'fixed', indices = c(2, 4, 5), n = 3), 
+initiated_test <- initTest(item_characteristics_shadowcat_format,
+                           start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
                            stop = list(type = 'variance', target = .2),
-                           max_n = 50, # utter maximum
+                           max_n = 20, # utter maximum
                            estimator = 'MAP',
                            objective = 'PD',
                            selection = 'MI',
-                           constraints = list(constraints = constraints, 
+                           constraints = list(constraints = constraints,
                                               characteristics = characteristics),
                            exposure = NULL,
                            lowerBound = rep(-3, item_characteristics_shadowcat_format$Q),
@@ -52,39 +52,41 @@ initiated_test <- initTest(item_characteristics_shadowcat_format,
 # get initiated person
 initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = .4)
 
-test_that("available items large", {
-  initiated_person$responses = rep(c(1, 0), 12) 
-  initiated_person$available <- c(6:10, 11:30, 50)
-  initiated_person$administered <- c(1:5, 31:49)
-  
+test_that("First 4 items administered", {
+  initiated_person$responses = rep(c(1, 0), 2)
+  initiated_person$available <- c(5:50)
+  initiated_person$administered <- c(1:4)
+
   item_information <- objective(initiated_test, initiated_person, pad = TRUE)
-  
+
   best_item <- Shadow(initiated_test, initiated_person, item_information)
-  
-  expect_equal(best_item, 6)  
+
+  expect_equal(best_item, 5)
 })
 
-test_that("available items small", {
-  initiated_person$responses = rep(c(1, 0), 12) 
-  initiated_person$available <- c(7:10)
-  initiated_person$administered <- c(1:6, 11:50)
+test_that("7 items administered", {
+  initiated_person$responses = c(1, 0, 1, 0, 1, 0, 1)
+  initiated_person$available <- c(2, 4, 6, 8, 10, 12, 14:50)
+  initiated_person$administered <- c(1, 3, 5, 7, 9, 11, 13)
   
   item_information <- objective(initiated_test, initiated_person, pad = TRUE)
   
   best_item <- Shadow(initiated_test, initiated_person, item_information)
   
-  expect_equal(best_item, 8)
+  expect_equal(best_item, 6)
 })
 
-test_that("available items one", {
-  initiated_person$responses = rep(c(1, 0), 12) 
-  initiated_person$available <- c(10)
-  initiated_person$administered <- c(1:9, 11:50)
+test_that("First 10 items administered", {
+  initiated_person$responses = rep(1, 10)
+  initiated_person$available <- c(11:50)
+  initiated_person$administered <- c(1:10)
   
   item_information <- objective(initiated_test, initiated_person, pad = TRUE)
   
   best_item <- Shadow(initiated_test, initiated_person, item_information)
   
-  expect_equal(best_item, 10)
+  expect_equal(best_item, 47)
 })
+
+
 
