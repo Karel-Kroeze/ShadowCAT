@@ -58,7 +58,6 @@ FI <- function(test, person) {
   
   if (model == "SM") {
     # Sequential Model (Tutz, xxxx)
-    # TODO: triple check this.
     for(i in 1:K){
       for(j in 1:(m[i]+1)){
         Psi <- c(1, lf(at[i] - b[i,1:m[i]]), 0) # basically: 1, lf(at - b), 0.

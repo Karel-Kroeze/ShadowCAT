@@ -59,7 +59,6 @@ objective <- function(test, person, pad = TRUE) {
   
   # If all objective values are 0, something went horribly wrong.
   # This is made worse by lpSolve -> it will give back a full vector, not respecting constraints.
-  # TODO: check if this is ok.
   if (all(out == 0)) {
     out <- rep(1, length(out)) # so replace them by 1's.
     cat("\nObjective is (computationally) zero for all items.")

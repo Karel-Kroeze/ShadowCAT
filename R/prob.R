@@ -16,7 +16,7 @@
 #' @export
 prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL, items = NULL){
   
-  # TODO: Check input.
+  # TODO: Validate input.
   
   # attach item(s) directly
   if (is.null(items)){
@@ -82,7 +82,6 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
     ll <- log(res$l)
     LL <- sum(ll)
     
-    # TODO: derivatives are correct for a single item, but not for K > 1?
     # create derivatives
     d1 <- matrix(res$d, nrow = 1) %*% a
     
@@ -94,7 +93,7 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
     
     # prior
     if ( ! is.null(prior)) {
-      # TODO: mean? 
+      # TODO: mean? Prior currently only allows a variable covariance matrix, mean is fixed at 0 (vector)
       # Alleen variabele deel van multivariaat normaal verdeling (exp).
       LL <- LL - (t(theta) %*% solve(prior) %*% theta) / 2
       d1 <- d1 - t(solve(prior) %*% theta)

@@ -62,7 +62,6 @@ estimate <- function(person, test, ...) {
   args <- list(...)
   
   if (test$estimator %in% c("ML", "MAP")){
-    # for now, simple nlm (TODO: look at optim, and possible reintroducing pure N-R).
     # We want a maximum, but nlm produces minima -> reverse function call. 
     # LL is the target function, test, person and minimize need to be passed on. We also want the value of the hessian at the final estimate.
     
