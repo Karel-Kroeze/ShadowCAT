@@ -11,18 +11,11 @@
 #' @return integer item index of item with maximum information within constraints
 #' @importFrom lpSolve lp
 Shadow <- function(test, person, item_information) {
+  administered_binary <- sapply(1:test$items$K, FUN = function(x) { if (x %in% person$administered) 1 else 0 } )
+  
   result <- function() {
-    administered_binary <- sapply(1:test$items$K, FUN = function(x) { if (x %in% person$administered) 1 else 0 } )
-
-    # user created constraints are combined with constraint to select all administered items.
-    solution <- lp(direction = 'max',
-                   objective.in = item_information,
-                   const.mat = as.matrix(cbind(test$constraints$lp_chars, administered_binary)),
-                   const.dir = c(test$constraints$constraints$op, "="),
-                   const.rhs = c(test$constraints$constraints$target, length(person$responses)),
-                   all.bin = TRUE,
-                   transpose.constraints = FALSE)$solution
-
+    solution <- get_lp_solution()
+    
     # get items from the pool that have the max value from the solution set.
     max_information <- which(item_information == max(item_information[as.logical(solution)]))
 
@@ -31,6 +24,17 @@ Shadow <- function(test, person, item_information) {
       intersect(max_information, person$available)
     else
       max_information
+  }
+  
+  get_lp_solution <- function() {
+    # user created constraints are combined with constraint to select all administered items.
+    lp(direction = 'max',
+       objective.in = item_information,
+       const.mat = as.matrix(cbind(test$constraints$lp_chars, administered_binary)),
+       const.dir = c(test$constraints$constraints$op, "="),
+       const.rhs = c(test$constraints$constraints$target, length(person$responses)),
+       all.bin = TRUE,
+       transpose.constraints = FALSE)$solution
   }
 
   validate <- function() {
