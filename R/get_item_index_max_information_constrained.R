@@ -17,13 +17,13 @@ Shadow <- function(test, person, item_information) {
     solution <- get_lp_solution()
     
     # get items from the pool that have the max value from the solution set.
-    max_information <- which(item_information == max(item_information[as.logical(solution)]))
+    item_with_max_information <- which(item_information == max(item_information[as.logical(solution)]))
 
     # since it is theoretically possible that items not in the set share this value, cull them.
-    if (length(max_information) > 1)
-      intersect(max_information, person$available)
+    if (length(item_with_max_information) > 1)
+      intersect(item_with_max_information, person$available)
     else
-      max_information
+      item_with_max_information
   }
   
   get_lp_solution <- function() {

@@ -3,7 +3,8 @@
 #' @param unique_values a vector containing the unique values of the categorical vector
 #' @param categorical_vector the categorical vector to be transformed into dummy variables
 #' @return a matrix containing the dummy variables, number of columns (dummies) equals the number of unique values
-#' @examples sum(categorical_to_dummy(c("a", "b", "c"), rep(c("a", "b", "c"), 3))[1,] ==  rep(c(1, 0, 0), 3)) == 9 || stop("wrong")
+#' @examples expect_equal <- categorical_to_dummy(c("a", "b", "c"), rep(c("a", "b", "c"), 3))[1,] == rep(c(1, 0, 0), 3);
+#' sum(expect_equal) == 9 || stop("wrong")
 #' @export
 categorical_to_dummy <- function(unique_values, categorical_vector) {
   sapply(unique_values, FUN = function(value) { as.numeric(categorical_vector == value) })
@@ -34,7 +35,7 @@ lapply_return_array <- function(X, dim, FUN, ...) {
 #' @param FUN the funcion to be applied
 #' @param ... any additional arguments to FUN
 #' @return same a apply, but always in matrix format
-#' @examples matrix_apply(c(1:5, NA), 2, sum, na.rm = TRUE) == 15 || is.matrix(matrix_apply(c(1:5, NA), 2, sum, na.rm = TRUE)) || stop("wrong")
+#' @examples ( matrix_apply(c(1:5, NA), 2, sum, na.rm = TRUE) == 15 && is.matrix(matrix_apply(c(1:5, NA), 2, sum, na.rm = TRUE)) ) || stop("wrong")
 #' @export
 matrix_apply <- function(X, margin, FUN, ...) {
   as.matrix(apply(as.matrix(X), margin, FUN, ...))
@@ -45,7 +46,8 @@ matrix_apply <- function(X, margin, FUN, ...) {
 #'@param x vector or value for which it is too be checked if its elements are in vector y
 #'@param y vector for which it is too be checked if it contains the values in x
 #'@return a vector with elements equal to TRUE for each element of x that is not in y
-#'@examples c("a", "b", "g", "k", "b") %not_in% c("a", "b", "c") == c(FALSE, FALSE, TRUE, TRUE, FALSE) || stop("wrong")
+#'@examples expect_equal <- c("a", "b", "g", "k", "b") %not_in% c("a", "b", "c") == c(FALSE, FALSE, TRUE, TRUE, FALSE);
+#' sum(expect_equal) == 5 || stop("wrong")
 #'@export
 `%not_in%` <- function(x,y) { !(x %in% y) }
 
@@ -53,7 +55,8 @@ matrix_apply <- function(X, margin, FUN, ...) {
 #' 
 #' @param X a matrix
 #' @return number of non-NA cells per row
-#' @examples number_non_missing_cells_per_row(matrix(c(1,2,NA,NA,2,3,NA,2,3), ncol = 3)) == c(1, 3, 2) || stop("wrong")
+#' @examples expect_equal <- number_non_missing_cells_per_row(matrix(c(1,2,NA,NA,2,3,NA,2,3), ncol = 3)) == c(1, 3, 2);
+#' sum(expect_equal) == 3 || stop("wrong")
 #' @export
 number_non_missing_cells_per_row <- function(X) {
   apply(X, 1, function(x) sum(!is.na(x)))
@@ -63,8 +66,10 @@ number_non_missing_cells_per_row <- function(X) {
 #' 
 #' @param X a vector or matrix; if vector, the vector will be converted to a matrix with one column
 #' @return matrix containing cumulative sums for each row
-#' @examples row_cumsum(matrix(1:12, ncol = 3))[2,] == c(2, 6, 10) || stop("wrong");
-#' row_cumsum(1:12) == matrix(1:12, ncol = 1) || stop("wrong")
+#' @examples expect_equal1 <- row_cumsum(matrix(1:12, ncol = 3))[2,] == c(2, 8, 18);
+#' expect_equal2 <- row_cumsum(1:12) == matrix(1:12, ncol = 1);
+#' sum(expect_equal1) == 3 || stop("wrong")
+#' sum(expect_equal2) == 12 || stop("wrong")
 #' @export
 row_cumsum <- function(X) {
   transpose_if_ncol_and_nrow_larger_1(matrix_apply(X, 1, cumsum))
@@ -97,9 +102,10 @@ rsapply <- function(..., fn) {
 #' @param FUN a function of the loop_vector values, returning the object to be added to start_object at each iteration. First argument should be loop values argument
 #' @param ... any additional arguments to FUN
 #' @return sum of objects returned by a loop, added to starting object
-#' @examples matrix_example = matrix(1:6, ncol = 2);
-#' sum_loop_outputs(matrix(0, 2, 2), 1:3, FUN = function(item, matrix_example) { matrix_example[item,] %*% t(matrix_example[item,]) }, matrix_example = matrix_example) == 
-#' (matrix_example[1,] %*% t(matrix_example[1,]) + matrix_example[2,] %*% t(matrix_example[2,]) + matrix_example[3,] %*% t(matrix_example[3,])) || stop("wrong")
+#' @examples matrix_example <- matrix(1:6, ncol = 2);
+#' expect_equal <- sum_loop_outputs(matrix(0, 2, 2), 1:3, FUN = function(item, matrix_example) { matrix_example[item,] %*% t(matrix_example[item,]) }, matrix_example = matrix_example) == 
+#'                 (matrix_example[1,] %*% t(matrix_example[1,]) + matrix_example[2,] %*% t(matrix_example[2,]) + matrix_example[3,] %*% t(matrix_example[3,]));
+#' sum(expect_equal) == 4 || stop("wrong")
 #' @export
 sum_loop_outputs <- function(start_object, loop_vector, FUN, ...) {
   for (i in loop_vector) {
@@ -112,7 +118,8 @@ sum_loop_outputs <- function(start_object, loop_vector, FUN, ...) {
 #' 
 #' @param X a matrix
 #' @return transpose of X if number of columns and number of rows are larger than 1, X otherwise
-#' @examples transpose_if_ncol_and_nrow_larger_1(matrix(1:50, ncol = 2)) == t(matrix(1:50, ncol = 2)) || stop("wrong")
+#' @examples expect_equal <- transpose_if_ncol_and_nrow_larger_1(matrix(1:50, ncol = 2)) == t(matrix(1:50, ncol = 2));
+#' sum(expect_equal) == 50 || stop("wrong")
 #' @export
 transpose_if_ncol_and_nrow_larger_1 <- function(X) {
   if (ncol(X) > 1 && ncol(X) > 1)
