@@ -66,10 +66,10 @@ initTest <- function(items,
   # set up default constraints
   out$constraints <- createConstraints(out, constraints$characteristics, constraints$constraints)
   
+  # maybe for the future, not finished yet:
   # apply ineligibility constraints (if requested).
-  if(!is.null(exposure)) {
-    out <- with(exposure, createExposureConstraint(out, exposure, eligible, feasible, total, target))
-  }
+  #if(!is.null(exposure))
+  #  out <- with(exposure, createExposureConstraint(out, exposure, eligible, feasible, total, target))
   
   invisible(out)
 }
