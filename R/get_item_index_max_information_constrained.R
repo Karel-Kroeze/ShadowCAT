@@ -27,7 +27,10 @@ Shadow <- function(test, person, item_information) {
     max_information <- which(item_information == max(item_information[as.logical(solution)]))
 
     # since it is theoretically possible that items not in the set share this value, cull them.
-    intersect(max_information, person$available)
+    if (length(max_information) > 1)
+      intersect(max_information, person$available)
+    else
+      max_information
   }
 
   validate <- function() {
