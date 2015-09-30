@@ -705,3 +705,40 @@ test_that("objective is of unknown type", {
   
   expect_equal(item_information$errors$objective, "of unknown type")
 })
+
+test_that("zero item information", {
+  # create item characteristics
+  model <- '3PLM'
+  number_items <- 50
+  number_dimensions <- 1
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+  eta <- NULL # only relevant for GPCM model
+  
+  alpha <- matrix(rep(0, number_items * number_dimensions), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(rep(0, number_items), nrow = number_items, ncol = 1)
+  
+  item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = eta, silent = TRUE)
+  
+  initiated_test <- initTest(item_characteristics_shadowcat_format,
+                             start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
+                             stop = list(type = 'variance', target = .2),
+                             max_n = 20, # utter maximum
+                             estimator = 'MAP',
+                             objective = 'A',
+                             selection = 'Shadow',
+                             constraints = NULL,
+                             exposure = NULL,
+                             lowerBound = rep(-3, item_characteristics_shadowcat_format$Q),
+                             upperBound = rep(3, item_characteristics_shadowcat_format$Q))
+  
+  # get initiated person
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = .4)
+  initiated_person$responses <- rep(c(1, 0), 15)
+  initiated_person$available <- 31:50
+  initiated_person$administered <- 1:30
+  
+  item_information <- objective(initiated_test, initiated_person, pad = TRUE)
+  
+  expect_equal(round(item_information, 3), c(rep(0, 30), rep(1, 20)))
+})

@@ -25,7 +25,7 @@ objective <- function(test, person, pad = TRUE) {
   # TODO: investigate / remove, (mostly occurs in 3PLM weirdly enough.)
   impute_zero_for_na <- function(item_information) {
     if (any(is.na(item_information))) {
-      cat("\nMissing values in objective function.")
+      cat("\nMissing values in objective function.\n")
       item_information[is.na(item_information)] <- 0
     }
     item_information
@@ -43,7 +43,7 @@ objective <- function(test, person, pad = TRUE) {
     # This is made worse by lpSolve -> it will give back a full vector, not respecting constraints.
     # TODO: check if this is ok.
     if (all(item_information == 0)) {
-      cat("\nObjective is (computationally) zero for all items.")
+      cat("\nObjective is (computationally) zero for all items.\n")
       rep(1, length(item_information))   
     }
     else {
