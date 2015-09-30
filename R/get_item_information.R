@@ -6,48 +6,96 @@
 #' @return vector
 #' @export
 objective <- function(test, person, pad = TRUE) {
-  if (test$objective %in% c('A','D','PA','PD')) {
-    # Fisher information based criteria
-    info <- FI(test, person)
+  result <- function() {
+    item_information <- get_item_information_switch()
+    item_information_imputed_missings <- impute_zero_for_na(item_information)
     
-    so_far <- apply(info[,,person$administered, drop = FALSE], c(1,2), sum)
-    
-    # add prior
-    if (test$objective %in% c('PA', 'PD')) so_far <- so_far + solve(person$prior)
-    
-    # determinant
-    if (test$objective %in% c('PD', 'D')) {
-      out <- apply(info[,,person$available, drop = FALSE], 3, function(x) det(so_far + x))
+    if (pad) {
+      item_information_imputed_missings_padded <- rep(0, test$items$K)
+      item_information_imputed_missings_padded[person$available] <- item_information_imputed_missings
+      item_information_imputed_missings_padded
     }
-    # trace
-    if (test$objective %in% c('PA','A')){
-      out <- apply(info[,,person$available, drop = FALSE], 3, function(x) sum(diag(so_far + x)))
-    }
+    else {
+      item_information_imputed_missings
+    }   
   }
-  else if (test$objective == "PEKL") {
-    out <- PEKL(test, person)
-  } 
-  else stop("unknown objective function.")
-  
-  # If all objective values are 0, something went horribly wrong.
-  # This is made worse by lpSolve -> it will give back a full vector, not respecting constraints.
-  # TODO: check if this is ok.
-  if (all(out == 0)) {
-    out <- rep(1, length(out)) # so replace them by 1's.
-    cat("\nObjective is (computationally) zero for all items.")
-  } 
-  
-  # pad to full length K objective vector.
-  if (pad) {
-    full <- rep(0, test$items$K)
-    full[person$available] <- out
-    out <- full
-  }
+
   
   # set missings to 0. I'm hoping this is underflow.
   # TODO: investigate / remove, (mostly occurs in 3PLM weirdly enough.)
-  if (any(is.na(out))) cat("\nMissing values in objective function.")
-  out[is.na(out)] <- 0  
+  impute_zero_for_na <- function(item_information) {
+    if (any(is.na(item_information))) {
+      cat("\nMissing values in objective function.")
+      item_information[is.na(item_information)] <- 0
+    }
+    item_information
+  }
   
-  return(out)
+  get_item_information_switch <- function() {
+    item_information <- switch(test$objective,
+                               "A" = item_information_trace(),
+                               "PA" = item_information_post_trace(),
+                               "D" = item_information_determinant(),
+                               "PD" = item_information_post_determinant(),
+                               "PEKL" = item_information_pekl())
+    
+    # If all objective values are 0, something went horribly wrong.
+    # This is made worse by lpSolve -> it will give back a full vector, not respecting constraints.
+    # TODO: check if this is ok.
+    if (all(item_information == 0)) {
+      cat("\nObjective is (computationally) zero for all items.")
+      rep(1, length(item_information)) # so replace them by 1's.   
+    }
+    else {
+      item_information
+    }        
+  }
+  
+  # A
+  item_information_trace <- function() {
+    fisher_information <- FI(test, person)
+    information_administered <- apply(fisher_information[,,person$administered, drop = FALSE], c(1, 2), sum)
+    apply(fisher_information[,,person$available, drop = FALSE], 3, function(x) sum(diag(information_administered + x)))
+  }
+  
+  # PA
+  item_information_post_trace <- function() {
+    fisher_information <- FI(test, person)
+    information_administered <- apply(fisher_information[,,person$administered, drop = FALSE], c(1, 2), sum) + solve(person$prior)
+    apply(fisher_information[,,person$available, drop = FALSE], 3, function(x) sum(diag(information_administered + x)))
+  }
+  
+  # D
+  item_information_determinant <- function() {
+    fisher_information <- FI(test, person)
+    information_administered <- apply(fisher_information[,,person$administered, drop = FALSE], c(1, 2), sum)
+    apply(fisher_information[,,person$available, drop = FALSE], 3, function(x) det(information_administered + x))
+  }
+  
+  # PD
+  item_information_post_determinant <- function() {
+    fisher_information <- FI(test, person)
+    information_administered <- apply(fisher_information[,,person$administered, drop = FALSE], c(1, 2), sum) + solve(person$prior)
+    apply(fisher_information[,,person$available, drop = FALSE], 3, function(x) det(information_administered + x))
+  }
+  
+  # PEKL
+  item_information_pekl <- function() {
+    PEKL(test, person)
+  }
+  
+  validate <- function() {
+    if (test$objective %not_in% c("A", "PA", "D", "PD", "PEKL"))
+      add_error("objective", "of unknown type")
+    if (is.null(test))
+      add_error("test", "is missing")
+    if (is.null(person))
+      add_error("person", "is missing")
+  }
+  
+  invalid_result <- function() {
+    list(errors = errors())
+  }
+  
+  validate_and_run()
 }

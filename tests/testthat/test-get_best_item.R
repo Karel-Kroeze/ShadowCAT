@@ -118,7 +118,7 @@ test_that("First 10 items administered, Shadow", {
   expect_equal(next_item, 47)
 })
 
-context("all item characteristics equal")
+context("many item characteristics equal")
 
 # create item characteristics
 model <- '3PLM'

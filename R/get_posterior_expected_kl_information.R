@@ -39,7 +39,7 @@ PEKL <- function(test, person, theta_range = -3:3) {
   #' Kullback Leibler Divergence for given items and pairs of thetas x posterior density.
   #' theta0 is theta estimated with EAP
   #' returns vector containing information for each yet available item
-  KLB <- function(theta, theta0, test, person){
+  KLB <- function(theta, theta0, test, person) {
     # TODO: wrap this into PEKL, do not recompute P0 for each theta (considering it is constant for the current posterior).
     available_items <- subset(test$items, person$available)
     administered_items <- subset(test$items, person$administered)
