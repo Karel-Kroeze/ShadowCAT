@@ -238,6 +238,84 @@ test_that("First 10 item administered, objective is PD (posterior determinant), 
   expect_equal(round(item_information[c(1:5, 35:40)], 3), c(9.370, 8.728, 9.485, 9.083, 8.596, 8.824, 8.596, 9.845, 9.095, 9.439, 8.723))
 })
 
+test_that("10 scattered items administered, objective is PD (posterior determinant), 1 dimension, with padding", {
+  # create item characteristics
+  model <- '3PLM'
+  number_items <- 50
+  number_dimensions <- 1
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+  eta <- NULL # only relevant for GPCM model
+  
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  
+  item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = eta, silent = TRUE)
+  
+  initiated_test <- initTest(item_characteristics_shadowcat_format,
+                             start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
+                             stop = list(type = 'variance', target = .2),
+                             max_n = 20, # utter maximum
+                             estimator = 'MAP',
+                             objective = 'PD',
+                             selection = 'MI',
+                             constraints = NULL,
+                             exposure = NULL,
+                             lowerBound = rep(-3, item_characteristics_shadowcat_format$Q),
+                             upperBound = rep(3, item_characteristics_shadowcat_format$Q))
+  
+  # get initiated person
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.5, item_characteristics_shadowcat_format$Q), prior = .4)
+  initiated_person$responses <- rep(c(1, 0), 5)
+  initiated_person$available <- c(1, 3, 4, 6, 7, 9, 10, 12:18, 20:24, 31:50)
+  initiated_person$administered <- c(2, 5, 8, 11, 19, 25:30)
+  
+  item_information <- objective(initiated_test, initiated_person, pad = TRUE)
+  
+  expect_equal(length(item_information), 50)
+  expect_equal(round(item_information[c(1:5, 35:40)], 3), c(4.374, .000, 4.404, 4.368, .000, 4.454, 4.501, 4.434, 4.387, 4.518, 4.358))
+  expect_equal(which(round(item_information, 5) == 0), c(2, 5, 8, 11, 19, 25:30))
+})
+
+test_that("10 scattered items administered, objective is PD (posterior determinant), 3 dimensions, with padding", {
+  # create item characteristics
+  model <- '3PLM'
+  number_items <- 50
+  number_dimensions <- 3
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+  eta <- NULL # only relevant for GPCM model
+  
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  
+  item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = eta, silent = TRUE)
+  
+  initiated_test <- initTest(item_characteristics_shadowcat_format,
+                             start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
+                             stop = list(type = 'variance', target = .2),
+                             max_n = 20, # utter maximum
+                             estimator = 'MAP',
+                             objective = 'PD',
+                             selection = 'MI',
+                             constraints = NULL,
+                             exposure = NULL,
+                             lowerBound = rep(-3, item_characteristics_shadowcat_format$Q),
+                             upperBound = rep(3, item_characteristics_shadowcat_format$Q))
+  
+  # get initiated person
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.5, item_characteristics_shadowcat_format$Q), prior = diag(c(.4, .8, 1.5)))
+  initiated_person$responses <- rep(c(1, 0), 5)
+  initiated_person$available <- c(1, 3, 4, 6, 7, 9, 10, 12:18, 20:24, 31:50)
+  initiated_person$administered <- c(2, 5, 8, 11, 19, 25:30)
+  
+  item_information <- objective(initiated_test, initiated_person, pad = TRUE)
+  
+  expect_equal(length(item_information), 50)
+  expect_equal(round(item_information[c(1:5, 35:40)], 3), c(8.537, 0.000, 8.252, 8.546, 0.000, 8.605, 8.995, 8.263, 8.879, 8.873, 8.934))
+  expect_equal(which(round(item_information, 5) == 0), c(2, 5, 8, 11, 19, 25:30))
+})
+
 context("objective is A (trace)")
 
 test_that("First 1 item administered, objective is A (trace), one dimension, with padding", {

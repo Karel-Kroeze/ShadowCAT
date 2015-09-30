@@ -8,18 +8,18 @@
 objective <- function(test, person, pad = TRUE) {
   result <- function() {
     item_information <- get_item_information_switch()
-    item_information_imputed_missings <- impute_zero_for_na(item_information)
-    
-    if (pad) {
-      item_information_imputed_missings_padded <- rep(0, test$items$K)
-      item_information_imputed_missings_padded[person$available] <- item_information_imputed_missings
-      item_information_imputed_missings_padded
-    }
-    else {
-      item_information_imputed_missings
-    }   
+    item_information_imputed_missings <- impute_zero_for_na(item_information)   
+    if (pad) 
+      pad_zeros(item_information_imputed_missings)
+    else
+      item_information_imputed_missings  
   }
-
+  
+  pad_zeros <- function(item_information) {
+    item_information_padded <- rep(0, test$items$K)
+    item_information_padded[person$available] <- item_information
+    item_information_padded
+  }
   
   # set missings to 0. I'm hoping this is underflow.
   # TODO: investigate / remove, (mostly occurs in 3PLM weirdly enough.)
@@ -44,7 +44,7 @@ objective <- function(test, person, pad = TRUE) {
     # TODO: check if this is ok.
     if (all(item_information == 0)) {
       cat("\nObjective is (computationally) zero for all items.")
-      rep(1, length(item_information)) # so replace them by 1's.   
+      rep(1, length(item_information))   
     }
     else {
       item_information
