@@ -25,7 +25,8 @@ next_item <- function(person, test) {
     # they CAN overlap, which may cause unwanted side effects, and in within models the result is identical to 'normal' random starting.
     if (test$start$type == 'randomByDimension'){
       # check for vector or scalar argument, make vector
-      if (length(test$start$nByDimension) == 1) test$start$nByDimension <- rep(test$start$nByDimension, test$items$Q)
+      if (length(test$start$nByDimension) == 1) 
+        test$start$nByDimension <- rep(test$start$nByDimension, test$items$Q)
       
       # validate n and nByDimension
       if (test$start$n != sum(test$start$nByDimension))
