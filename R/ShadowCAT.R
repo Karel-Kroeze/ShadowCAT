@@ -12,9 +12,10 @@
 ShadowCAT <- function(person, test, verbose = FALSE) {
   ## Start CAT
   if (verbose > 0) cat("\n")
+  
   while(!stop_test(person, test)) {
     # update person with new answer
-    person <- answer(person, test, next_item(person, test))
+    person <- answer(person, test, indeces = next_item(person, test))
     
     # if inititial items have been administered (so we are in the CAT phase), update person estimate after each newly answered item
     if (length(person$responses) > test$start$n) 
