@@ -6,24 +6,30 @@
 #' Details
 #' @param person last update of person
 #' @param test test object
-#' @return person
+#' @param new_response new responses from respondent
+#' @param indeces indeces of newly administered items 
+#' @return next item and updated person object; when test is finished, new item is NULL
 #' @export
-ShadowCAT_roqua <- function(person, test) {
+ShadowCAT_roqua <- function(person, test, new_responses, indeces) {
   result <- function() {
-    if (!stop_test(person, test)) {
-      person <- update_person_estimate()
-      index_next_item <- next_item(person, test)
-      list(person = person,
-           index_next_item = index_next_item)
-    }
-    else {
-      list(person = person,
-           index_next_item = "stop_test")
-    }  
+    if (is.null(new_responses)) # first iteration: no responses given yet
+      return(list(next_item = next_item(person, test),
+                  person = person))
+    
+    person <- update_person_estimate(person)
+    if (!stop_test(person, test))
+      list(next_item = next_item(person, test),
+           person = person)
+    else
+      list(next_item = NULL,
+           person = person)
   }
   
   # if inititial items have been administered (so we are in the CAT phase), update person estimate after each newly answered item
-  update_person_estimate <- function() {
+  update_person_estimate <- function(person) {
+    person$responses <- c(person$responses, new_responses)
+    person$administered <- c(person$administered, indeces)
+    person$available <- person$available[-which(person$available %in% indeces)]
     if (length(person$responses) > test$start$n) 
       estimate(person, test)
     else

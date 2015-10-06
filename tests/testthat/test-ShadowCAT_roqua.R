@@ -2,6 +2,60 @@
 '
 library(testthat)
 '
+make_random_seed_exist <- rnorm(1)
+
+context("stop rule is number of items")
+
+test_that("stop rule is number of items, target not reached", {
+  # create item characteristics
+  model <- '3PLM'
+  number_items <- 50
+  number_dimensions <- 1
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+  eta <- NULL # only relevant for GPCM model
+  
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  
+  item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = eta, silent = TRUE)
+  
+  # get initiated test: adaptive test rules
+  initiated_test <- initTest(item_characteristics_shadowcat_format, 
+                             start = list(type = 'random', n = 5), 
+                             stop = list(type = 'length', n = 10),
+                             max_n = 50, # utter maximum
+                             estimator = 'MAP',
+                             objective = 'PD',
+                             selection = 'MI',
+                             constraints = NULL,
+                             exposure = NULL,
+                             lowerBound = rep(-3, item_characteristics_shadowcat_format$Q),
+                             upperBound = rep(3, item_characteristics_shadowcat_format$Q))
+  
+  # get initiated person
+  person <- initPerson(item_characteristics_shadowcat_format, prior = diag(item_characteristics_shadowcat_format$Q))
+  
+  new_response = NULL
+  next_shadow_item = NULL
+  
+  for (iteration in 1:7) {
+    next_shadow_item <- with_random_seed(2, ShadowCAT_roqua)(person, initiated_test, new_response, indeces) 
+    person <- next_shadow_item$person
+    indeces <- next_shadow_item$next_item
+    new_response <- with_random_seed(2, answer)(person, initiated_test, indeces = next_shadow_item)$responses[tail(1)] # simulate person response on new item  
+  }
+  
+  expect_equal(new_response, 0)
+  expect_equal(next_shadow_item$next_item, 37)
+  expect_equal(as.vector(round(next_shadow_item$person$estimate, 3)), -1.186)
+  expect_equal(as.vector(round(attr(next_shadow_item$person$estimate, "variance"), 3)), .606)
+  expect_equal(next_shadow_item$person$available, c(1:4, 6:8, 14:50))
+  expect_equal(next_shadow_item$person$administered, c(10, 11, 9, 12, 13, 5))
+  expect_equal(next_shadow_item$person$responses, rep(0, 6))
+})
+
+
 
 if (FALSE) {
 make_random_seed_exist <- rnorm(1)
