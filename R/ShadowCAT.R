@@ -1,35 +1,38 @@
-#' ShadowCAT
+if(getRversion() >= "2.15.1")  utils::globalVariables(c("person_updated_after_new_response", "index_new_item"))
+#' Returns the next item to be administered given a new response
 #' 
 #' Run test with a specified person, and a specified test. See initPerson and initTest.
 #'  This is a simple wrapper to call the right methods, options should be defined in the test object.
 #'
 #' Details
-#' @param person last update of person
+#' @param new_response new response from respondent
+#' @param person initialized person
 #' @param test test object
-#' @param new_response new responses from respondent
-#' @param indeces indeces of newly administered items 
-#' @return next item and updated person object; when test is finished, new item is NULL
+#' @return index next item; when test is finished, person object
 #' @export
-ShadowCAT_roqua <- function(person, test, new_responses, indeces) {
+ShadowCAT_roqua <- function(new_response, person, test) {
   result <- function() {
-    if (is.null(new_responses)) # first iteration: no responses given yet
-      return(list(next_item = next_item(person, test),
-                  person = person))
+    if (is.null(new_response)) { # first iteration: no responses given yet
+      assign("person_updated_after_new_response", person, envir = .GlobalEnv)
+      assign("index_new_item", next_item(person, test), envir = .GlobalEnv)
+      return(index_new_item)
+    } 
     
-    person <- update_person_estimate(person)
-    if (!stop_test(person, test))
-      list(next_item = next_item(person, test),
-           person = person)
-    else
-      list(next_item = NULL,
-           person = person)
+    assign("person_updated_after_new_response", update_person_estimate(person_updated_after_new_response), envir = .GlobalEnv)
+    if (!stop_test(person_updated_after_new_response, test)) {
+      assign("index_new_item", next_item(person_updated_after_new_response, test), envir = .GlobalEnv)
+      index_new_item
+    }
+    else {
+      person_updated_after_new_response
+    }
   }
   
   # if inititial items have been administered (so we are in the CAT phase), update person estimate after each newly answered item
   update_person_estimate <- function(person) {
-    person$responses <- c(person$responses, new_responses)
-    person$administered <- c(person$administered, indeces)
-    person$available <- person$available[-which(person$available %in% indeces)]
+    person$responses <- c(person$responses, new_response)
+    person$administered <- c(person$administered, index_new_item)
+    person$available <- person$available[-which(person$available %in% index_new_item)]
     if (length(person$responses) > test$start$n) 
       estimate(person, test)
     else
