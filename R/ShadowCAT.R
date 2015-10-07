@@ -1,11 +1,12 @@
 if(getRversion() >= "2.15.1")  utils::globalVariables(c("person_updated_after_new_response", "index_new_item"))
-#' Returns the next item to be administered given a new response
+#' Returns the index of the next item to be administered given a new response, and updates the global variables person_updated_after_new_response and index_new_item.
+#' When test is finished, person_updated_after_new_response is returned 
 #' 
 #' Run test with a specified person, and a specified test. See initPerson and initTest.
 #'  This is a simple wrapper to call the right methods, options should be defined in the test object.
 #'
 #' Details
-#' @param new_response new response from respondent
+#' @param new_response new response from respondent, should be initialized with NULL
 #' @param person initialized person
 #' @param test test object
 #' @return index next item; when test is finished, person object
