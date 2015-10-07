@@ -11,7 +11,7 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("person_updated_after_ne
 #' @param test test object
 #' @return index next item; when test is finished, person object
 #' @export
-ShadowCAT_roqua <- function(new_response, person, test) {
+shadowcat_roqua <- function(new_response, person, test) {
   result <- function() {
     if (is.null(new_response)) { # first iteration: no responses given yet
       assign("person_updated_after_new_response", person, envir = .GlobalEnv)
