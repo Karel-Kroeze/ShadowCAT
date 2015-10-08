@@ -209,5 +209,63 @@ test_that("stop rule is variance", {
   expect_equal(person_next_shadow_item$responses, c(0, 1, 0, 0, 1, 1))
 })
 
+# not run because it takes too much time
+if (FALSE) {
+  context("problematic")
 
-
+  # This one gets stuck after the 248st administered item. At that point, the estimated variance matrix becomes
+  # non-invertible (has an eigenvalue of -5.530436e-18). See the problems in the trans function within init.quad().
+  # Also, when running the 248 items, the resulting estimates are poor. 
+  test_that("true theta is 2, -2, 3", {
+    # create item characteristics
+    model <- '3PLM'
+    number_items <- 300
+    number_dimensions <- 3
+    number_answer_categories <- 2 # can only be 2 for 3PLM model
+    guessing <- NULL
+    eta <- NULL # only relevant for GPCM model
+    
+    alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+    alpha[1:100,2:3] <- 0
+    alpha[101:200,c(1,3)] <- 0
+    alpha[201:300,1:2] <- 0
+    beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+    
+    item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = eta, silent = TRUE)
+    
+    # get initiated test
+    initiated_test <- initTest(item_characteristics_shadowcat_format, 
+                               start = list(type = 'random', n = 3), 
+                               stop = list(type = 'length', n = 248),
+                               max_n = 300, # utter maximum
+                               estimator = 'EAP',
+                               objective = 'PD',
+                               selection = 'MI',
+                               constraints = NULL,
+                               exposure = NULL,
+                               lowerBound = rep(-3, item_characteristics_shadowcat_format$Q),
+                               upperBound = rep(3, item_characteristics_shadowcat_format$Q))
+    
+    # get initiated person
+    initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = c(2, -2, 3), prior = diag(item_characteristics_shadowcat_format$Q) * 5)
+    
+    new_response = NULL
+    
+    test_shadowcat_roqua <- function() {
+      person_next_shadow_item <- 0 # just need a start value for the while loop
+      while (!is.list(person_next_shadow_item)) {
+        person_next_shadow_item <- shadowcat_roqua(new_response, initiated_person, initiated_test)
+        if (!is.list(person_next_shadow_item))
+          new_response <- tail(answer(person_updated_after_new_response, initiated_test, indeces = person_next_shadow_item)$responses, 1) # simulate person response on new item  
+      }
+      person_next_shadow_item
+    }
+    
+    person_next_shadow_item <- with_random_seed(2, test_shadowcat_roqua)()
+    #person_kroeze <- with_random_seed(2, ShadowCAT)(initiated_person, initiated_test)
+     
+    expect_equal(as.vector(round(person_next_shadow_item$estimate, 3)), c(.984, .171, -.055))
+    expect_equal(as.vector(round(attr(person_next_shadow_item$estimate, "variance"), 3))[1:3],c(.238, .259, .122))
+    expect_equal(length(person_next_shadow_item$administered), 248)
+  })
+}
