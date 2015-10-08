@@ -5,41 +5,6 @@
 
 using namespace Rcpp;
 
-// log1pExp
-double log1pExp(double x);
-RcppExport SEXP ShadowCAT_log1pExp(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< double >::type x(xSEXP);
-    __result = Rcpp::wrap(log1pExp(x));
-    return __result;
-END_RCPP
-}
-// logExpXplusExpY
-double logExpXplusExpY(const double x, const double y);
-RcppExport SEXP ShadowCAT_logExpXplusExpY(SEXP xSEXP, SEXP ySEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< const double >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const double >::type y(ySEXP);
-    __result = Rcpp::wrap(logExpXplusExpY(x, y));
-    return __result;
-END_RCPP
-}
-// logExpXminusExpY
-double logExpXminusExpY(const double x, const double y);
-RcppExport SEXP ShadowCAT_logExpXminusExpY(SEXP xSEXP, SEXP ySEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< const double >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const double >::type y(ySEXP);
-    __result = Rcpp::wrap(logExpXminusExpY(x, y));
-    return __result;
-END_RCPP
-}
 // PROB_3PLM
 List PROB_3PLM(NumericVector theta, NumericMatrix a, NumericVector b, NumericVector c, NumericVector u, bool deriv);
 RcppExport SEXP ShadowCAT_PROB_3PLM(SEXP thetaSEXP, SEXP aSEXP, SEXP bSEXP, SEXP cSEXP, SEXP uSEXP, SEXP derivSEXP) {

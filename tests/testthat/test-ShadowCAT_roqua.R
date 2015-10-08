@@ -9,7 +9,7 @@ context("validate shadowcat_roqua")
 test_that("true theta is 2", {
   # create item characteristics
   model <- '3PLM'
-  number_items <- 50
+  number_items <- 100
   number_dimensions <- 1
   number_answer_categories <- 2 # can only be 2 for 3PLM model
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
@@ -22,9 +22,9 @@ test_that("true theta is 2", {
   
   # get initiated test
   initiated_test <- initTest(item_characteristics_shadowcat_format, 
-                             start = list(type = 'random', n = 1), 
-                             stop = list(type = 'length', n = 50),
-                             max_n = 50, # utter maximum
+                             start = list(type = 'random', n = 3), 
+                             stop = list(type = 'length', n = 100),
+                             max_n = 100, # utter maximum
                              estimator = 'MAP',
                              objective = 'PD',
                              selection = 'MI',
@@ -34,17 +34,14 @@ test_that("true theta is 2", {
                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
   # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = 2, prior = diag(item_characteristics_shadowcat_format$Q))
-  initiated_person$administered <- 1
-  initiated_person$responses <- 1
-  initiated_person$available <- 2:50
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = 2, prior = diag(item_characteristics_shadowcat_format$Q) * 5)
   
   new_response = NULL
   
   test_shadowcat_roqua <- function() {
     person_next_shadow_item <- 0 # just need a start value for the while loop
     while (!is.list(person_next_shadow_item)) {
-      person_next_shadow_item <- with_random_seed(2, shadowcat_roqua)(new_response, initiated_person, initiated_test) 
+      person_next_shadow_item <- shadowcat_roqua(new_response, initiated_person, initiated_test) 
       if (!is.list(person_next_shadow_item))
         new_response <- tail(answer(person_updated_after_new_response, initiated_test, indeces = person_next_shadow_item)$responses, 1) # simulate person response on new item  
     }
@@ -53,12 +50,11 @@ test_that("true theta is 2", {
   
   person_next_shadow_item <- with_random_seed(2, test_shadowcat_roqua)()
   
-  expect_equal(as.vector(round(person_next_shadow_item$estimate, 3)), 1.682)
-  expect_equal(as.vector(round(attr(person_next_shadow_item$estimate, "variance"), 3)), .17)
+  expect_equal(as.vector(round(person_next_shadow_item$estimate, 3)), 1.912)
+  expect_equal(as.vector(round(attr(person_next_shadow_item$estimate, "variance"), 3)), .112)
   expect_equal(person_next_shadow_item$available, numeric(0))
-  expect_equal(length(person_next_shadow_item$administered), 50)
+  expect_equal(length(person_next_shadow_item$administered), 100)
 })
-
 
 test_that("validate with ShadowCAT Karel Kroeze", {
   # create item characteristics
@@ -98,7 +94,7 @@ test_that("validate with ShadowCAT Karel Kroeze", {
   test_shadowcat_roqua <- function() {
     person_next_shadow_item <- 0 # just need a start value for the while loop
     while (!is.list(person_next_shadow_item)) {
-      person_next_shadow_item <- with_random_seed(2, shadowcat_roqua)(new_response, initiated_person, initiated_test) 
+      person_next_shadow_item <- shadowcat_roqua(new_response, initiated_person, initiated_test) 
       if (!is.list(person_next_shadow_item))
         new_response <- tail(answer(person_updated_after_new_response, initiated_test, indeces = person_next_shadow_item)$responses, 1) # simulate person response on new item  
     }

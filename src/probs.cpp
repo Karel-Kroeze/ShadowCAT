@@ -1,59 +1,5 @@
 #include <Rcpp.h>
-#include "bfcommon.h"
 using namespace Rcpp;
-
-/////// From BayesFactor package: ///////
-// return log(1 + exp(x)), preventing cancellation and overflow */
-  // From http://www.codeproject.com/KB/recipes/avoiding_overflow.aspx
-// [[Rcpp::export]]
-double log1pExp(double x) {
-  const double LOG_DBL_EPSILON = log(DBL_EPSILON);
-  const double LOG_ONE_QUARTER = log(0.25);
-  
-  if (x > -LOG_DBL_EPSILON) {
-    // log(exp(x) + 1) == x to machine precision
-    return x;
-  }
-  else if (x > LOG_ONE_QUARTER) {
-    return log( 1.0 + exp(x) );
-  }
-  else {
-    // Prevent loss of precision that would result from adding small argument to 1.
-    return log1p( exp(x) );
-  }
-}
-
-// Compute log(exp(x) + exp(y))
-// [[Rcpp::export]]
-double logExpXplusExpY( const double x, const double y ) {
-  return x + log1pExp( y - x );
-}
-
-// Compute log(exp(x) - exp(y))
-// [[Rcpp::export]]
-double logExpXminusExpY( const double x, const double y ) {
-  return x + Rf_pexp( x - y, 1, true, true );
-}
-/////// end from BayesFactor package ///////
-
-double log1mp(double logp){ 
-  if ((logp) > -M_LN2) {
-    return(log(-expm1(logp)));
-  }
-  else {
-    return(log1p(-exp(logp)));   
-  }
-}
-
-// vectorized logExpXminusExpY function
-NumericVector vec_logExpXminusExpY(NumericVector x, NumericVector y) {
-  NumericVector out = clone(x);
-  int n = out.length();
-  for(int i = 0; i < n; i++){
-    out[i] = logExpXminusExpY(x[i], y[i]);
-  }
-  return out;
-}
 
 // really vectorized power function (exponent)
 NumericVector vec_pow(NumericVector base, NumericVector exp) {
@@ -81,8 +27,8 @@ double lf(double x) {
 // [[Rcpp::export]]
 List PROB_3PLM(NumericVector theta, NumericMatrix a, NumericVector b, NumericVector c, NumericVector u, bool deriv) {
   int Q = a.ncol(), K = a.nrow(), M = 2;
-  NumericVector aux(K), log_l(K), d(K), D(K);
-  NumericMatrix logP(K, M);
+  NumericVector aux(K), l(K), d(K), D(K);
+  NumericMatrix P(K, M);
   
   // loop over items
   for (int k = 0; k < K; k++){
@@ -93,20 +39,19 @@ List PROB_3PLM(NumericVector theta, NumericMatrix a, NumericVector b, NumericVec
       aux[k] += -a(k,q) * (theta[q] - b[k]);
     }
     
-    logP(k,1) = logExpXplusExpY(log(c[k]), (log(1-c[k]) - log1pExp(aux[k])));
-    logP(k,0) = log1mp(logP(k,1));
+    P(k,1) = c[k] + (1-c[k])/(1+exp(aux[k]));
+    P(k,0) = 1 - P(k,1);
   }
   
 if (deriv) {
-  NumericVector log_p = logP(_,1), p = exp(logP(_,1)), p2 = pow(p,2), log_q = logP(_,0), q = exp(logP(_,0));
-  log_l = u*log_p + (1 - u)*log_q;
-  //l = vec_pow(p, u) * vec_pow(q, 1 - u);
+  NumericVector p = P(_,1), p2 = pow(p,2), q = P(_,0);
+  l = vec_pow(p, u) * vec_pow(q, 1 - u);
   d = ((p-c) * (u-p)) / ((1-c) * p);
   D = (q *(p-c)*(c*u-p2)) / (p2*pow(1-c,2));
 }
   
-  List out = List::create(_["P"] = logP,
-  _["l"] = log_l,
+  List out = List::create(_["P"] = P,
+  _["l"] = l,
   _["d"] = d,
   _["D"] = D);
   
