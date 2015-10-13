@@ -1,4 +1,4 @@
-# Connection redis not working, will fix later
+# Connection redis not working
 if (FALSE) {
 require(rredis)
 

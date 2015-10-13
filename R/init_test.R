@@ -8,19 +8,19 @@
 #' list(type = 'fixed', indices, n)
 #' list(type = 'randomByDimension', nByDimension, n)
 #' where n = total number of initial items, indices = vector of initial item indices, 
-#' nByDimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension,
+#' nByDimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
 #' @param stop rule for when to stop providing new items to patient; one of
-#' list(type = 'length', n = 30); in this case, max_n is actually superfluous
+#' list(type = 'length', n); in this case, max_n is actually superfluous
 #' list(type = 'variance', target)
 #' where n is test length at which testing should stop,  target = vector of maximum acceptable variances per dimension
 #' @param max_n maximum test length alowed
 #' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "EAP" (Expected A Posteriori Estimation), or "ML" (maximum likelihood)
 #' @param objective how to summarize information; one of
 #' "D" = compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
-#  "PD" = compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
-#  "A" = compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
-#  "PA" = compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
-#  "PEKL" = compute Posterior expected Kullback-Leibler Information 
+#' "PD" = compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+#' "A" = compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
+#' "PA" = compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+#' "PEKL" = compute Posterior expected Kullback-Leibler Information 
 #' @param selection selection criterion; one of "MI" (maximum information) or "Shadow" (maximum information and take constraints into account)
 #' @param constraints list with constraints and characteristics
 #' constraints should be specified as a list of constraints, each constraint is a list with three named values;

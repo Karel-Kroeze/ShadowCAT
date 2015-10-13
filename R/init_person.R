@@ -6,7 +6,6 @@
 #' @param items Itembank (required for bookkeeping reasons)
 #' @param theta True theta; only useful for simulations?
 #' @param prior Prior covariance matrix
-#' @param responses person responses 
 #' @return person ShadowCAT.person object
 #' @export
 initPerson <- function(items, theta = rep(0, items$Q), prior = diag(items$Q)) {
