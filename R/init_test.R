@@ -28,7 +28,7 @@
 #' \code{op} the logical operator to be used. Valid options are "<", "=", ">" and "><".
 #' \code{target} the target value, numeric. If the operator is "><", this should be a length two vector in between which the target should fall.
 #' characteristics should be a data.frame with characteristics, one row per item, one column per characteristic.
-#' @param exposure vector, need to figure out what this is yet
+#' @param exposure this is something Karel Kroeze started working on but is not completed yet
 #' @param lowerBound vector with lower bounds for theta per dimension 
 #' @param upperBound vector with upper bounds for theta per dimension
 #' @param ...
