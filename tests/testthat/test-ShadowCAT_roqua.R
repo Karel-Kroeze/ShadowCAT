@@ -4,6 +4,29 @@ library(testthat)
 '
 make_random_seed_exist <- rnorm(1)
 
+test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection = "MI", constraints = NULL) {
+  new_response <- NULL
+  next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection, constraints)
+  
+  while (next_item_and_test_outcome$index_new_item != "stop_test") {
+    person_updated_after_new_response$theta <- true_theta
+    new_response <- tail(answer(person = person_updated_after_new_response, 
+                                test = initTest(items = initItembank(model, alpha, beta, guessing, eta, silent = TRUE), 
+                                                start = start_items, 
+                                                stop = stop_test,
+                                                max_n = stop_test$n,
+                                                estimator = estimator,
+                                                objective = information_summary,
+                                                selection = item_selection), 
+                                indeces = next_item_and_test_outcome$index_new_item)$responses, 1) # simulate person response on new item
+    
+    next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection, constraints)   
+  }
+  
+  next_item_and_test_outcome$person_updated_after_new_response
+}
+
+
 context("validate shadowcat_roqua")
 
 test_that("true theta is 2", {
@@ -30,31 +53,7 @@ test_that("true theta is 2", {
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 5
   
-  # initialize new response
-  new_response = NULL
-  
-  test_shadowcat_roqua <- function() {
-    next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
-    
-    while (next_item_and_test_outcome$index_new_item != "stop_test") {
-      person_updated_after_new_response$theta <- true_theta
-      new_response <- tail(answer(person = person_updated_after_new_response, 
-                                  test = initTest(items = initItembank(model, alpha, beta, guessing, eta, silent = TRUE), 
-                                                  start = start_items, 
-                                                  stop = stop_test,
-                                                  max_n = stop_test$n,
-                                                  estimator = estimator,
-                                                  objective = information_summary,
-                                                  selection = item_selection), 
-                                  indeces = next_item_and_test_outcome$index_new_item)$responses, 1) # simulate person response on new item
-      
-      next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)   
-    }
-    
-    next_item_and_test_outcome$person_updated_after_new_response
-  }
-  
-  test_outcome <- with_random_seed(2, test_shadowcat_roqua)()
+  test_outcome <- with_random_seed(2, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), 1.912)
   expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), .112)
@@ -85,10 +84,7 @@ test_that("validate with ShadowCAT Karel Kroeze", {
   item_selection <- 'MI'
   
   # define prior covariance matrix
-  prior <- diag(number_dimensions)
-  
-  # initialize new response
-  new_response = NULL  
+  prior <- diag(number_dimensions) 
 
   # make person and test object for ShadowCAT from Kroeze
   item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = eta, silent = TRUE)
@@ -109,28 +105,7 @@ test_that("validate with ShadowCAT Karel Kroeze", {
                    lowerBound = rep(-3, item_characteristics_shadowcat_format$Q), 
                    upperBound = rep(3, item_characteristics_shadowcat_format$Q))
   
-  test_shadowcat_roqua <- function() {
-    next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
-    
-    while (next_item_and_test_outcome$index_new_item != "stop_test") {
-      person_updated_after_new_response$theta <- true_theta
-      new_response <- tail(answer(person = person_updated_after_new_response, 
-                                  test = initTest(items = initItembank(model, alpha, beta, guessing, eta, silent = TRUE), 
-                                                  start = start_items, 
-                                                  stop = stop_test,
-                                                  max_n = stop_test$n,
-                                                  estimator = estimator,
-                                                  objective = information_summary,
-                                                  selection = item_selection), 
-                                  indeces = next_item_and_test_outcome$index_new_item)$responses, 1) # simulate person response on new item
-      
-      next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)   
-    }
-    
-    next_item_and_test_outcome$person_updated_after_new_response
-  }
-  
-  test_outcome_roqua <- with_random_seed(2, test_shadowcat_roqua)()
+  test_outcome_roqua <- with_random_seed(2, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   person_kroeze <- with_random_seed(2, ShadowCAT)(person, test)
   
   expect_equal(person_kroeze$estimate, test_outcome_roqua$estimate)
@@ -162,31 +137,7 @@ test_that("stop rule is number of items", {
   # define prior covariance matrix
   prior <- diag(number_dimensions)
   
-  # initialize new response
-  new_response = NULL
-  
-  test_shadowcat_roqua <- function() {
-    next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
-    
-    while (next_item_and_test_outcome$index_new_item != "stop_test") {
-      person_updated_after_new_response$theta <- true_theta
-      new_response <- tail(answer(person = person_updated_after_new_response, 
-                                  test = initTest(items = initItembank(model, alpha, beta, guessing, eta, silent = TRUE), 
-                                                  start = start_items, 
-                                                  stop = stop_test,
-                                                  max_n = stop_test$n,
-                                                  estimator = estimator,
-                                                  objective = information_summary,
-                                                  selection = item_selection), 
-                                  indeces = next_item_and_test_outcome$index_new_item)$responses, 1) # simulate person response on new item
-      
-      next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)   
-    }
-    
-    next_item_and_test_outcome$person_updated_after_new_response
-  }
-  
-  test_outcome <- with_random_seed(2, test_shadowcat_roqua)()
+  test_outcome <- with_random_seed(2, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), -0.022)
   expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), .315)
@@ -219,31 +170,7 @@ test_that("stop rule is variance", {
   # define prior covariance matrix
   prior <- diag(number_dimensions)
   
-  # initialize new response
-  new_response = NULL
-  
-  test_shadowcat_roqua <- function() {
-    next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
-    
-    while (next_item_and_test_outcome$index_new_item != "stop_test") {
-      person_updated_after_new_response$theta <- true_theta
-      new_response <- tail(answer(person = person_updated_after_new_response, 
-                                  test = initTest(items = initItembank(model, alpha, beta, guessing, eta, silent = TRUE), 
-                                                  start = start_items, 
-                                                  stop = stop_test,
-                                                  max_n = stop_test$n,
-                                                  estimator = estimator,
-                                                  objective = information_summary,
-                                                  selection = item_selection), 
-                                  indeces = next_item_and_test_outcome$index_new_item)$responses, 1) # simulate person response on new item
-      
-      next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)   
-    }
-    
-    next_item_and_test_outcome$person_updated_after_new_response
-  }
-  
-  test_outcome <- with_random_seed(2, test_shadowcat_roqua)()
+  test_outcome <- with_random_seed(2, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), .608)
   expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), 0.468)
@@ -287,35 +214,12 @@ if (FALSE) {
     # define prior covariance matrix
     prior <- diag(number_dimensions) * 5
     
-    # initialize new response
-    new_response = NULL
-    
-    test_shadowcat_roqua <- function() {
-      next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
-      
-      while (next_item_and_test_outcome$index_new_item != "stop_test") {
-        person_updated_after_new_response$theta <- true_theta
-        new_response <- tail(answer(person = person_updated_after_new_response, 
-                                    test = initTest(items = initItembank(model, alpha, beta, guessing, eta, silent = TRUE), 
-                                                    start = start_items, 
-                                                    stop = stop_test,
-                                                    max_n = stop_test$n,
-                                                    estimator = estimator,
-                                                    objective = information_summary,
-                                                    selection = item_selection), 
-                                    indeces = next_item_and_test_outcome$index_new_item)$responses, 1) # simulate person response on new item
-        
-        next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)   
-      }
-      
-      next_item_and_test_outcome$person_updated_after_new_response
-    }
-    
-    test_outcome <- with_random_seed(2, test_shadowcat_roqua)()
+    test_outcome <- with_random_seed(2, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
      
     expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.984, .171, -.055))
     expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.238, .259, .122))
     expect_equal(length(test_outcome$administered), 248)
   })
 }
+
 
