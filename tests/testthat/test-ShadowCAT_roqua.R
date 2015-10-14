@@ -26,6 +26,22 @@ test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing
   next_item_and_test_outcome$person_updated_after_new_response
 }
 
+run_simulation <- function(true_theta_vec, number_items_vec, number_dimensions_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec, prior, start_items, variance_target, item_selection = "MI", constraints = NULL, guessing = NULL) {
+  conditions <- expand.grid(true_theta_vec, number_items_vec, number_dimensions_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec)
+  colnames(conditions) <- c("true_theta", "number_items", "number_dimensions", "number_answer_categories", "model", "estimator", "information_summary", "item_selection")
+    
+  sapply(1:nrow(conditions), 
+         FUN = function(condition) {
+           stop_test <- list(type = 'variance', target = variance_target, n = conditions[condition, "number_items"])
+           true_theta <- conditions[condition, "true_theta"]
+           alpha_beta <- createTestBank(model = as.character(conditions[condition, "model"]), K = conditions[condition, "number_items"], Q = conditions[condition, "number_dimensions"], M = conditions[condition, "number_answer_categories"] - 1, run_initItembank = FALSE)
+           estimate_theta <- tryCatch(test_shadowcat_roqua(true_theta, prior, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), item_selection, constraints)$estimate,
+                                      error = function(e) e)
+           
+           c("estimated_theta" = estimate_theta,
+             "variance_estimate" = attr(estimate_theta, "variance"))
+         })
+}
 
 context("validate shadowcat_roqua")
 
@@ -181,6 +197,35 @@ test_that("stop rule is variance", {
 
 # not run because it takes too much time
 if (FALSE) {
+  
+  context("simulations")
+  
+  test_that("one dimension, no constraints on item selection", {
+    # not all information summaries work well, EAP estimation seems to give either 3 or -3 as theta estimate
+    true_theta_vec <- c(-2, 1)
+    number_items_vec <- c(15, 50)
+    number_answer_categories_vec <- c(2, 4)
+    number_dimensions_vec <- 1
+    
+    start_items <- list(type = 'random', n = 3)
+    variance_target <- .1
+    model_vec <- c("3PLM","GRM","GPCM","SM")
+    estimator_vec <- c("ML", "MAP", "EAP")
+    information_summary_vec <- c("D", "PD", "A", "AD")
+    item_selection_vec <- 'MI'
+    
+    prior <- diag(number_dimensions) * 5
+    
+    estimates_and_variance <- run_simulation(true_theta_vec, number_items_vec, number_dimensions_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec, prior, start_items, variance_target)
+    
+    conditions <- expand.grid(true_theta_vec, number_items_vec, number_dimensions_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec)
+    colnames(conditions) <- c("true_theta", "number_items", "number_dimensions", "number_answer_categories", "model", "estimator", "information_summary", "item_selection")
+    
+    estimates_and_conditions <- cbind(t(estimates_and_variance), conditions[, c("true_theta", "number_items", "number_dimensions", "number_answer_categories", "model", "estimator", "information_summary")])
+    
+  })
+  
+  
   context("problematic")
 
   # This one gets stuck after the 248st administered item. At that point, the estimated variance matrix becomes
