@@ -1,3 +1,5 @@
+# Connection redis not working
+if (FALSE) {
 require(rredis)
 
 # connect
@@ -51,3 +53,4 @@ while(TRUE) {
   Sys.sleep(min(5 * interval, 10))
 }
 
+}

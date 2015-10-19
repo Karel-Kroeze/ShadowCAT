@@ -16,5 +16,6 @@ Depends:
       mvtnorm,
       MultiGHQuad,
       numDeriv,
-      plot3D,
       lpSolve
+Suggests:
+      testthat (>= 0.8.1)

@@ -1,2 +1,9 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+Guardfile
+Gemfile
+Gemfile.lock
+.git
+.gitignore
+.lintr
+vendor

@@ -1,138 +1,138 @@
 ### probability and derivatives
 
-#' Probability and Derivatives for a given (subset of) ShadowCAT.items itembank.
+#' Probability and Derivatives for a given (subset of) ShadowCAT.items itembank. It gives the probability of 
+#' responses given theta (only useful for simulation I think), and the likelihood of given responses
 #' 
 #' Generic
 #' 
 #' Details
-#' @param items
+#' @param test 
 #' @param person Person object, will use current theta estimate of the person to obtain P values.
-#' @param theta Give a specific theta vector to use, overrides person if set.
+#' @param theta Give a specific theta vector to use. Overrides person$estimate if set.
 #' @param deriv Should we fetch derivatives and LL?
-#' @param prior If not NULL, prior to be applied to derivatives.
+#' @param prior prior to be applied to derivatives. Overrides person$prior if set
+#' @param items overrides test$items if set
+#' @return 
 #' @importFrom mvtnorm dmvnorm
 #' @importFrom Rcpp evalCpp
 #' @useDynLib ShadowCAT
 #' @export
 prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL, items = NULL){
-  
-  # TODO: Validate input.
-  
-  # attach item(s) directly
-  if (is.null(items)){
-    items <- test$items
-  } else {
-    items <- items
+  # TODO: Check input.
+  # TODO priors: mean? 
+  # priors: Alleen variabele deel van multivariaat normaal verdeling (exp).
+  result <- function() {
+    items <- get_items()
+    theta <- get_theta(items)
+    prior <- get_prior(items)
+    probabilities <- get_probabilities(items, theta)
+    #return(probabilities$d)
+    
+    if (!deriv)
+      list(P = probabilities$P)
+    else
+      list(P = probabilities$P,
+           LL = get_LL(probabilities, prior, theta),
+           d1 = get_first_derivative(probabilities, prior, theta, items),
+           d2 = get_second_derivative(probabilities, prior, items))  
   }
   
-  # Make sure a theta exists
-  if (is.null(person) && is.null(theta)) {
-    warning("No person or theta given - defaulting to 0 vector.")
-    theta <- rep(0,items$Q)
-  } 
-  
-  # if theta is not overriden, use the current estimate.
-  if (is.null(theta)) { 
-    theta <- person$estimate
+  get_items <- function() {
+    if (is.null(items))
+      test$items
+    else
+      items
   }
   
-  # if test requires a prior, and it is not set explicitly, fetch from person. 
-  # If that isn't set, raise a warning and use a multivariate standard normal
-  if (is.null(prior) && test$estimator %in% c("MAP", "EAP") && deriv == TRUE) {
-    if (is.null(person)) {
-      warning("No person or prior set - defaulting to multivariate standard normal")
-      prior <- diag(items$Q)
-    } else {
-      prior <- person$prior
+  get_theta <- function(items) {
+    if (is.null(person) && is.null(theta)) {
+      warning("No person or theta given - defaulting to 0 vector.")
+      return(rep(0,items$Q))
     }
+    if (is.null(theta)) 
+      person$estimate
+    else
+      theta
   }
   
-  # if test does not require a prior, but it is set, raise a warning (but do use prior).
-  if ( ! is.null(prior) && test$estimator == "ML" && deriv == TRUE){
-    warning("Prior set for ML estimator - this is not standard!")
+  get_responses <- function() {
+    if (deriv) 
+      person$responses
+    else
+      numeric(0)
   }
   
-  # simplify input
-  a <- items$pars$alpha
-  b <- items$pars$beta
-  c <- items$pars$guessing
-  if (deriv) u <- person$responses
-  else u <- c(1,2,3,NA,NA,NA,NA,NA) # Batman! (in all seriousness, it just needs to be a numeric vector with one or more NA's).
+  get_prior <- function(items) {
+    if (is.null(prior) && is.null(person) && test$estimator %in% c("MAP", "EAP") && deriv == TRUE) {
+        warning("No person or prior set - defaulting to multivariate standard normal")
+        return(diag(items$Q))
+    }
+    if (is.null(prior) && !is.null(person) && test$estimator %in% c("MAP", "EAP") && deriv == TRUE)
+      person$prior
+    else
+      prior
+  }
   
-  res <- switch(items$model,
-                "3PLM" = PROB_3PLM(theta, a, b, c, u),
-                "GRM" = PROB_GRM(theta, a, b, u),
-                "SM" = PROB_SM(theta, a, b, u),
-                "GPCM" = PROB_GPCM(theta, a, b, u))
-  
-  out <- list()
-  out$P <- res$P
-  
-  # likelihoods can never truly be zero, let alone negative
-  # TODO: make debug output toggleable
-  # if (any(out$P <= 0)) cat("\nProbability <= 0 (k =", length(person$responses), ", estimate = ", paste0(round(person$estimate, 2), collapse = ", "), ").")
-  out$P[which(out$P <= 0)] <- 1e-10
-  
-  
-  if (deriv){
+  get_probabilities <- function(items, theta) {
+    responses <- get_responses()
+    probs <- switch(items$model,
+                    "3PLM" = PROB_3PLM(theta, items$pars$alpha, items$pars$beta, items$pars$guessing, responses, deriv),
+                    "GRM" = PROB_GRM(theta, items$pars$alpha, items$pars$beta, responses, deriv),
+                    "SM" = PROB_SM(theta, items$pars$alpha, items$pars$beta, responses, deriv),
+                    "GPCM" = PROB_GPCM(theta, items$pars$alpha, items$pars$beta, responses, deriv))
+    
     # likelihoods can never truly be zero, let alone negative
-    res$l[which(res$l <= 0)] <- 1e-10
-    
-    # create (log)likelihood (L, LL)
-    ll <- log(res$l)
-    LL <- sum(ll)
-    
-    # create derivatives
-    d1 <- matrix(res$d, nrow = 1) %*% a
-    
-    # d2
-    d2 <- matrix(0,items$Q,items$Q)
-    for (i in seq_along(res$D)){
-      d2 <- d2 + a[i,] %*% t(a[i,]) * res$D[i]
-    }
-    
-    # prior
-    if ( ! is.null(prior)) {
-      # TODO: mean? Prior currently only allows a variable covariance matrix, mean is fixed at 0 (vector)
-      # Alleen variabele deel van multivariaat normaal verdeling (exp).
-      LL <- LL - (t(theta) %*% solve(prior) %*% theta) / 2
-      d1 <- d1 - t(solve(prior) %*% theta)
-      d2 <- d2 - solve(prior)
-    }
-    
-    # attach to output
-    out$LL <- LL # log likelihood
-    out$d1 <- d1 # first derivative of complete set of items at theta (+prior)
-    out$d2 <- d2 # second derivative of complete set of items at theta (+prior)
+    # TODO: make debug output toggleable
+    # if (any(out$P <= 0)) cat("\nProbability <= 0 (k =", length(person$responses), ", estimate = ", paste0(round(person$estimate, 2), collapse = ", "), ").")
+      
+    probs$P[which(probs$P <= 0)] <- 1e-10
+    probs
   }
   
-  return(invisible(out))
-}
-
-#' Log Likelihood
-#' 
-#' Internal - fetch appropriate elements from prob for nlm optimizer
-#' @param theta
-#' @param test
-#' @param person
-#' @param should values be reversed (useful for minimization, reverses LL as well as derivatives)
-#' @return Log-Likelihood, as well as gradient and hessian attributes.
-#' @importFrom stats nlm
-LL <- function(theta, test, person, minimize = FALSE, log = TRUE) {
-  # subset items that have a response
-  test$items <- subset(test$items, person$administered)
+  get_LL <- function(probabilities, prior, theta) {
+    # likelihoods can never truly be zero, let alone negative
+    probabilities$l[which(probabilities$l <= 0)] <- 1e-10  
+    LL <- sum(log(probabilities$l))
+    if (test$estimator == "ML")
+      LL
+    else
+      LL - (t(theta) %*% solve(prior) %*% theta) / 2    
+  }
   
-  # get LL and derivatives.
-  PROB <- prob(test, person, theta, deriv = TRUE)
+  # TODO: derivatives are correct for a single item, but not for K > 1?
+  get_first_derivative <- function(probabilities, prior, theta, items) {
+    derivative1 <- matrix(probabilities$d, nrow = 1) %*% items$pars$alpha
+    if (test$estimator == "ML")
+      derivative1
+    else
+      derivative1 - t(solve(prior) %*% theta)  
+  }
   
-  # prepare output
-  out <- PROB$LL * (-1) ^ minimize
+  get_second_derivative <- function(probabilities, prior, items) {
+    derivative2 <- sum_loop_outputs(start_object = matrix(0, items$Q, items$Q), 
+                                    loop_vector = 1:items$K, 
+                                    FUN = function(item, alpha, D) { alpha[item,] %*% t(alpha[item,]) * D[item] }, 
+                                    alpha = items$pars$alpha, 
+                                    D = probabilities$D)
+    if (test$estimator == "ML")
+      derivative2
+    else
+      derivative2 - solve(prior)  
+  }
   
-  # gradient and hessian for nlm optimizer.
-  attr(out, "gradient") <- PROB$d1 * (-1) ^ minimize
-  attr(out, "hessian") <- PROB$d2 * (-1) ^ minimize
+  validate <- function() {
+    if (!is.null(prior) && test$estimator == "ML" && deriv == TRUE){
+      add_error("prior", "set for ML estimator, this makes no sense")
+    }
+  }
   
-  # return
-  if ( ! log) return(invisible(exp(out)))  
-  return(invisible(out))
+  invalid_result <- function() {
+    list(P = NA,
+         LL = NA,
+         d1 = NA,
+         d2 = NA,
+         errors = errors())
+  }
+    
+  validate_and_run()
 }
