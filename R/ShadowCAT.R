@@ -3,7 +3,7 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("person_updated_after_ne
 #' When test is finished, person_updated_after_new_response is returned 
 #'
 #' @param new_response new response from respondent, should be initialized with NULL
-#' @param prior covariance matrix for theta; only used when estimator type is MAP or EAP, but at this point should always be defined
+#' @param prior covariance matrix of the multi variate normal prior for theta; mean vector is fixed at zero; only used when estimator type is MAP or EAP, but at this point should always be defined
 #' #' note that this prior should be a square matrix with number of rows and columns equal to the number of dimensions; values on the diagonal should be larger than 1
 #' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param alpha Matrix of alpha paramteres, one column per dimension, one row per item. Note that so called within-dimensional models still use an alpha matrix, they simply 
