@@ -68,7 +68,6 @@ estimate <- function(person, test) {
     # We want a maximum, but nlm produces minima -> reverse function call. 
     # LL is the target function, test, person and minimize need to be passed on. We also want the value of the hessian at the final estimate.
     
-    # note that prior is applied in LL (incorrectly it seems, but still).
     # suppress warnings and errors and do EAP instead. RM I have removed this option, I don't want users to get something they think
     # is something else. Also, if estimator was ML, the default prior is used which may not make sense.
     person$estimate <- nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate # passed on to LL, reverses polarity.
@@ -106,7 +105,7 @@ estimate <- function(person, test) {
     # TODO: prior mean is currently fixed at zero, update when/if possible.
     # TODO: allow setting ip through internals argument(s)
     adapt <- if (length(person$responses) > 5 & !is.null(attr(person$estimate, 'variance')))
-               list(mu = person$estimate, Sigma = as.matrix(attr(person$estimate, "variance")))           
+               list(mu = person$estimate, Sigma = as.matrix(attr(person$estimate, "variance")))    
     Q_dim_grid_quad_points <- init.quad(Q = test$items$Q,
                               prior = list(mu = rep(0, test$items$Q), Sigma = person$prior),
                               adapt = adapt,

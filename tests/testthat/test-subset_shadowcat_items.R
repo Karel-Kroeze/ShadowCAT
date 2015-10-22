@@ -82,3 +82,27 @@ test_that("GPCM model, 3 dimension, 4 categories", {
   expect_equal(item_characteristics_subset$subset, c(2, 4, 7, 11, 20:25, 28)) 
   
 })
+
+test_that("order of items does not change", {
+  model <- 'GPCM'
+  number_items <- 50
+  number_dimensions <- 3
+  number_answer_categories <- 4
+  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+  subset_indices <- c(3, 6, 1)
+  
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  temp_vector <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  eta <- t(apply(temp_vector, 1, function(x) x + seq(-2, 2, length.out = (number_answer_categories - 1))))
+  
+  item_characteristics_shadowcat_format <- initItembank(model = model, 
+                                                        alpha = alpha,
+                                                        beta = NULL,
+                                                        guessing = guessing, 
+                                                        eta = eta,
+                                                        silent = TRUE)
+  item_characteristics_subset <- subset.ShadowCAT.items(item_characteristics_shadowcat_format, subset_indices)
+  
+  expect_equal(round(item_characteristics_subset$pars$alpha[2,], 3), c(1.432, 1.274, 1.015))
+  expect_equal(item_characteristics_subset$subset, c(3, 6, 1)) 
+})

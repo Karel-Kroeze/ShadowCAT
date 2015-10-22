@@ -45,7 +45,7 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("person_updated_after_ne
 #' @param upperbound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
 #' @return index next item; when test is finished, "stop_test"
 #' @export
-shadowcat_roqua <- function(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection = "MI", constraints = NULL, lowerbound = rep(-3, item_characteristics_shadowcat_format$Q), upperbound = rep(3, item_characteristics_shadowcat_format$Q)) {
+shadowcat_roqua <- function(new_response, prior, model, alpha, beta, guessing, eta = NULL, start_items, stop_test, estimator, information_summary, item_selection = "MI", constraints = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha))) {
   item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = eta, silent = TRUE)
   
   person <- initPerson(items = item_characteristics_shadowcat_format, 

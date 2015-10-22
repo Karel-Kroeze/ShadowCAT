@@ -16,6 +16,7 @@ Depends:
       mvtnorm,
       MultiGHQuad,
       numDeriv,
-      lpSolve
+      lpSolve,
+      pbapply
 Suggests:
       testthat (>= 0.8.1)
