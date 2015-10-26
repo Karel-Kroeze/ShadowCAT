@@ -103,7 +103,7 @@ test_that("one dimension, no constraints on item selection, one iteration per co
 test_that("one dimension, no constraints on item selection, two iterations per condition", {
   # EAP estimation does not work
   # PEKL information summaries give errors because it also makes use of EAP estimation
-  iterations_per_unique_condition <- 2 # extend to 100 when time permits and when EAP issue is fixed
+  iterations_per_unique_condition <- 100 # extend to 100 when time permits and when EAP issue is fixed
   true_theta_vec <- c(-2, 1)
   number_items_vec <- c(50, 100)
   number_answer_categories_vec <- c(2, 4)
@@ -148,7 +148,7 @@ test_that("three dimensions, no constraints on item selection, ten iterations pe
   # EAP estimation does not work
   # PEKL information summaries give errors because it also makes use of EAP estimation
   # ML estimate gives error here
-  iterations_per_unique_condition <- 10 # extend to 100 when time permits and when EAP issue is fixed
+  iterations_per_unique_condition <- 100 # extend to 100 when time permits and when EAP issue is fixed
   true_theta_vec <- c(-2, 1, 2)
   number_items_vec <- c(300)
   number_answer_categories_vec <- c(2, 4)
@@ -157,7 +157,7 @@ test_that("three dimensions, no constraints on item selection, ten iterations pe
   start_items <- list(type = 'random', n = 3)
   variance_target <- .1^2
   model_vec <- c("3PLM","GRM","GPCM","SM")
-  estimator_vec <- c("MAP") # AEP # ML
+  estimator_vec <- c("ML", "MAP") # AEP
   information_summary_vec <- c("D", "PD", "A", "PA") # PEKL 
   item_selection_vec <- 'MI'
   
