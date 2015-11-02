@@ -100,7 +100,7 @@ test_that("one dimension, no constraints on item selection, one iteration per co
   
 })
 
-test_that("one dimension, no constraints on item selection, two iterations per condition", {
+test_that("one dimension, no constraints on item selection, 100 iterations per condition", {
   # EAP estimation does not work
   # PEKL information summaries give errors because it also makes use of EAP estimation
   iterations_per_unique_condition <- 100 # extend to 100 when time permits and when EAP issue is fixed
@@ -129,22 +129,25 @@ test_that("one dimension, no constraints on item selection, two iterations per c
   average_per_condition_true_1 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 1), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 1)]), "mean")
   sd_per_condition_true_1 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 1), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 1)]), "sd") 
   
-  expect_equal(round(average_per_condition_true_minus2[,"x"], 3)[1:4], c(-2.268, -1.733, -1.171, -2.122))
-  expect_equal(round(average_per_condition_true_1[,"x"], 3)[1:4], c(.768, .779, 1.435, 1.016))
-  expect_equal(round(sd_per_condition_true_minus2[,"x"], 3)[1:4], c(1.035, .407, .100, .102))
-  expect_equal(round(sd_per_condition_true_1[,"x"], 3)[1:4], c(.278, .178, .403, .081))
+  # five number summary of average theta estimate per condition, with true theta is -2
+  expect_equal(round(fivenum(average_per_condition_true_minus2[,"x"]), 3), c(-2.182, -2.049, -2.024, -1.999, -1.938))
   
-  expect_equal(round(fivenum(average_per_condition_true_minus2[,"x"]), 3), c(-2.717, -2.174, -1.999, -1.863, -1.171))
-  expect_equal(round(fivenum(average_per_condition_true_1[,"x"]), 3), c(.442, .877, 1.005, 1.147, 1.735))
-  expect_equal(round(range(sd_per_condition_true_minus2[,"x"]), 3), c(.009, 1.035))
-  expect_equal(round(range(sd_per_condition_true_1[,"x"]), 3), c(.001, .827))
+  # five number summary of average theta estimate per condition, with true theta is 1
+  expect_equal(round(fivenum(average_per_condition_true_1[,"x"]), 3), c(.934, .986, 1.003, 1.025, 1.084))
   
-  expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 50), "variance_estimate"])), 3), c(.213, .282, .355, .419, .901))
-  expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 100), "variance_estimate"])), 3), c(.152, .198, .247, .292, .499))
+  # five number summary of observed sd of the theta estimates within each condition, with true theta is -2
+  expect_equal(round(fivenum(sd_per_condition_true_minus2[,"x"]), 3), c(.156, .278, .322, .435, .548))  
+  
+  # five number summary of observed sd of the theta estimates within each condition, with true theta is 1
+  expect_equal(round(fivenum(sd_per_condition_true_1[,"x"]), 3), c(.156, .227, .257, .346, .434))  
+  
+  # five number summary of reported sd of the theta estimate within each condition where max number of items is 50 and 100, respectively
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 50), "variance_estimate"])), 3), c(.188, .283, .351, .420, 1.300))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 100), "variance_estimate"])), 3), c(.142, .200, .249, .298, .569))
  
 })
 
-test_that("three dimensions, no constraints on item selection, ten iterations per condition", {
+test_that("three dimensions, no constraints on item selection, 100 iterations per condition", {
   # EAP estimation does not work
   # PEKL information summaries give errors because it also makes use of EAP estimation
   # ML estimate gives error here
