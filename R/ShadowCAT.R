@@ -45,7 +45,7 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("person_updated_after_ne
 #' @param upperbound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
 #' @return index next item; when test is finished, "stop_test"
 #' @export
-shadowcat_roqua <- function(new_response, prior, model, alpha, beta, guessing, eta = NULL, start_items, stop_test, estimator, information_summary, item_selection = "MI", constraints = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha))) {
+shadowcat_roqua <- function(new_response, prior, model, alpha, beta, guessing = NULL, eta = NULL, start_items, stop_test, estimator, information_summary, item_selection = "MI", constraints = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha))) {
   item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = eta, silent = TRUE)
   
   person <- initPerson(items = item_characteristics_shadowcat_format, 
@@ -95,10 +95,20 @@ shadowcat_roqua <- function(new_response, prior, model, alpha, beta, guessing, e
   }
   
   validate <- function() {
-    if (is.null(person))
-      add_error("person", "is missing")
-    if (is.null(test))
-      add_error("test", "is missing")
+    if (is.null(model))
+      add_error("model", "is missing")
+    if (is.null(alpha))
+      add_error("alpha", "is missing")
+    if (is.null(beta))
+      add_error("beta", "is missing")
+    if (is.null(start_items))
+      add_error("start_items", "is missing")
+    if (is.null(stop_test))
+      add_error("stop_test", "is missing")
+    if (is.null(estimator))
+      add_error("estimator", "is missing")
+    if (is.null(information_summary))
+      add_error("information_summary", "is missing")
   }
   
   invalid_result <- function() {
