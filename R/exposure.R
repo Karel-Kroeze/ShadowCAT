@@ -43,9 +43,15 @@ createExposureConstraint <- function(test, exposure, eligible, feasible, total, 
   }
   
   # add constraints
-  test$constraints$lp_chars <- cbind(test$constraints$lp_chars, ineligible = ineligible)
-  test$constraints$constraints <- rbind(test$constraints$constraints, list("ineligible", "=", 0))
-    
+  if (!is.null(test$constraints$lp_chars$ineligible)){
+    # do we already have ineligibility constraints? If so, update them.
+    test$constraints$lp_chars$ineligible <- ineligible
+  } else {
+    # otherwise, add them.
+    test$constraints$lp_chars <- cbind(test$constraints$lp_chars, ineligible = ineligible)
+    test$constraints$constraints <- rbind(test$constraints$constraints, list("ineligible", "=", 0))
+  } 
+  
   # administrative fluff
   test$exposure <- list(feasible = feasible, eligible = !ineligible)
   

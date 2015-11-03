@@ -65,7 +65,7 @@ estimate <- function(person, test, ...) {
     # We want a maximum, but nlm produces minima -> reverse function call. 
     # LL is the target function, test, person and minimize need to be passed on. We also want the value of the hessian at the final estimate.
     
-    # note that prior is applied in LL (incorrectly it seems, but still).
+    # note that prior is applied in LL
     # suppress warnings and errors and do EAP instead.
     person$estimate <- tryCatch( nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate, # passed on to LL, reverses polarity.
                          error = function(e) {
