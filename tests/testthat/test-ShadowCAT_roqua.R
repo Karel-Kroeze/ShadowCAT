@@ -155,7 +155,7 @@ test_that("three dimensions, estimates ML and MAP, information summary D, PD, A,
   number_answer_categories_vec <- c(2, 4)
   number_dimensions <- 3
   
-  start_items <- list(type = 'random', n = 3)
+  start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
   variance_target <- .1^2
   model_vec <- c("3PLM","GRM","GPCM","SM")
   estimator_vec <- c("ML", "MAP") # AEP
@@ -189,27 +189,27 @@ test_that("three dimensions, estimates ML and MAP, information summary D, PD, A,
   number_na_per_condition <- aggregate(estimates_and_conditions[, "estimated_theta1"], list(condition_vector), FUN = function(x) { sum(is.na(x)) })
   
   # five number summary of average theta estimate per condition, dimension 1 (true theta is -2)
-  expect_equal(round(fivenum(average_per_condition_dim1[,"x"]), 3), c(-2.253, -2.042, -2.020, -2.001, -1.943))
+  expect_equal(round(fivenum(average_per_condition_dim1[,"x"]), 3), c(-2.108, -2.045, -2.015, -1.992, -1.950))
   # five number summary of average theta estimate per condition, dimension 2 (true theta is 1)
-  expect_equal(round(fivenum(average_per_condition_dim2[,"x"]), 3), c(.939, .982, 1.006, 1.021, 1.077))
+  expect_equal(round(fivenum(average_per_condition_dim2[,"x"]), 3), c(.954, .990, 1.011, 1.019, 1.058))
   # five number summary of average theta estimate per condition, dimension 3 (true theta is 2)
-  expect_equal(round(fivenum(average_per_condition_dim3[,"x"]), 3), c(1.962, 1.991, 2.010, 2.034, 2.098))
+  expect_equal(round(fivenum(average_per_condition_dim3[,"x"]), 3), c(1.967, 1.999, 2.016, 2.040, 2.123))
   
   # five number summary of observed sd of the theta estimates within each condition, for dimension 1, 2, and 3, respectively
-  expect_equal(round(fivenum(sd_per_condition_dim1[,"x"]), 3), c(.163, .207, .310, .340, .405))
-  expect_equal(round(fivenum(sd_per_condition_dim2[,"x"]), 3), c(.139, .179, .236, .256, .325))
-  expect_equal(round(fivenum(sd_per_condition_dim3[,"x"]), 3), c(.154, .211, .319, .340, .406))
+  expect_equal(round(fivenum(sd_per_condition_dim1[,"x"]), 3), c(.176, .211, .304, .340, .387))
+  expect_equal(round(fivenum(sd_per_condition_dim2[,"x"]), 3), c(.157, .195, .243, .260, .301))
+  expect_equal(round(fivenum(sd_per_condition_dim3[,"x"]), 3), c(.171, .206, .312, .337, .385))
   
   # five number summary of reported sd of the theta estimate within each condition, for dimension 1, 2, and 3, respectively
-  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate1"])), 3), c(.164, .261, .289, .317, .549))
-  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), c(.142, .203, .246, .275, .393))
-  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.161, .203, .287, .316, .564))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate1"])), 3), c(.160, .262, .289, .316, .525))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), c(.146, .206, .248, .277, .382))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.158, .212, .289, .316, .522))
   
   # no errors/missings for MAP estimator
   expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "MAP"), "x"], rep(0, 32))
   # many errors/missings for ML estimator
   expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "ML"), "x"], 
-               c(9, 7, 26, 21, 10, 7, 29, 22, 8, 7, 33, 19, 14, 13, 32, 15, 63, 49, 57, 57, 56, 58, 58, 52, 57, 56, 57, 55, 58, 53, 56, 54))
+               c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0))
   
 })
 
