@@ -72,7 +72,7 @@ estimate <- function(person, test, safe_ml = FALSE) {
     # suppress warnings and errors and do EAP instead. RM I have removed this option, I don't want users to get something they think
     # is something else. Also, if estimator was ML, the default prior is used which may not make sense.
     
-    if (safe_ml) {
+    if (safe_ml)
       person$estimate <- tryCatch(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate,
                                   error = function(e) {
                                     test$estimator <- "MAP"
@@ -84,29 +84,13 @@ estimate <- function(person, test, safe_ml = FALSE) {
                                     person$prior <- diag(number_dimensions) * 100
                                     return(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate)
                                   })
-      
-      fisher_information_items <- FI(test, person)
-      fisher_information_test_so_far <- tryCatch(apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum),
-                                                 error = function(e) {
-                                                   return(apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum) +
-                                                          solve(person$prior))
-                                                 },
-                                                 warning = function(w) {
-                                                   return(apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum) +
-                                                            solve(person$prior))
-                                                 })
-       
-      
-    }
-
-    else {
+    else
       person$estimate <- nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate # passed on to LL, reverses polarity.
-      
-      # TODO: We should really store info somewhere so we don't have to redo this (when using FI based selection criteria).
-      fisher_information_items <- FI(test, person)
-      fisher_information_test_so_far <- apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum)
-    }
-      
+    
+    # TODO: We should really store info somewhere so we don't have to redo this (when using FI based selection criteria).
+    fisher_information_items <- FI(test, person)
+    fisher_information_test_so_far <- apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum)
+    
     # inverse
     attr(person$estimate, "variance") <- solve(fisher_information_test_so_far)
     person$estimate
@@ -125,7 +109,7 @@ estimate <- function(person, test, safe_ml = FALSE) {
     # TODO: We should really store info somewhere so we don't have to redo this (when using FI based selection criteria).
     fisher_information_items <- FI(test, person)
     fisher_information_test_so_far <- apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum) +
-                                      solve(person$prior)
+      solve(person$prior)
     # inverse
     attr(person$estimate, "variance") <- solve(fisher_information_test_so_far)
     person$estimate
