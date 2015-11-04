@@ -9,9 +9,9 @@ if (FALSE) {
   
 make_random_seed_exist <- rnorm(1)
 
-test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection = "MI", constraints = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha))) {
+test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection = "MI", constraints = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha)), safe_ml = FALSE) {
   new_response <- NULL
-  next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection, constraints, lowerbound, upperbound)
+  next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection, constraints, lowerbound, upperbound, safe_ml)
   
   while (next_item_and_test_outcome$index_new_item != "stop_test") {
     person_updated_after_new_response$theta <- true_theta
@@ -25,7 +25,7 @@ test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing
                                                 selection = item_selection), 
                                 indeces = next_item_and_test_outcome$index_new_item)$responses, 1) # simulate person response on new item
     
-    next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection, constraints, lowerbound, upperbound)   
+    next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection, constraints, lowerbound, upperbound, safe_ml)   
   }
   
   next_item_and_test_outcome$person_updated_after_new_response
@@ -43,7 +43,7 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
   conditions
 }
 
-run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, item_selection = "MI", constraints = NULL, guessing = NULL, items_load_one_dimension = TRUE, lowerbound = rep(-3, number_dimensions), upperbound = rep(3, number_dimensions), prior = diag(number_dimensions) * 20) {                   
+run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, item_selection = "MI", constraints = NULL, guessing = NULL, items_load_one_dimension = TRUE, lowerbound = rep(-3, number_dimensions), upperbound = rep(3, number_dimensions), prior = diag(number_dimensions) * 20, safe_ml = FALSE) {                   
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec, iterations_per_unique_condition, number_dimensions)
   
   pbapply::pbsapply(1:nrow(conditions), 
@@ -55,7 +55,7 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
                                     else
                                       true_theta_vec )
                     alpha_beta <- createTestBank(model = as.character(conditions[condition, "model"]), K = conditions[condition, "number_items"], Q = number_dimensions, M = conditions[condition, "number_answer_categories"] - 1, between = items_load_one_dimension, run_initItembank = FALSE)
-                    estimate_theta <- tryCatch(test_shadowcat_roqua(true_theta, prior, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), item_selection, constraints, lowerbound, upperbound)$estimate,
+                    estimate_theta <- tryCatch(test_shadowcat_roqua(true_theta, prior, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), item_selection, constraints, lowerbound, upperbound, safe_ml)$estimate,
                                                error = function(e) e)
            
                     c("estimated_theta" = estimate_theta,
