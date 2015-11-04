@@ -77,13 +77,11 @@ estimate <- function(person, test, safe_ml = FALSE) {
                                   error = function(e) {
                                     test$estimator <- "MAP"
                                     person$prior <- diag(number_dimensions) * 100
-                                    print("turned to MAP")
                                     return(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate)
                                   },
                                   warning = function(w) {
                                     test$estimator <- "MAP"
                                     person$prior <- diag(number_dimensions) * 100
-                                    print("turned to MAP")
                                     return(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate)
                                   })
     else
