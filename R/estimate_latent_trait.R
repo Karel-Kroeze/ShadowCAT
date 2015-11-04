@@ -53,29 +53,46 @@
 #' 
 #' @param person Person object, see \code{\link{initPerson}}.
 #' @param test Test object, see \code{\link{initTest}}.
+#' @param safe_ml if TRUE, MAP estimate with flat prior is computed instead of ML if ML estimate fails
 #' @return person object, amended with the new estimate.
 #' @importFrom MultiGHQuad init.quad eval.quad
 #' @export
-estimate <- function(person, test) {
+estimate <- function(person, test, safe_ml = FALSE) {
   result <- function() {
-    updated_estimate <- get_updated_estimate_and_variance_attribute(test$estimator)     
-    person$estimate <- trim_estimate(updated_estimate)    
+    updated_estimate <- get_updated_estimate_and_variance_attribute(test$estimator)
+    person$estimate <- trim_estimate(updated_estimate)
     invisible(person)
   }
   
   get_updated_estimate_and_variance_ml <- function() {
     # for now, simple nlm (TODO: look at optim, and possible reintroducing pure N-R).
-    # We want a maximum, but nlm produces minima -> reverse function call. 
+    # We want a maximum, but nlm produces minima -> reverse function call.
     # LL is the target function, test, person and minimize need to be passed on. We also want the value of the hessian at the final estimate.
     
     # suppress warnings and errors and do EAP instead. RM I have removed this option, I don't want users to get something they think
     # is something else. Also, if estimator was ML, the default prior is used which may not make sense.
-    person$estimate <- nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate # passed on to LL, reverses polarity.
+    
+    if (safe_ml)
+      person$estimate <- tryCatch(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate,
+                                  error = function(e) {
+                                    test$estimator <- "MAP"
+                                    person$prior <- diag(number_dimensions) * 100
+                                    print("turned to MAP")
+                                    return(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate)
+                                  },
+                                  warning = function(w) {
+                                    test$estimator <- "MAP"
+                                    person$prior <- diag(number_dimensions) * 100
+                                    print("turned to MAP")
+                                    return(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate)
+                                  })
+    else
+      person$estimate <- nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate # passed on to LL, reverses polarity.
     
     # TODO: We should really store info somewhere so we don't have to redo this (when using FI based selection criteria).
     fisher_information_items <- FI(test, person)
     fisher_information_test_so_far <- apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum)
-
+    
     # inverse
     attr(person$estimate, "variance") <- solve(fisher_information_test_so_far)
     person$estimate
@@ -83,7 +100,7 @@ estimate <- function(person, test) {
   
   get_updated_estimate_and_variance_map <- function() {
     # for now, simple nlm (TODO: look at optim, and possible reintroducing pure N-R).
-    # We want a maximum, but nlm produces minima -> reverse function call. 
+    # We want a maximum, but nlm produces minima -> reverse function call.
     # LL is the target function, test, person and minimize need to be passed on. We also want the value of the hessian at the final estimate.
     
     # note that prior is applied in LL (incorrectly it seems, but still).
@@ -94,7 +111,7 @@ estimate <- function(person, test) {
     # TODO: We should really store info somewhere so we don't have to redo this (when using FI based selection criteria).
     fisher_information_items <- FI(test, person)
     fisher_information_test_so_far <- apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum) +
-                                      solve(person$prior)
+      solve(person$prior)
     # inverse
     attr(person$estimate, "variance") <- solve(fisher_information_test_so_far)
     person$estimate
@@ -105,11 +122,11 @@ estimate <- function(person, test) {
     # TODO: prior mean is currently fixed at zero, update when/if possible.
     # TODO: allow setting ip through internals argument(s)
     adapt <- if (length(person$responses) > 5 & !is.null(attr(person$estimate, 'variance')))
-               list(mu = person$estimate, Sigma = as.matrix(attr(person$estimate, "variance")))    
+      list(mu = person$estimate, Sigma = as.matrix(attr(person$estimate, "variance")))
     Q_dim_grid_quad_points <- init.quad(Q = test$items$Q,
-                              prior = list(mu = rep(0, test$items$Q), Sigma = person$prior),
-                              adapt = adapt,
-                              ip = switch(test$items$Q, 50, 15, 6, 4, 3))
+                                        prior = list(mu = rep(0, test$items$Q), Sigma = person$prior),
+                                        adapt = adapt,
+                                        ip = switch(test$items$Q, 50, 15, 6, 4, 3))
     eval.quad(FUN = LL, X = Q_dim_grid_quad_points, test = test, person = person)
   }
   
@@ -142,4 +159,3 @@ estimate <- function(person, test) {
   
   validate_and_run()
 }
-

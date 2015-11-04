@@ -42,9 +42,10 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("person_updated_after_ne
 #' See constraints_correct_format() for details
 #' @param lowerbound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values 
 #' @param upperbound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
+#' @param safe_ml if TRUE, MAP estimate with flat prior is computed instead of ML if ML estimate fails
 #' @return a list with the index of the next item to be administered given a new response (or "stop_test"), and an updated person object
 #' @export
-shadowcat_roqua <- function(new_response, prior, model, alpha, beta, guessing = NULL, eta = NULL, start_items, stop_test, estimator, information_summary, item_selection = "MI", constraints = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha))) {
+shadowcat_roqua <- function(new_response, prior, model, alpha, beta, guessing = NULL, eta = NULL, start_items, stop_test, estimator, information_summary, item_selection = "MI", constraints = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha)), safe_ml = FALSE) {
   item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = eta, silent = TRUE)
   
   person <- initPerson(items = item_characteristics_shadowcat_format, 
@@ -88,7 +89,7 @@ shadowcat_roqua <- function(new_response, prior, model, alpha, beta, guessing = 
     person$administered <- c(person$administered, index_new_item)
     person$available <- person$available[-which(person$available %in% index_new_item)]
     if (length(person$responses) > test$start$n) 
-      estimate(person, test)
+      estimate(person, test, safe_ml)
     else
       person
   }
