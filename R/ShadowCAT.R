@@ -1,6 +1,5 @@
 if(getRversion() >= "2.15.1")  utils::globalVariables(c("person_updated_after_new_response", "index_new_item"))
-#' Returns the index of the next item to be administered given a new response, and updates the global variables person_updated_after_new_response and index_new_item.
-#' When test is finished, person_updated_after_new_response is returned 
+#' Returns a list with the index of the next item to be administered given a new response, and an updated person object
 #'
 #' @param new_response new response from respondent, should be initialized with NULL
 #' @param prior covariance matrix of the multi variate normal prior for theta; mean vector is fixed at zero; only used when estimator type is MAP or EAP, but at this point should always be defined
@@ -43,7 +42,7 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("person_updated_after_ne
 #' See constraints_correct_format() for details
 #' @param lowerbound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values 
 #' @param upperbound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
-#' @return index next item; when test is finished, "stop_test"
+#' @return a list with the index of the next item to be administered given a new response (or "stop_test"), and an updated person object
 #' @export
 shadowcat_roqua <- function(new_response, prior, model, alpha, beta, guessing = NULL, eta = NULL, start_items, stop_test, estimator, information_summary, item_selection = "MI", constraints = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha))) {
   item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = eta, silent = TRUE)

@@ -43,12 +43,12 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
   conditions
 }
 
-run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec, prior, start_items, variance_target, iterations_per_unique_condition, number_dimensions, item_selection = "MI", constraints = NULL, guessing = NULL, items_load_one_dimension = TRUE, lowerbound = rep(-3, number_dimensions), upperbound = rep(3, number_dimensions)) {                   
+run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec, prior, start_items, variance_target, iterations_per_unique_condition, number_dimensions, item_selection = "MI", constraints = NULL, guessing = NULL, items_load_one_dimension = TRUE, lowerbound = rep(-3, number_dimensions), upperbound = rep(3, number_dimensions), prior = diag(number_dimensions) * 20) {                   
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec, iterations_per_unique_condition, number_dimensions)
   
   pbapply::pbsapply(1:nrow(conditions), 
                     FUN = function(condition) {
-                    prior <- diag(number_dimensions) * 20
+                    prior <- prior
                     stop_test <- list(type = 'variance', target = variance_target, n = conditions[condition, "number_items"])
                     true_theta <- ( if (number_dimensions == 1) 
                                       conditions[condition, "true_theta"]
