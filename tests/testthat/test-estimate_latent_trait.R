@@ -92,6 +92,47 @@ test_that("estimator is ML, 3 dimensions, varying number of categories", {
   expect_equal(round(attr(estimated_latent_trait$estimate, "variance"), 3)[3,], c(-.181, -.281, .484))
 })
 
+test_that("test safe_ml", {
+  # create item characteristics
+  model <- 'SM'
+  number_items <- 300
+  number_dimensions <- 3
+  max_number_answer_categories <- 2
+  guessing <- NULL
+  
+  alpha <- matrix(with_random_seed(107, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(with_random_seed(107, rnorm)(number_items), nrow = number_items, ncol = 1)
+  
+  item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, silent = TRUE)
+  
+  # get initiated test: adaptive test rules
+  initiated_test <- initTest(item_characteristics_shadowcat_format, 
+                             start = list(type = 'random', n = 9), 
+                             stop = list(type = 'length', n = 300),
+                             max_n = 300, # utter maximum
+                             estimator = 'ML',
+                             objective = 'A',
+                             selection = 'MI',
+                             constraints = NULL,
+                             exposure = NULL,
+                             lowerBound = rep(-3, item_characteristics_shadowcat_format$Q),
+                             upperBound = rep(3, item_characteristics_shadowcat_format$Q))
+  
+  # get initiated person
+  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = NULL)
+  initiated_person$available <- c(1:3, 5:26, 28:37, 39:181, 183:186, 188:199, 201:226, 228:240, 242:273, 275:197, 299:300)
+  initiated_person$administered <- c(38, 27, 4, 182, 187, 200, 241, 274, 227, 298)
+  initiated_person$estimate <- c(0, 0, 0)
+  initiated_person$responses <- c(0, 0, 0, 1, 1, 1, 1, 1, 1, 0)
+  attr(initiated_person$estimate, "variance") <- diag(3) * 20
+  
+  # ML estimation gives warning -> estimate switches to MAP
+  estimated_latent_trait <- estimate(initiated_person, initiated_test, safe_ml = TRUE)
+
+  expect_equal(round(as.vector(estimated_latent_trait$estimate), 3), c(-.281, .362, 1.315))
+  
+})
+
 context("estimator is MAP")
 
 test_that("estimator is MAP, 1 dimension, 2 categories", {

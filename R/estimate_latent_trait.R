@@ -65,27 +65,17 @@ estimate <- function(person, test, safe_ml = FALSE) {
   }
   
   get_updated_estimate_and_variance_ml <- function() {
+    if (safe_ml)
+      get_updated_estimate_and_variance_ml_safe()
+    else
+      get_updated_estimate_and_variance_ml_unsafe()
+  }
+  
+  get_updated_estimate_and_variance_ml_unsafe <- function() {
     # for now, simple nlm (TODO: look at optim, and possible reintroducing pure N-R).
     # We want a maximum, but nlm produces minima -> reverse function call.
     # LL is the target function, test, person and minimize need to be passed on. We also want the value of the hessian at the final estimate.
-    
-    # suppress warnings and errors and do EAP instead. RM I have removed this option, I don't want users to get something they think
-    # is something else. Also, if estimator was ML, the default prior is used which may not make sense.
-    
-    if (safe_ml)
-      person$estimate <- tryCatch(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate,
-                                  error = function(e) {
-                                    test$estimator <- "MAP"
-                                    person$prior <- diag(number_dimensions) * 100
-                                    return(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate)
-                                  },
-                                  warning = function(w) {
-                                    test$estimator <- "MAP"
-                                    person$prior <- diag(number_dimensions) * 100
-                                    return(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate)
-                                  })
-    else
-      person$estimate <- nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate # passed on to LL, reverses polarity.
+    person$estimate <- nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate # passed on to LL, reverses polarity.
     
     # TODO: We should really store info somewhere so we don't have to redo this (when using FI based selection criteria).
     fisher_information_items <- FI(test, person)
@@ -93,6 +83,35 @@ estimate <- function(person, test, safe_ml = FALSE) {
     
     # inverse
     attr(person$estimate, "variance") <- solve(fisher_information_test_so_far)
+    person$estimate
+  }
+  
+  get_updated_estimate_and_variance_ml_safe <- function() { 
+    # suppress warnings and errors and do MAP with flat prior instead
+    person$estimate <- tryCatch(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate,
+                                error = function(e) {
+                                  test$estimator <- "MAP"
+                                  person$prior <- diag(number_dimensions) * 100
+                                  return(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate)
+                                },
+                                warning = function(w) {
+                                  test$estimator <- "MAP"
+                                  person$prior <- diag(number_dimensions) * 100
+                                  return(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate)
+                                })
+
+    fisher_information_items <- FI(test, person)
+    fisher_information_test_so_far <- apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum)
+    
+    # inverse
+    attr(person$estimate, "variance") <- tryCatch(solve(fisher_information_test_so_far),
+                                                  error = function(e) {
+                                                    return(solve(fisher_information_test_so_far + diag(number_dimensions) * 100))
+                                                  },
+                                                  warning = function(w) {
+                                                    return(solve(fisher_information_test_so_far + diag(number_dimensions) * 100))
+                                                  })
+      
     person$estimate
   }
   
@@ -109,7 +128,7 @@ estimate <- function(person, test, safe_ml = FALSE) {
     # TODO: We should really store info somewhere so we don't have to redo this (when using FI based selection criteria).
     fisher_information_items <- FI(test, person)
     fisher_information_test_so_far <- apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum) +
-      solve(person$prior)
+                                      solve(person$prior)
     # inverse
     attr(person$estimate, "variance") <- solve(fisher_information_test_so_far)
     person$estimate
