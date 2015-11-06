@@ -207,10 +207,70 @@ test_that("three dimensions, estimates ML and MAP, information summary D, PD, A,
   
   # no errors/missings for MAP estimator
   expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "MAP"), "x"], rep(0, 32))
-  # many errors/missings for ML estimator
+  # some errors/missings for ML estimator
   expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "ML"), "x"], 
                c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0))
   
+})
+
+test_that("test safe_ml is TRUE", {
+  # EAP estimation does not work
+  # PEKL information summaries give errors because it also makes use of EAP estimation
+  # ML estimate gives error here
+  iterations_per_unique_condition <- 100 # extend to 100 when time permits and when EAP issue is fixed
+  true_theta_vec <- c(-2, 1, 2)
+  number_items_vec <- c(300)
+  number_answer_categories_vec <- c(2, 4)
+  number_dimensions <- 3
+  
+  start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
+  variance_target <- .1^2
+  model_vec <- c("3PLM","GRM","GPCM","SM")
+  estimator_vec <- c("ML", "MAP") # AEP
+  information_summary_vec <- c("D", "PD", "A", "PA") # PEKL 
+  item_selection_vec <- 'MI'
+  
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, safe_ml = TRUE)
+  
+  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec, iterations_per_unique_condition, number_dimensions)
+  
+  condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/iterations_per_unique_condition), iterations_per_unique_condition))
+  
+  estimates_and_conditions <- cbind(t(estimates_and_variance)[, c("estimated_theta1", "estimated_theta2", "estimated_theta3", "variance_estimate1", "variance_estimate5", "variance_estimate9")], 
+                                    conditions[, c("iteration", "number_items", "number_answer_categories", "model", "estimator", "information_summary")], 
+                                    condition_vector)
+  
+  average_per_condition_dim1 <- aggregate(estimates_and_conditions[, "estimated_theta1"], list(condition_vector), "mean", na.rm = TRUE)
+  average_per_condition_dim2 <- aggregate(estimates_and_conditions[, "estimated_theta2"], list(condition_vector), "mean", na.rm = TRUE)
+  average_per_condition_dim3 <- aggregate(estimates_and_conditions[, "estimated_theta3"], list(condition_vector), "mean", na.rm = TRUE)
+  
+  sd_per_condition_dim1 <- aggregate(estimates_and_conditions[, "estimated_theta1"], list(condition_vector), "sd", na.rm = TRUE)
+  sd_per_condition_dim2 <- aggregate(estimates_and_conditions[, "estimated_theta2"], list(condition_vector), "sd", na.rm = TRUE)
+  sd_per_condition_dim3 <- aggregate(estimates_and_conditions[, "estimated_theta3"], list(condition_vector), "sd", na.rm = TRUE)
+  
+  number_na_per_condition <- aggregate(estimates_and_conditions[, "estimated_theta1"], list(condition_vector), FUN = function(x) { sum(is.na(x)) })
+  
+  # five number summary of average theta estimate per condition, dimension 1 (true theta is -2)
+  expect_equal(round(fivenum(average_per_condition_dim1[,"x"]), 3), c(-2.108, -2.045, -2.017, -1.992, -1.950))
+  # five number summary of average theta estimate per condition, dimension 2 (true theta is 1)
+  expect_equal(round(fivenum(average_per_condition_dim2[,"x"]), 3), c(.954, .990, 1.011, 1.020, 1.077))
+  # five number summary of average theta estimate per condition, dimension 3 (true theta is 2)
+  expect_equal(round(fivenum(average_per_condition_dim3[,"x"]), 3), c(1.967, 1.999, 2.016, 2.044, 2.123))
+  
+  # five number summary of observed sd of the theta estimates within each condition, for dimension 1, 2, and 3, respectively
+  expect_equal(round(fivenum(sd_per_condition_dim1[,"x"]), 3), c(.176, .213, .304, .340, .392))
+  expect_equal(round(fivenum(sd_per_condition_dim2[,"x"]), 3), c(.157, .195, .244, .264, .332))
+  expect_equal(round(fivenum(sd_per_condition_dim3[,"x"]), 3), c(.171, .206, .314, .340, .395))
+  
+  # five number summary of reported sd of the theta estimate within each condition, for dimension 1, 2, and 3, respectively
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate1"])), 3), c(.100, .262, .289, .316, .525))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), c(.100, .206, .248, .277, .382))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.100, .210, .289, .316, .522))
+  
+  # no errors/missings for MAP estimator
+  expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "MAP"), "x"], rep(0, 32))
+  # no errors/missings for ML estimator
+  expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "ML"), "x"], rep(0, 32))
 })
 
 context("validate shadowcat_roqua single conditions")
