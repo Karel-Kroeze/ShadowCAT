@@ -31,13 +31,13 @@ test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing
   next_item_and_test_outcome$person_updated_after_new_response
 }
 
-get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec, iterations_per_unique_condition, number_dimensions) {
+get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions) {
   if (number_dimensions == 1) {
-    conditions <- expand.grid(1:iterations_per_unique_condition, true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec)
+    conditions <- expand.grid(1:iterations_per_unique_condition, true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection)
     colnames(conditions) <- c("iteration", "true_theta", "number_items", "number_answer_categories", "model", "estimator", "information_summary", "item_selection")
   }
   else {
-    conditions <- expand.grid(1:iterations_per_unique_condition, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec)
+    conditions <- expand.grid(1:iterations_per_unique_condition, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection)
     colnames(conditions) <- c("iteration", "number_items", "number_answer_categories", "model", "estimator", "information_summary", "item_selection") 
   }
   conditions
@@ -47,7 +47,7 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
 # if number dimensions is larger than 1, true_theta_vec is interpreted as containing the true thetas for each dimension
 # item_selection can be "MI" or "Shadow". In case of "Shadow", constraints should be defined, and number_items_vec can only have length 1
 run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints = NULL, guessing = NULL, items_load_one_dimension = TRUE, lowerbound = rep(-3, number_dimensions), upperbound = rep(3, number_dimensions), prior = diag(number_dimensions) * 20, safe_ml = FALSE, return_administered_item_indeces = FALSE) {                   
-  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec, iterations_per_unique_condition, number_dimensions)
+  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
   
   pbapply::pbsapply(1:nrow(conditions), 
                     FUN = function(condition) {
