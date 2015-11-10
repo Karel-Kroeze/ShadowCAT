@@ -50,7 +50,7 @@ shadowcat_roqua <- function(new_response, prior, model, alpha, beta, guessing = 
   
   person <- initPerson(items = item_characteristics_shadowcat_format, 
                        prior = prior)
-  
+
   test <- initTest(items = item_characteristics_shadowcat_format, 
                    start = start_items, 
                    stop = stop_test,
@@ -62,7 +62,7 @@ shadowcat_roqua <- function(new_response, prior, model, alpha, beta, guessing = 
                    exposure = NULL,
                    lowerBound = lowerbound,
                    upperBound = upperbound)
-   
+
   result <- function() {
     if (is.null(new_response)) { # first iteration: no responses given yet
       assign("person_updated_after_new_response", person, envir = .GlobalEnv)

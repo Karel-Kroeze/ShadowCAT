@@ -56,7 +56,6 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
                     prior <- prior
                     if (is.null(max_n))
                       max_n <- conditions[condition, "number_items"] 
-                    print(max_n)
                     stop_test <- list(type = 'variance', target = variance_target, n = max_n)
                     true_theta <- ( if (number_dimensions == 1) 
                                       conditions[condition, "true_theta"]
@@ -313,7 +312,7 @@ test_that("test constraints, max_n 130", {
                            op = '><',
                            target = c(75, 100)))
   
-  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, safe_ml = TRUE, return_administered_item_indeces = TRUE, max_n = max_n)
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints = list(characteristics = characteristics, constraints = constraints), safe_ml = TRUE, return_administered_item_indeces = TRUE, max_n = max_n)
   #save(estimates_and_variance, file = "/Users/rivkadevries/Desktop/simulationsCAT/estimates_and_variance_3dim_constraints_maxn130.R")
   
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
@@ -373,6 +372,60 @@ test_that("test constraints, max_n 130", {
   expect_equal(fivenum(number_somatic_items), c(38, 43, 45, 46, 50)) 
 })
 
+test_that("test constraints, max_n 260", {
+  # EAP estimation does not work
+  # PEKL information summaries give errors because it also makes use of EAP estimation
+  # ML estimate gives error here
+  iterations_per_unique_condition <- 100 # extend to 100 when time permits and when EAP issue is fixed
+  true_theta_vec <- c(-2, 1, 2)
+  number_items_vec <- 300 # can only have length one here (with item characteristics) and should be divisible by 3, to keep things simple
+  number_answer_categories_vec <- 4
+  number_dimensions <- 3
+  
+  start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
+  variance_target <- .001^2
+  model_vec <- "SM"
+  estimator_vec <- c("ML", "MAP") # AEP
+  information_summary_vec <- "D" # PEKL 
+  item_selection <- 'Shadow' 
+  max_n = 260
+  
+  #create item characteristics and constraints
+  characteristics <- data.frame(content = c(rep('depression', number_items_vec / 3), rep('anxiety', number_items_vec / 3), rep('somatic', number_items_vec / 3)))
+  constraints <- list(list(name = 'content/depression',
+                           op = '><',
+                           target = c(50, 75)),
+                      list(name = 'content/somatic',
+                           op = '><',
+                           target = c(75, 90)))
+  
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints = list(characteristics = characteristics, constraints = constraints), safe_ml = TRUE, return_administered_item_indeces = TRUE, max_n = max_n)
+  #save(estimates_and_variance, file = "/Users/rivkadevries/Desktop/simulationsCAT/estimates_and_variance_3dim_constraints_maxn260.R")
+  
+  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
+  
+  condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/iterations_per_unique_condition), iterations_per_unique_condition))
+  
+  estimates_and_conditions <- cbind(t(estimates_and_variance)[, c("estimated_theta1", "estimated_theta2", "estimated_theta3", "variance_estimate1", "variance_estimate5", "variance_estimate9",
+                                                                  str_c("items_administered", 1:max_n))], 
+                                    conditions[, c("iteration", "number_items", "number_answer_categories", "model", "estimator", "information_summary")], 
+                                    condition_vector)
+  
+  number_depression_items <- apply(estimates_and_conditions[,str_c("items_administered", 1:max_n)], 
+                                   1, 
+                                   FUN = function(x) {sum(x <= 100)} )
+  number_anxiety_items <- apply(estimates_and_conditions[,str_c("items_administered", 1:max_n)], 
+                                1, 
+                                FUN = function(x) {sum((x > 100 & x <= 200))} )
+  number_somatic_items <- apply(estimates_and_conditions[,str_c("items_administered", 1:max_n)], 
+                                1, 
+                                FUN = function(x) {sum(x > 200)} )
+  
+  # with max_n small, the minimum of 50 depression and 75 somatic items is not reached
+  expect_equal(fivenum(number_depression_items), c(83, 90, 92, 93, 96))
+  expect_equal(fivenum(number_anxiety_items), c(77, 83, 84, 86, 91))
+  expect_equal(fivenum(number_somatic_items), c(78, 82, 84, 86, 91)) 
+})
 
 test_that("MAP with informative prior", {
   # EAP estimation does not work
@@ -650,6 +703,50 @@ test_that("stop rule is variance", {
   expect_equal(test_outcome$administered, c(10, 30, 48, 7, 24, 5, 17))
   expect_equal(test_outcome$responses, c(1, 0, 1, 1, 0, 1, 0))
 })
+
+context("constraints")
+test_that("test constraints", {
+  # define true theta for simulation of responses
+  true_theta <- c(-2, 1, 2)
+  
+  # define item characteristics
+  number_items <- 300
+  number_dimensions <- 3
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  
+  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
+  stop_test <- list(type = 'length', n = 130)
+  estimator <- 'MAP'
+  information_summary <- 'PD'
+  item_selection <- 'MI'
+  
+  #create item characteristics and constraints
+  characteristics <- data.frame(content = c(rep('depression', number_items_vec / 3), rep('anxiety', number_items_vec / 3), rep('somatic', number_items_vec / 3)))
+  constraints <- list(list(name = 'content/depression',
+                           op = '><',
+                           target = c(50, 75)),
+                      list(name = 'content/somatic',
+                           op = '><',
+                           target = c(75, 100)))
+  
+  # define prior covariance matrix
+  prior <- diag(number_dimensions)
+  
+  test_outcome <- with_random_seed(2, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints = list(characteristics = characteristics, constraints = constraints))
+  
+  expect_equal(as.vector(round(test_outcome$estimate, 3)), .405)
+  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), .315)
+  expect_equal(test_outcome$available, c(1:4, 8:9, 11:16, 18:23, 25:29, 31:44, 46, 49:50))
+  expect_equal(test_outcome$administered, c(10, 30, 48, 7, 24, 5, 17, 6, 45, 47))
+  expect_equal(test_outcome$responses, c(1, 0, 1, 1, 0, 1, 0, 1, 0, 1))
+})
+
 
 # gives error at this point due to bug in updated MultiGHQuad package
 if (FALSE) {  

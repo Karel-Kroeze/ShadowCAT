@@ -81,7 +81,7 @@ createConstraints <- function(test, characteristics = NULL, constraints = NULL) 
                        else
                          as.data.frame(rbind(data.frame(name = 'length', op = '=', target = max_n, stringsAsFactors = FALSE),
                                              get_constraints_lp())))
-    
+
     characteristics_numeric_lp <- characteristics_numeric[,constraints_lp$name, drop = FALSE]
     
     characteristics_and_constraints_lp <- list(characteristics = characteristics_numeric, constraints = constraints_lp, lp_chars = characteristics_numeric_lp)
@@ -91,7 +91,7 @@ createConstraints <- function(test, characteristics = NULL, constraints = NULL) 
   }
   
   get_characteristics_numeric <- function() {
-    numeric_characteristics_list <- sapply(colnames(characteristics), 
+    numeric_characteristics_list <- lapply(colnames(characteristics), 
                                            FUN = function(key) {   
                                             if (is.character(characteristics[[key]]) || is.factor(characteristics[[key]])) {
                                               dummy_matrix <- sapply(unique(characteristics[[key]]), FUN = categorical_to_dummy, categorical_vector = characteristics[[key]])
@@ -102,7 +102,11 @@ createConstraints <- function(test, characteristics = NULL, constraints = NULL) 
                                               matrix(characteristics[[key]], ncol = 1, dimnames = list(c(), key))
                                             } 
                                     )
-    do.call(cbind, numeric_characteristics_list)
+
+    if (is.list(numeric_characteristics_list))
+      do.call(cbind, numeric_characteristics_list)
+    else
+      numeric_characteristics_list 
   }
   
   get_names_numeric_characteristics_list <- function(numeric_characteristics_list) {
@@ -111,13 +115,18 @@ createConstraints <- function(test, characteristics = NULL, constraints = NULL) 
   }
   
   get_constraints_lp <- function() {
-    constraints_lp_format_list <- sapply(constraints, FUN = function(constraint) { if (constraint$op == "><")  
+    constraints_lp_format_list <- lapply(constraints, FUN = function(constraint) { if (constraint$op == "><")  
                                                                                      rbind(c(constraint$name, ">", constraint$target[1]), 
                                                                                            c(constraint$name, "<", constraint$target[2]))
                                                                                    else
                                                                                      c(constraint$name, constraint$op, constraint$target)
                                                                                  }) 
-    constraints_lp_format <- do.call(rbind, constraints_lp_format_list)
+
+    constraints_lp_format <- ( if (is.list(constraints_lp_format_list))
+                                 do.call(rbind, constraints_lp_format_list) 
+                               else
+                                 constraints_lp_format_list )
+      
     colnames(constraints_lp_format) <- c("name", "op", "target")
     constraints_lp_format
   }
