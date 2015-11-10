@@ -345,31 +345,30 @@ test_that("test constraints, max_n 130", {
                                    FUN = function(x) {sum(x > 200)} )
   
   # average theta estimate per condition, dimension 1 (true theta is -2)
-  expect_equal(round(average_per_condition_dim1[,"x"], 3), c(-2.029, -2.002))
+  expect_equal(round(average_per_condition_dim1[,"x"], 3), c(-2.006, -1.992))
   # average theta estimate per condition, dimension 2 (true theta is 1)
-  expect_equal(round(average_per_condition_dim2[,"x"], 3), c(.986, .982))
+  expect_equal(round(average_per_condition_dim2[,"x"], 3), c(.996, 1.056))
   # average theta estimate per condition, dimension 3 (true theta is 2)
-  expect_equal(round(average_per_condition_dim3[,"x"], 3), c(2.034, 2.011))
+  expect_equal(round(average_per_condition_dim3[,"x"], 3), c(2.000, 2.027))
   
   # five number summary of observed sd of the theta estimates within each condition, for dimension 1, 2, and 3, respectively
-  expect_equal(round(sd_per_condition_dim1[,"x"], 3), c(.284, .316))
-  expect_equal(round(sd_per_condition_dim2[,"x"], 3), c(.189, .212))
-  expect_equal(round(sd_per_condition_dim3[,"x"], 3), c(.260, .248))
+  expect_equal(round(sd_per_condition_dim1[,"x"], 3), c(.286, .272))
+  expect_equal(round(sd_per_condition_dim2[,"x"], 3), c(.756, .626))
+  expect_equal(round(sd_per_condition_dim3[,"x"], 3), c(.188, .216))
   
   # five number summary of reported sd of the theta estimate within each condition, for dimension 1, 2, and 3, respectively
-  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate1"])), 3), c(.270, .297, .313, .328, .388))
-  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), c(.202, .216, .221, .229, .247))
-  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.194, .207, .212, .217, .245))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate1"])), 3), c(.240, .277, .295, .311, .397))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), c(.546, .618, .674, .711, .841))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.172, .182, .188, .193, .214))
   
   # no errors/missings for MAP estimator
   expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "MAP"), "x"], 0)
   # no errors/missings for ML estimator
   expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "ML"), "x"], 0)
   
-  # with max_n small, the minimum of 50 depression and 75 somatic items is not reached
-  expect_equal(fivenum(number_depression_items), c(34, 39, 41, 42, 48))
-  expect_equal(fivenum(number_anxiety_items), c(39, 44, 45, 46, 49))
-  expect_equal(fivenum(number_somatic_items), c(38, 43, 45, 46, 50)) 
+  expect_equal(number_depression_items, rep(50, 200))
+  expect_equal(number_anxiety_items, rep(5, 200))
+  expect_equal(number_somatic_items, rep(75, 200)) 
 })
 
 test_that("test constraints, max_n 260", {
@@ -422,9 +421,9 @@ test_that("test constraints, max_n 260", {
                                 FUN = function(x) {sum(x > 200)} )
   
   # with max_n small, the minimum of 50 depression and 75 somatic items is not reached
-  expect_equal(fivenum(number_depression_items), c(83, 90, 92, 93, 96))
-  expect_equal(fivenum(number_anxiety_items), c(77, 83, 84, 86, 91))
-  expect_equal(fivenum(number_somatic_items), c(78, 82, 84, 86, 91)) 
+  expect_equal(number_depression_items, rep(75, 200))
+  expect_equal(all(number_anxiety_items < 98 & number_anxiety_items > 94), TRUE)
+  expect_equal(all(number_somatic_items < 91 & number_somatic_items > 87), TRUE)
 })
 
 test_that("MAP with informative prior", {
@@ -703,50 +702,6 @@ test_that("stop rule is variance", {
   expect_equal(test_outcome$administered, c(10, 30, 48, 7, 24, 5, 17))
   expect_equal(test_outcome$responses, c(1, 0, 1, 1, 0, 1, 0))
 })
-
-context("constraints")
-test_that("test constraints", {
-  # define true theta for simulation of responses
-  true_theta <- c(-2, 1, 2)
-  
-  # define item characteristics
-  number_items <- 300
-  number_dimensions <- 3
-  number_answer_categories <- 2 # can only be 2 for 3PLM model
-  
-  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
-  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
-  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
-  eta <- NULL # only relevant for GPCM model
-  
-  model <- '3PLM'
-  start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
-  stop_test <- list(type = 'length', n = 130)
-  estimator <- 'MAP'
-  information_summary <- 'PD'
-  item_selection <- 'MI'
-  
-  #create item characteristics and constraints
-  characteristics <- data.frame(content = c(rep('depression', number_items_vec / 3), rep('anxiety', number_items_vec / 3), rep('somatic', number_items_vec / 3)))
-  constraints <- list(list(name = 'content/depression',
-                           op = '><',
-                           target = c(50, 75)),
-                      list(name = 'content/somatic',
-                           op = '><',
-                           target = c(75, 100)))
-  
-  # define prior covariance matrix
-  prior <- diag(number_dimensions)
-  
-  test_outcome <- with_random_seed(2, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints = list(characteristics = characteristics, constraints = constraints))
-  
-  expect_equal(as.vector(round(test_outcome$estimate, 3)), .405)
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), .315)
-  expect_equal(test_outcome$available, c(1:4, 8:9, 11:16, 18:23, 25:29, 31:44, 46, 49:50))
-  expect_equal(test_outcome$administered, c(10, 30, 48, 7, 24, 5, 17, 6, 45, 47))
-  expect_equal(test_outcome$responses, c(1, 0, 1, 1, 0, 1, 0, 1, 0, 1))
-})
-
 
 # gives error at this point due to bug in updated MultiGHQuad package
 if (FALSE) {  
