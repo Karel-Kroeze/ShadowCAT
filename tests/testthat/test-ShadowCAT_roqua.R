@@ -2,6 +2,7 @@
 '
 library(testthat)
 library(pbapply)
+library(stringr) # only for test constraints simulations
 '
 
 # Tests take a while, select shorter ones later
@@ -46,13 +47,17 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
 # if number dimensions is 1, simulations are performed for each true theta value in true_theta_vec
 # if number dimensions is larger than 1, true_theta_vec is interpreted as containing the true thetas for each dimension
 # item_selection can be "MI" or "Shadow". In case of "Shadow", constraints should be defined, and number_items_vec can only have length 1
-run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints = NULL, guessing = NULL, items_load_one_dimension = TRUE, lowerbound = rep(-3, number_dimensions), upperbound = rep(3, number_dimensions), prior = diag(number_dimensions) * 20, safe_ml = FALSE, return_administered_item_indeces = FALSE) {                   
+# max_n can only have length 1; if null, max_n is set to the number of items (which may differ accross conditions)
+run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints = NULL, guessing = NULL, items_load_one_dimension = TRUE, lowerbound = rep(-3, number_dimensions), upperbound = rep(3, number_dimensions), prior = diag(number_dimensions) * 20, safe_ml = FALSE, return_administered_item_indeces = FALSE, max_n = NULL) {                   
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
   
   pbapply::pbsapply(1:nrow(conditions), 
                     FUN = function(condition) {
                     prior <- prior
-                    stop_test <- list(type = 'variance', target = variance_target, n = conditions[condition, "number_items"])
+                    if (is.null(max_n))
+                      max_n <- conditions[condition, "number_items"] 
+                    print(max_n)
+                    stop_test <- list(type = 'variance', target = variance_target, n = max_n)
                     true_theta <- ( if (number_dimensions == 1) 
                                       conditions[condition, "true_theta"]
                                     else
@@ -281,7 +286,7 @@ test_that("test safe_ml is TRUE", {
   expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "ML"), "x"], rep(0, 32))
 })
 
-test_that("test constraints", {
+test_that("test constraints, max_n 130", {
   # EAP estimation does not work
   # PEKL information summaries give errors because it also makes use of EAP estimation
   # ML estimate gives error here
@@ -296,24 +301,27 @@ test_that("test constraints", {
   model_vec <- "SM"
   estimator_vec <- c("ML", "MAP") # AEP
   information_summary_vec <- "D" # PEKL 
-  item_selection <- 'Shadow'  
+  item_selection <- 'Shadow' 
+  max_n = 130
   
   #create item characteristics and constraints
   characteristics <- data.frame(content = c(rep('depression', number_items_vec / 3), rep('anxiety', number_items_vec / 3), rep('somatic', number_items_vec / 3)))
-  constraints <- list(list(name = 'content/algebra',
+  constraints <- list(list(name = 'content/depression',
                            op = '><',
                            target = c(50, 75)),
-                      list(name = 'content/physics',
+                      list(name = 'content/somatic',
                            op = '><',
                            target = c(75, 100)))
   
-  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, safe_ml = TRUE)
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, safe_ml = TRUE, return_administered_item_indeces = TRUE, max_n = max_n)
+  #save(estimates_and_variance, file = "/Users/rivkadevries/Desktop/simulationsCAT/estimates_and_variance_3dim_constraints_maxn130.R")
   
-  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec, iterations_per_unique_condition, number_dimensions)
+  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
   
   condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/iterations_per_unique_condition), iterations_per_unique_condition))
   
-  estimates_and_conditions <- cbind(t(estimates_and_variance)[, c("estimated_theta1", "estimated_theta2", "estimated_theta3", "variance_estimate1", "variance_estimate5", "variance_estimate9")], 
+  estimates_and_conditions <- cbind(t(estimates_and_variance)[, c("estimated_theta1", "estimated_theta2", "estimated_theta3", "variance_estimate1", "variance_estimate5", "variance_estimate9",
+                                                                  str_c("items_administered", 1:max_n))], 
                                     conditions[, c("iteration", "number_items", "number_answer_categories", "model", "estimator", "information_summary")], 
                                     condition_vector)
   
@@ -327,27 +335,42 @@ test_that("test constraints", {
   
   number_na_per_condition <- aggregate(estimates_and_conditions[, "estimated_theta1"], list(condition_vector), FUN = function(x) { sum(is.na(x)) })
   
-  # five number summary of average theta estimate per condition, dimension 1 (true theta is -2)
-  expect_equal(round(fivenum(average_per_condition_dim1[,"x"]), 3), c())
-  # five number summary of average theta estimate per condition, dimension 2 (true theta is 1)
-  expect_equal(round(fivenum(average_per_condition_dim2[,"x"]), 3), c())
-  # five number summary of average theta estimate per condition, dimension 3 (true theta is 2)
-  expect_equal(round(fivenum(average_per_condition_dim3[,"x"]), 3), c())
+  number_depression_items <- apply(estimates_and_conditions[,str_c("items_administered", 1:max_n)], 
+                                   1, 
+                                   FUN = function(x) {sum(x <= 100)} )
+  number_anxiety_items <- apply(estimates_and_conditions[,str_c("items_administered", 1:max_n)], 
+                                1, 
+                                FUN = function(x) {sum((x > 100 & x <= 200))} )
+  number_somatic_items <- apply(estimates_and_conditions[,str_c("items_administered", 1:max_n)], 
+                                   1, 
+                                   FUN = function(x) {sum(x > 200)} )
+  
+  # average theta estimate per condition, dimension 1 (true theta is -2)
+  expect_equal(round(average_per_condition_dim1[,"x"], 3), c(-2.029, -2.002))
+  # average theta estimate per condition, dimension 2 (true theta is 1)
+  expect_equal(round(average_per_condition_dim2[,"x"], 3), c(.986, .982))
+  # average theta estimate per condition, dimension 3 (true theta is 2)
+  expect_equal(round(average_per_condition_dim3[,"x"], 3), c(2.034, 2.011))
   
   # five number summary of observed sd of the theta estimates within each condition, for dimension 1, 2, and 3, respectively
-  expect_equal(round(fivenum(sd_per_condition_dim1[,"x"]), 3), c())
-  expect_equal(round(fivenum(sd_per_condition_dim2[,"x"]), 3), c())
-  expect_equal(round(fivenum(sd_per_condition_dim3[,"x"]), 3), c())
+  expect_equal(round(sd_per_condition_dim1[,"x"], 3), c(.284, .316))
+  expect_equal(round(sd_per_condition_dim2[,"x"], 3), c(.189, .212))
+  expect_equal(round(sd_per_condition_dim3[,"x"], 3), c(.260, .248))
   
   # five number summary of reported sd of the theta estimate within each condition, for dimension 1, 2, and 3, respectively
-  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate1"])), 3), c())
-  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), c())
-  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c())
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate1"])), 3), c(.270, .297, .313, .328, .388))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), c(.202, .216, .221, .229, .247))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.194, .207, .212, .217, .245))
   
   # no errors/missings for MAP estimator
-  expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "MAP"), "x"], )
+  expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "MAP"), "x"], 0)
   # no errors/missings for ML estimator
-  expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "ML"), "x"], )
+  expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "ML"), "x"], 0)
+  
+  # with max_n small, the minimum of 50 depression and 75 somatic items is not reached
+  expect_equal(fivenum(number_depression_items), c(34, 39, 41, 42, 48))
+  expect_equal(fivenum(number_anxiety_items), c(39, 44, 45, 46, 49))
+  expect_equal(fivenum(number_somatic_items), c(38, 43, 45, 46, 50)) 
 })
 
 
