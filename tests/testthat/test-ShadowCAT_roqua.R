@@ -285,7 +285,7 @@ test_that("test safe_ml is TRUE", {
   expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "ML"), "x"], rep(0, 32))
 })
 
-test_that("test constraints, max_n 130", {
+test_that("simulate with constraints, max_n 130", {
   # EAP estimation does not work
   # PEKL information summaries give errors because it also makes use of EAP estimation
   # ML estimate gives error here
@@ -371,7 +371,7 @@ test_that("test constraints, max_n 130", {
   expect_equal(number_somatic_items, rep(75, 200)) 
 })
 
-test_that("test constraints, max_n 260", {
+test_that("simulate with constraints, max_n 260", {
   # EAP estimation does not work
   # PEKL information summaries give errors because it also makes use of EAP estimation
   # ML estimate gives error here
@@ -584,6 +584,110 @@ test_that("true theta is 2, 2, 2", {
   expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.11, .000, .000))
   expect_equal(length(test_outcome$administered), 300)
 })
+
+test_that("with constraints max_n 260", {  
+  # define true theta for simulation of responses
+  true_theta <- c(-2, 1, 2)
+  
+  # define item characteristics
+  number_items <- 300
+  number_dimensions <- 3
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  
+  guessing <- NULL
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  alpha[1:100,2:3] <- 0
+  alpha[101:200,c(1,3)] <- 0
+  alpha[201:300,1:2] <- 0
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
+  stop_test <- list(type = 'length', n = 260)
+  estimator <- 'MAP'
+  information_summary <- 'PD'
+  item_selection <- 'Shadow'  
+  
+  # define prior covariance matrix
+  prior <- diag(number_dimensions) * 20
+  
+  #create item characteristics and constraints
+  characteristics <- data.frame(content = c(rep('depression', number_items / 3), rep('anxiety', number_items / 3), rep('somatic', number_items / 3)))
+  constraints <- list(list(name = 'content/depression',
+                           op = '><',
+                           target = c(50, 75)),
+                      list(name = 'content/somatic',
+                           op = '><',
+                           target = c(75, 90)))
+  
+  test_outcome <- with_random_seed(3, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection =  item_selection, constraints = list(characteristics = characteristics, constraints = constraints))
+  
+  number_depression_items <- sum(test_outcome$administered <= 100)
+  number_anxiety_items <- sum(test_outcome$administered > 100 & test_outcome$administered <= 200)
+  number_somatic_items <- sum(test_outcome$administered > 200)
+  
+  expect_equal(as.vector(round(test_outcome$estimate, 3)), c(-2.689, .697, 2.260))
+  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.155, .000, .000))
+  expect_equal(length(test_outcome$administered), 260)
+  expect_equal(number_depression_items, 75)
+  expect_equal(number_anxiety_items, 95)
+  expect_equal(number_somatic_items, 90) 
+})
+
+test_that("with constraints max_n 130", {  
+  # define true theta for simulation of responses
+  true_theta <- c(-2, 1, 2)
+  
+  # define item characteristics
+  number_items <- 300
+  number_dimensions <- 3
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  
+  guessing <- NULL
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  alpha[1:100,2:3] <- 0
+  alpha[101:200,c(1,3)] <- 0
+  alpha[201:300,1:2] <- 0
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
+  stop_test <- list(type = 'length', n = 130)
+  estimator <- 'MAP'
+  information_summary <- 'PD'
+  item_selection <- 'Shadow'  
+  
+  # define prior covariance matrix
+  prior <- diag(number_dimensions) * 20
+  
+  #create item characteristics and constraints
+  characteristics <- data.frame(content = c(rep('depression', number_items / 3), rep('anxiety', number_items / 3), rep('somatic', number_items / 3)))
+  constraints <- list(list(name = 'content/depression',
+                           op = '><',
+                           target = c(50, 75)),
+                      list(name = 'content/somatic',
+                           op = '><',
+                           target = c(75, 90)))
+  
+  test_outcome <- with_random_seed(3, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection =  item_selection, constraints = list(characteristics = characteristics, constraints = constraints))
+  
+  number_depression_items <- sum(test_outcome$administered <= 100)
+  number_anxiety_items <- sum(test_outcome$administered > 100 & test_outcome$administered <= 200)
+  number_somatic_items <- sum(test_outcome$administered > 200)
+  
+  expect_equal(as.vector(round(test_outcome$estimate, 3)), c(-1.577, .071, 1.906))
+  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.106, .000, .000))
+  expect_equal(length(test_outcome$administered), 130)
+  expect_equal(number_depression_items, 50)
+  expect_equal(number_anxiety_items, 5)
+  expect_equal(number_somatic_items, 75) 
+})
+
+
 
 
 test_that("validate with ShadowCAT Karel Kroeze", {
