@@ -127,9 +127,9 @@ test_that("test safe_ml", {
   attr(initiated_person$estimate, "variance") <- diag(3) * 20
   
   # ML estimation gives warning -> estimate switches to MAP
-  estimated_latent_trait <- estimate(initiated_person, initiated_test, safe_ml = TRUE)
+  estimated_latent_trait <- estimate(initiated_person, initiated_test, prior_var_safe_ml = 1)
 
-  expect_equal(round(as.vector(estimated_latent_trait$estimate), 3), c(-.281, .362, 1.315))
+  expect_equal(round(as.vector(estimated_latent_trait$estimate), 3), c(.248, .366, .476))
   
 })
 

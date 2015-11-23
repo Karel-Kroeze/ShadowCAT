@@ -53,11 +53,11 @@
 #' 
 #' @param person Person object, see \code{\link{initPerson}}.
 #' @param test Test object, see \code{\link{initTest}}.
-#' @param safe_ml if TRUE, MAP estimate with flat prior is computed instead of ML if ML estimate fails
+#' @param prior_var_safe_ml if not NULL, MAP estimate with prior variance equal to prior_var_safe_ml is computed instead of ML, if ML estimate fails
 #' @return person object, amended with the new estimate.
 #' @importFrom MultiGHQuad init.quad eval.quad
 #' @export
-estimate <- function(person, test, safe_ml = FALSE) {
+estimate <- function(person, test, prior_var_safe_ml = NULL) {
   result <- function() {
     updated_estimate <- get_updated_estimate_and_variance_attribute(test$estimator)
     person$estimate <- trim_estimate(updated_estimate)
@@ -65,10 +65,10 @@ estimate <- function(person, test, safe_ml = FALSE) {
   }
   
   get_updated_estimate_and_variance_ml <- function() {
-    if (safe_ml)
-      get_updated_estimate_and_variance_ml_safe()
-    else
+    if (is.null(prior_var_safe_ml))
       get_updated_estimate_and_variance_ml_unsafe()
+    else
+      get_updated_estimate_and_variance_ml_safe()      
   }
   
   get_updated_estimate_and_variance_ml_unsafe <- function() {
@@ -91,12 +91,12 @@ estimate <- function(person, test, safe_ml = FALSE) {
     person$estimate <- tryCatch(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate,
                                 error = function(e) {
                                   test$estimator <- "MAP"
-                                  person$prior <- diag(number_dimensions) * 100
+                                  person$prior <- diag(test$items$Q) * prior_var_safe_ml
                                   return(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate)
                                 },
                                 warning = function(w) {
                                   test$estimator <- "MAP"
-                                  person$prior <- diag(number_dimensions) * 100
+                                  person$prior <- diag(test$items$Q) * prior_var_safe_ml
                                   return(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate)
                                 })
 
@@ -106,10 +106,10 @@ estimate <- function(person, test, safe_ml = FALSE) {
     # inverse
     attr(person$estimate, "variance") <- tryCatch(solve(fisher_information_test_so_far),
                                                   error = function(e) {
-                                                    return(solve(fisher_information_test_so_far + diag(number_dimensions) * 100))
+                                                    return(solve(fisher_information_test_so_far + diag(test$items$Q) * prior_var_safe_ml))
                                                   },
                                                   warning = function(w) {
-                                                    return(solve(fisher_information_test_so_far + diag(number_dimensions) * 100))
+                                                    return(solve(fisher_information_test_so_far + diag(test$items$Q) * prior_var_safe_ml))
                                                   })
       
     person$estimate

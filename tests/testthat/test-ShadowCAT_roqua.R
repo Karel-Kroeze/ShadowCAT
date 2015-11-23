@@ -10,9 +10,9 @@ if (FALSE) {
   
 make_random_seed_exist <- rnorm(1)
 
-test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection = "MI", constraints = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha)), safe_ml = FALSE) {
+test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection = "MI", constraints = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL) {
   new_response <- NULL
-  next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection, constraints, lowerbound, upperbound, safe_ml)
+  next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml)
   
   while (next_item_and_test_outcome$index_new_item != "stop_test") {
     person_updated_after_new_response$theta <- true_theta
@@ -26,7 +26,7 @@ test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing
                                                 selection = item_selection), 
                                 indeces = next_item_and_test_outcome$index_new_item)$responses, 1) # simulate person response on new item
     
-    next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection, constraints, lowerbound, upperbound, safe_ml)   
+    next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml)   
   }
   
   next_item_and_test_outcome$person_updated_after_new_response
@@ -48,7 +48,7 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
 # if number dimensions is larger than 1, true_theta_vec is interpreted as containing the true thetas for each dimension
 # item_selection can be "MI" or "Shadow". In case of "Shadow", constraints should be defined, and number_items_vec can only have length 1
 # max_n can only have length 1; if null, max_n is set to the number of items (which may differ accross conditions)
-run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints = NULL, guessing = NULL, items_load_one_dimension = TRUE, lowerbound = rep(-3, number_dimensions), upperbound = rep(3, number_dimensions), prior = diag(number_dimensions) * 20, safe_ml = FALSE, return_administered_item_indeces = FALSE, max_n = NULL) {                   
+run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints = NULL, guessing = NULL, items_load_one_dimension = TRUE, lowerbound = rep(-3, number_dimensions), upperbound = rep(3, number_dimensions), prior = diag(number_dimensions) * 20, prior_var_safe_ml = NULL, return_administered_item_indeces = FALSE, max_n = NULL) {                   
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
   
   pbapply::pbsapply(1:nrow(conditions), 
@@ -62,7 +62,7 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
                                     else
                                       true_theta_vec )
                     alpha_beta <- createTestBank(model = as.character(conditions[condition, "model"]), K = conditions[condition, "number_items"], Q = number_dimensions, M = conditions[condition, "number_answer_categories"] - 1, between = items_load_one_dimension, run_initItembank = FALSE)
-                    estimate_theta <- tryCatch(test_shadowcat_roqua(true_theta, prior, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), item_selection, constraints, lowerbound, upperbound, safe_ml)$estimate,
+                    estimate_theta <- tryCatch(test_shadowcat_roqua(true_theta, prior, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml)$estimate,
                                                error = function(e) e)
            
                     if (return_administered_item_indeces)
@@ -218,7 +218,7 @@ test_that("three dimensions, estimates ML and MAP, information summary D, PD, A,
   
   # no errors/missings for MAP estimator
   expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "MAP"), "x"], rep(0, 32))
-  # some errors/missings for ML estimator because safe_ML = FALSE
+  # some errors/missings for ML estimator because prior_var_safe_ml = NULL
   expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "ML"), "x"], 
                c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0))
   
@@ -241,7 +241,7 @@ test_that("items load on all dimensions", {
   information_summary_vec <- c("D", "PD", "A", "PA") # PEKL 
   item_selection <- 'MI'
   
-  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, items_load_one_dimension = FALSE, safe_ml = TRUE)
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, items_load_one_dimension = FALSE, prior_var_safe_ml = 100)
   #save(estimates_and_variance, file = "/Users/rivkadevries/Desktop/simulationsCAT/estimates_and_variance_within.R")
   estimates_and_variance_without_errors <- sapply(estimates_and_variance, 
                                                   FUN = function(x) { 
@@ -294,7 +294,7 @@ test_that("items load on all dimensions", {
 })
 
 
-test_that("test safe_ml is TRUE", {
+test_that("test prior_var_safe_ml is 100", {
   # EAP estimation does not work
   # PEKL information summaries give errors because it also makes use of EAP estimation
   # ML estimate gives error here
@@ -311,7 +311,7 @@ test_that("test safe_ml is TRUE", {
   information_summary_vec <- c("D", "PD", "A", "PA") # PEKL 
   item_selection <- 'MI'
   
-  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, safe_ml = TRUE)
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, prior_var_safe_ml = 100)
   
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec, iterations_per_unique_condition, number_dimensions)
   
@@ -381,7 +381,7 @@ test_that("simulate with constraints, max_n 130", {
                            op = '><',
                            target = c(75, 100)))
   
-  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints = list(characteristics = characteristics, constraints = constraints), safe_ml = TRUE, return_administered_item_indeces = TRUE, max_n = max_n)
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints = list(characteristics = characteristics, constraints = constraints), prior_var_safe_ml = 100, return_administered_item_indeces = TRUE, max_n = max_n)
   #save(estimates_and_variance, file = "/Users/rivkadevries/Desktop/simulationsCAT/estimates_and_variance_3dim_constraints_maxn130.R")
   
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
@@ -467,7 +467,7 @@ test_that("simulate with constraints, max_n 260", {
                            op = '><',
                            target = c(75, 90)))
   
-  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints = list(characteristics = characteristics, constraints = constraints), safe_ml = TRUE, return_administered_item_indeces = TRUE, max_n = max_n)
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints = list(characteristics = characteristics, constraints = constraints), prior_var_safe_ml = 100, return_administered_item_indeces = TRUE, max_n = max_n)
   #save(estimates_and_variance, file = "/Users/rivkadevries/Desktop/simulationsCAT/estimates_and_variance_3dim_constraints_maxn260.R")
   
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
@@ -512,7 +512,7 @@ test_that("MAP with informative prior", {
   information_summary_vec <- c("D", "PD", "A", "PA") # PEKL 
   item_selection <- 'MI'
   
-  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, prior = diag(3) * .5, safe_ml = TRUE)
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, prior = diag(3) * .5, prior_var_safe_ml = 100)
   
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec, iterations_per_unique_condition, number_dimensions)
   
