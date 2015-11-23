@@ -141,6 +141,38 @@ test_that("true theta is 1, 0, 2", {
   expect_equal(length(test_outcome$administered), 300)
 })
 
+test_that("items load on three dimensions", {  
+  # define true theta for simulation of responses
+  true_theta <- c(1, 0, 2)
+  
+  # define item characteristics
+  number_items <- 300
+  number_dimensions <- 3
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  
+  guessing <- NULL
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'random', n = 3)
+  stop_test <- list(type = 'length', n = 300)
+  estimator <- 'MAP'
+  information_summary <- 'PD'
+  item_selection <- 'MI'
+  
+  # define prior covariance matrix
+  prior <- diag(number_dimensions) * 20
+  
+  test_outcome <- with_random_seed(3, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  
+  expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.454, .719, 1.745))
+  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.178, -.088, -.081))
+  expect_equal(length(test_outcome$administered), 300)
+})
+
 test_that("true theta is 2, 2, 2", {  
   # define true theta for simulation of responses
   true_theta <- c(2, 2, 2)

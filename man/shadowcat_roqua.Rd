@@ -43,7 +43,8 @@ list(type = 'variance', target = ..., n = ...)
 where n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule), 
 target = vector of maximum acceptable variances per dimension}
 
-\item{estimator}{type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "EAP" (Expected A Posteriori Estimation), or "ML" (maximum likelihood)}
+\item{estimator}{type of estimator to be used, one of "MAP" (Maximum a posteriori estimation) or "ML" (maximum likelihood); 
+"EAP" (Expected A Posteriori Estimation) is currently not working due to problems with the MultiGHQuad package}
 
 \item{information_summary}{called "objective" by Kroeze; how to summarize information; one of
 "D" = determinant: compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
