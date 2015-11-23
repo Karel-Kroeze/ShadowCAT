@@ -25,7 +25,8 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("person_updated_after_ne
 #' list(type = 'variance', target = ..., n = ...)
 #' where n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule), 
 #' target = vector of maximum acceptable variances per dimension
-#' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "EAP" (Expected A Posteriori Estimation), or "ML" (maximum likelihood)
+#' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation) or "ML" (maximum likelihood); 
+#' "EAP" (Expected A Posteriori Estimation) is currently not working due to problems with the MultiGHQuad package
 #' @param information_summary called "objective" by Kroeze; how to summarize information; one of
 #' "D" = determinant: compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
 #' "PD" = posterior determinant: compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
