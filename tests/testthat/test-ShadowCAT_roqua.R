@@ -115,7 +115,7 @@ test_that("one dimension, no constraints on item selection, one iteration per co
 test_that("one dimension, estimates ML and MAP, information summary D, PD, A, and PA, no constraints on item selection, 100 iterations per condition", {
   # EAP estimation does not work
   # PEKL information summaries give errors because it also makes use of EAP estimation
-  iterations_per_unique_condition <- 100 # extend to 100 when time permits and when EAP issue is fixed
+  iterations_per_unique_condition <- 100
   true_theta_vec <- c(-2, 1)
   number_items_vec <- c(50, 100)
   number_answer_categories_vec <- c(2, 4)
@@ -160,7 +160,7 @@ test_that("one dimension, estimates ML and MAP, information summary D, PD, A, an
 test_that("three dimensions, estimates ML and MAP, information summary D, PD, A, and PA, no constraints on item selection, 100 iterations per condition", {
   # EAP estimation does not work
   # PEKL information summaries give errors because it also makes use of EAP estimation
-  iterations_per_unique_condition <- 100 # extend to 100 when time permits and when EAP issue is fixed
+  iterations_per_unique_condition <- 100 
   true_theta_vec <- c(-2, 1, 2)
   number_items_vec <- c(300)
   number_answer_categories_vec <- c(2, 4)
@@ -225,9 +225,10 @@ test_that("three dimensions, estimates ML and MAP, information summary D, PD, A,
 })
 
 test_that("items load on all dimensions", {
+  # find out where the occasional errors come from when estimator is ML
   # EAP estimation does not work
   # PEKL information summaries give errors because it also makes use of EAP estimation
-  iterations_per_unique_condition <- 100 # extend to 100 when time permits and when EAP issue is fixed
+  iterations_per_unique_condition <- 100 
   true_theta_vec <- c(2, -1, -2)
   number_items_vec <- c(300)
   number_answer_categories_vec <- c(2, 4)
@@ -297,7 +298,7 @@ test_that("test safe_ml is TRUE", {
   # EAP estimation does not work
   # PEKL information summaries give errors because it also makes use of EAP estimation
   # ML estimate gives error here
-  iterations_per_unique_condition <- 100 # extend to 100 when time permits and when EAP issue is fixed
+  iterations_per_unique_condition <- 100
   true_theta_vec <- c(-2, 1, 2)
   number_items_vec <- c(300)
   number_answer_categories_vec <- c(2, 4)
@@ -357,7 +358,7 @@ test_that("simulate with constraints, max_n 130", {
   # EAP estimation does not work
   # PEKL information summaries give errors because it also makes use of EAP estimation
   # ML estimate gives error here
-  iterations_per_unique_condition <- 100 # extend to 100 when time permits and when EAP issue is fixed
+  iterations_per_unique_condition <- 100
   true_theta_vec <- c(-2, 1, 2)
   number_items_vec <- 300 # can only have length one here (with item characteristics) and should be divisible by 3, to keep things simple
   number_answer_categories_vec <- 4
@@ -443,7 +444,7 @@ test_that("simulate with constraints, max_n 260", {
   # EAP estimation does not work
   # PEKL information summaries give errors because it also makes use of EAP estimation
   # ML estimate gives error here
-  iterations_per_unique_condition <- 100 # extend to 100 when time permits and when EAP issue is fixed
+  iterations_per_unique_condition <- 100
   true_theta_vec <- c(-2, 1, 2)
   number_items_vec <- 300 # can only have length one here (with item characteristics) and should be divisible by 3, to keep things simple
   number_answer_categories_vec <- 4
@@ -498,7 +499,7 @@ test_that("MAP with informative prior", {
   # EAP estimation does not work
   # PEKL information summaries give errors because it also makes use of EAP estimation
   # ML estimate gives error here
-  iterations_per_unique_condition <- 100 # extend to 100 when time permits and when EAP issue is fixed
+  iterations_per_unique_condition <- 100
   true_theta_vec <- c(-2, 1, 2)
   number_items_vec <- c(300)
   number_answer_categories_vec <- c(2, 4)

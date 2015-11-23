@@ -88,7 +88,7 @@ shadowcat_roqua <- function(new_response, prior, model, alpha, beta, guessing = 
     person$responses <- c(person$responses, new_response)
     person$administered <- c(person$administered, index_new_item)
     person$available <- person$available[-which(person$available %in% index_new_item)]
-    if (length(person$responses) > test$start$n) 
+    if (length(person$responses) > test$start$n)
       estimate(person, test, safe_ml)
     else
       person
