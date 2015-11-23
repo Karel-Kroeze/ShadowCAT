@@ -138,47 +138,47 @@ test_that("model is 3PLM, 1 dimension, 2 categories, estimator is MAP, deriv is 
 
 })
 
-test_that("model is 3PLM, 3 dimensions, 2 categories, estimator is EAP, deriv is true", {
-  # create item characteristics
-  model <- '3PLM'
-  number_items <- 50
-  number_dimensions <- 3
-  number_answer_categories <- 2 # can only be 2 for 3PLM model
-  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
-  eta <- NULL # only relevant for GPCM model
-  
-  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
-  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
-  
-  item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = eta, silent = TRUE)
-  
-  # get initiated test: adaptive test rules
-  initiated_test <- initTest(item_characteristics_shadowcat_format, 
-                             start = list(type = 'random', n = 5), 
-                             stop = list(type = 'length', n = 30),
-                             max_n = 50, # utter maximum
-                             estimator = 'EAP',
-                             objective = 'PD',
-                             selection = 'MI',
-                             constraints = NULL,
-                             exposure = NULL,
-                             lowerBound = rep(-3, item_characteristics_shadowcat_format$Q),
-                             upperBound = rep(3, item_characteristics_shadowcat_format$Q))
-  
-  # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
-  initiated_person$responses <- rep(c(1, 0), 25)
-  
-  probabilities <- prob(test = initiated_test, person = initiated_person, theta = NULL, deriv = TRUE, prior = NULL, items = NULL)
-  
-  expect_equal(round(probabilities$P[1,], 3), c(.204, .796))
-  expect_equal(round(probabilities$P[40,], 3), c(.305, .695))
-  expect_equal(dim(probabilities$P), c(50, 2))
-  expect_equal(dim(probabilities$LL), c(1, 1))
-  expect_equal(dim(probabilities$d1), c(1, 3))
-  expect_equal(dim(probabilities$d2), c(3, 3))
-  expect_equal(length(probabilities), 4)
-})
+# test_that("model is 3PLM, 3 dimensions, 2 categories, estimator is EAP, deriv is true", {
+#   # create item characteristics
+#   model <- '3PLM'
+#   number_items <- 50
+#   number_dimensions <- 3
+#   number_answer_categories <- 2 # can only be 2 for 3PLM model
+#   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+#   eta <- NULL # only relevant for GPCM model
+#   
+#   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+#   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+#   
+#   item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = eta, silent = TRUE)
+#   
+#   # get initiated test: adaptive test rules
+#   initiated_test <- initTest(item_characteristics_shadowcat_format, 
+#                              start = list(type = 'random', n = 5), 
+#                              stop = list(type = 'length', n = 30),
+#                              max_n = 50, # utter maximum
+#                              estimator = 'EAP',
+#                              objective = 'PD',
+#                              selection = 'MI',
+#                              constraints = NULL,
+#                              exposure = NULL,
+#                              lowerBound = rep(-3, item_characteristics_shadowcat_format$Q),
+#                              upperBound = rep(3, item_characteristics_shadowcat_format$Q))
+#   
+#   # get initiated person
+#   initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
+#   initiated_person$responses <- rep(c(1, 0), 25)
+#   
+#   probabilities <- prob(test = initiated_test, person = initiated_person, theta = NULL, deriv = TRUE, prior = NULL, items = NULL)
+#   
+#   expect_equal(round(probabilities$P[1,], 3), c(.204, .796))
+#   expect_equal(round(probabilities$P[40,], 3), c(.305, .695))
+#   expect_equal(dim(probabilities$P), c(50, 2))
+#   expect_equal(dim(probabilities$LL), c(1, 1))
+#   expect_equal(dim(probabilities$d1), c(1, 3))
+#   expect_equal(dim(probabilities$d2), c(3, 3))
+#   expect_equal(length(probabilities), 4)
+# })
 
 context("model is GPCM")
 
