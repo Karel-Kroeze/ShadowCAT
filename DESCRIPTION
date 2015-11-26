@@ -14,12 +14,10 @@ License: COPYRIGHTED (until I figure out what license to use.)
 LazyData: true
 LinkingTo: Rcpp
 Imports:
-    Rcpp
-Depends:
+    Rcpp,
     stats,
     mvtnorm,
     MultiGHQuad,
-    numDeriv,
     lpSolve 
 Suggests:
     testthat (>= 0.8.1),
