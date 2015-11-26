@@ -20,8 +20,8 @@ Depends:
     mvtnorm,
     MultiGHQuad,
     numDeriv,
-    lpSolve,
-    pbapply
+    lpSolve 
 Suggests:
-    testthat (>= 0.8.1)
+    testthat (>= 0.8.1),
+    pbapply
 RoxygenNote: 5.0.0
