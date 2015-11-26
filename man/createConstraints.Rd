@@ -14,7 +14,7 @@ createConstraints(test, characteristics = NULL, constraints = NULL)
 \item{constraints}{\code{list} of constraints, see \code{details}.}
 }
 \value{
-constraints Constraints object, see \code{details}.
+Constraints object, see \code{details}.
 }
 \description{
 Convenience wrapper to create a constraints object, which can be added to a \code{test} object.
@@ -36,7 +36,7 @@ characteristics and constraints as described above to the initTest function call
 \section{Constraints in test object}{
 
 The specified constraints will be stored within a list, which can/should be saved in the test object (test$constraints). 
-Constraints in Shadow Tests are implemented through linear programming, for which the package \code{\link{lpSolve}} is used. 
+Constraints in Shadow Tests are implemented through linear programming, for which the package lpSolve is used. 
 The constraints object is a list with three named elements; characterstics, constraints and lp_chars. Characteristics is a copy of the argument given, constraints and lp_chars
 are set up to work with lpSolve, and should not be manually edited.
 }
