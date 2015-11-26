@@ -4,12 +4,14 @@
 \alias{subset.ShadowCAT.items}
 \title{Subset method for ShadowCAT.items.}
 \usage{
-\method{subset}{ShadowCAT.items}(items, select)
+\method{subset}{ShadowCAT.items}(x, subset, ...)
 }
 \arguments{
-\item{items}{item characteristics class ShadowCAT.items.}
+\item{x}{item characteristics class ShadowCAT.items (as returned by initItembank()).}
 
-\item{select}{indeces of items to be selected}
+\item{subset}{indeces of items to be selected}
+
+\item{...}{further arguments to be passed to or from other methods.}
 }
 \value{
 Item subset of provided itembank, with class ShadowCAT.items, as well as any original classes.

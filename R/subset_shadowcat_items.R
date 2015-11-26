@@ -1,21 +1,21 @@
 #' Subset method for ShadowCAT.items.
 #' 
 #' Creates a valid subset of items to work with in ShadowCAT functions. Primarily used internally.
-#' @param items  item characteristics class ShadowCAT.items.
-#' @param select indeces of items to be selected
+#' @param x item characteristics class ShadowCAT.items (as returned by initItembank()).
+#' @param subset indeces of items to be selected
+#' @param ... further arguments to be passed to or from other methods.
 #' @return Item subset of provided itembank, with class ShadowCAT.items, as well as any original classes. 
 #' @export
-subset.ShadowCAT.items <- function(items, select) {
-  items$pars <- lapply(items$pars, 
+subset.ShadowCAT.items <- function(x, subset, ...) {
+  x$pars <- lapply(x$pars, 
                        FUN = function(x) {
                          if (is.vector(x)) 
-                           x[select]
+                           x[subset]
                          else
-                           x[select,,drop = FALSE]
+                           x[subset,,drop = FALSE]
                        })
                         
-  #items$pars <- lapply(items$pars, subset, subset = sapply(1:items$K, FUN = function (x) { if (x %in% select) TRUE else FALSE }))
-  items$subset <- select
-  items$K <- length(select)
-  items
+  x$subset <- subset
+  x$K <- length(subset)
+  x
 }
