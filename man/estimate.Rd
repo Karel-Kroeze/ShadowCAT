@@ -31,7 +31,7 @@ and handled with package \code{\link{nlm}}.
 \section{EAP}{
 
 Expected A-Posteriori estimates require the repeated evaluation of Q nested integrals, where Q is the dimensionality of the test.
-This is performed with adaptive multidimensional Gauss-Hermite quadrature, and handled by package \code{\link{MultiGHQuad}}, see the documentation there for further details.
+This is performed with adaptive multidimensional Gauss-Hermite quadrature, and handled by package MultiGHQuad, see the documentation there for further details.
 Note that the number of quadrature points used rises exponentially with the dimensionality of the test - use of EAP estimates with 
 a 3+ dimensional test may not be a good idea.
 }
