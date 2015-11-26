@@ -1,6 +1,6 @@
 # Connection redis not working
 if (FALSE) {
-require(rredis)
+#require(rredis)
 
 # connect
 host <- '128.199.63.229'

@@ -9,7 +9,7 @@ prob(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
   items = NULL)
 }
 \arguments{
-\item{test}{}
+\item{test}{test object}
 
 \item{person}{Person object, will use current theta estimate of the person to obtain P values.}
 

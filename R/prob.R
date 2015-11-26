@@ -6,7 +6,7 @@
 #' Generic
 #' 
 #' Details
-#' @param test 
+#' @param test test object
 #' @param person Person object, will use current theta estimate of the person to obtain P values.
 #' @param theta Give a specific theta vector to use. Overrides person$estimate if set.
 #' @param deriv Should we fetch derivatives and LL?
