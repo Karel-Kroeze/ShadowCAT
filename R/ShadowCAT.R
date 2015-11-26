@@ -126,8 +126,8 @@ shadowcat_roqua <- function(new_response, prior, model, alpha, beta, guessing = 
 #'  This is a simple wrapper to call the right methods, options should be defined in the test object.
 #'
 #' Details
-#' @param person
-#' @param test
+#' @param person person object
+#' @param test test object
 #' @param verbose if larger than 0, print estimate and variance of estimate after test is finished. If larger than 1, also print estimate and variance of estimate at each iteration
 #' @return person
 #' @export

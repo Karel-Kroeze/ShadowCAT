@@ -6,6 +6,11 @@
 \usage{
 next_item(person, test)
 }
+\arguments{
+\item{person}{person object}
+
+\item{test}{test object}
+}
 \value{
 integer item index
 }

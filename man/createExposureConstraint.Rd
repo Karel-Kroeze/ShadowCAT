@@ -7,6 +7,8 @@
 createExposureConstraint(test, exposure, eligible, feasible, total, target)
 }
 \arguments{
+\item{test}{test object}
+
 \item{exposure}{vector of actual exposure counts.}
 
 \item{eligible}{vector of eligibility counts (including lifting of restrictions.)}

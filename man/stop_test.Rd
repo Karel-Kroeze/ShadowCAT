@@ -6,6 +6,11 @@
 \usage{
 stop_test(person, test)
 }
+\arguments{
+\item{person}{person object}
+
+\item{test}{test object}
+}
 \value{
 boolean completed
 }

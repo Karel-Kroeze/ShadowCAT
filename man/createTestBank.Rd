@@ -16,7 +16,10 @@ createTestBank(model, K = 50, Q = 1, M = 4, between = FALSE,
 
 \item{M}{number of item steps (number of categories minus 1)}
 
-\item{between}{is TRUE, force items to load on one dimension each.}
+\item{between}{is TRUE, force items to load on one dimension each}
+
+\item{run_initItembank}{if FALSE, the simulated testbank is returned; if TRUE, initItembank() is applied on
+the simulated testbank and the result of this is returned}
 }
 \value{
 ShadowCAT.itembank

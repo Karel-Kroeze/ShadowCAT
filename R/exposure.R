@@ -7,7 +7,7 @@
 #' 
 #' TODO: CURRENTLY ONLY WORKS WITH SHADOW TESTING!
 #' 
-#' @param test
+#' @param test test object
 #' @param exposure vector of actual exposure counts.    
 #' @param eligible vector of eligibility counts (including lifting of restrictions.)
 #' @param feasible count of respondents for whom a feasible solution was found.

@@ -2,8 +2,8 @@
 #' 
 #' Control function to select the next item, takes account of starting / stopping conditions.
 #' 
-#' @param person
-#' @param test
+#' @param person person object
+#' @param test test object
 #' @return integer item index
 #' @export
 next_item <- function(person, test) {

@@ -1,7 +1,7 @@
 #' Obtain a vector with information for each available item (values of the objective function). 
 #' 
-#' @param test
-#' @param person
+#' @param test test object
+#' @param person person object
 #' @param pad Should the return vector be padded with zeros for items that have already been administered?
 #' @return vector
 #' @export

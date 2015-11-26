@@ -31,7 +31,7 @@
 #' @param exposure this is something Karel Kroeze started working on but is not completed yet
 #' @param lowerBound vector with lower bounds for theta per dimension 
 #' @param upperBound vector with upper bounds for theta per dimension
-#' @param ...
+#' @param ... further arguments to be passed to or from other methods.
 #' @return ShadowCAT.test object, containing list of input, where constraints are restructured 
 #' @export
 initTest <- function(items, 

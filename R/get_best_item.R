@@ -2,8 +2,8 @@
 #' 
 #' This function is a wrapper that sends the actual work to the correct subroutines.
 #' 
-#' @param test
-#' @param person
+#' @param test test object
+#' @param person person object
 #' @return integer item index
 #' @export
 best_item <- function(person, test) {

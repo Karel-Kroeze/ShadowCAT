@@ -49,6 +49,8 @@ characteristics should be a data.frame with characteristics, one row per item, o
 \item{lowerBound}{vector with lower bounds for theta per dimension}
 
 \item{upperBound}{vector with upper bounds for theta per dimension}
+
+\item{...}{further arguments to be passed to or from other methods.}
 }
 \value{
 ShadowCAT.test object, containing list of input, where constraints are restructured

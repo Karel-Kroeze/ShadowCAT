@@ -7,9 +7,15 @@
 LL(theta, test, person, minimize = FALSE, return_log = TRUE)
 }
 \arguments{
-\item{return_log}{should log of output be returned}
+\item{theta}{theta value for which which (log) likelihood is to be evaluated}
 
-\item{should}{values be reversed (useful for minimization, reverses LL as well as derivatives)}
+\item{test}{test object}
+
+\item{person}{person object}
+
+\item{minimize}{should values be reversed (useful for minimization, reverses LL as well as derivatives)}
+
+\item{return_log}{should log of output be returned}
 }
 \value{
 Log-Likelihood, as well as gradient and hessian attributes.

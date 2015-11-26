@@ -7,6 +7,10 @@
 ShadowCAT(person, test, verbose = FALSE)
 }
 \arguments{
+\item{person}{person object}
+
+\item{test}{test object}
+
 \item{verbose}{if larger than 0, print estimate and variance of estimate after test is finished. If larger than 1, also print estimate and variance of estimate at each iteration}
 }
 \value{

@@ -7,6 +7,10 @@
 objective(test, person, pad = TRUE)
 }
 \arguments{
+\item{test}{test object}
+
+\item{person}{person object}
+
 \item{pad}{Should the return vector be padded with zeros for items that have already been administered?}
 }
 \value{

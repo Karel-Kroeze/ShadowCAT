@@ -2,8 +2,8 @@
 #' 
 #' Control function to check if the test is completed.
 #' 
-#' @param test
-#' @param person
+#' @param test test object
+#' @param person person object
 #' @return boolean completed
 #' @export
 stop_test <- function(person, test) {

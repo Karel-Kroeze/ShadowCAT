@@ -5,7 +5,9 @@
 #' @param K number of items
 #' @param Q number of dimensions
 #' @param M number of item steps (number of categories minus 1)
-#' @param between is TRUE, force items to load on one dimension each.
+#' @param between is TRUE, force items to load on one dimension each
+#' @param run_initItembank if FALSE, the simulated testbank is returned; if TRUE, initItembank() is applied on
+#' the simulated testbank and the result of this is returned 
 #' @return ShadowCAT.itembank
 #' @export
 createTestBank <- function(model, K = 50, Q = 1, M = 4, between = FALSE, run_initItembank = TRUE){
