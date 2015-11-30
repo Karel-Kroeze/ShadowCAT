@@ -38,7 +38,7 @@ constraints <- list(list(name = 'content/algebra',
 
 initiated_test <- initTest(item_characteristics_shadowcat_format,
                            start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                           stop = list(type = 'variance', target = .2),
+                           stop = list(type = 'variance', target = .2, n = 20),
                            max_n = 20, # utter maximum
                            estimator = 'MAP',
                            objective = 'PD',
@@ -152,7 +152,7 @@ constraints <- list(list(name = 'content/algebra',
 
 initiated_test <- initTest(item_characteristics_shadowcat_format,
                            start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                           stop = list(type = 'variance', target = .2),
+                           stop = list(type = 'variance', target = .2, n = 20),
                            max_n = 20, # utter maximum
                            estimator = 'MAP',
                            objective = 'PD',

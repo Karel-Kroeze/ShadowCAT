@@ -10,10 +10,10 @@
 #' where n = total number of initial items, indices = vector of initial item indices, 
 #' nByDimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
 #' @param stop rule for when to stop providing new items to patient; one of
-#' list(type = 'length', n); in this case, max_n is actually superfluous
-#' list(type = 'variance', target)
+#' list(type = 'length', n = ...);
+#' list(type = 'variance', target = ..., n = ...)
 #' where n is test length at which testing should stop,  target = vector of maximum acceptable variances per dimension
-#' @param max_n maximum test length alowed
+#' @param max_n maximum test length alowed, equal to n in stop_test, argument will be removed later
 #' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "EAP" (Expected A Posteriori Estimation), or "ML" (maximum likelihood)
 #' @param objective how to summarize information; one of
 #' "D" = compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
@@ -64,7 +64,7 @@ initTest <- function(items,
   attr(out, 'class') <- c("ShadowCAT.test")  
   
   # set up default constraints
-  out$constraints <- createConstraints(out, constraints$characteristics, constraints$constraints)
+  out$constraints <- createConstraints(stop$n, items$K, constraints$characteristics, constraints$constraints)
   
   # maybe for the future, not finished yet:
   # apply ineligibility constraints (if requested).

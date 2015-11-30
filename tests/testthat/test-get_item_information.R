@@ -24,7 +24,7 @@ test_that("First 1 item administered, objective is D (determinant), one dimensio
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20, # utter maximum
                              estimator = 'MAP',
                              objective = 'D',
@@ -62,7 +62,7 @@ test_that("First 1 item administered, objective is D (determinant), three dimens
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20, # utter maximum
                              estimator = 'MAP',
                              objective = 'D',
@@ -100,7 +100,7 @@ test_that("First 10 item administered, objective is D (determinant), three dimen
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20, # utter maximum
                              estimator = 'MAP',
                              objective = 'D',
@@ -140,7 +140,7 @@ test_that("First 1 item administered, objective is PD (posterior determinant), o
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20, # utter maximum
                              estimator = 'MAP',
                              objective = 'PD',
@@ -178,7 +178,7 @@ test_that("First 1 item administered, objective is PD (posterior determinant), t
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20, # utter maximum
                              estimator = 'MAP',
                              objective = 'PD',
@@ -216,7 +216,7 @@ test_that("First 10 item administered, objective is PD (posterior determinant), 
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20, # utter maximum
                              estimator = 'MAP',
                              objective = 'PD',
@@ -254,7 +254,7 @@ test_that("10 scattered items administered, objective is PD (posterior determina
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20, # utter maximum
                              estimator = 'MAP',
                              objective = 'PD',
@@ -293,7 +293,7 @@ test_that("10 scattered items administered, objective is PD (posterior determina
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20, # utter maximum
                              estimator = 'MAP',
                              objective = 'PD',
@@ -334,7 +334,7 @@ test_that("First 1 item administered, objective is A (trace), one dimension, wit
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20, # utter maximum
                              estimator = 'MAP',
                              objective = 'A',
@@ -372,7 +372,7 @@ test_that("First 1 item administered, objective is A (trace), three dimensions, 
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20, # utter maximum
                              estimator = 'MAP',
                              objective = 'A',
@@ -410,7 +410,7 @@ test_that("First 10 item administered, objective is A (trace), three dimensions,
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20, # utter maximum
                              estimator = 'MAP',
                              objective = 'A',
@@ -450,7 +450,7 @@ test_that("First 1 item administered, objective is PA (posterior trace), one dim
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20, # utter maximum
                              estimator = 'MAP',
                              objective = 'PA',
@@ -488,7 +488,7 @@ test_that("First 1 item administered, objective is PA (posterior trace), three d
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20, # utter maximum
                              estimator = 'MAP',
                              objective = 'PA',
@@ -526,7 +526,7 @@ test_that("First 10 item administered, objective is PA (posterior trace), three 
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20, # utter maximum
                              estimator = 'MAP',
                              objective = 'PA',
@@ -566,7 +566,7 @@ test_that("First 1 item administered, objective is PEKL, one dimension, with pad
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20, # utter maximum
                              estimator = 'MAP',
                              objective = 'PEKL',
@@ -607,7 +607,7 @@ test_that("objective is PD", {
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20, # utter maximum
                              estimator = 'MAP',
                              objective = 'PD',
@@ -645,7 +645,7 @@ test_that("objective is PEKL", {
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20, # utter maximum
                              estimator = 'MAP',
                              objective = 'PEKL',
@@ -685,7 +685,7 @@ test_that("objective is of unknown type", {
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20, # utter maximum
                              estimator = 'MAP',
                              objective = 'PPP',
@@ -722,7 +722,7 @@ test_that("zero item information", {
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20, # utter maximum
                              estimator = 'MAP',
                              objective = 'A',

@@ -21,7 +21,7 @@ test_that("stop rule is variance, targets not reached, one dimension", {
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20)
   
   # get initiated person
@@ -48,7 +48,7 @@ test_that("stop rule is variance, targets reached, one dimension", {
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20)
   
   # get initiated person
@@ -75,7 +75,7 @@ test_that("stop rule is variance, targets not reached, three dimensions", {
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20)
   
   # get initiated person
@@ -102,7 +102,7 @@ test_that("stop rule is variance, variance reached, three dimensions", {
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20)
   
   # get initiated person
@@ -129,7 +129,7 @@ test_that("stop rule is variance, maximum number of items reached, three dimensi
   
   initiated_test <- initTest(item_characteristics_shadowcat_format,
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 20),
                              max_n = 20)
   
   # get initiated person

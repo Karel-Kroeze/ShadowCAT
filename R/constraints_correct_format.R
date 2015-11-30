@@ -19,7 +19,7 @@
 #' are set up to work with lpSolve, and should not be manually edited.
 #' 
 #' @section Note about length:
-#' Note that the maximum test length (either max_length or the length stopping parameter) is always included as an additional constraint.
+#' Note that the maximum test length is always included as an additional constraint.
 #' 
 #' @examples
 #' # set up a simple itembank and test.
@@ -51,7 +51,7 @@
 #'        target = 2))
 #' 
 #' # update the test object
-#' test$constraints <- createConstraints(test, characteristics, constraints)
+#' test$constraints <- createConstraints(test$stop$n, test$items$K, characteristics, constraints)
 #' 
 #' # or do it all at once;
 #' test2 <- initTest(items, constraints = list(characteristics = characteristics, constraints = constraints))
@@ -59,28 +59,16 @@
 #' # results are identical (initTest uses createConstraints internally);
 #' all.equal(test$constraints, test2$constraints)
 #' 
-#' @param test Test object, see \code{\link{initTest}}
+#' @param max_n test length at which testing should stop
+#' @param number_items number of items available in the item bank
 #' @param characteristics \code{data.frame} with characteristics, one row per item, one column per characteristic.
 #' @param constraints \code{list} of constraints, see \code{details}.
 #' @return Constraints object, see \code{details}.
 #' @export
-createConstraints <- function(test, characteristics = NULL, constraints = NULL) {
+createConstraints <- function(max_n, number_items, characteristics = NULL, constraints = NULL) {
   result <- function() {
-    # test stops at whichever occurs first, length stopping rule or max_n
-    max_n <- ifelse(test$stop$type == 'length', min(test$stop$n, test$max_n), test$max_n)
-    
-    characteristics_numeric <- (if (is.null(characteristics)) 
-                                  data.frame(length = rep(1, test$items$K)) 
-                                else
-                                  as.data.frame(cbind(data.frame(length = rep(1, test$items$K)), 
-                                                     get_characteristics_numeric())))
-    
-    constraints_lp <- (if (is.null(constraints))
-                         data.frame(name = 'length', op = '=', target = max_n, stringsAsFactors = FALSE)
-                       else
-                         as.data.frame(rbind(data.frame(name = 'length', op = '=', target = max_n, stringsAsFactors = FALSE),
-                                             get_constraints_lp())))
-
+    characteristics_numeric <- get_characteristics_numeric()
+    constraints_lp <- get_constraints_lp()
     characteristics_numeric_lp <- characteristics_numeric[,constraints_lp$name, drop = FALSE]
     
     characteristics_and_constraints_lp <- list(characteristics = characteristics_numeric, constraints = constraints_lp, lp_chars = characteristics_numeric_lp)
@@ -90,6 +78,9 @@ createConstraints <- function(test, characteristics = NULL, constraints = NULL) 
   }
   
   get_characteristics_numeric <- function() {
+    if (is.null(characteristics)) 
+      return(data.frame(length = rep(1, number_items)))
+    
     numeric_characteristics_list <- lapply(colnames(characteristics), 
                                            FUN = function(key) {   
                                             if (is.character(characteristics[[key]]) || is.factor(characteristics[[key]])) {
@@ -102,11 +93,12 @@ createConstraints <- function(test, characteristics = NULL, constraints = NULL) 
                                             } 
                                     )
 
-    if (is.list(numeric_characteristics_list))
-      do.call(cbind, numeric_characteristics_list)
-    else
-      numeric_characteristics_list 
+    numeric_characteristics <- unlist_numeric_characteristics(numeric_characteristics_list)
+    
+    cbind(data.frame(length = rep(1, number_items)),
+          numeric_characteristics)
   }
+ 
   
   get_names_numeric_characteristics_list <- function(numeric_characteristics_list) {
     unlist(sapply(numeric_characteristics_list, 
@@ -114,6 +106,9 @@ createConstraints <- function(test, characteristics = NULL, constraints = NULL) 
   }
   
   get_constraints_lp <- function() {
+    if (is.null(constraints))
+      return(data.frame(name = 'length', op = '=', target = max_n, stringsAsFactors = FALSE))
+    
     constraints_lp_format_list <- lapply(constraints, FUN = function(constraint) { if (constraint$op == "><")  
                                                                                      rbind(c(constraint$name, ">", constraint$target[1]), 
                                                                                            c(constraint$name, "<", constraint$target[2]))
@@ -121,11 +116,24 @@ createConstraints <- function(test, characteristics = NULL, constraints = NULL) 
                                                                                      c(constraint$name, constraint$op, constraint$target)
                                                                                  }) 
 
-    constraints_lp_format <- ( if (is.list(constraints_lp_format_list))
-                                 do.call(rbind, constraints_lp_format_list) 
-                               else
-                                 constraints_lp_format_list )
-      
+    constraints_lp_format <- unlist_and_name_constraints_lp_format(constraints_lp_format_list)    
+
+    as.data.frame(rbind(data.frame(name = 'length', op = '=', target = max_n, stringsAsFactors = FALSE),
+                        constraints_lp_format))
+  }
+  
+  unlist_numeric_characteristics <- function(numeric_characteristics_list) {
+    if (is.list(numeric_characteristics_list))
+      do.call(cbind, numeric_characteristics_list)
+    else
+      numeric_characteristics_list
+  }
+  
+  unlist_and_name_constraints_lp_format <- function(constraints_lp_format_list) {
+    if (is.list(constraints_lp_format_list))
+      constraints_lp_format <- do.call(rbind, constraints_lp_format_list) 
+    else
+      constraints_lp_format <- constraints_lp_format_list
     colnames(constraints_lp_format) <- c("name", "op", "target")
     constraints_lp_format
   }

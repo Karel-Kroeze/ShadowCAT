@@ -4,10 +4,13 @@
 \alias{createConstraints}
 \title{Creates a constraints object which can be used in lp function from lpSolve package.}
 \usage{
-createConstraints(test, characteristics = NULL, constraints = NULL)
+createConstraints(max_n, number_items, characteristics = NULL,
+  constraints = NULL)
 }
 \arguments{
-\item{test}{Test object, see \code{\link{initTest}}}
+\item{max_n}{test length at which testing should stop}
+
+\item{number_items}{number of items available in the item bank}
 
 \item{characteristics}{\code{data.frame} with characteristics, one row per item, one column per characteristic.}
 
@@ -43,7 +46,7 @@ are set up to work with lpSolve, and should not be manually edited.
 
 \section{Note about length}{
 
-Note that the maximum test length (either max_length or the length stopping parameter) is always included as an additional constraint.
+Note that the maximum test length is always included as an additional constraint.
 }
 \examples{
 # set up a simple itembank and test.
@@ -75,7 +78,7 @@ constraints <- list(
        target = 2))
 
 # update the test object
-test$constraints <- createConstraints(test, characteristics, constraints)
+test$constraints <- createConstraints(test$stop$n, test$items$K, characteristics, constraints)
 
 # or do it all at once;
 test2 <- initTest(items, constraints = list(characteristics = characteristics, constraints = constraints))

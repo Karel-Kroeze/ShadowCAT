@@ -23,7 +23,7 @@ test_that("start is random, stop is n, constraints is null", {
   initiated_test <- initTest(item_characteristics_shadowcat_format, 
                              start = list(type = 'random', n = 5), 
                              stop = list(type = 'length', n = 30),
-                             max_n = 50, # utter maximum
+                             max_n = 30, # utter maximum
                              estimator = 'MAP',
                              objective = 'PD',
                              selection = 'MI',
@@ -37,7 +37,7 @@ test_that("start is random, stop is n, constraints is null", {
   expect_equal(initiated_test$start$n, 5)
   expect_equal(initiated_test$stop$type, "length")
   expect_equal(initiated_test$stop$n, 30)
-  expect_equal(initiated_test$max_n, 50)
+  expect_equal(initiated_test$max_n, 30)
   expect_equal(initiated_test$lowerBound, -3)
   expect_equal(initiated_test$upperBound, 3)
   expect_equal(initiated_test$estimator, "MAP")
@@ -84,7 +84,7 @@ test_that("start is fixed, stop is variance, constraints is defined", {
   
   initiated_test <- initTest(item_characteristics_shadowcat_format, 
                              start = list(type = 'fixed', indices = c(2, 4, 5), n = 3), 
-                             stop = list(type = 'variance', target = .2),
+                             stop = list(type = 'variance', target = .2, n = 50),
                              max_n = 50, # utter maximum
                              estimator = 'MAP',
                              objective = 'PD',
@@ -125,3 +125,4 @@ test_that("start is fixed, stop is variance, constraints is defined", {
   expect_equal(round(as.matrix(initiated_test$constraints$lp_chars$exclusive)[8:11,], 3), c(1, 0, 1, 0))
   expect_equal(initiated_test$internal, list())    
 })
+
