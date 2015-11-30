@@ -310,58 +310,6 @@ test_that("with constraints max_n 130", {
   expect_equal(number_somatic_items, 75) 
 })
 
-
-
-
-test_that("validate with ShadowCAT Karel Kroeze", {
-  # define true theta for simulation of responses
-  true_theta <- 2
-  
-  # define item characteristics
-  number_items <- 50
-  number_dimensions <- 1
-  number_answer_categories <- 2 # can only be 2 for 3PLM model
-  
-  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
-  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
-  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
-  eta <- NULL # only relevant for GPCM model
-  
-  model <- '3PLM'
-  start_items <- list(type = 'random', n = 1)
-  stop_test <- list(type = 'length', n = 50)
-  estimator <- 'MAP'
-  information_summary <- 'PD'
-  item_selection <- 'MI'
-  
-  # define prior covariance matrix
-  prior <- diag(number_dimensions) 
-
-  # make person and test object for ShadowCAT from Kroeze
-  item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = eta, silent = TRUE)
-  
-  person <- initPerson(items = item_characteristics_shadowcat_format,
-                       theta = true_theta,
-                       prior = prior)
-  
-  test <- initTest(items = item_characteristics_shadowcat_format, 
-                   start = start_items, 
-                   stop = stop_test,
-                   max_n = stop_test$n,
-                   estimator = estimator,
-                   objective = information_summary,
-                   selection = item_selection,
-                   constraints = NULL,
-                   exposure = NULL,
-                   lowerBound = rep(-3, item_characteristics_shadowcat_format$Q), 
-                   upperBound = rep(3, item_characteristics_shadowcat_format$Q))
-  
-  test_outcome_roqua <- with_random_seed(2, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
-  person_kroeze <- with_random_seed(2, ShadowCAT)(person, test)
-  
-  expect_equal(person_kroeze$estimate, test_outcome_roqua$estimate)
-})
-
 context("check stop rule")
 
 test_that("stop rule is number of items", {

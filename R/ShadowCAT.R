@@ -23,7 +23,7 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("person_updated_after_ne
 #' @param stop_test rule for when to stop providing new items to patient; one of
 #' list(type = 'length', n = ...);
 #' list(type = 'variance', target = ..., n = ...)
-#' where n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule), 
+#' where n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule; n <= 0 never stops for max length), 
 #' target = vector of maximum acceptable variances per dimension
 #' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation) or "ML" (maximum likelihood); 
 #' "EAP" (Expected A Posteriori Estimation) is currently not working due to problems with the MultiGHQuad package
@@ -73,7 +73,7 @@ shadowcat_roqua <- function(new_response, prior, model, alpha, beta, guessing = 
     } 
     
     assign("person_updated_after_new_response", update_person_estimate(person_updated_after_new_response), envir = .GlobalEnv)
-    if (!stop_test(person_updated_after_new_response, test)) {
+    if (!test_must_stop(length(person_updated_after_new_response$responses), attr(person_updated_after_new_response$estimate, 'variance'), stop_test$n, stop_test$type, stop_test$target)) {
       assign("index_new_item", next_item(person_updated_after_new_response, test), envir = .GlobalEnv)
       list(index_new_item = index_new_item,
            person_updated_after_new_response = person_updated_after_new_response)
@@ -117,39 +117,6 @@ shadowcat_roqua <- function(new_response, prior, model, alpha, beta, guessing = 
   }
   
   validate_and_run()
-}
-
-
-#' ShadowCAT Karel Kroeze
-#' 
-#' Run test with a specified person, and a specified test. See initPerson and initTest.
-#'  This is a simple wrapper to call the right methods, options should be defined in the test object.
-#'
-#' Details
-#' @param person person object
-#' @param test test object
-#' @param verbose if larger than 0, print estimate and variance of estimate after test is finished. If larger than 1, also print estimate and variance of estimate at each iteration
-#' @return person
-#' @export
-ShadowCAT <- function(person, test, verbose = FALSE) {
-  ## Start CAT
-  if (verbose > 0) cat("\n")
-  
-  while(!stop_test(person, test)) {
-    # update person with new answer
-    person <- answer(person, test, indeces = next_item(person, test))
-    
-    # if inititial items have been administered (so we are in the CAT phase), update person estimate after each newly answered item
-    if (length(person$responses) > test$start$n) 
-      person <- estimate(person, test)
-    
-    if (verbose > 1) 
-      cat("\r", paste0(round(person$estimate, 2), collapse = ', '), " | ", paste0(round(diag(attr(person$estimate,'variance')), 2), collapse = ', '), '         ')
-  }
-  
-  if (verbose > 0) cat("\r", paste0(round(person$estimate, 2), collapse = ', '), " | ", paste0(round(diag(attr(person$estimate,'variance')), 2), collapse = ', '), '         ', "\n")
-  
-  invisible(person)
 }
 
 

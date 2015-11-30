@@ -40,7 +40,7 @@ nByDimension = scalar of number of initial items per dimension, or vector with n
 \item{stop_test}{rule for when to stop providing new items to patient; one of
 list(type = 'length', n = ...);
 list(type = 'variance', target = ..., n = ...)
-where n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule), 
+where n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule; n <= 0 never stops for max length), 
 target = vector of maximum acceptable variances per dimension}
 
 \item{estimator}{type of estimator to be used, one of "MAP" (Maximum a posteriori estimation) or "ML" (maximum likelihood); 
