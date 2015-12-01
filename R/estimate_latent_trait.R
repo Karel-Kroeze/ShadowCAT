@@ -75,7 +75,7 @@ estimate <- function(person, test, prior_var_safe_ml = NULL) {
     # for now, simple nlm (TODO: look at optim, and possible reintroducing pure N-R).
     # We want a maximum, but nlm produces minima -> reverse function call.
     # LL is the target function, test, person and minimize need to be passed on. We also want the value of the hessian at the final estimate.
-    person$estimate <- nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate # passed on to LL, reverses polarity.
+    person$estimate <- nlm(f = probabilities_and_likelihoods, p = person$estimate, person$responses, test$items$model, person$administered, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, person$prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate
     
     # TODO: We should really store info somewhere so we don't have to redo this (when using FI based selection criteria).
     fisher_information_items <- FI(test, person)
@@ -88,16 +88,16 @@ estimate <- function(person, test, prior_var_safe_ml = NULL) {
   
   get_updated_estimate_and_variance_ml_safe <- function() { 
     # suppress warnings and errors and do MAP with flat prior instead
-    person$estimate <- tryCatch(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate,
+    person$estimate <- tryCatch(nlm(f = probabilities_and_likelihoods, p = person$estimate, person$responses, test$items$model, person$administered, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, person$prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate,
                                 error = function(e) {
                                   test$estimator <- "MAP"
                                   person$prior <- diag(test$items$Q) * prior_var_safe_ml
-                                  return(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate)
+                                  return(nlm(f = probabilities_and_likelihoods, p = person$estimate, person$responses, test$items$model, person$administered, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, person$prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate)
                                 },
                                 warning = function(w) {
                                   test$estimator <- "MAP"
                                   person$prior <- diag(test$items$Q) * prior_var_safe_ml
-                                  return(nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate)
+                                  return(nlm(f = probabilities_and_likelihoods, p = person$estimate, person$responses, test$items$model, person$administered, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, person$prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate)
                                 })
 
     fisher_information_items <- FI(test, person)
@@ -123,7 +123,7 @@ estimate <- function(person, test, prior_var_safe_ml = NULL) {
     # note that prior is applied in LL (incorrectly it seems, but still).
     # suppress warnings and errors and do EAP instead. RM I have removed this option, I don't want users to get something they think
     # is something else. Also, if estimator was ML, the default prior is used which may not make sense.
-    person$estimate <- nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate # passed on to LL, reverses polarity.
+    person$estimate <- nlm(f = probabilities_and_likelihoods, p = person$estimate, person$responses, test$items$model, person$administered, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, person$prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate # passed on to LL, reverses polarity.
     
     # TODO: We should really store info somewhere so we don't have to redo this (when using FI based selection criteria).
     fisher_information_items <- FI(test, person)
@@ -144,7 +144,7 @@ estimate <- function(person, test, prior_var_safe_ml = NULL) {
                                         prior = list(mu = rep(0, test$items$Q), Sigma = person$prior),
                                         adapt = adapt,
                                         ip = switch(test$items$Q, 50, 15, 6, 4, 3))
-    eval.quad(FUN = LL, X = Q_dim_grid_quad_points, test = test, person = person)
+    eval.quad(FUN = probabilities_and_likelihoods, X = Q_dim_grid_quad_points, person$responses, test$items$model, person$administered, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, person$prior, output = "likelihoods")
   }
   
   get_updated_estimate_and_variance_attribute <- function(estimator) {

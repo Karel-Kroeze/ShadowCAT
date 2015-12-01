@@ -19,3 +19,4 @@ subset.ShadowCAT.items <- function(x, subset, ...) {
   x$K <- length(subset)
   x
 }
+

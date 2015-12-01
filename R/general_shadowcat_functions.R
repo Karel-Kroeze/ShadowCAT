@@ -10,6 +10,21 @@ categorical_to_dummy <- function(unique_values, categorical_vector) {
   sapply(unique_values, FUN = function(value) { as.numeric(categorical_vector == value) })
 }
 
+#' Get subset based on indeces
+#' 
+#' @param x vector or matrix from which a subset is to be taken
+#' @param subset indeces of elements/rows to be selected
+#' @return subset of x 
+#' @examples all(get_subset(c(1, 4, 2, 6, 3), c(2, 5, 3)) == c(4, 3, 2)) || stop("wrong")
+#' all(get_subset(matrix(c(1, 4, 2, 6, 3, 8, 6, 9, 0, 1), ncol = 2), c(2, 5, 3)) == matrix(c(4, 3, 2, 6, 1, 9), ncol = 2)) || stop("wrong")
+#' @export
+get_subset <- function(x, subset) {
+  if (is.vector(x)) 
+    x[subset]
+  else
+    x[subset,,drop = FALSE]
+}
+
 #' lapply with array as output
 #' 
 #'@param X a vector or list; see ? lapply for details
