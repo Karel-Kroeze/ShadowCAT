@@ -76,7 +76,7 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
   
   if (deriv){
     # likelihoods can never truly be zero, let alone negative
-    res$l[which(res$l <= 0)] <- 1e-10
+    res$l[which(res$l <= 0e-10)] <- 1e-10
     
     # create (log)likelihood (L, LL)
     ll <- log(res$l)

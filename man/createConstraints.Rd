@@ -78,7 +78,7 @@ constraints <- list(
 test$constraints <- createConstraints(test, characteristics, constraints)
 
 # or do it all at once;
-test <- initTest(items, constraints = list(characteristics = characteristics, constraints = constraints))
+test2 <- initTest(items, constraints = list(characteristics = characteristics, constraints = constraints))
 
 # results are identical (initTest uses createConstraints internally);
 all.equal(test$constraints, test2$constraints)
