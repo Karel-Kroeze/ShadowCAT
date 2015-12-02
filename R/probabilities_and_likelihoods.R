@@ -9,13 +9,13 @@
 #' @param theta true or estimated theta
 #' @param responses person responses to the administered items; only required if output is "likelihoods" or "both"
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
-#' @param administered indeces of administered items
+#' @param items_to_include indeces of items to include in computations, usually indeces of either the administered items or all items
 #' @param number_dimensions number of dimensions
 #' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "EAP" (Expected A Posteriori Estimation), or "ML" (maximum likelihood)
 #' @param alpha matrix containing the alpha parameters
 #' @param beta matrix containing the beta parameters
 #' @param quessing matrix containing the quessing
-#' @param prior prior covariance matrix for theta; only required if estimator is "MAP" or "EAP" and deriv = TRUE
+#' @param prior prior covariance matrix for theta; only required if estimator is "MAP" or "EAP" and output is "likelihoods" or "both"
 #' @param return_log_likelihoods if TRUE, log of likelihoods are returned, else likelihoods
 #' @param inverse_likelihoods should likelihood values be reversed (useful for minimization, reverses LL as well as derivatives)
 #' @param output string, one of "probs" (return vector of probabilities only), "likelihoods" (return vector of likelihoods with first and second derivatives as attributes),
@@ -25,14 +25,14 @@
 #' @importFrom Rcpp evalCpp
 #' @useDynLib ShadowCAT
 #' @export
-probabilities_and_likelihoods <- function(theta, responses = NULL, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = NULL, return_log_likelihoods = TRUE, inverse_likelihoods = FALSE, output = "probs") {
+probabilities_and_likelihoods <- function(theta, responses = NULL, model, items_to_include, number_dimensions, estimator, alpha, beta, guessing, prior = NULL, return_log_likelihoods = TRUE, inverse_likelihoods = FALSE, output = "probs") {
   # TODO: Check input.
   # TODO priors: mean? 
   # priors: Alleen variabele deel van multivariaat normaal verdeling (exp).
-  number_items <- length(administered)
-  alpha <- get_subset(alpha, administered)
-  beta <- get_subset(beta, administered)
-  quessing <- get_subset(guessing, administered)
+  number_items <- length(items_to_include)
+  alpha <- get_subset(alpha, items_to_include)
+  beta <- get_subset(beta, items_to_include)
+  quessing <- get_subset(guessing, items_to_include)
   
   result <- function() {
     probabilities <- get_probabilities()

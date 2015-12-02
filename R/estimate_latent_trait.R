@@ -77,8 +77,8 @@ estimate <- function(person, test, prior_var_safe_ml = NULL) {
     # LL is the target function, test, person and minimize need to be passed on. We also want the value of the hessian at the final estimate.
     person$estimate <- nlm(f = probabilities_and_likelihoods, p = person$estimate, person$responses, test$items$model, person$administered, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, person$prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate
     
-    # TODO: We should really store info somewhere so we don't have to redo this (when using FI based selection criteria).
-    fisher_information_items <- FI(test, person)
+    # TODO: We should really store info somewhere so we don't have to redo this (when using get_fisher_information based selection criteria).
+    fisher_information_items <- get_fisher_information(person$estimate, test$items$model, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, test$items$pars$m)
     fisher_information_test_so_far <- apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum)
     
     # inverse
@@ -100,7 +100,7 @@ estimate <- function(person, test, prior_var_safe_ml = NULL) {
                                   return(nlm(f = probabilities_and_likelihoods, p = person$estimate, person$responses, test$items$model, person$administered, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, person$prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate)
                                 })
 
-    fisher_information_items <- FI(test, person)
+    fisher_information_items <- get_fisher_information(person$estimate, test$items$model, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, test$items$pars$m)
     fisher_information_test_so_far <- apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum)
     
     # inverse
@@ -125,8 +125,8 @@ estimate <- function(person, test, prior_var_safe_ml = NULL) {
     # is something else. Also, if estimator was ML, the default prior is used which may not make sense.
     person$estimate <- nlm(f = probabilities_and_likelihoods, p = person$estimate, person$responses, test$items$model, person$administered, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, person$prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate # passed on to LL, reverses polarity.
     
-    # TODO: We should really store info somewhere so we don't have to redo this (when using FI based selection criteria).
-    fisher_information_items <- FI(test, person)
+    # TODO: We should really store info somewhere so we don't have to redo this (when using get_fisher_information based selection criteria).
+    fisher_information_items <- get_fisher_information(person$estimate, test$items$model, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, test$items$pars$m)
     fisher_information_test_so_far <- apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum) +
                                       solve(person$prior)
     # inverse
