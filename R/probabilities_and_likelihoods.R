@@ -14,7 +14,7 @@
 #' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "EAP" (Expected A Posteriori Estimation), or "ML" (maximum likelihood)
 #' @param alpha matrix containing the alpha parameters
 #' @param beta matrix containing the beta parameters
-#' @param quessing matrix containing the quessing
+#' @param guessing matrix containing the quessing
 #' @param prior prior covariance matrix for theta; only required if estimator is "MAP" or "EAP" and output is "likelihoods" or "both"
 #' @param return_log_likelihoods if TRUE, log of likelihoods are returned, else likelihoods
 #' @param inverse_likelihoods should likelihood values be reversed (useful for minimization, reverses LL as well as derivatives)
@@ -29,6 +29,8 @@ probabilities_and_likelihoods <- function(theta, responses = NULL, model, items_
   # TODO: Check input.
   # TODO priors: mean? 
   # priors: Alleen variabele deel van multivariaat normaal verdeling (exp).
+  if (estimator == "ML")
+    prior <- NULL
   number_items <- length(items_to_include)
   alpha <- get_subset(alpha, items_to_include)
   beta <- get_subset(beta, items_to_include)
@@ -79,7 +81,7 @@ probabilities_and_likelihoods <- function(theta, responses = NULL, model, items_
     responses <- get_responses()
     probs <- switch(model,
                     "3PLM" = PROB_3PLM(theta, alpha, beta, guessing, responses, output != "probs"),
-                    "GRM" = PROB_GRM(theta,alpha, beta, responses, output != "probs"),
+                    "GRM" = PROB_GRM(theta, alpha, beta, responses, output != "probs"),
                     "SM" = PROB_SM(theta, alpha, beta, responses, output != "probs"),
                     "GPCM" = PROB_GPCM(theta, alpha, beta, responses, output != "probs"))
     
@@ -123,8 +125,8 @@ probabilities_and_likelihoods <- function(theta, responses = NULL, model, items_
   }
   
   validate <- function() {
-    if (!is.null(prior) && estimator == "ML" && output != "probs")
-      add_error("prior", "set for ML estimator, this makes no sense")
+   # if (!is.null(prior) && estimator == "ML" && output != "probs")
+   #   add_error("prior", "set for ML estimator, this makes no sense")
     if (is.null(prior) && estimator %in% c("MAP", "EAP") && output != "probs")
       add_error("prior", "is missing but required for estimate")
   }

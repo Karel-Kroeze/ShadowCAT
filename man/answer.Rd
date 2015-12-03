@@ -4,7 +4,7 @@
 \alias{answer}
 \title{Simulate response(s)}
 \usage{
-answer(person, test, indeces = NULL)
+answer(person, test, indeces)
 }
 \arguments{
 \item{person}{Person object, see \code{\link{initPerson}}.}
@@ -25,7 +25,7 @@ test <- initTest(items)
 person <- initPerson(items)
 
 # simulates responses to all questions, and returns a vector response pattern.
-answer(person, test)
+answer(person, test, 1:50)
 
 # simulates responses to the specified question indeces, and returns an updated person object.
 answer(person, test, sample(test$items$K, 5))

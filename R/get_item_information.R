@@ -6,6 +6,7 @@
 #' @return vector
 #' @export
 objective <- function(test, person, pad = TRUE) {
+  fisher_information <- get_fisher_information(person$estimate, test$items$model, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, test$items$pars$m)
   result <- function() {
     item_information <- get_item_information_switch()
     item_information_imputed_missings <- impute_zero_for_na(item_information)   
@@ -53,28 +54,24 @@ objective <- function(test, person, pad = TRUE) {
   
   # A
   item_information_trace <- function() {
-    fisher_information <- FI(test, person)
     information_administered <- apply(fisher_information[,,person$administered, drop = FALSE], c(1, 2), sum)
     apply(fisher_information[,,person$available, drop = FALSE], 3, function(x) sum(diag(information_administered + x)))
   }
   
   # PA
   item_information_post_trace <- function() {
-    fisher_information <- FI(test, person)
     information_administered <- apply(fisher_information[,,person$administered, drop = FALSE], c(1, 2), sum) + solve(person$prior)
     apply(fisher_information[,,person$available, drop = FALSE], 3, function(x) sum(diag(information_administered + x)))
   }
   
   # D
   item_information_determinant <- function() {
-    fisher_information <- FI(test, person)
     information_administered <- apply(fisher_information[,,person$administered, drop = FALSE], c(1, 2), sum)
     apply(fisher_information[,,person$available, drop = FALSE], 3, function(x) det(information_administered + x))
   }
   
   # PD
   item_information_post_determinant <- function() {
-    fisher_information <- FI(test, person)
     information_administered <- apply(fisher_information[,,person$administered, drop = FALSE], c(1, 2), sum) + solve(person$prior)
     apply(fisher_information[,,person$available, drop = FALSE], 3, function(x) det(information_administered + x))
   }

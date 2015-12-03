@@ -20,7 +20,7 @@
 #' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "EAP" (Expected A Posteriori Estimation), or "ML" (maximum likelihood)
 #' @param alpha matrix containing the alpha parameters
 #' @param beta matrix containing the beta parameters
-#' @param quessing matrix containing the quessing
+#' @param guessing matrix containing the quessing
 #' @param number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix
 #' @return array with an information matrix for each item (QxQxK).
 #' @export

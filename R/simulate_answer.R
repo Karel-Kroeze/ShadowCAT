@@ -8,7 +8,7 @@
 #' person <- initPerson(items)
 #' 
 #' # simulates responses to all questions, and returns a vector response pattern.
-#' answer(person, test)
+#' answer(person, test, 1:50)
 #' 
 #' # simulates responses to the specified question indeces, and returns an updated person object.
 #' answer(person, test, sample(test$items$K, 5))
@@ -21,7 +21,7 @@
 #' @export
 answer <- function(person, test, indeces) {
   # probabilities, generated with TRUE theta.
-  Pij <- probabilities_and_likelihoods(person$theta, test$items$model, indeces, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, output = "probs")
+  Pij <- probabilities_and_likelihoods(person$theta, responses = NULL, test$items$model, indeces, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, output = "probs")
   
   # cumulative probabilities
   cp <- Pij 

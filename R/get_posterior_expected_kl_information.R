@@ -41,11 +41,9 @@ PEKL <- function(test, person, theta_range = -3:3) {
   #' returns vector containing information for each yet available item
   KLB <- function(theta, theta0, test, person) {
     # TODO: wrap this into PEKL, do not recompute P0 for each theta (considering it is constant for the current posterior).
-    available_items <- subset(test$items, person$available)
-    administered_items <- subset(test$items, person$administered)
-    P <- prob(test = test, theta = theta, items = available_items)$P
-    P0 <- prob(test = test, theta = theta0, items = available_items)$P
-    LL <- prob(test = test, theta = theta, person = person, items = administered_items, deriv = TRUE)$LL
+    P <- probabilities_and_likelihoods(theta, NULL, test$items$model, person$available, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, output = "probs")
+    P0 <- probabilities_and_likelihoods(theta0, NULL, test$items$model, person$available, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, output = "probs")
+    LL <- probabilities_and_likelihoods(theta, person$responses, test$items$model, person$administered, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, prior = person$prior, output = "likelihoods")
     
     rowSums(P0 * (log(P0) - log(P)), na.rm = TRUE) * exp(LL)
   }

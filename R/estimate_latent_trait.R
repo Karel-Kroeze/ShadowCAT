@@ -61,7 +61,7 @@ estimate <- function(person, test, prior_var_safe_ml = NULL) {
   result <- function() {
     updated_estimate <- get_updated_estimate_and_variance_attribute(test$estimator)
     person$estimate <- trim_estimate(updated_estimate)
-    invisible(person)
+    person
   }
   
   get_updated_estimate_and_variance_ml <- function() {
