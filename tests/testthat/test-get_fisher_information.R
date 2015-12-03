@@ -69,6 +69,7 @@ test_that("model is GPCM, 3 dimensions, varying numbers of categories", {
   model <- "GPCM"
   estimator <- "ML"
   number_items <- 50
+  max_number_answer_categories <- 5
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   temp_vector <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
   eta <- t(apply(temp_vector, 1, function(x) x + seq(-2, 2, length.out = (max_number_answer_categories - 1))))
@@ -87,6 +88,7 @@ test_that("model is GPCM, 3 dimensions, varying numbers of categories", {
   expect_equal(round(fisher_information[1,,24], 3), c(.116, .126, .330))
   expect_equal(round(fisher_information[3,,40], 3), c(.216, .319, .351))
 })
+
 context("SM model")
 
 test_that("model is SM 1 dimensions, 2 categories", {
@@ -210,6 +212,7 @@ test_that("model is GRM, 3 dimensions, varying number of categories", {
   eta[c(1, 5:10), 3:4] <- NA
   eta[c(40:45), 4] <- NA
   beta <- row_cumsum(eta)
+  guessing <- NULL
   number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   
   fisher_information <- get_fisher_information(theta, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)

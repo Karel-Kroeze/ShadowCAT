@@ -474,37 +474,6 @@ test_that("model is SM, 3 dimensions, 4 categories, estimator is ML, deriv is tr
 }) 
 
 test_that("model is SM, 3 dimensions, 4 categories, estimator is ML, deriv is false", {
-  # create item characteristics
-  model <- 'SM'
-  number_items <- 50
-  number_dimensions <- 3
-  number_answer_categories <- 4
-  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
-  
-  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
-  temp_vector <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
-  beta <- t(apply(temp_vector, 1, function(x) x + seq(-2, 2, length.out = (number_answer_categories - 1))))
-  
-  item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = NULL, silent = TRUE)
-  
-  # get initiated test: adaptive test rules
-  initiated_test <- initTest(item_characteristics_shadowcat_format, 
-                             start = list(type = 'random', n = 5), 
-                             stop = list(type = 'length', n = 30),
-                             max_n = 50, # utter maximum
-                             estimator = 'ML',
-                             objective = 'PD',
-                             selection = 'MI',
-                             constraints = NULL,
-                             exposure = NULL,
-                             lowerBound = rep(-3, item_characteristics_shadowcat_format$Q),
-                             upperBound = rep(3, item_characteristics_shadowcat_format$Q))
-  
-  # get initiated person
-  initiated_person <- initPerson(item_characteristics_shadowcat_format, prior = NULL)
-  
-  probabilities <- prob(initiated_test, person = initiated_person, theta = NULL, deriv = FALSE, prior = NULL, items = NULL)
-  
   theta <- c(0, 0, 0)
   model <- "SM"
   administered <- 1:50

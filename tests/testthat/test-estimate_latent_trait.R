@@ -175,6 +175,7 @@ test_that("estimator is MAP, 1 dimension, 2 categories", {
   expect_equal(round(attr(estimated_latent_trait$estimate, "variance"), 3), matrix(.201))
 })
 
+
 test_that("estimator is MAP, 3 dimensions, varying number of categories", {
   # create item characteristics
   model <- 'GPCM'
@@ -222,7 +223,7 @@ test_that("estimator is MAP, 3 dimensions, varying number of categories", {
 
 
 
-context("estimator is EAP")
+# context("estimator is EAP")
 
 # test_that("estimator is EAP, 1 dimension, 2 categories", {
 #   model <- "3PLM"

@@ -19,6 +19,8 @@ categorical_to_dummy <- function(unique_values, categorical_vector) {
 #' all(get_subset(matrix(c(1, 4, 2, 6, 3, 8, 6, 9, 0, 1), ncol = 2), c(2, 5, 3)) == matrix(c(4, 3, 2, 6, 1, 9), ncol = 2)) || stop("wrong")
 #' @export
 get_subset <- function(x, subset) {
+  if (is.null(x))
+    return(NULL)
   if (is.vector(x)) 
     x[subset]
   else

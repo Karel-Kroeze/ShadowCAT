@@ -34,8 +34,8 @@ probabilities_and_likelihoods <- function(theta, responses = NULL, model, items_
   number_items <- length(items_to_include)
   alpha <- get_subset(alpha, items_to_include)
   beta <- get_subset(beta, items_to_include)
-  quessing <- get_subset(guessing, items_to_include)
-  
+  guessing <- get_subset(guessing, items_to_include)
+
   result <- function() {
     probabilities <- get_probabilities()
     switch(output,
