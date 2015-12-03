@@ -25,7 +25,7 @@ best_item <- function(person, test) {
     
     # find item with largest information; 'MI' is a simple maximum, 'Shadow' does ShadowTesting.
     item_with_max_information <- switch(test$selection,
-                                        "MI" = MI(test, person, item_information),
+                                        "MI" = get_item_index_max_information(person$available, item_information),
                                         "Shadow" = Shadow(test, person, item_information))
     
     # if there's more than one, select one at random (edge case)

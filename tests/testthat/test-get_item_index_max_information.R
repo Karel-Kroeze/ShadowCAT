@@ -39,7 +39,7 @@ test_that("with padding in objective function", {
   initiated_person$responses <- rep(c(1, 0), 17)
   
   item_information <- objective(initiated_test, initiated_person, pad = TRUE)
-  item_index_max_information <- MI(initiated_test, initiated_person, item_information)
+  item_index_max_information <- get_item_index_max_information(initiated_person$available, item_information)
   
   expect_equal(item_index_max_information, 6)
 })
