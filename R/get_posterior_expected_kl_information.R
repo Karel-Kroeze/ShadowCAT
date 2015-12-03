@@ -32,7 +32,7 @@ PEKL <- function(test, person, theta_range = -3:3) {
     } 
     else {
       test$estimator <- "EAP"
-      estimate(person, test)$estimate
+      estimate_latent_trait(person$estimate, person$responses, person$prior, test$items$model, person$administered,test$items$Q, test$estimator,test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, test$items$pars$m, test$lowerBound, test$upperBound)
     }
   }
   

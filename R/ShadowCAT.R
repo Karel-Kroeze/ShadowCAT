@@ -51,7 +51,7 @@ shadowcat_roqua <- function(new_response, prior, model, alpha, beta, guessing = 
   
   person <- initPerson(items = item_characteristics_shadowcat_format, 
                        prior = prior)
-
+  
   test <- initTest(items = item_characteristics_shadowcat_format, 
                    start = start_items, 
                    stop = stop_test,
@@ -63,7 +63,7 @@ shadowcat_roqua <- function(new_response, prior, model, alpha, beta, guessing = 
                    exposure = NULL,
                    lowerBound = lowerbound,
                    upperBound = upperbound)
-
+  
   result <- function() {
     if (is.null(new_response)) { # first iteration: no responses given yet
       assign("person_updated_after_new_response", person, envir = .GlobalEnv)
@@ -90,9 +90,8 @@ shadowcat_roqua <- function(new_response, prior, model, alpha, beta, guessing = 
     person$administered <- c(person$administered, index_new_item)
     person$available <- person$available[-which(person$available %in% index_new_item)]
     if (length(person$responses) > test$start$n)
-      estimate(person, test, prior_var_safe_ml)
-    else
-      person
+      person$estimate <- estimate_latent_trait(person$estimate, person$responses, prior, model, person$administered, test$items$Q, estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, test$items$pars$m, lowerbound, upperbound, prior_var_safe_ml)
+    person
   }
   
   validate <- function() {

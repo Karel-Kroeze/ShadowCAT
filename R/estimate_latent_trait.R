@@ -23,45 +23,65 @@
 #' Variance of the estimate is added to the estimate as an attribute.
 #' 
 #' @examples 
-#' # create a basic test + person
-#' items <- createTestBank("GPCM")
-#' test <- initTest(items, estimator = "ML")
-#' person <- initPerson(items)
-#' 
-#' # answer a few items
-#' person <- answer(person, test, sample(items$K, 10))
-#' 
+#'number_dimensions <- 1
+#'estimate <- rep(.3, number_dimensions)
+#'model <- "3PLM"
+#'number_items <- 50
+#'responses <- rep(c(1, 0), 17)
+#'administered <- c(6:20, 31:49)
+#'alpha <- matrix(runif(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+#'beta <- matrix(rnorm(number_items), nrow = number_items, ncol = 1)
+#'guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+#'number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
+#'lower_bound <- rep(-3, number_dimensions)
+#'upper_bound <- rep(3, number_dimensions)
+#'prior <- diag(1)
+#'prior_var_safe_ml <- NULL
+#'
 #' # obtain estimates
-#' ML <- estimate(person, test)$estimate
-#' test$estimator <- "MAP"
-#' MAP <- estimate(person, test)$estimate
-#' test$estimator <- "EAP"
-#' EAP <- estimate(person, test)$estimate
-#' ML; MAP; EAP
+#' estimator <- "ML"
+#' ML <- estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+#' estimator <- "MAP"
+#' MAP <- estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+#' estimator <- "EAP"
+#' # EAP <- estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+#' ML; MAP; #EAP
 #' 
 #' # access variance
 #' attr(ML, "variance")
 #' 
 #' # Note that EAP takes considerably more time when dimensionality is higher...
+#' items <- createTestBank("GPCM")
+#' test <- initTest(items, estimator = "ML")
 #' items5d <- createTestBank("GPCM", Q=5)
 #' test5dEAP <- initTest(items, estimator = "EAP")
 #' test5dMAP <- initTest(items, estimator = "MAP")
 #' person5d <- answer(initPerson(items), test, sample(items5d$K, 10))
 #' 
-#' system.time(estimate(person5d, test5dEAP))
-#' system.time(estimate(person5d, test5dMAP))
+#' #system.time(estimate(person5d, test5dEAP))
+#' #system.time(estimate(person5d, test5dMAP))
 #' 
-#' @param person Person object, see \code{\link{initPerson}}.
-#' @param test Test object, see \code{\link{initTest}}.
+#' @param estimate theta estimate
+#' @param responses person responses
+#' @param prior prior covariance matrix for theta
+#' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively
+#' @param administered indeces of administered items
+#' @param number_dimensions number of dimensions
+#' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "ML" (maximum likelihood), or "EAP" (Expected A Posteriori Estimation)
+#' @param alpha matrix of alpha paramteres
+#' @param beta matrix of beta paramteres
+#' @param guessing matrix of guessing parameters
+#' @param number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix
+#' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values
+#' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
 #' @param prior_var_safe_ml if not NULL, MAP estimate with prior variance equal to prior_var_safe_ml is computed instead of ML, if ML estimate fails
 #' @return person object, amended with the new estimate.
 #' @importFrom MultiGHQuad init.quad eval.quad
 #' @export
-estimate <- function(person, test, prior_var_safe_ml = NULL) {
+estimate_latent_trait <- function(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL) {
   result <- function() {
-    updated_estimate <- get_updated_estimate_and_variance_attribute(test$estimator)
-    person$estimate <- trim_estimate(updated_estimate)
-    person
+    updated_estimate <- get_updated_estimate_and_variance_attribute(estimator)
+    trim_estimate(updated_estimate)
   }
   
   get_updated_estimate_and_variance_ml <- function() {
@@ -74,77 +94,54 @@ estimate <- function(person, test, prior_var_safe_ml = NULL) {
   get_updated_estimate_and_variance_ml_unsafe <- function() {
     # for now, simple nlm (TODO: look at optim, and possible reintroducing pure N-R).
     # We want a maximum, but nlm produces minima -> reverse function call.
-    # LL is the target function, test, person and minimize need to be passed on. We also want the value of the hessian at the final estimate.
-    person$estimate <- nlm(f = probabilities_and_likelihoods, p = person$estimate, person$responses, test$items$model, person$administered, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, person$prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate
+    estimate <- nlm(f = probabilities_and_likelihoods, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate
     
     # TODO: We should really store info somewhere so we don't have to redo this (when using get_fisher_information based selection criteria).
-    fisher_information_items <- get_fisher_information(person$estimate, test$items$model, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, test$items$pars$m)
-    fisher_information_test_so_far <- apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum)
+    fisher_information_items <- get_fisher_information(estimate, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
+    fisher_information_test_so_far <- apply(fisher_information_items[,,administered, drop = FALSE], c(1, 2), sum)
     
-    # inverse
-    attr(person$estimate, "variance") <- solve(fisher_information_test_so_far)
-    person$estimate
+    attr(estimate, "variance") <- solve(fisher_information_test_so_far)
+    estimate
   }
   
   get_updated_estimate_and_variance_ml_safe <- function() { 
     # suppress warnings and errors and do MAP with flat prior instead
-    person$estimate <- tryCatch(nlm(f = probabilities_and_likelihoods, p = person$estimate, person$responses, test$items$model, person$administered, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, person$prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate,
-                                error = function(e) {
-                                  test$estimator <- "MAP"
-                                  person$prior <- diag(test$items$Q) * prior_var_safe_ml
-                                  return(nlm(f = probabilities_and_likelihoods, p = person$estimate, person$responses, test$items$model, person$administered, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, person$prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate)
-                                },
-                                warning = function(w) {
-                                  test$estimator <- "MAP"
-                                  person$prior <- diag(test$items$Q) * prior_var_safe_ml
-                                  return(nlm(f = probabilities_and_likelihoods, p = person$estimate, person$responses, test$items$model, person$administered, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, person$prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate)
-                                })
-
-    fisher_information_items <- get_fisher_information(person$estimate, test$items$model, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, test$items$pars$m)
-    fisher_information_test_so_far <- apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum)
+    estimate <- tryCatch(nlm(f = probabilities_and_likelihoods, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate,
+                         error = function(e) { safe_ml() },
+                         warning = function(w) { safe_ml() })
     
-    # inverse
-    attr(person$estimate, "variance") <- tryCatch(solve(fisher_information_test_so_far),
-                                                  error = function(e) {
-                                                    return(solve(fisher_information_test_so_far + diag(test$items$Q) * prior_var_safe_ml))
-                                                  },
-                                                  warning = function(w) {
-                                                    return(solve(fisher_information_test_so_far + diag(test$items$Q) * prior_var_safe_ml))
-                                                  })
-      
-    person$estimate
+    fisher_information_items <- get_fisher_information(estimate, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
+    fisher_information_test_so_far <- apply(fisher_information_items[,,administered, drop = FALSE], c(1, 2), sum)
+    
+    attr(estimate, "variance") <- tryCatch(solve(fisher_information_test_so_far),
+                                           error = function(e) { solve(fisher_information_test_so_far + diag(number_dimensions) * prior_var_safe_ml) },
+                                           warning = function(w) { solve(fisher_information_test_so_far + diag(number_dimensions) * prior_var_safe_ml) })
+    
+    estimate
   }
   
   get_updated_estimate_and_variance_map <- function() {
-    # for now, simple nlm (TODO: look at optim, and possible reintroducing pure N-R).
-    # We want a maximum, but nlm produces minima -> reverse function call.
-    # LL is the target function, test, person and minimize need to be passed on. We also want the value of the hessian at the final estimate.
+    # note that prior is applied in probabilities_and_likelihoods (incorrectly it seems, but still).
+    estimate <- nlm(f = probabilities_and_likelihoods, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate
     
-    # note that prior is applied in LL (incorrectly it seems, but still).
-    # suppress warnings and errors and do EAP instead. RM I have removed this option, I don't want users to get something they think
-    # is something else. Also, if estimator was ML, the default prior is used which may not make sense.
-    person$estimate <- nlm(f = probabilities_and_likelihoods, p = person$estimate, person$responses, test$items$model, person$administered, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, person$prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate # passed on to LL, reverses polarity.
-    
-    # TODO: We should really store info somewhere so we don't have to redo this (when using get_fisher_information based selection criteria).
-    fisher_information_items <- get_fisher_information(person$estimate, test$items$model, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, test$items$pars$m)
-    fisher_information_test_so_far <- apply(fisher_information_items[,,person$administered, drop = FALSE], c(1, 2), sum) +
-                                      solve(person$prior)
+    fisher_information_items <- get_fisher_information(estimate, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
+    fisher_information_test_so_far <- apply(fisher_information_items[,,administered, drop = FALSE], c(1, 2), sum) +
+      solve(prior)
     # inverse
-    attr(person$estimate, "variance") <- solve(fisher_information_test_so_far)
-    person$estimate
+    attr(estimate, "variance") <- solve(fisher_information_test_so_far)
+    estimate
   }
   
   get_updated_estimate_and_variance_eap <- function() {
     # Multidimensional Gauss-Hermite Quadrature
     # TODO: prior mean is currently fixed at zero, update when/if possible.
     # TODO: allow setting ip through internals argument(s)
-    adapt <- if (length(person$responses) > 5 & !is.null(attr(person$estimate, 'variance')))
-      list(mu = person$estimate, Sigma = as.matrix(attr(person$estimate, "variance")))
-    Q_dim_grid_quad_points <- init.quad(Q = test$items$Q,
-                                        prior = list(mu = rep(0, test$items$Q), Sigma = person$prior),
+    adapt <- if (length(responses) > 5 & !is.null(attr(estimate, 'variance'))) list(mu = estimate, Sigma = as.matrix(attr(estimate, "variance")))
+    Q_dim_grid_quad_points <- init.quad(Q = number_dimensions,
+                                        prior = list(mu = rep(0, number_dimensions), Sigma = prior),
                                         adapt = adapt,
-                                        ip = switch(test$items$Q, 50, 15, 6, 4, 3))
-    eval.quad(FUN = probabilities_and_likelihoods, X = Q_dim_grid_quad_points, person$responses, test$items$model, person$administered, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, person$prior, output = "likelihoods")
+                                        ip = switch(number_dimensions, 50, 15, 6, 4, 3))
+    eval.quad(FUN = probabilities_and_likelihoods, X = Q_dim_grid_quad_points, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, output = "likelihoods")
   }
   
   get_updated_estimate_and_variance_attribute <- function(estimator) {
@@ -155,24 +152,18 @@ estimate <- function(person, test, prior_var_safe_ml = NULL) {
   }
   
   trim_estimate <- function(estimate) {
-    # enforce boundaries.
     # TODO: make debug output toggleable
     # if (any(person$estimate > test$upperBound | person$estimate < test$lowerBound)) cat("Estimate outside boundaries (k =", length(person$responses), "estimate =", paste0(round(person$estimate, 2), collapse = ", "), ").\n")
-    estimate[which(estimate > test$upperBound)] <- test$upperBound[which(estimate > test$upperBound)]
-    estimate[which(estimate < test$lowerBound)] <- test$lowerBound[which(estimate < test$lowerBound)]
+    estimate[which(estimate > upper_bound)] <- upper_bound[which(estimate > upper_bound)]
+    estimate[which(estimate < lower_bound)] <- lower_bound[which(estimate < lower_bound)]
     estimate
   }
   
-  validate <- function() {
-    if (is.null(person))
-      add_error("person", "is missing")
-    if (is.null(test))
-      add_error("test", "is missing")
+  safe_ml <- function() {
+    estimator <- "MAP"
+    prior <- diag(number_dimensions) * prior_var_safe_ml
+    nlm(f = probabilities_and_likelihoods, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate
   }
   
-  invalid_result <- function() {
-    list(errors = errors())
-  }
-  
-  validate_and_run()
+  result()
 }
