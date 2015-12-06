@@ -53,7 +53,7 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
                     prior <- prior
                     if (is.null(max_n))
                       max_n <- conditions[condition, "number_items"] 
-                    stop_test <- list(type = 'variance', target = variance_target, n = max_n)
+                    stop_test <- list(target = variance_target, n = max_n)
                     true_theta <- ( if (number_dimensions == 1) 
                                       conditions[condition, "true_theta"]
                                     else
@@ -90,7 +90,7 @@ test_that("true theta is 2", {
   
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
-  stop_test <- list(type = 'length', n = 100)
+  stop_test <- list(n = 100)
   estimator <- 'MAP'
   information_summary <- 'PD'
   item_selection <- 'MI'
@@ -126,7 +126,7 @@ test_that("true theta is 1, 0, 2", {
   
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
-  stop_test <- list(type = 'length', n = 300)
+  stop_test <- list(n = 300)
   estimator <- 'MAP'
   information_summary <- 'PD'
   item_selection <- 'MI'
@@ -158,7 +158,7 @@ test_that("items load on three dimensions", {
   
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
-  stop_test <- list(type = 'length', n = 300)
+  stop_test <- list(n = 300)
   estimator <- 'MAP'
   information_summary <- 'PD'
   item_selection <- 'MI'
@@ -193,7 +193,7 @@ test_that("true theta is 2, 2, 2", {
   
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
-  stop_test <- list(type = 'length', n = 300)
+  stop_test <- list(n = 300)
   estimator <- 'MAP'
   information_summary <- 'PD'
   item_selection <- 'MI'
@@ -228,7 +228,7 @@ test_that("with constraints max_n 260", {
   
   model <- '3PLM'
   start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
-  stop_test <- list(type = 'length', n = 260)
+  stop_test <- list(n = 260)
   estimator <- 'MAP'
   information_summary <- 'PD'
   item_selection <- 'Shadow'  
@@ -279,7 +279,7 @@ test_that("with constraints max_n 130", {
   
   model <- '3PLM'
   start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
-  stop_test <- list(type = 'length', n = 130)
+  stop_test <- list(n = 130)
   estimator <- 'MAP'
   information_summary <- 'PD'
   item_selection <- 'Shadow'  
@@ -328,7 +328,7 @@ test_that("stop rule is number of items", {
   
   model <- '3PLM'
   start_items <- list(type = 'random', n = 5)
-  stop_test <- list(type = 'length', n = 10)
+  stop_test <- list(n = 10)
   estimator <- 'MAP'
   information_summary <- 'PD'
   item_selection <- 'MI'
@@ -361,7 +361,7 @@ test_that("stop rule is variance", {
   
   model <- '3PLM'
   start_items <- list(type = 'random', n = 5)
-  stop_test <- list(type = 'variance', target = .5, n = 50)
+  stop_test <- list(target = .5, n = 50)
   estimator <- 'MAP'
   information_summary <- 'PD'
   item_selection <- 'MI'
@@ -406,7 +406,7 @@ if (FALSE) {
     
     model <- '3PLM'
     start_items <- list(type = 'random', n = 3)
-    stop_test <- list(type = 'length', n = 248)
+    stop_test <- list(n = 248)
     estimator <- 'EAP'
     information_summary <- 'PD'
     item_selection <- 'MI'

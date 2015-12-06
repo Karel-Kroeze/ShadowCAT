@@ -37,11 +37,10 @@ list(type = 'randomByDimension', nByDimension, n)
 where n = total number of initial items, indices = vector of initial item indeces, 
 nByDimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension}
 
-\item{stop_test}{rule for when to stop providing new items to patient; one of
-list(type = 'length', n = ...);
-list(type = 'variance', target = ..., n = ...)
+\item{stop_test}{rule for when to stop providing new items to patient; should be a list of the form
+list(target = ..., n = ...), 
 where n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule; n <= 0 never stops for max length), 
-target = vector of maximum acceptable variances per dimension}
+target = vector of maximum acceptable variances per dimension; if target = NULL, only n is taken into account}
 
 \item{estimator}{type of estimator to be used, one of "MAP" (Maximum a posteriori estimation) or "ML" (maximum likelihood); 
 "EAP" (Expected A Posteriori Estimation) is currently not working due to problems with the MultiGHQuad package}

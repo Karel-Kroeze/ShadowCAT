@@ -20,11 +20,10 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("person_updated_after_ne
 #' list(type = 'randomByDimension', nByDimension, n)
 #' where n = total number of initial items, indices = vector of initial item indeces, 
 #' nByDimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
-#' @param stop_test rule for when to stop providing new items to patient; one of
-#' list(type = 'length', n = ...);
-#' list(type = 'variance', target = ..., n = ...)
+#' @param stop_test rule for when to stop providing new items to patient; should be a list of the form
+#' list(target = ..., n = ...), 
 #' where n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule; n <= 0 never stops for max length), 
-#' target = vector of maximum acceptable variances per dimension
+#' target = vector of maximum acceptable variances per dimension; if target = NULL, only n is taken into account
 #' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation) or "ML" (maximum likelihood); 
 #' "EAP" (Expected A Posteriori Estimation) is currently not working due to problems with the MultiGHQuad package
 #' @param information_summary called "objective" by Kroeze; how to summarize information; one of
@@ -73,7 +72,7 @@ shadowcat_roqua <- function(new_response, prior, model, alpha, beta, guessing = 
     } 
     
     assign("person_updated_after_new_response", update_person_estimate(person_updated_after_new_response), envir = .GlobalEnv)
-    if (!test_must_stop(length(person_updated_after_new_response$responses), attr(person_updated_after_new_response$estimate, 'variance'), stop_test$n, stop_test$type, stop_test$target)) {
+    if (!test_must_stop(length(person_updated_after_new_response$responses), attr(person_updated_after_new_response$estimate, 'variance'), stop_test$n, stop_test$target)) {
       assign("index_new_item", next_item(person_updated_after_new_response, test), envir = .GlobalEnv)
       list(index_new_item = index_new_item,
            person_updated_after_new_response = person_updated_after_new_response)
