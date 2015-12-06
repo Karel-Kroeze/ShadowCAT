@@ -51,12 +51,12 @@
 #'        target = 2))
 #' 
 #' # update the test object
-#' test$constraints <- createConstraints(test$stop$n, test$items$K, characteristics, constraints)
+#' test$constraints <- constraints_correct_format(test$stop$n, test$items$K, characteristics, constraints)
 #' 
 #' # or do it all at once;
 #' test2 <- initTest(items, constraints = list(characteristics = characteristics, constraints = constraints))
 #' 
-#' # results are identical (initTest uses createConstraints internally);
+#' # results are identical (initTest uses constraints_correct_format internally);
 #' all.equal(test$constraints, test2$constraints)
 #' 
 #' @param max_n test length at which testing should stop
@@ -65,7 +65,7 @@
 #' @param constraints \code{list} of constraints, see \code{details}.
 #' @return Constraints object, see \code{details}.
 #' @export
-createConstraints <- function(max_n, number_items, characteristics = NULL, constraints = NULL) {
+constraints_correct_format <- function(max_n, number_items, characteristics = NULL, constraints = NULL) {
   result <- function() {
     characteristics_numeric <- get_characteristics_numeric()
     constraints_lp <- get_constraints_lp()

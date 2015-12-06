@@ -5,13 +5,17 @@
 #' At each step in a CAT, a Shadow Test is created consisting of an optimal complete test meeting all constraints.
 #' The best item that was not already administrated is then selected from this test, and presented to the respondent.
 #'
-#' @param test test object
-#' @param person person object
+#' @param number_items number of items
+#' @param administered vector with indeces of administered items
+#' @param available vector with indeces of yet available items
+#' @param responses vector with person responses
+#' @param constraints data frame with constraints in lp format: the constraints list returned by constraints_correct_format()
+#' @param lp_characters data frame with constraint characters in lp format: the lp_chars list returned by constraints_correct_format()
 #' @param item_information item_information vector with information of each yet available item, with zeros for administered items (returned by objective() with pad = TRUE)
 #' @return integer item index of item with maximum information within constraints
 #' @importFrom lpSolve lp
-Shadow <- function(test, person, item_information) {
-  administered_binary <- sapply(1:test$items$K, FUN = function(x) { if (x %in% person$administered) 1 else 0 } )
+get_item_index_max_information_constrained <- function(number_items, administered, available, responses, constraints, lp_characters, item_information) {
+  administered_binary <- sapply(1:number_items, FUN = function(x) { if (x %in% administered) 1 else 0 } )
   
   result <- function() {
     solution <- get_lp_solution()
@@ -21,7 +25,7 @@ Shadow <- function(test, person, item_information) {
 
     # since it is theoretically possible that items not in the set share this value, cull them.
     if (length(item_with_max_information) > 1)
-      intersect(item_with_max_information, person$available)
+      intersect(item_with_max_information, available)
     else
       item_with_max_information
   }
@@ -30,22 +34,16 @@ Shadow <- function(test, person, item_information) {
     # user created constraints are combined with constraint to select all administered items.
     lp(direction = 'max',
        objective.in = item_information,
-       const.mat = as.matrix(cbind(test$constraints$lp_chars, administered_binary)),
-       const.dir = c(test$constraints$constraints$op, "="),
-       const.rhs = c(test$constraints$constraints$target, length(person$responses)),
+       const.mat = as.matrix(cbind(lp_characters, administered_binary)),
+       const.dir = c(constraints$op, "="),
+       const.rhs = c(constraints$target, length(responses)),
        all.bin = TRUE,
        transpose.constraints = FALSE)$solution
   }
 
   validate <- function() {
-    if (is.null(test$constraints))
+    if (is.null(constraints))
       add_error("constraints", "matrix not given. Shadow Testing without constraints is equivalent to maximum information selection, but with more overhead.")
-    if (is.null(test))
-      add_error("test", "is missing")
-    if (is.null(person))
-      add_error("person", "is missing")
-    if (is.null(item_information))
-      add_error("item_information", "is missing")
   }
 
   invalid_result <- function() {

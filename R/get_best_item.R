@@ -21,12 +21,12 @@ best_item <- function(person, test) {
   
   get_item_with_max_information <- function() {
     # get the values of the objective function for this test/person combo
-    item_information <- objective(test, person, TRUE)
+    item_information <- get_item_information(test$objective, person$estimate, test$items$model, person$responses, person$prior, person$available, person$administered, test$items$K, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, test$items$pars$m, test$lowerBound, test$upperBound, pad = TRUE)
     
     # find item with largest information; 'MI' is a simple maximum, 'Shadow' does ShadowTesting.
     item_with_max_information <- switch(test$selection,
                                         "MI" = get_item_index_max_information(person$available, item_information),
-                                        "Shadow" = Shadow(test, person, item_information))
+                                        "Shadow" = get_item_index_max_information_constrained(test$items$K, person$administered, person$available, person$responses, test$constraints$constraints, test$constraints$lp_chars, item_information))
     
     # if there's more than one, select one at random (edge case)
     if (length(item_with_max_information) > 1) 

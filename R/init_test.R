@@ -64,7 +64,7 @@ initTest <- function(items,
   attr(out, 'class') <- c("ShadowCAT.test")  
   
   # set up default constraints
-  out$constraints <- createConstraints(stop$n, items$K, constraints$characteristics, constraints$constraints)
+  out$constraints <- constraints_correct_format(stop$n, items$K, constraints$characteristics, constraints$constraints)
   
   # maybe for the future, not finished yet:
   # apply ineligibility constraints (if requested).

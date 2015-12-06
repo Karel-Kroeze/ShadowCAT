@@ -9,7 +9,7 @@ make_random_seed_exist <- rnorm(1)
 context("valid input")
 
 test_that("no charateristics and constraints", {  
-  constraints_formatted <- createConstraints(max_n = 50, number_items = 50, characteristics = NULL, constraints = NULL)
+  constraints_formatted <- constraints_correct_format(max_n = 50, number_items = 50, characteristics = NULL, constraints = NULL)
 
   expect_equal(length(constraints_formatted), 3)
   expect_equal(constraints_formatted$characteristics, data.frame(length = rep(1, 50)))
@@ -38,7 +38,7 @@ test_that("constraints 1", {
                            op = '<',
                            target = 2))
   
-  constraints_formatted <- createConstraints(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
+  constraints_formatted <- constraints_correct_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
   
   expect_equal(length(constraints_formatted), 3)
   expect_equal(names(constraints_formatted$characteristics), c("length", "content/algebra", "content/calculus", "content/physics", "time", "exclusive"))
@@ -86,7 +86,7 @@ test_that("constraints 2", {
                            op = '<',
                            target = 3))
       
-  constraints_formatted <- createConstraints(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
+  constraints_formatted <- constraints_correct_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
   
   expect_equal(length(constraints_formatted), 3)
   expect_equal(names(constraints_formatted$characteristics), c("length", "time", "type/depression", "type/anxiety", "type/insomnia", "stressful", "extra"))
@@ -127,7 +127,7 @@ test_that("constraints 3", {
                            op = '><',
                            target = c(2, 4)))
     
-  constraints_formatted <- createConstraints(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
+  constraints_formatted <- constraints_correct_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
   
   expect_equal(length(constraints_formatted), 3)
   expect_equal(names(constraints_formatted$characteristics), c("length", "type/depression", "type/anxiety", "type/insomnia"))
@@ -175,7 +175,7 @@ test_that("characteristics not data frame", {
                            op = '<',
                            target = 3))
   
-  constraints_formatted <- createConstraints(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
+  constraints_formatted <- constraints_correct_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
   expect_equal(constraints_formatted$errors$characteristics, "should be a data.frame with unique column names.")
 })
 
@@ -190,7 +190,7 @@ test_that("constraints is not a list", {
                                 extra = rep(c(1, 0, 0, 0, 0), 10))
   constraints <- data.frame(name = 2)
   
-  constraints_formatted <- createConstraints(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
+  constraints_formatted <- constraints_correct_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
   expect_equal(constraints_formatted$errors$constraints, "is of invalid structure, should be list of lists, each sublist containing three elements called name, op, and target.")
 })
 
@@ -215,7 +215,7 @@ test_that("One of the lists in constraints has length 2", {
                            op = '<',
                            target = 3))
   
-  constraints_formatted <- createConstraints(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
+  constraints_formatted <- constraints_correct_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
   expect_equal(constraints_formatted$errors$constraints, "is of invalid structure, should be list of lists, each sublist containing three elements called name, op, and target.")
 })
 
@@ -241,7 +241,7 @@ test_that("constraint name is not in characteristics names, constraint operator 
                            op = '<',
                            target = "5"))
   
-  constraints_formatted <- createConstraints(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
+  constraints_formatted <- constraints_correct_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
   expect_equal(constraints_formatted$errors$constraints_names, "should be contained in names characteristics")
   expect_equal(constraints_formatted$errors$constraints_op, "containts invalid operator(s)")
   expect_equal(constraints_formatted$errors$constraints_targets, "must be numeric") 
