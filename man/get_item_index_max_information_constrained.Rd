@@ -5,7 +5,7 @@
 \title{Shadow Test item selection}
 \usage{
 get_item_index_max_information_constrained(number_items, administered,
-  available, responses, constraints, lp_characters, item_information)
+  available, responses, lp_constraints, lp_characters, item_information)
 }
 \arguments{
 \item{number_items}{number of items}
@@ -16,7 +16,7 @@ get_item_index_max_information_constrained(number_items, administered,
 
 \item{responses}{vector with person responses}
 
-\item{constraints}{data frame with constraints in lp format: the constraints list returned by constraints_correct_format()}
+\item{lp_constraints}{data frame with constraints in lp format: the constraints list returned by constraints_correct_format()}
 
 \item{lp_characters}{data frame with constraint characters in lp format: the lp_chars list returned by constraints_correct_format()}
 

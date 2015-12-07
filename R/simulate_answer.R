@@ -1,41 +1,37 @@
-#' Simulate response(s)
-#' 
-#' Given a person and (a subset of) an itembank, simulate a response pattern.
+#' Simulates responses on items indicated by indeces, given true theta
 #' 
 #' @examples 
 #' items <- createTestBank("GPCM")
-#' test <- initTest(items)
-#' person <- initPerson(items)
 #' 
-#' # simulates responses to all questions, and returns a vector response pattern.
-#' answer(person, test, 1:50)
+#' # simulates responses on items indicated by indeces, given true theta
+#' answer(.3, "GPCM", 1, "MAP", items$pars$alpha, items$pars$beta, items$pars$guessing, items$M, 3)
 #' 
-#' # simulates responses to the specified question indeces, and returns an updated person object.
-#' answer(person, test, sample(test$items$K, 5))
-#' 
-#' 
-#' @param person Person object, see \code{\link{initPerson}}.
-#' @param test Test object, see \code{\link{initPerson}}.
-#' @param indeces If not NULL, answer questions with the given indeces, and update the person object. If NULL, answers the full test.
+#' @param theta true theta
+#' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
+#' @param number_dimensions number of dimensions
+#' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation) or "ML" (maximum likelihood); 
+#' "EAP" (Expected A Posteriori Estimation) is currently not working due to problems with the MultiGHQuad package
+#' @param alpha matrix of alpha parameters
+#' @param beta matrix of beta parameters
+#' @param guessing vector of guessing parameters
+#' @param number_itemsteps number of itemsteps
+#' @param indeces answer questions with the given indeces
 #' @return vector responses, or updated person object if indeces is set.
 #' @export
-answer <- function(person, test, indeces) {
+answer <- function(theta, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps, indeces) {
+  if (is.null(guessing))
+    guessing <- matrix(0, nrow(as.matrix(beta)), 1)
+
   # probabilities, generated with TRUE theta.
-  Pij <- probabilities_and_likelihoods(person$theta, responses = NULL, test$items$model, indeces, test$items$Q, test$estimator, test$items$pars$alpha, test$items$pars$beta, test$items$pars$guessing, output = "probs")
+  Pij <- probabilities_and_likelihoods(theta, responses = NULL, model, indeces, number_dimensions, estimator, alpha, beta, guessing, output = "probs")
   
   # cumulative probabilities
   cp <- Pij 
-  for (i in 1:(test$items$M+1)) cp[,i] <- apply(matrix(Pij[,1:i],ncol=i),1,sum)
-  
+  for (i in 1:(number_itemsteps + 1)) cp[,i] <- apply(matrix(Pij[,1:i],ncol=i),1,sum)
+   
   # rand ~ unif(0,1)
   rand <- runif(length(indeces))
   
   # answer is the number of categories that have a cumulative probability smaller than rand
-  responses <- apply(rand > cp, 1, sum, na.rm=TRUE)
-  
-  # updated person
-  person$responses <- c(person$responses, responses)
-  person$administered <- c(person$administered, indeces)
-  person$available <- person$available[-which(person$available %in% indeces)]
-  person
+  apply(rand > cp, 1, sum, na.rm=TRUE)
 }

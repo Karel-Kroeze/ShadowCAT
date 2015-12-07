@@ -4,20 +4,29 @@
 \alias{shadowcat_roqua}
 \title{Returns a list with the index of the next item to be administered given a new response, and an updated person object}
 \usage{
-shadowcat_roqua(new_response, prior, model, alpha, beta, guessing = NULL,
-  eta = NULL, start_items, stop_test, estimator, information_summary,
-  item_selection = "MI", constraints = NULL, lowerbound = rep(-3,
-  ncol(alpha)), upperbound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL)
+shadowcat_roqua(new_response, estimate, responses, administered, available,
+  prior, model, alpha, beta, guessing = NULL, eta = NULL, start_items,
+  stop_test, estimator, information_summary, item_selection = "MI",
+  constraints_and_characts = NULL, lower_bound = rep(-3, ncol(alpha)),
+  upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL)
 }
 \arguments{
 \item{new_response}{new response from respondent, should be initialized with NULL}
+
+\item{estimate}{estimate of latent trait theta}
+
+\item{responses}{vector of given responses; numeric(0) at first iteration}
+
+\item{administered}{vector containing indeces of administered items; numeric(0) at first iteration}
+
+\item{available}{vector containing indeces of yet available items}
 
 \item{prior}{covariance matrix of the multi variate normal prior for theta; mean vector is fixed at zero; only used when estimator type is MAP or EAP, but at this point should always be defined
 #' note that this prior should be a square matrix with number of rows and columns equal to the number of dimensions; values on the diagonal should be larger than 1}
 
 \item{model}{String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
 
-\item{alpha}{Matrix of alpha paramteres, one column per dimension, one row per item. Note that so called within-dimensional models still use an alpha matrix, they simply 
+\item{alpha}{Matrix of alpha parameters, one column per dimension, one row per item. Note that so called within-dimensional models still use an alpha matrix, they simply 
 have only one non-zero loading per item.}
 
 \item{beta}{Matrix of beta parameters, one column per item step, one row per item. Note that ShadowCAT expects response categories to be sequential,
@@ -54,7 +63,7 @@ target = vector of maximum acceptable variances per dimension; if target = NULL,
 
 \item{item_selection}{selection criterion; one of "MI" (maximum information) or "Shadow" (maximum information and take constraints into account)}
 
-\item{constraints}{list with constraints and characteristics
+\item{constraints_and_characts}{list with constraints and characteristics
 constraints should be specified as a list of constraints, each constraint is a list with three named values;
 name: the column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as name/value.
 op: the logical operator to be used. Valid options are "<", "=", ">" and "><".
@@ -62,14 +71,15 @@ target: the target value, numeric. If the operator is "><", this should be a len
 characteristics should be a data.frame with characteristics, one row per item, one column per characteristic.
 See constraints_correct_format() for details}
 
-\item{lowerbound}{vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values}
+\item{lower_bound}{vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values}
 
-\item{upperbound}{vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values}
+\item{upper_bound}{vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values}
 
 \item{prior_var_safe_ml}{if not NULL, MAP estimate with prior variance equal to prior_var_safe_ml is computed instead of ML, if ML estimate fails}
 }
 \value{
-a list with the index of the next item to be administered given a new response (or "stop_test"), and an updated person object
+a list containing the index of the next item to be administered given a new response (or "stop_test"), 
+updated estimate of theta, responses, indeces of administered items, and indeces of available items
 }
 \description{
 Returns a list with the index of the next item to be administered given a new response, and an updated person object

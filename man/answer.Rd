@@ -2,34 +2,42 @@
 % Please edit documentation in R/simulate_answer.R
 \name{answer}
 \alias{answer}
-\title{Simulate response(s)}
+\title{Simulates responses on items indicated by indeces, given true theta}
 \usage{
-answer(person, test, indeces)
+answer(theta, model, number_dimensions, estimator, alpha, beta, guessing,
+  number_itemsteps, indeces)
 }
 \arguments{
-\item{person}{Person object, see \code{\link{initPerson}}.}
+\item{theta}{true theta}
 
-\item{test}{Test object, see \code{\link{initPerson}}.}
+\item{model}{String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
 
-\item{indeces}{If not NULL, answer questions with the given indeces, and update the person object. If NULL, answers the full test.}
+\item{number_dimensions}{number of dimensions}
+
+\item{estimator}{type of estimator to be used, one of "MAP" (Maximum a posteriori estimation) or "ML" (maximum likelihood); 
+"EAP" (Expected A Posteriori Estimation) is currently not working due to problems with the MultiGHQuad package}
+
+\item{alpha}{matrix of alpha parameters}
+
+\item{beta}{matrix of beta parameters}
+
+\item{guessing}{vector of guessing parameters}
+
+\item{number_itemsteps}{number of itemsteps}
+
+\item{indeces}{answer questions with the given indeces}
 }
 \value{
 vector responses, or updated person object if indeces is set.
 }
 \description{
-Given a person and (a subset of) an itembank, simulate a response pattern.
+Simulates responses on items indicated by indeces, given true theta
 }
 \examples{
 items <- createTestBank("GPCM")
-test <- initTest(items)
-person <- initPerson(items)
 
-# simulates responses to all questions, and returns a vector response pattern.
-answer(person, test, 1:50)
-
-# simulates responses to the specified question indeces, and returns an updated person object.
-answer(person, test, sample(test$items$K, 5))
-
+# simulates responses on items indicated by indeces, given true theta
+answer(.3, "GPCM", 1, "MAP", items$pars$alpha, items$pars$beta, items$pars$guessing, items$M, 3)
 
 }
 

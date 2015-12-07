@@ -106,7 +106,6 @@ test <- initTest(items, estimator = "ML")
 items5d <- createTestBank("GPCM", Q=5)
 test5dEAP <- initTest(items, estimator = "EAP")
 test5dMAP <- initTest(items, estimator = "MAP")
-person5d <- answer(initPerson(items), test, sample(items5d$K, 10))
 
 #system.time(estimate(person5d, test5dEAP))
 #system.time(estimate(person5d, test5dMAP))

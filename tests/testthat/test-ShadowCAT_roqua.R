@@ -9,24 +9,16 @@ make_random_seed_exist <- rnorm(1)
 
 test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection = "MI", constraints = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL) {
   new_response <- NULL
-  next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml)
+  initital_estimate <- rep(0, ncol(alpha))
+  attr(initital_estimate, 'variance') <- prior
+  next_item_and_test_outcome <- shadowcat_roqua(new_response, estimate = initital_estimate , responses = numeric(0), administered = numeric(0), available = 1:nrow(beta), prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml)
   
   while (next_item_and_test_outcome$index_new_item != "stop_test") {
-    person_updated_after_new_response$theta <- true_theta
-    new_response <- tail(answer(person = person_updated_after_new_response, 
-                                test = initTest(items = initItembank(model, alpha, beta, guessing, eta, silent = TRUE), 
-                                                start = start_items, 
-                                                stop = stop_test,
-                                                max_n = stop_test$n,
-                                                estimator = estimator,
-                                                objective = information_summary,
-                                                selection = item_selection), 
-                                indeces = next_item_and_test_outcome$index_new_item)$responses, 1) # simulate person response on new item
-    
-    next_item_and_test_outcome <- shadowcat_roqua(new_response, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml)   
+    new_response <- answer(true_theta, model, ncol(alpha), estimator, alpha, beta, guessing, ncol(beta), next_item_and_test_outcome$index_new_item)
+    next_item_and_test_outcome <- shadowcat_roqua(new_response, next_item_and_test_outcome$estimate, next_item_and_test_outcome$responses, next_item_and_test_outcome$administered, next_item_and_test_outcome$available, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml)  
   }
   
-  next_item_and_test_outcome$person_updated_after_new_response
+  next_item_and_test_outcome
 }
 
 get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions) {
@@ -59,16 +51,16 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
                                     else
                                       true_theta_vec )
                     alpha_beta <- createTestBank(model = as.character(conditions[condition, "model"]), K = conditions[condition, "number_items"], Q = number_dimensions, M = conditions[condition, "number_answer_categories"] - 1, between = items_load_one_dimension, run_initItembank = FALSE)
-                    estimate_theta <- tryCatch(test_shadowcat_roqua(true_theta, prior, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml)$estimate,
+                    estimate_theta <- tryCatch(test_shadowcat_roqua(true_theta, prior, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml),
                                                error = function(e) e)
            
                     if (return_administered_item_indeces)
-                      c("estimated_theta" = estimate_theta,
-                        "variance_estimate" = attr(estimate_theta, "variance"),
-                        "items_administered" = person_updated_after_new_response$administered)
+                      c("estimated_theta" = estimate_theta$estimate,
+                        "variance_estimate" = attr(estimate_theta$estimate, "variance"),
+                        "items_administered" = estimate_theta$administered)
                     else
-                      c("estimated_theta" = estimate_theta,
-                        "variance_estimate" = attr(estimate_theta, "variance"))               
+                      c("estimated_theta" = estimate_theta$estimate,
+                        "variance_estimate" =  attr(estimate_theta$estimate, "variance"))               
                     })
 }
 
