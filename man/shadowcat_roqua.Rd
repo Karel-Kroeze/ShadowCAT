@@ -13,16 +13,16 @@ shadowcat_roqua(new_response, estimate, responses, administered, available,
 \arguments{
 \item{new_response}{new response from respondent, should be initialized with NULL}
 
-\item{estimate}{estimate of latent trait theta}
+\item{estimate}{estimate of latent trait theta, with variance as attribute}
 
-\item{responses}{vector of given responses; numeric(0) at first iteration}
+\item{responses}{vector of given responses; should be initialized with numeric(0)}
 
-\item{administered}{vector containing indeces of administered items; numeric(0) at first iteration}
+\item{administered}{vector containing indeces of administered items; should be initialized with numeric(0)}
 
 \item{available}{vector containing indeces of yet available items}
 
-\item{prior}{covariance matrix of the multi variate normal prior for theta; mean vector is fixed at zero; only used when estimator type is MAP or EAP, but at this point should always be defined
-#' note that this prior should be a square matrix with number of rows and columns equal to the number of dimensions; values on the diagonal should be larger than 1}
+\item{prior}{covariance matrix of the multi variate normal prior for theta; mean vector is fixed at zero; not used for ML estimator, but at this point should always be defined
+#' note that this prior should be a square matrix with number of rows and columns equal to the number of dimensions; values on the diagonal should be larger than 0}
 
 \item{model}{String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
 

@@ -1,12 +1,12 @@
 #' Returns a list with the index of the next item to be administered given a new response, and an updated person object
 #'
 #' @param new_response new response from respondent, should be initialized with NULL
-#' @param estimate estimate of latent trait theta
-#' @param responses vector of given responses; numeric(0) at first iteration
-#' @param administered vector containing indeces of administered items; numeric(0) at first iteration
+#' @param estimate estimate of latent trait theta, with variance as attribute
+#' @param responses vector of given responses; should be initialized with numeric(0)
+#' @param administered vector containing indeces of administered items; should be initialized with numeric(0)
 #' @param available vector containing indeces of yet available items
-#' @param prior covariance matrix of the multi variate normal prior for theta; mean vector is fixed at zero; only used when estimator type is MAP or EAP, but at this point should always be defined
-#' #' note that this prior should be a square matrix with number of rows and columns equal to the number of dimensions; values on the diagonal should be larger than 1
+#' @param prior covariance matrix of the multi variate normal prior for theta; mean vector is fixed at zero; not used for ML estimator, but at this point should always be defined
+#' #' note that this prior should be a square matrix with number of rows and columns equal to the number of dimensions; values on the diagonal should be larger than 0
 #' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param alpha Matrix of alpha parameters, one column per dimension, one row per item. Note that so called within-dimensional models still use an alpha matrix, they simply 
 #' have only one non-zero loading per item.
