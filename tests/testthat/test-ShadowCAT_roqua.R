@@ -11,7 +11,7 @@ test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing
   new_response <- NULL
   attr(initital_estimate, 'variance') <- initial_variance
   next_item_and_test_outcome <- shadowcat_roqua(new_response, estimate = initital_estimate , responses = numeric(0), administered = numeric(0), available = 1:nrow(beta), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta, item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml)
-
+  
   while (next_item_and_test_outcome$index_new_item != "stop_test") {
     new_response <- answer(true_theta, model, ncol(alpha), estimator, alpha, beta, guessing, ncol(beta), next_item_and_test_outcome$index_new_item)
     next_item_and_test_outcome <- shadowcat_roqua(new_response, next_item_and_test_outcome$estimate, next_item_and_test_outcome$responses, next_item_and_test_outcome$administered, next_item_and_test_outcome$available, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior,  guessing, eta, item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml)  
@@ -41,25 +41,25 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
   
   pbapply::pbsapply(1:nrow(conditions), 
                     FUN = function(condition) {
-                    prior <- prior
-                    if (is.null(max_n))
-                      max_n <- conditions[condition, "number_items"] 
-                    stop_test <- list(target = variance_target, n = max_n)
-                    true_theta <- ( if (number_dimensions == 1) 
-                                      conditions[condition, "true_theta"]
-                                    else
-                                      true_theta_vec )
-                    alpha_beta <- createTestBank(model = as.character(conditions[condition, "model"]), K = conditions[condition, "number_items"], Q = number_dimensions, M = conditions[condition, "number_answer_categories"] - 1, between = items_load_one_dimension, run_initItembank = FALSE)
-                    estimate_theta <- tryCatch(test_shadowcat_roqua(true_theta, prior, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml),
-                                               error = function(e) e)
-           
-                    if (return_administered_item_indeces)
-                      c("estimated_theta" = estimate_theta$estimate,
-                        "variance_estimate" = attr(estimate_theta$estimate, "variance"),
-                        "items_administered" = estimate_theta$administered)
-                    else
-                      c("estimated_theta" = estimate_theta$estimate,
-                        "variance_estimate" =  attr(estimate_theta$estimate, "variance"))               
+                      prior <- prior
+                      if (is.null(max_n))
+                        max_n <- conditions[condition, "number_items"] 
+                      stop_test <- list(target = variance_target, n = max_n)
+                      true_theta <- ( if (number_dimensions == 1) 
+                        conditions[condition, "true_theta"]
+                        else
+                          true_theta_vec )
+                      alpha_beta <- createTestBank(model = as.character(conditions[condition, "model"]), K = conditions[condition, "number_items"], Q = number_dimensions, M = conditions[condition, "number_answer_categories"] - 1, between = items_load_one_dimension, run_initItembank = FALSE)
+                      estimate_theta <- tryCatch(test_shadowcat_roqua(true_theta, prior, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml),
+                                                 error = function(e) e)
+                      
+                      if (return_administered_item_indeces)
+                        c("estimated_theta" = estimate_theta$estimate,
+                          "variance_estimate" = attr(estimate_theta$estimate, "variance"),
+                          "items_administered" = estimate_theta$administered)
+                      else
+                        c("estimated_theta" = estimate_theta$estimate,
+                          "variance_estimate" =  attr(estimate_theta$estimate, "variance"))               
                     })
 }
 
@@ -73,7 +73,7 @@ test_that("true theta is 2, estimator is MAP", {
   number_items <- 100
   number_dimensions <- 1
   number_answer_categories <- 2 # can only be 2 for 3PLM model
- 
+  
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
@@ -435,7 +435,7 @@ test_that("stop rule is variance", {
 # gives error at this point due to bug in updated MultiGHQuad package
 if (FALSE) {  
   context("problematic")
-
+  
   # This one gets stuck after the 248st administered item. At that point, the estimated variance matrix becomes
   # non-invertible (has an eigenvalue of -5.530436e-18). See the problems in the trans function within init.quad().
   # Also, when running the 248 items, the resulting estimates are poor. 
@@ -469,7 +469,7 @@ if (FALSE) {
     prior <- diag(number_dimensions) * 5
     
     test_outcome <- with_random_seed(2, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
-     
+    
     expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.984, .171, -.055))
     expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.238, .259, .122))
     expect_equal(length(test_outcome$administered), 248)
@@ -826,7 +826,7 @@ if (FALSE) {
     
   })
   
- 
+  
   test_that("simulate with constraints, max_n 130", {
     # EAP estimation does not work
     # PEKL information summaries give errors because it also makes use of EAP estimation
