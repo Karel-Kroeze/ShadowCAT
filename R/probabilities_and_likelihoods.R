@@ -29,8 +29,6 @@ probabilities_and_likelihoods <- function(theta, responses = NULL, model, items_
   # TODO: Check input.
   # TODO priors: mean? 
   # priors: Alleen variabele deel van multivariaat normaal verdeling (exp).
-  if (estimator == "ML")
-    prior <- NULL
   number_items <- length(items_to_include)
   alpha <- get_subset(alpha, items_to_include)
   beta <- get_subset(beta, items_to_include)
