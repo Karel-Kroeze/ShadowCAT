@@ -1,11 +1,5 @@
-### probability and derivatives
-
-#' Probability and Derivatives for a given (subset of) ShadowCAT.items itembank. It gives the probability of 
-#' responses given theta (only useful for simulation I think), and the likelihood of given responses
+#' Probabilities, likelihood, and derivatives for a given (subset of) items.
 #' 
-#' Generic
-#' 
-#' Details
 #' @param theta true or estimated theta
 #' @param responses person responses to the administered items; only required if output is "likelihoods" or "both"
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.

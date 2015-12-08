@@ -37,15 +37,15 @@ constraints <- list(list(name = 'content/algebra',
                          op = '<',
                          target = 2))
 
-constraints_formatted <- constraints_correct_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
+constraints_formatted <- constraints_lp_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
 
 test_that("First 4 items administered, MI", {
-  responses = rep(c(1, 0), 2)
+  responses <- rep(c(1, 0), 2)
   available <- c(5:50)
   administered <- c(1:4)
   item_selection <- "MI"
   
-  best_item <- get_best_item(item_selection, information_summary, constraints_formatted$constraints, constraints_formatted$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
+  best_item <- get_best_item(item_selection, information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
 
   expect_equal(best_item, 5)
 })
@@ -56,102 +56,56 @@ test_that("First 4 items administered, Shadow", {
   administered <- c(1:4)
   item_selection <- "Shadow"
   
-  best_item <- get_best_item(item_selection, information_summary, constraints_formatted$constraints, constraints_formatted$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
+  best_item <- get_best_item(item_selection, information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
   
   expect_equal(best_item, 5)
 })
 
 test_that("7 items administered, MI", {
-  responses = c(1, 0, 1, 0, 1, 0, 1)
+  responses <- c(1, 0, 1, 0, 1, 0, 1)
   available <- c(2, 4, 6, 8, 10, 12, 14:50)
   administered <- c(1, 3, 5, 7, 9, 11, 13)
   item_selection <- "MI"
     
-  best_item <- get_best_item(item_selection, information_summary, constraints_formatted$constraints, constraints_formatted$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
+  best_item <- get_best_item(item_selection, information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
   
   expect_equal(best_item, 6)
 })
 
 test_that("7 items administered, Shadow", {
-  responses = c(1, 0, 1, 0, 1, 0, 1)
+  responses <- c(1, 0, 1, 0, 1, 0, 1)
   available <- c(2, 4, 6, 8, 10, 12, 14:50)
   administered <- c(1, 3, 5, 7, 9, 11, 13)
   item_selection <- "Shadow"
   
-  best_item <- get_best_item(item_selection, information_summary, constraints_formatted$constraints, constraints_formatted$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
+  best_item <- get_best_item(item_selection, information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
   
   expect_equal(best_item, 6)
 })
 
 test_that("First 10 items administered, MI", {
-  responses = rep(1, 10)
+  responses <- rep(1, 10)
   available <- c(11:50)
   administered <- c(1:10)
   item_selection <- "MI"
   
-  best_item <- get_best_item(item_selection, information_summary, constraints_formatted$constraints, constraints_formatted$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
+  best_item <- get_best_item(item_selection, information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
   
   expect_equal(best_item, 47)
 })
 
 test_that("First 10 items administered, Shadow", {
-  responses = rep(1, 10)
+  responses <- rep(1, 10)
   available <- c(11:50)
   administered <- c(1:10)
   item_selection <- "Shadow"
   
-  best_item <- get_best_item(item_selection, information_summary, constraints_formatted$constraints, constraints_formatted$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
+  best_item <- get_best_item(item_selection, information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
   
   expect_equal(best_item, 47)
 })
 
 context("many item characteristics equal")
-
-# create item characteristics
-model <- '3PLM'
-number_items <- 50
-number_dimensions <- 1
-number_answer_categories <- 2 # can only be 2 for 3PLM model
-guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
-eta <- NULL # only relevant for GPCM model
-
-alpha <- matrix(rep(1, number_items * number_dimensions), nrow = number_items, ncol = number_dimensions)
-beta <- matrix(rep(1, number_items), nrow = number_items, ncol = 1)
-
-item_characteristics_shadowcat_format <- initItembank(model = model, alpha = alpha, beta = beta, guessing = guessing, eta = eta, silent = TRUE)
-
-#create item characteristics and constraints
-characteristics <- data.frame(content = with_random_seed(2, sample)(c('algebra','physics','calculus'), item_characteristics_shadowcat_format$K, TRUE),
-                              time = with_random_seed(2, rnorm)(item_characteristics_shadowcat_format$K),
-                              exclusive = sapply(1:item_characteristics_shadowcat_format$K, FUN = function (x) { if (x %in% with_random_seed(2, sample)(item_characteristics_shadowcat_format$K, 4)) 1 else 0 }))
-constraints <- list(list(name = 'content/algebra',
-                         op = '><',
-                         target = c(5, 10)),
-                    list(name = 'content/physics',
-                         op = '><',
-                         target = c(2, 5)),
-                    list(name = 'time',
-                         op = '<',
-                         target = 20),
-                    list(name = 'exclusive',
-                         op = '<',
-                         target = 2))
-
-initiated_test <- initTest(item_characteristics_shadowcat_format,
-                           start = list(type = 'fixed', indices = c(2, 4, 5), n = 3),
-                           stop = list(type = 'variance', target = .2, n = 20),
-                           max_n = 20, # utter maximum
-                           estimator = 'MAP',
-                           objective = 'PD',
-                           selection = 'MI',
-                           constraints = list(constraints = constraints,
-                                              characteristics = characteristics),
-                           exposure = NULL,
-                           lowerBound = rep(-3, item_characteristics_shadowcat_format$Q),
-                           upperBound = rep(3, item_characteristics_shadowcat_format$Q))
-
-# get initiated person
-initiated_person <- initPerson(item_characteristics_shadowcat_format, theta = rep(.2, item_characteristics_shadowcat_format$Q), prior = .4)
 
 model <- "3PLM"
 information_summary <- "PD"
@@ -183,7 +137,7 @@ constraints <- list(list(name = 'content/algebra',
                     list(name = 'exclusive',
                          op = '<',
                          target = 2))
-constraints_formatted <- constraints_correct_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
+constraints_formatted <- constraints_lp_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
 
 
 test_that("First 10 items administered, MI", {
@@ -192,7 +146,7 @@ test_that("First 10 items administered, MI", {
   administered <- c(1:10)
   item_selection <- "MI"
   
-  best_item <- with_random_seed(2, get_best_item)(item_selection, information_summary, constraints_formatted$constraints, constraints_formatted$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
+  best_item <- with_random_seed(2, get_best_item)(item_selection, information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
   
   expect_equal(best_item, 13)
 })
@@ -203,7 +157,7 @@ test_that("First 10 items administered, Shadow", {
   administered <- c(1:10)
   item_selection <- "Shadow"
   
-  best_item <- with_random_seed(2, get_best_item)(item_selection, information_summary, constraints_formatted$constraints, constraints_formatted$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
+  best_item <- with_random_seed(2, get_best_item)(item_selection, information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
   
   expect_equal(best_item, 13)
 })

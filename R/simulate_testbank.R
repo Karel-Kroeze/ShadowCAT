@@ -10,7 +10,7 @@
 #' the simulated testbank and the result of this is returned 
 #' @return ShadowCAT.itembank
 #' @export
-createTestBank <- function(model, K = 50, Q = 1, M = 4, between = FALSE, run_initItembank = TRUE){
+simulate_testbank <- function(model, K = 50, Q = 1, M = 4, between = FALSE, run_initItembank = TRUE){
   # 3PLM is dichotomous by definition
   if (model == "3PLM") M <- 1 
   
@@ -46,7 +46,7 @@ createTestBank <- function(model, K = 50, Q = 1, M = 4, between = FALSE, run_ini
   } 
   
   if (run_initItembank)
-    invisible(initItembank(model, alpha, beta, silent = TRUE))
+    initItembank(model, alpha, beta, silent = TRUE)
   else
     list(alpha = alpha,
          beta = beta)

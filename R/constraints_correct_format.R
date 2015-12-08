@@ -1,10 +1,4 @@
-#' Creates a constraints object which can be used in lp function from lpSolve package.
-#' 
-#' Convenience wrapper to create a constraints object, which can be added to a \code{test} object.
-#' 
-#' @section Set constraints from \code{\link{initTest}}:
-#' Note that constraints can also be set with the initTest call. Simply include a list with named elements 
-#' characteristics and constraints as described above to the initTest function call.
+#' Creates a list with characteristics and constraints which can be used in lp function from lpSolve package.
 #' 
 #' @section Constraint specification:
 #' \code{constraints} should be specified as a list of constraints, each constraint is a list with three named values;
@@ -12,25 +6,24 @@
 #' \code{op} the logoical operator to be used. Valid options are "<", "=", ">" and "><".
 #' \code{target} the target value, numeric. If the operator is "><", this should be a length two vector in between which the target should fall. 
 #' 
-#' @section Constraints in test object:
-#' The specified constraints will be stored within a list, which can/should be saved in the test object (test$constraints). 
+#' @section Return object:
+#' The constraints and characteristics in lp format will be stored within a list. 
 #' Constraints in Shadow Tests are implemented through linear programming, for which the package lpSolve is used. 
-#' The constraints object is a list with three named elements; characterstics, constraints and lp_chars. Characteristics is a copy of the argument given, constraints and lp_chars
-#' are set up to work with lpSolve, and should not be manually edited.
+#' The returned constraints object is a list with two named elements; lp_constraints and lp_chars. The lp_constraints 
+#' and lp_chars are set up to work with lpSolve, and should not be manually edited.
 #' 
 #' @section Note about length:
 #' Note that the maximum test length is always included as an additional constraint.
 #' 
 #' @examples
-#' # set up a simple itembank and test.
-#' items <- createTestBank("GPCM")
-#' test <- initTest(items, selection = "Shadow" , objective = "PEKL")
+#' max_n <- 30
+#' number_items <- 50
 #' 
 #' # set up some dummy characteristics.
-#' content <- sample(c('algebra','physics','calculus'), items$K, TRUE)
-#' time <- rnorm(items$K)
-#' exclusive <- rep(0, items$K)
-#' exclusive[sample(items$K, 4)] <- 1
+#' content <- sample(c('algebra','physics','calculus'), number_items, TRUE)
+#' time <- rnorm(number_items)
+#' exclusive <- rep(0, number_items)
+#' exclusive[sample(number_items, 4)] <- 1
 #' 
 #' # bind them in a data.fame
 #' characteristics <- data.frame(content, time, exclusive)
@@ -50,31 +43,23 @@
 #'        op = '<',
 #'        target = 2))
 #' 
-#' # update the test object
-#' test$constraints <- constraints_correct_format(test$stop$n, test$items$K, characteristics, constraints)
-#' 
-#' # or do it all at once;
-#' test2 <- initTest(items, constraints = list(characteristics = characteristics, constraints = constraints))
-#' 
-#' # results are identical (initTest uses constraints_correct_format internally);
-#' all.equal(test$constraints, test2$constraints)
+#' # get list of characteristics and constraintrs in lp format
+#' chars_constraints_lp <- constraints_lp_format(max_n, number_items, characteristics, constraints)
 #' 
 #' @param max_n test length at which testing should stop
 #' @param number_items number of items available in the item bank
 #' @param characteristics \code{data.frame} with characteristics, one row per item, one column per characteristic.
 #' @param constraints \code{list} of constraints, see \code{details}.
-#' @return Constraints object, see \code{details}.
+#' @return list containing characteristics and constraints in lp format; see \code{details}.
 #' @export
-constraints_correct_format <- function(max_n, number_items, characteristics = NULL, constraints = NULL) {
+constraints_lp_format <- function(max_n, number_items, characteristics = NULL, constraints = NULL) {
   result <- function() {
     characteristics_numeric <- get_characteristics_numeric()
     constraints_lp <- get_constraints_lp()
     characteristics_numeric_lp <- characteristics_numeric[,constraints_lp$name, drop = FALSE]
     
-    characteristics_and_constraints_lp <- list(characteristics = characteristics_numeric, constraints = constraints_lp, lp_chars = characteristics_numeric_lp)
-    attr(characteristics_and_constraints_lp, 'class') <- "ShadowCAT.constraints"
-    
-    characteristics_and_constraints_lp
+    list(lp_constraints = constraints_lp, 
+         lp_chars = characteristics_numeric_lp)
   }
   
   get_characteristics_numeric <- function() {

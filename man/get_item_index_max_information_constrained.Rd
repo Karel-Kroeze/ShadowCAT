@@ -16,9 +16,9 @@ get_item_index_max_information_constrained(number_items, administered,
 
 \item{responses}{vector with person responses}
 
-\item{lp_constraints}{data frame with constraints in lp format: the constraints list returned by constraints_correct_format()}
+\item{lp_constraints}{data frame with constraints in lp format: the lp_constraints from the list returned by constraints_lp_format()}
 
-\item{lp_characters}{data frame with constraint characters in lp format: the lp_chars list returned by constraints_correct_format()}
+\item{lp_characters}{data frame with characteristics in lp format: the lp_chars from the list returned by constraints_lp_format()}
 
 \item{item_information}{item_information vector with information of each yet available item, with zeros for administered items (returned by objective() with pad = TRUE)}
 }

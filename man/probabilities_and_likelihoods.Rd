@@ -2,8 +2,7 @@
 % Please edit documentation in R/probabilities_and_likelihoods.R
 \name{probabilities_and_likelihoods}
 \alias{probabilities_and_likelihoods}
-\title{Probability and Derivatives for a given (subset of) ShadowCAT.items itembank. It gives the probability of 
-responses given theta (only useful for simulation I think), and the likelihood of given responses}
+\title{Probabilities, likelihood, and derivatives for a given (subset of) items.}
 \usage{
 probabilities_and_likelihoods(theta, responses = NULL, model,
   items_to_include, number_dimensions, estimator, alpha, beta, guessing,
@@ -42,9 +41,6 @@ or "both" (return list of both probabilities and likelihoods with first and seco
 probabilities and/or likelihoods, depending on output parameter
 }
 \description{
-Generic
-}
-\details{
-Details
+Probabilities, likelihood, and derivatives for a given (subset of) items.
 }
 

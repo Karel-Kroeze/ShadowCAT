@@ -42,7 +42,7 @@
 #' op: the logical operator to be used. Valid options are "<", "=", ">" and "><".
 #' target: the target value, numeric. If the operator is "><", this should be a length two vector in between which the target should fall.
 #' characteristics should be a data.frame with characteristics, one row per item, one column per characteristic.
-#' See constraints_correct_format() for details
+#' See constraints_lp_format() for details
 #' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values 
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
 #' @param prior_var_safe_ml if not NULL, MAP estimate with prior variance equal to prior_var_safe_ml is computed instead of ML, if ML estimate fails
@@ -56,11 +56,11 @@ shadowcat_roqua <- function(new_response, estimate, responses, administered, ava
   number_items <- nrow(beta)
   number_dimensions <- ncol(alpha)
   number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
-  lp_constraints_and_characts <- constraints_correct_format(stop_test$n, number_items, constraints_and_characts$characteristics, constraints_and_characts$constraints)
+  lp_constraints_and_characts <- constraints_lp_format(stop_test$n, number_items, constraints_and_characts$characteristics, constraints_and_characts$constraints)
   
   result <- function() {
     if (is.null(new_response)) { # first iteration: no responses given yet
-      index_new_item <- get_next_item(start_items, item_selection, information_summary, lp_constraints_and_characts$constraints, lp_constraints_and_characts$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
+      index_new_item <- get_next_item(start_items, item_selection, information_summary, lp_constraints_and_characts$lp_constraints, lp_constraints_and_characts$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
       return(list(index_new_item = index_new_item,
                   estimate = estimate,
                   responses = responses,
@@ -73,7 +73,7 @@ shadowcat_roqua <- function(new_response, estimate, responses, administered, ava
     continue_test <- !test_must_stop(length(responses), attr(estimate, 'variance'), stop_test$n, stop_test$target)
 
     if (continue_test) {
-      index_new_item <- get_next_item(start_items, item_selection, information_summary, lp_constraints_and_characts$constraints, lp_constraints_and_characts$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
+      index_new_item <- get_next_item(start_items, item_selection, information_summary, lp_constraints_and_characts$lp_constraints, lp_constraints_and_characts$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
       list(index_new_item = index_new_item,
            estimate = estimate,
            responses = responses,

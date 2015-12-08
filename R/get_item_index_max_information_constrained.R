@@ -9,8 +9,8 @@
 #' @param administered vector with indeces of administered items
 #' @param available vector with indeces of yet available items
 #' @param responses vector with person responses
-#' @param lp_constraints data frame with constraints in lp format: the constraints list returned by constraints_correct_format()
-#' @param lp_characters data frame with constraint characters in lp format: the lp_chars list returned by constraints_correct_format()
+#' @param lp_constraints data frame with constraints in lp format: the lp_constraints from the list returned by constraints_lp_format()
+#' @param lp_characters data frame with characteristics in lp format: the lp_chars from the list returned by constraints_lp_format()
 #' @param item_information item_information vector with information of each yet available item, with zeros for administered items (returned by objective() with pad = TRUE)
 #' @return integer item index of item with maximum information within constraints
 #' @importFrom lpSolve lp

@@ -90,25 +90,28 @@ prior_var_safe_ml <- NULL
 
 # obtain estimates
 estimator <- "ML"
-ML <- estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+ML <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
 estimator <- "MAP"
-MAP <- estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+MAP <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
 estimator <- "EAP"
-# EAP <- estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+# EAP <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
 ML; MAP; #EAP
 
 # access variance
 attr(ML, "variance")
 
 # Note that EAP takes considerably more time when dimensionality is higher...
-items <- createTestBank("GPCM")
-test <- initTest(items, estimator = "ML")
-items5d <- createTestBank("GPCM", Q=5)
-test5dEAP <- initTest(items, estimator = "EAP")
-test5dMAP <- initTest(items, estimator = "MAP")
+number_dimensions <- 5
+estimate <- rep(.3, number_dimensions)
+alpha <- matrix(runif(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+lower_bound <- rep(-3, number_dimensions)
+upper_bound <- rep(3, number_dimensions)
+prior <- diag(number_dimensions) 
 
-#system.time(estimate(person5d, test5dEAP))
-#system.time(estimate(person5d, test5dMAP))
+estimator <- "MAP"
+system.time(estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL))
+estimator <- "EAP"
+# system.time(estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL))
 
 }
 

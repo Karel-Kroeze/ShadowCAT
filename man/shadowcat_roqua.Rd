@@ -69,7 +69,7 @@ name: the column name of the characteristic this constraint applies to. For cate
 op: the logical operator to be used. Valid options are "<", "=", ">" and "><".
 target: the target value, numeric. If the operator is "><", this should be a length two vector in between which the target should fall.
 characteristics should be a data.frame with characteristics, one row per item, one column per characteristic.
-See constraints_correct_format() for details}
+See constraints_lp_format() for details}
 
 \item{lower_bound}{vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values}
 

@@ -40,7 +40,7 @@ constraints <- list(list(name = 'content/algebra',
                          op = '<',
                          target = 2))
 
-chars_constraints_lp <- constraints_correct_format(max_n, number_items, characteristics, constraints)
+chars_constraints_lp <- constraints_lp_format(max_n, number_items, characteristics, constraints)
 
 test_that("First 4 items administered", {
   responses <- rep(c(1, 0), 2)
@@ -48,7 +48,7 @@ test_that("First 4 items administered", {
   administered <- c(1:4)
 
   item_information <- get_item_information(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE) 
-  best_item <- get_item_index_max_information_constrained(number_items, administered, available, responses, chars_constraints_lp$constraints, chars_constraints_lp$lp_chars, item_information)
+  best_item <- get_item_index_max_information_constrained(number_items, administered, available, responses, chars_constraints_lp$lp_constraints, chars_constraints_lp$lp_chars, item_information)
 
   expect_equal(best_item, 5)
 })
@@ -59,7 +59,7 @@ test_that("7 items administered", {
   administered <- c(1, 3, 5, 7, 9, 11, 13)
   
   item_information <- get_item_information(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE) 
-  best_item <- get_item_index_max_information_constrained(number_items, administered, available, responses, chars_constraints_lp$constraints, chars_constraints_lp$lp_chars, item_information)
+  best_item <- get_item_index_max_information_constrained(number_items, administered, available, responses, chars_constraints_lp$lp_constraints, chars_constraints_lp$lp_chars, item_information)
   
   expect_equal(best_item, 6)
 })
@@ -70,7 +70,7 @@ test_that("First 10 items administered", {
   administered <- c(1:10)
   
   item_information <- get_item_information(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE) 
-  best_item <- get_item_index_max_information_constrained(number_items, administered, available, responses, chars_constraints_lp$constraints, chars_constraints_lp$lp_chars, item_information)
+  best_item <- get_item_index_max_information_constrained(number_items, administered, available, responses, chars_constraints_lp$lp_constraints, chars_constraints_lp$lp_chars, item_information)
   
   expect_equal(best_item, 47)
 })

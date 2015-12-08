@@ -23,42 +23,45 @@
 #' Variance of the estimate is added to the estimate as an attribute.
 #' 
 #' @examples 
-#'number_dimensions <- 1
-#'estimate <- rep(.3, number_dimensions)
-#'model <- "3PLM"
-#'number_items <- 50
-#'responses <- rep(c(1, 0), 17)
-#'administered <- c(6:20, 31:49)
-#'alpha <- matrix(runif(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
-#'beta <- matrix(rnorm(number_items), nrow = number_items, ncol = 1)
-#'guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
-#'number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
-#'lower_bound <- rep(-3, number_dimensions)
-#'upper_bound <- rep(3, number_dimensions)
-#'prior <- diag(1)
-#'prior_var_safe_ml <- NULL
+#' number_dimensions <- 1
+#' estimate <- rep(.3, number_dimensions)
+#' model <- "3PLM"
+#' number_items <- 50
+#' responses <- rep(c(1, 0), 17)
+#' administered <- c(6:20, 31:49)
+#' alpha <- matrix(runif(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+#' beta <- matrix(rnorm(number_items), nrow = number_items, ncol = 1)
+#' guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+#' number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
+#' lower_bound <- rep(-3, number_dimensions)
+#' upper_bound <- rep(3, number_dimensions)
+#' prior <- diag(1)
+#' prior_var_safe_ml <- NULL
 #'
 #' # obtain estimates
 #' estimator <- "ML"
-#' ML <- estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+#' ML <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
 #' estimator <- "MAP"
-#' MAP <- estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+#' MAP <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
 #' estimator <- "EAP"
-#' # EAP <- estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+#' # EAP <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
 #' ML; MAP; #EAP
 #' 
 #' # access variance
 #' attr(ML, "variance")
 #' 
 #' # Note that EAP takes considerably more time when dimensionality is higher...
-#' items <- createTestBank("GPCM")
-#' test <- initTest(items, estimator = "ML")
-#' items5d <- createTestBank("GPCM", Q=5)
-#' test5dEAP <- initTest(items, estimator = "EAP")
-#' test5dMAP <- initTest(items, estimator = "MAP")
+#' number_dimensions <- 5
+#' estimate <- rep(.3, number_dimensions)
+#' alpha <- matrix(runif(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+#' lower_bound <- rep(-3, number_dimensions)
+#' upper_bound <- rep(3, number_dimensions)
+#' prior <- diag(number_dimensions) 
 #' 
-#' #system.time(estimate(person5d, test5dEAP))
-#' #system.time(estimate(person5d, test5dMAP))
+#' estimator <- "MAP"
+#' system.time(estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL))
+#' estimator <- "EAP"
+#' # system.time(estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL))
 #' 
 #' @param estimate theta estimate
 #' @param responses person responses

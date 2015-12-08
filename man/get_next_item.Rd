@@ -26,9 +26,9 @@ nByDimension = scalar of number of initial items per dimension, or vector with n
 "PA" = posterior trace: compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
 "PEKL" = compute Posterior expected Kullback-Leibler Information}
 
-\item{lp_constraints}{data frame with constraints in lp format: the constraints list returned by constraints_correct_format()}
+\item{lp_constraints}{data frame with constraints in lp format: the lp_constraints from the list returned by constraints_lp_format()}
 
-\item{lp_characters}{data frame with constraint characters in lp format: the lp_chars list returned by constraints_correct_format()}
+\item{lp_characters}{data frame with constraint characters in lp format: the lp_chars from the list returned by constraints_lp_format()}
 
 \item{estimate}{current theta estimate}
 

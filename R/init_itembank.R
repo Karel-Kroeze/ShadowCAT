@@ -22,7 +22,7 @@
 #' @param guessing vector of guessing parameters per item. Optionally used in 3PLM model, ignored for all others.
 #' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others.
 #' @param silent if TRUE, a summary of the item bank properties is printed
-#' @return ShadowCAT.items Itembank object, as used by \code{\link{initTest}} and \code{\link{initPerson}}.
+#' @return ShadowCAT.items Itembank object
 #' @export
 initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = NULL, eta = NULL, silent = FALSE){  
   result <- function() {  
@@ -40,7 +40,7 @@ initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = N
     if (!silent) 
       cat("\nItembank for",item_bank$model,"model.",item_bank$K,"items over",item_bank$Q,"dimension(s), with up to",item_bank$M+1,"categories per item.")
     
-    invisible(item_bank)
+    item_bank
   }
     
   get_beta <- function() {

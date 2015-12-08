@@ -34,7 +34,7 @@ vector responses, or updated person object if indeces is set.
 Simulates responses on items indicated by indeces, given true theta
 }
 \examples{
-items <- createTestBank("GPCM")
+items <- simulate_testbank("GPCM")
 
 # simulates responses on items indicated by indeces, given true theta
 answer(.3, "GPCM", 1, "MAP", items$pars$alpha, items$pars$beta, items$pars$guessing, items$M, 3)

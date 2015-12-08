@@ -26,7 +26,7 @@ More flexibility in Beta parameters might be added in future versions.}
 \item{silent}{if TRUE, a summary of the item bank properties is printed}
 }
 \value{
-ShadowCAT.items Itembank object, as used by \code{\link{initTest}} and \code{\link{initPerson}}.
+ShadowCAT.items Itembank object
 }
 \description{
 Produce an itembank object from a list of parameters.

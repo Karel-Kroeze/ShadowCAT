@@ -9,8 +9,8 @@
 #' "A" = trace: compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
 #' "PA" = posterior trace: compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
 #' "PEKL" = compute Posterior expected Kullback-Leibler Information
-#' @param lp_constraints data frame with constraints in lp format: the constraints list returned by constraints_correct_format()
-#' @param lp_characters data frame with constraint characters in lp format: the lp_chars list returned by constraints_correct_format()
+#' @param lp_constraints data frame with constraints in lp format: the lp_constraints from the list returned by constraints_lp_format()
+#' @param lp_characters data frame with constraint characters in lp format: the lp_chars from the list returned by constraints_lp_format()
 #' @param estimate current theta estimate
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param responses vector with person responses
