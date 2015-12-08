@@ -4,10 +4,10 @@
 \alias{lapply_return_array}
 \title{lapply with array as output}
 \usage{
-lapply_return_array(X, dim, FUN, ...)
+lapply_return_array(x, dim, FUN, ...)
 }
 \arguments{
-\item{X}{a vector or list; see ? lapply for details}
+\item{x}{a vector or list; see ? lapply for details}
 
 \item{dim}{vector with dimensions of the returned array}
 

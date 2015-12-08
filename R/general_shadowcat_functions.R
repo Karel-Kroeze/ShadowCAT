@@ -29,7 +29,7 @@ get_subset <- function(x, subset) {
 
 #' lapply with array as output
 #' 
-#'@param X a vector or list; see ? lapply for details
+#'@param x a vector or list; see ? lapply for details
 #'@param dim vector with dimensions of the returned array
 #'@param FUN function to be applied to each element of X; see ? lapply for details
 #'@param ... any additional arguments to FUN
@@ -40,22 +40,22 @@ get_subset <- function(x, subset) {
 #'                     FUN = function(i, matrix_example) { matrix_example[i,] %*% t(matrix_example[i,]) }, 
 #'                     matrix_example = matrix_example)[1, 1, 1] == 1 || stop("wrong")
 #'@export
-lapply_return_array <- function(X, dim, FUN, ...) {
-  lapply_output <- lapply(X, FUN, ...)
+lapply_return_array <- function(x, dim, FUN, ...) {
+  lapply_output <- lapply(x, FUN, ...)
   array(unlist(lapply_output), dim = dim)
 }
 
 #' apply with input and output converted to matrix
 #' 
-#' @param X a vector or matrix; if vector, the vector will be converted to a matrix
+#' @param x a vector or matrix; if vector, the vector will be converted to a matrix
 #' @param margin a vector giving the subscripts which the function will be applied over, see ?apply for details
 #' @param FUN the funcion to be applied
 #' @param ... any additional arguments to FUN
 #' @return same a apply, but always in matrix format
 #' @examples ( matrix_apply(c(1:5, NA), 2, sum, na.rm = TRUE) == 15 && is.matrix(matrix_apply(c(1:5, NA), 2, sum, na.rm = TRUE)) ) || stop("wrong")
 #' @export
-matrix_apply <- function(X, margin, FUN, ...) {
-  as.matrix(apply(as.matrix(X), margin, FUN, ...))
+matrix_apply <- function(x, margin, FUN, ...) {
+  as.matrix(apply(as.matrix(x), margin, FUN, ...))
 }
 
 #' not in
@@ -70,13 +70,13 @@ matrix_apply <- function(X, margin, FUN, ...) {
 
 #' get the number of non-NA cells per row of a matrix
 #' 
-#' @param X a matrix
+#' @param x a matrix
 #' @return number of non-NA cells per row
 #' @examples expect_equal <- number_non_missing_cells_per_row(matrix(c(1,2,NA,NA,2,3,NA,2,3), ncol = 3)) == c(1, 3, 2);
 #' sum(expect_equal) == 3 || stop("wrong")
 #' @export
-number_non_missing_cells_per_row <- function(X) {
-  apply(X, 1, function(x) sum(!is.na(x)))
+number_non_missing_cells_per_row <- function(x) {
+  apply(x, 1, function(x_row) sum(!is.na(x_row)))
 }
 
 #' compute cumulative sums for each row of a matrix

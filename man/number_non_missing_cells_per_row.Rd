@@ -4,10 +4,10 @@
 \alias{number_non_missing_cells_per_row}
 \title{get the number of non-NA cells per row of a matrix}
 \usage{
-number_non_missing_cells_per_row(X)
+number_non_missing_cells_per_row(x)
 }
 \arguments{
-\item{X}{a matrix}
+\item{x}{a matrix}
 }
 \value{
 number of non-NA cells per row

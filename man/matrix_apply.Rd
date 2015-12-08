@@ -4,10 +4,10 @@
 \alias{matrix_apply}
 \title{apply with input and output converted to matrix}
 \usage{
-matrix_apply(X, margin, FUN, ...)
+matrix_apply(x, margin, FUN, ...)
 }
 \arguments{
-\item{X}{a vector or matrix; if vector, the vector will be converted to a matrix}
+\item{x}{a vector or matrix; if vector, the vector will be converted to a matrix}
 
 \item{margin}{a vector giving the subscripts which the function will be applied over, see ?apply for details}
 
