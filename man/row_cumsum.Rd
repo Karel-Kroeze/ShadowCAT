@@ -4,10 +4,10 @@
 \alias{row_cumsum}
 \title{compute cumulative sums for each row of a matrix}
 \usage{
-row_cumsum(X)
+row_cumsum(x)
 }
 \arguments{
-\item{X}{a vector or matrix; if vector, the vector will be converted to a matrix with one column}
+\item{x}{a vector or matrix; if vector, the vector will be converted to a matrix with one column}
 }
 \value{
 matrix containing cumulative sums for each row
@@ -18,7 +18,9 @@ compute cumulative sums for each row of a matrix
 \examples{
 expect_equal1 <- row_cumsum(matrix(1:12, ncol = 3))[2,] == c(2, 8, 18);
 expect_equal2 <- row_cumsum(1:12) == matrix(1:12, ncol = 1);
+expect_equal3 <- row_cumsum(matrix(1:4, nrow = 1)) == matrix(c(1, 3, 6, 10), nrow = 1);
 sum(expect_equal1) == 3 || stop("wrong")
 sum(expect_equal2) == 12 || stop("wrong")
+sum(expect_equal3) == 4 || stop("wrong")
 }
 

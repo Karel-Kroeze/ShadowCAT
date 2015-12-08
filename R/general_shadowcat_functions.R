@@ -81,15 +81,22 @@ number_non_missing_cells_per_row <- function(X) {
 
 #' compute cumulative sums for each row of a matrix
 #' 
-#' @param X a vector or matrix; if vector, the vector will be converted to a matrix with one column
+#' @param x a vector or matrix; if vector, the vector will be converted to a matrix with one column
 #' @return matrix containing cumulative sums for each row
 #' @examples expect_equal1 <- row_cumsum(matrix(1:12, ncol = 3))[2,] == c(2, 8, 18);
 #' expect_equal2 <- row_cumsum(1:12) == matrix(1:12, ncol = 1);
+#' expect_equal3 <- row_cumsum(matrix(1:4, nrow = 1)) == matrix(c(1, 3, 6, 10), nrow = 1);
 #' sum(expect_equal1) == 3 || stop("wrong")
 #' sum(expect_equal2) == 12 || stop("wrong")
+#' sum(expect_equal3) == 4 || stop("wrong")
 #' @export
-row_cumsum <- function(X) {
-  transpose_if_ncol_and_nrow_larger_1(matrix_apply(X, 1, cumsum))
+row_cumsum <- function(x) {
+  x_matrix <- as.matrix(x)
+  r_cumsum <- matrix_apply(x_matrix, 1, cumsum)
+  if ((nrow(x_matrix) > 1 && ncol(x_matrix) > 1) || nrow(x_matrix) == 1)
+    t(r_cumsum)
+  else
+    r_cumsum
 }
 
 #' Recursive list apply, given a bunch of vectors, creates lists of lists with the elements as keys
@@ -130,19 +137,3 @@ sum_loop_outputs <- function(start_object, loop_vector, FUN, ...) {
   }
   start_object
 }
-
-#' transpose matrix if number of columns is larger than 1
-#' 
-#' @param X a matrix
-#' @return transpose of X if number of columns and number of rows are larger than 1, X otherwise
-#' @examples expect_equal <- transpose_if_ncol_and_nrow_larger_1(matrix(1:50, ncol = 2)) == t(matrix(1:50, ncol = 2));
-#' sum(expect_equal) == 50 || stop("wrong")
-#' @export
-transpose_if_ncol_and_nrow_larger_1 <- function(X) {
-  if (ncol(X) > 1 && ncol(X) > 1)
-    t(X)
-  else
-    X
-}
-
-

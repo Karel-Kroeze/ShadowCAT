@@ -18,19 +18,23 @@
 #' @param indeces answer questions with the given indeces
 #' @return vector responses, or updated person object if indeces is set.
 simulate_answer <- function(theta, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps, indeces) {
-  if (is.null(guessing))
-    guessing <- matrix(0, nrow(as.matrix(beta)), 1)
+  result <- function() {
+    guessing <- get_guessing()
+    # probabilities, generated with TRUE theta.
+    probabilities <- probabilities_and_likelihoods(theta, responses = NULL, model, indeces, number_dimensions, estimator, alpha, beta, guessing, output = "probs")
+    cumulative_probabilities <- row_cumsum(probabilities) 
+    random_numbers <- runif(length(indeces))
+    
+    # answer is the number of categories that have a cumulative probability smaller than random_numbers
+    apply(random_numbers > cumulative_probabilities, 1, sum, na.rm=TRUE)
+  }
 
-  # probabilities, generated with TRUE theta.
-  Pij <- probabilities_and_likelihoods(theta, responses = NULL, model, indeces, number_dimensions, estimator, alpha, beta, guessing, output = "probs")
+  get_guessing <- function() {
+    if (is.null(guessing))
+      matrix(0, nrow(as.matrix(beta)), 1)
+    else
+      guessing
+  }
   
-  # cumulative probabilities
-  cp <- Pij 
-  for (i in 1:(number_itemsteps + 1)) cp[,i] <- apply(matrix(Pij[,1:i],ncol=i),1,sum)
-   
-  # rand ~ unif(0,1)
-  rand <- runif(length(indeces))
-  
-  # answer is the number of categories that have a cumulative probability smaller than rand
-  apply(rand > cp, 1, sum, na.rm=TRUE)
+  result()
 }
