@@ -1,4 +1,4 @@
-#' Create a test Itembank
+#' Simulate testbank
 #' 
 #' Quick and simple itembanks for testing purposes.
 #' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
@@ -6,10 +6,10 @@
 #' @param Q number of dimensions
 #' @param M number of item steps (number of categories minus 1)
 #' @param between is TRUE, force items to load on one dimension each
-#' @param run_initItembank if FALSE, the simulated testbank is returned; if TRUE, initItembank() is applied on
+#' @param return_testbank_properties if FALSE, a list of alpha and beta is returned; if TRUE, substract_testbank_properties() is applied on
 #' the simulated testbank and the result of this is returned 
 #' @return ShadowCAT.itembank
-simulate_testbank <- function(model, K = 50, Q = 1, M = 4, between = FALSE, run_initItembank = TRUE){
+simulate_testbank <- function(model, K = 50, Q = 1, M = 4, between = FALSE, return_testbank_properties = TRUE){
   # 3PLM is dichotomous by definition
   if (model == "3PLM") M <- 1 
   
@@ -42,14 +42,14 @@ simulate_testbank <- function(model, K = 50, Q = 1, M = 4, between = FALSE, run_
   if (model == "GPCM") 
     beta <- row_cumsum(beta) 
   
-  if (run_initItembank)
-    initItembank(model, alpha, beta, silent = TRUE)
+  if (return_testbank_properties)
+    substract_testbank_properties(model, alpha, beta, silent = TRUE)
   else
     list(alpha = alpha,
          beta = beta)
 }
 
-#' Initialize an itembank object.
+#' Substract extra information about testbank
 #' 
 #' Produce an itembank object from a list of parameters.
 #' 
@@ -73,8 +73,8 @@ simulate_testbank <- function(model, K = 50, Q = 1, M = 4, between = FALSE, run_
 #' @param guessing vector of guessing parameters per item. Optionally used in 3PLM model, ignored for all others.
 #' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others.
 #' @param silent if TRUE, a summary of the item bank properties is printed
-#' @return ShadowCAT.items Itembank object
-initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = NULL, eta = NULL, silent = FALSE){  
+#' @return list containing testbank and its properties
+substract_testbank_properties <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = NULL, eta = NULL, silent = FALSE){  
   result <- function() {  
     # define output, list
     # I will change Q (number of dimensions), K (number of items), M (number of item steps; number of categories 
@@ -84,7 +84,6 @@ initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = N
                       K = get_number_items_itemsteps_dimensions()$number_items, 
                       M = get_number_items_itemsteps_dimensions()$number_itemsteps, 
                       model = model)
-    attr(item_bank, 'class') <- c("ShadowCAT.items")
     
     # little feedback
     if (!silent) 
