@@ -4,7 +4,7 @@
 #' items <- simulate_testbank("GPCM")
 #' 
 #' # simulates responses on items indicated by indeces, given true theta
-#' answer(.3, "GPCM", 1, "MAP", items$pars$alpha, items$pars$beta, items$pars$guessing, items$M, 3)
+#' simulate_answer(.3, "GPCM", 1, "MAP", items$pars$alpha, items$pars$beta, items$pars$guessing, items$M, 3)
 #' 
 #' @param theta true theta
 #' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
@@ -17,8 +17,7 @@
 #' @param number_itemsteps number of itemsteps
 #' @param indeces answer questions with the given indeces
 #' @return vector responses, or updated person object if indeces is set.
-#' @export
-answer <- function(theta, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps, indeces) {
+simulate_answer <- function(theta, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps, indeces) {
   if (is.null(guessing))
     guessing <- matrix(0, nrow(as.matrix(beta)), 1)
 

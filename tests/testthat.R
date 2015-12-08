@@ -1,3 +1,5 @@
 source("testthat/help_functions.R")
+source("testthat/simulate_answer.R")
+source("testthat/simulate_testbank.R")
 library(testthat)
 test_check("ShadowCAT")

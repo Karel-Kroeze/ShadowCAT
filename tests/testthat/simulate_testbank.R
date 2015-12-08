@@ -1,3 +1,54 @@
+#' Create a test Itembank
+#' 
+#' Quick and simple itembanks for testing purposes.
+#' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
+#' @param K number of items
+#' @param Q number of dimensions
+#' @param M number of item steps (number of categories minus 1)
+#' @param between is TRUE, force items to load on one dimension each
+#' @param run_initItembank if FALSE, the simulated testbank is returned; if TRUE, initItembank() is applied on
+#' the simulated testbank and the result of this is returned 
+#' @return ShadowCAT.itembank
+simulate_testbank <- function(model, K = 50, Q = 1, M = 4, between = FALSE, run_initItembank = TRUE){
+  # 3PLM is dichotomous by definition
+  if (model == "3PLM") M <- 1 
+  
+  # make sure the number of items is divisible by the number of dimensions
+  if (between) K <- ceiling(K/Q) * Q 
+  
+  # set up alpha, very rough uniform from .3 to 1.5
+  alpha <- matrix(runif(K * Q, .3, 1.5), K, Q)
+  
+  # if between, force items to load on one dimension each.
+  if (between){
+    set = K / Q
+    for (i in 1:Q){
+      alpha[((i-1)*set+1):(i*set), (1:Q)[-i]] <- 0    
+    }
+  }
+  
+  # spread polytomous items cats -2 to +2.
+  spread <- seq(-2,2,length.out=M)
+  
+  # base loading for items
+  beta <- matrix(rnorm(K), K, 1)
+  
+  # apply spread for polytomous, betas are strictly monotously increasing because the spread is.
+  # apply transposes the matrix...
+  if (M > 1) 
+    beta <- t(apply(beta, 1, function(x) x + spread))
+  
+  # reparameterize GPCM
+  if (model == "GPCM") 
+    beta <- row_cumsum(beta) 
+  
+  if (run_initItembank)
+    initItembank(model, alpha, beta, silent = TRUE)
+  else
+    list(alpha = alpha,
+         beta = beta)
+}
+
 #' Initialize an itembank object.
 #' 
 #' Produce an itembank object from a list of parameters.
@@ -23,7 +74,6 @@
 #' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others.
 #' @param silent if TRUE, a summary of the item bank properties is printed
 #' @return ShadowCAT.items Itembank object
-#' @export
 initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = NULL, eta = NULL, silent = FALSE){  
   result <- function() {  
     # define output, list
@@ -42,7 +92,7 @@ initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = N
     
     item_bank
   }
-    
+  
   get_beta <- function() {
     # allow calculating beta from eta.
     if (model == "GPCM" && is.null(beta) && !is.null(eta))
@@ -56,12 +106,12 @@ initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = N
     pars = list(alpha = as.matrix(alpha),
                 beta = as.matrix(get_beta()),
                 guessing = if (is.null(guessing))
-                             matrix(0, nrow(as.matrix(get_beta())), 1)
-                           else
-                             as.matrix(guessing),
+                  matrix(0, nrow(as.matrix(get_beta())), 1)
+                else
+                  as.matrix(guessing),
                 index = 1:nrow(as.matrix(get_beta())), # except for bookkeeping things...
                 m = number_non_missing_cells_per_row(as.matrix(get_beta()))
-           ) 
+    ) 
     if (!is.null(eta)) 
       pars$eta <- as.matrix(eta)  
     
@@ -97,3 +147,4 @@ initItembank <- function(model = '3PLM', alpha = NULL, beta = NULL, guessing = N
   
   validate_and_run()
 }
+
