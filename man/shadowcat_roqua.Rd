@@ -5,8 +5,8 @@
 \title{Returns a list with the index of the next item to be administered given a new response, and an updated person object}
 \usage{
 shadowcat_roqua(new_response, estimate, responses, administered, available,
-  prior, model, alpha, beta, guessing = NULL, eta = NULL, start_items,
-  stop_test, estimator, information_summary, item_selection = "MI",
+  model, alpha, beta, start_items, stop_test, estimator, information_summary,
+  prior = NULL, guessing = NULL, eta = NULL, item_selection = "MI",
   constraints_and_characts = NULL, lower_bound = rep(-3, ncol(alpha)),
   upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL)
 }
@@ -21,9 +21,6 @@ shadowcat_roqua(new_response, estimate, responses, administered, available,
 
 \item{available}{vector containing indeces of yet available items}
 
-\item{prior}{covariance matrix of the multi variate normal prior for theta; mean vector is fixed at zero; not used for ML estimator, but at this point should always be defined
-#' note that this prior should be a square matrix with number of rows and columns equal to the number of dimensions; values on the diagonal should be larger than 0}
-
 \item{model}{String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
 
 \item{alpha}{Matrix of alpha parameters, one column per dimension, one row per item. Note that so called within-dimensional models still use an alpha matrix, they simply 
@@ -34,10 +31,6 @@ and without gaps. That is, the weight parameter in the GPCM model is assumed to 
 The matrix will have a number of columns equal to the largest number of response categories, items with fewer response categories should be 
 right-padded with \code{NA}. \code{NA} values between response categories are not allowed, and will lead to errors.
 More flexibility in Beta parameters might be added in future versions.}
-
-\item{guessing}{vector of guessing parameters per item. Optionally used in 3PLM model, ignored for all others.}
-
-\item{eta}{Matrix of location parameters, optionally used in GPCM model, ignored for all others.}
 
 \item{start_items}{items that are shown to the patient before adaptive proces starts; one of
 list(type = 'random', n)
@@ -60,6 +53,13 @@ target = vector of maximum acceptable variances per dimension; if target = NULL,
 "A" = trace: compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
 "PA" = posterior trace: compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
 "PEKL" = compute Posterior expected Kullback-Leibler Information}
+
+\item{prior}{covariance matrix of the multi variate normal prior for theta; mean vector is fixed at zero; not used for ML estimator, but at this point should always be defined
+#' note that this prior should be a square matrix with number of rows and columns equal to the number of dimensions; values on the diagonal should be larger than 0}
+
+\item{guessing}{vector of guessing parameters per item. Optionally used in 3PLM model, ignored for all others.}
+
+\item{eta}{Matrix of location parameters, optionally used in GPCM model, ignored for all others.}
 
 \item{item_selection}{selection criterion; one of "MI" (maximum information) or "Shadow" (maximum information and take constraints into account)}
 

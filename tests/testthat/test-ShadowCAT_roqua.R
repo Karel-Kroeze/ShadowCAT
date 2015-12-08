@@ -10,11 +10,11 @@ make_random_seed_exist <- rnorm(1)
 test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection = "MI", constraints = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL, initital_estimate = rep(0, ncol(alpha)), initial_variance = prior) {
   new_response <- NULL
   attr(initital_estimate, 'variance') <- initial_variance
-  next_item_and_test_outcome <- shadowcat_roqua(new_response, estimate = initital_estimate , responses = numeric(0), administered = numeric(0), available = 1:nrow(beta), prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml)
-  
+  next_item_and_test_outcome <- shadowcat_roqua(new_response, estimate = initital_estimate , responses = numeric(0), administered = numeric(0), available = 1:nrow(beta), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta, item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml)
+
   while (next_item_and_test_outcome$index_new_item != "stop_test") {
     new_response <- answer(true_theta, model, ncol(alpha), estimator, alpha, beta, guessing, ncol(beta), next_item_and_test_outcome$index_new_item)
-    next_item_and_test_outcome <- shadowcat_roqua(new_response, next_item_and_test_outcome$estimate, next_item_and_test_outcome$responses, next_item_and_test_outcome$administered, next_item_and_test_outcome$available, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml)  
+    next_item_and_test_outcome <- shadowcat_roqua(new_response, next_item_and_test_outcome$estimate, next_item_and_test_outcome$responses, next_item_and_test_outcome$administered, next_item_and_test_outcome$available, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior,  guessing, eta, item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml)  
   }
   
   next_item_and_test_outcome
@@ -65,7 +65,7 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
 
 context("validate shadowcat_roqua single conditions")
 
-test_that("true theta is 2", {
+test_that("true theta is 2, estimator is MAP", {
   # define true theta for simulation of responses
   true_theta <- 2
   
@@ -97,7 +97,37 @@ test_that("true theta is 2", {
   expect_equal(length(test_outcome$administered), 100)
 })
 
-test_that("true theta is 1, 0, 2", {  
+test_that("true theta is 2, estimator is ML", {
+  # define true theta for simulation of responses
+  true_theta <- 2
+  
+  # define item characteristics
+  number_items <- 100
+  number_dimensions <- 1
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  
+  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'random', n = 3)
+  stop_test <- list(n = 100)
+  estimator <- 'ML'
+  information_summary <- 'D'
+  item_selection <- 'MI'
+  
+  test_outcome <- with_random_seed(2, test_shadowcat_roqua)(true_theta, prior = NULL, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, initial_variance = diag(1))
+  
+  expect_equal(as.vector(round(test_outcome$estimate, 3)), 2.169)
+  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), .129)
+  expect_equal(test_outcome$available, numeric(0))
+  expect_equal(length(test_outcome$administered), 100)
+})
+
+
+test_that("true theta is 1, 0, 2, estimator is MAP", {  
   # define true theta for simulation of responses
   true_theta <- c(1, 0, 2)
   
@@ -131,6 +161,39 @@ test_that("true theta is 1, 0, 2", {
   expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.064, .000, .000))
   expect_equal(length(test_outcome$administered), 300)
 })
+
+test_that("true theta is 1, 0, 2, estimator is ML", {  
+  # define true theta for simulation of responses
+  true_theta <- c(1, 0, 2)
+  
+  # define item characteristics
+  number_items <- 300
+  number_dimensions <- 3
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  
+  guessing <- NULL
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  alpha[1:100,2:3] <- 0
+  alpha[101:200,c(1,3)] <- 0
+  alpha[201:300,1:2] <- 0
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'random', n = 3)
+  stop_test <- list(n = 300)
+  estimator <- 'ML'
+  information_summary <- 'D'
+  item_selection <- 'MI'
+  
+  test_outcome <- with_random_seed(3, test_shadowcat_roqua)(true_theta, prior = NULL, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, initial_variance = diag(1))
+  
+  expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.755, -.070, 2.221))
+  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.063, .000, .000))
+  expect_equal(length(test_outcome$administered), 300)
+})
+
 
 test_that("items load on three dimensions", {  
   # define true theta for simulation of responses

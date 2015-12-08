@@ -5,8 +5,6 @@
 #' @param responses vector of given responses; should be initialized with numeric(0)
 #' @param administered vector containing indeces of administered items; should be initialized with numeric(0)
 #' @param available vector containing indeces of yet available items
-#' @param prior covariance matrix of the multi variate normal prior for theta; mean vector is fixed at zero; not used for ML estimator, but at this point should always be defined
-#' #' note that this prior should be a square matrix with number of rows and columns equal to the number of dimensions; values on the diagonal should be larger than 0
 #' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param alpha Matrix of alpha parameters, one column per dimension, one row per item. Note that so called within-dimensional models still use an alpha matrix, they simply 
 #' have only one non-zero loading per item.
@@ -15,8 +13,6 @@
 #' The matrix will have a number of columns equal to the largest number of response categories, items with fewer response categories should be 
 #' right-padded with \code{NA}. \code{NA} values between response categories are not allowed, and will lead to errors.
 #' More flexibility in Beta parameters might be added in future versions.
-#' @param guessing vector of guessing parameters per item. Optionally used in 3PLM model, ignored for all others.
-#' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others.
 #' @param start_items items that are shown to the patient before adaptive proces starts; one of
 #' list(type = 'random', n)
 #' list(type = 'fixed', indices, n)
@@ -35,6 +31,10 @@
 #' "A" = trace: compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
 #' "PA" = posterior trace: compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
 #' "PEKL" = compute Posterior expected Kullback-Leibler Information
+#' @param prior covariance matrix of the multi variate normal prior for theta; mean vector is fixed at zero; not used for ML estimator, but at this point should always be defined
+#' #' note that this prior should be a square matrix with number of rows and columns equal to the number of dimensions; values on the diagonal should be larger than 0
+#' @param guessing vector of guessing parameters per item. Optionally used in 3PLM model, ignored for all others.
+#' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others.
 #' @param item_selection selection criterion; one of "MI" (maximum information) or "Shadow" (maximum information and take constraints into account)
 #' @param constraints_and_characts list with constraints and characteristics
 #' constraints should be specified as a list of constraints, each constraint is a list with three named values;
@@ -49,7 +49,7 @@
 #' @return a list containing the index of the next item to be administered given a new response (or "stop_test"), 
 #' updated estimate of theta, responses, indeces of administered items, and indeces of available items
 #' @export
-shadowcat_roqua <- function(new_response, estimate, responses, administered, available, prior, model, alpha, beta, guessing = NULL, eta = NULL, start_items, stop_test, estimator, information_summary, item_selection = "MI", constraints_and_characts = NULL, lower_bound = rep(-3, ncol(alpha)), upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL) {    
+shadowcat_roqua <- function(new_response, estimate, responses, administered, available, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior = NULL, guessing = NULL, eta = NULL, item_selection = "MI", constraints_and_characts = NULL, lower_bound = rep(-3, ncol(alpha)), upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL) {    
   alpha <- as.matrix(alpha)
   beta <- get_beta(model, beta, eta)
   guessing <- get_guessing(guessing, beta) 
@@ -98,6 +98,16 @@ shadowcat_roqua <- function(new_response, estimate, responses, administered, ava
   }
   
   validate <- function() {
+    if (is.null(estimate))
+      return(add_error("estimate", "is missing"))
+    if (is.null(attr(estimate, "variance")))
+      return(add_error("variance", "is missing as an attribute of estimate"))
+    if (is.null(responses))
+      return(add_error("responses", "is missing"))
+    if (is.null(administered))
+      return(add_error("administered", "is missing"))
+    if (is.null(available))
+      return(add_error("available", "is missing"))
     if (is.null(model))
       return(add_error("model", "is missing"))
     if (is.null(alpha))
@@ -118,6 +128,8 @@ shadowcat_roqua <- function(new_response, estimate, responses, administered, ava
       add_error("beta_and_eta", "are both missing; define at least one of them")
     if (model == "GPCM" && !is.null(beta) && !is.null(eta) && !all.equal(row_cumsum(eta), as.matrix(beta)))
       add_error("beta_and_eta", "objects do not match.")
+    if ((estimator != "ML" || information_summary %in% c("PD", "PA")) && is.null(prior))
+      add_error("prior", "is missing")
   }
   
   invalid_result <- function() {
