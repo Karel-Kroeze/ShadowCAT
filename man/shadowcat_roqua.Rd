@@ -54,7 +54,7 @@ target = vector of maximum acceptable variances per dimension; if target = NULL,
 "PA" = posterior trace: compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
 "PEKL" = compute Posterior expected Kullback-Leibler Information}
 
-\item{prior}{covariance matrix of the multi variate normal prior for theta; mean vector is fixed at zero; not used for ML estimator, but at this point should always be defined
+\item{prior}{covariance matrix of the multi variate normal prior for theta; mean vector is fixed at zero; not used for ML estimator
 #' note that this prior should be a square matrix with number of rows and columns equal to the number of dimensions; values on the diagonal should be larger than 0}
 
 \item{guessing}{vector of guessing parameters per item. Optionally used in 3PLM model, ignored for all others.}
