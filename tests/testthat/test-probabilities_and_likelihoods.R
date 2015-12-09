@@ -27,7 +27,7 @@ test_that("model is 3PLM, 1 dimension, 2 categories, estimator is MAP, deriv is 
 })
 
 test_that("model is 3PLM, 2 dimensions, 2 categories, estimator is ML, deriv is true", {
-  theta <- c(0, 0)
+  theta <- c(.3, .5)
   model <- "3PLM"
   administered <- 1:50
   number_dimensions <- 2
@@ -41,21 +41,21 @@ test_that("model is 3PLM, 2 dimensions, 2 categories, estimator is ML, deriv is 
   
   probabilities <- probabilities_and_likelihoods(theta, responses = responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = NULL, output = "both")
     
-  expect_equal(round(probabilities$probabilities[1,], 3), c(.290, .710))
-  expect_equal(round(probabilities$probabilities[40,], 3), c(.342, .658))
+  expect_equal(round(probabilities$probabilities[1,], 3), c(.232, .768))
+  expect_equal(round(probabilities$probabilities[40,], 3), c(.25, .75))
   expect_equal(dim(probabilities$probabilities), c(50, 2))
   expect_equal(length(probabilities$likelihoods), 1)
   expect_equal(dim(attr(probabilities$likelihoods, "gradient")), c(1, 2))
   expect_equal(dim(attr(probabilities$likelihoods, "hessian")), c(2, 2))
   expect_equal(length(probabilities), 2)
   
-  expect_equal(round(probabilities$likelihoods[1], 3), -61.592)
-  expect_equal(round(attr(probabilities$likelihoods, "gradient"), 3), matrix(c(-5.115, -7.757), ncol = 2))
-  expect_equal(round(attr(probabilities$likelihoods, "hessian"), 3), matrix(c(-2.986, -3.166, -3.166, -3.833), ncol = 2))
+  expect_equal(round(probabilities$likelihoods[1], 3), -68.063)
+  expect_equal(round(attr(probabilities$likelihoods, "gradient"), 3), matrix(c(-7.519, -10.47), ncol = 2))
+  expect_equal(round(attr(probabilities$likelihoods, "hessian"), 3), matrix(c(-3.005, -2.816, -2.816, -3.373), ncol = 2))
 })
 
 test_that("model is 3PLM, 1 dimension, 2 categories, estimator is MAP, deriv is true", {
-  theta <- 0
+  theta <- .2
   model <- "3PLM"
   administered <- 1:50
   number_dimensions <- 1
@@ -70,21 +70,21 @@ test_that("model is 3PLM, 1 dimension, 2 categories, estimator is MAP, deriv is 
   
   probabilities <- probabilities_and_likelihoods(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, output = "both")
     
-  expect_equal(round(probabilities$probabilities[1,], 3), c(.347, .653))
-  expect_equal(round(probabilities$probabilities[40,], 3), c(.376, .624))
+  expect_equal(round(probabilities$probabilities[1,], 3), c(.325, .675))
+  expect_equal(round(probabilities$probabilities[40,], 3), c(.357, .643))
   expect_equal(dim(probabilities$probabilities), c(50, 2))
   expect_equal(dim(probabilities$likelihoods), c(1, 1))
   expect_equal(dim(attr(probabilities$likelihoods, "gradient")), c(1, 1))
   expect_equal(dim(attr(probabilities$likelihoods, "hessian")), c(1, 1))
   expect_equal(length(probabilities), 2)
   
-  expect_equal(round(probabilities$likelihoods[1], 3), -47.383)
-  expect_equal(round(attr(probabilities$likelihoods, "gradient"), 3), matrix(-2.446))
-  expect_equal(round(attr(probabilities$likelihoods, "hessian"), 3), matrix(-5.916))
+  expect_equal(round(probabilities$likelihoods[1], 3), -47.993)
+  expect_equal(round(attr(probabilities$likelihoods, "gradient"), 3), matrix(-3.675))
+  expect_equal(round(attr(probabilities$likelihoods, "hessian"), 3), matrix(-6.35))
 })
 
 test_that("model is 3PLM, 3 dimensions, 2 categories, estimator is EAP, deriv is true", {
-  theta <- c(0, 0, 0)
+  theta <- c(.1, -.4, 2)
   model <- "3PLM"
   administered <- 1:50
   number_dimensions <- 3
@@ -99,8 +99,8 @@ test_that("model is 3PLM, 3 dimensions, 2 categories, estimator is EAP, deriv is
   
   probabilities <- probabilities_and_likelihoods(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, output = "both")
   
-  expect_equal(round(probabilities$probabilities[1,], 3), c(.204, .796))
-  expect_equal(round(probabilities$probabilities[40,], 3), c(.305, .695))
+  expect_equal(round(probabilities$probabilities[1,], 3), c(.087, .913))
+  expect_equal(round(probabilities$probabilities[40,], 3), c(.113, .887))
   expect_equal(dim(probabilities$probabilities), c(50, 2))
   expect_equal(dim(probabilities$likelihoods), c(1, 1))
   expect_equal(dim(attr(probabilities$likelihoods, "gradient")), c(1, 3))
@@ -111,7 +111,7 @@ test_that("model is 3PLM, 3 dimensions, 2 categories, estimator is EAP, deriv is
 context("model is GPCM")
 
 test_that("model is GPCM, 1 dimensions, 2 categories, estimator is MAP, deriv is true", {
-  theta <- 0
+  theta <- .6
   model <- "GPCM"
   administered <- 1:50
   number_dimensions <- 1
@@ -126,21 +126,21 @@ test_that("model is GPCM, 1 dimensions, 2 categories, estimator is MAP, deriv is
   
   probabilities <- probabilities_and_likelihoods(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, output = "both")
     
-  expect_equal(round(probabilities$probabilities[1,], 3), c(.290, .710))
-  expect_equal(round(probabilities$probabilities[40,], 3), c(.439, .561))
+  expect_equal(round(probabilities$probabilities[1,], 3), c(.23, .77))
+  expect_equal(round(probabilities$probabilities[40,], 3), c(.369, .631))
   expect_equal(dim(probabilities$probabilities), c(50, 2))
   expect_equal(dim(probabilities$likelihoods), c(1, 1))
   expect_equal(dim(attr(probabilities$likelihoods, "gradient")), c(1, 1))
   expect_equal(dim(attr(probabilities$likelihoods, "hessian")), c(1, 1))
   expect_equal(length(probabilities), 2)
   
-  expect_equal(round(probabilities$likelihoods[1], 3), -33.772)
-  expect_equal(round(attr(probabilities$likelihoods, "gradient"), 3), matrix(-1.824))
-  expect_equal(round(attr(probabilities$likelihoods, "hessian"), 3), matrix(-11.325))
+  expect_equal(round(probabilities$likelihoods[1], 3), -36.891)
+  expect_equal(round(attr(probabilities$likelihoods, "gradient"), 3), matrix(-8.511))
+  expect_equal(round(attr(probabilities$likelihoods, "hessian"), 3), matrix(-10.722))
 }) 
 
 test_that("model is GPCM, 3 dimensions, 4 categories, estimator is EAP, deriv is true", {
-  theta <- c(0, 0, 0)
+  theta <- c(-2, 1, .4)
   model <- "GPCM"
   administered <- 1:50
   number_dimensions <- 3
@@ -158,21 +158,21 @@ test_that("model is GPCM, 3 dimensions, 4 categories, estimator is EAP, deriv is
   
   probabilities <- probabilities_and_likelihoods(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, output = "both")
   
-  expect_equal(round(probabilities$probabilities[1,], 3), c(.013, .231, .567, .188))
-  expect_equal(round(probabilities$probabilities[40,], 3), c(.041, .384, .491, .085))
+  expect_equal(round(probabilities$probabilities[1,], 3), c(.033, .352, .514, .102))
+  expect_equal(round(probabilities$probabilities[40,], 3), c(.037, .370, .501, .092))
   expect_equal(dim(probabilities$probabilities), c(50, 4))
   expect_equal(dim(probabilities$likelihoods), c(1, 1))
   expect_equal(dim(attr(probabilities$likelihoods, "gradient")), c(1, 3))
   expect_equal(dim(attr(probabilities$likelihoods, "hessian")), c(3, 3))
   expect_equal(length(probabilities), 2)
   
-  expect_equal(round(probabilities$likelihoods[1], 3), -101.251)
-  expect_equal(round(attr(probabilities$likelihoods, "gradient"), 3), matrix(c(-20.747, -21.071, -21.938), ncol = 3))
-  expect_equal(round(attr(probabilities$likelihoods, "hessian")[1,], 3), c(-20.739, -19.060, -19.274))
+  expect_equal(round(probabilities$likelihoods[1], 3), -95.13)
+  expect_equal(round(attr(probabilities$likelihoods, "gradient"), 3), matrix(c(-7.362, -9.081, -10.707), ncol = 3))
+  expect_equal(round(attr(probabilities$likelihoods, "hessian")[1,], 3), c(-18.092, -17.893, -17.446))
 }) 
 
 test_that("model is GPCM, 3 dimensions, varying number of categories, estimator is EAP, deriv is true", {
-  theta <- c(0, 0, 0)
+  theta <- c(.7, -1.2, 2)
   model <- "GPCM"
   administered <- 1:50
   number_dimensions <- 3
@@ -192,23 +192,23 @@ test_that("model is GPCM, 3 dimensions, varying number of categories, estimator 
   
   probabilities <- probabilities_and_likelihoods(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, output = "both")
   
-  expect_equal(round(probabilities$probabilities[1,], 3), c(.009, .171, .819, NA,  NA))
-  expect_equal(round(probabilities$probabilities[40,], 3), c(.020, .191, .476, .313,  NA))
-  expect_equal(round(probabilities$probabilities[50,], 3), c(.002, .043, .276, .469, .211))
+  expect_equal(round(probabilities$probabilities[1,], 3), c(.001, .066, .932, NA,  NA))
+  expect_equal(round(probabilities$probabilities[40,], 3), c(.002, .047, .332, .620,  NA))
+  expect_equal(round(probabilities$probabilities[50,], 3), c(.000, .003, .066, .374, .556))
   expect_equal(dim(probabilities$probabilities), c(50, 5))
   expect_equal(dim(probabilities$likelihoods), c(1, 1))
   expect_equal(dim(attr(probabilities$likelihoods, "gradient")), c(1, 3))
   expect_equal(dim(attr(probabilities$likelihoods, "hessian")), c(3, 3))
   expect_equal(length(probabilities), 2)
   
-  expect_equal(round(probabilities$likelihoods[1], 3), -123.724)
-  expect_equal(round(attr(probabilities$likelihoods, "gradient"), 3), matrix(c(-39.473, -39.336, -40.724), ncol = 3))
-  expect_equal(round(attr(probabilities$likelihoods, "hessian")[1,], 3), c(-27.036, -23.968, -25.218))
+  expect_equal(round(probabilities$likelihoods[1], 3), -220.168)
+  expect_equal(round(attr(probabilities$likelihoods, "gradient"), 3), matrix(c(-76.815, -72.813, -80.579), ncol = 3))
+  expect_equal(round(attr(probabilities$likelihoods, "hessian")[1,], 3), c(-20.055, -18.670, -19.012))
 }) 
 
 
 test_that("model is GPCM, 3 dimensions, 4 categories, estimator is ML, deriv is true", {
-  theta <- c(0, 0, 0)
+  theta <- c(-1, 2, 3)
   model <- "GPCM"
   administered <- 1:50
   number_dimensions <- 3
@@ -226,8 +226,8 @@ test_that("model is GPCM, 3 dimensions, 4 categories, estimator is ML, deriv is 
   
   probabilities <- probabilities_and_likelihoods(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, output = "both")
   
-  expect_equal(round(probabilities$probabilities[1,], 3), c(.013, .231, .567, .188))
-  expect_equal(round(probabilities$probabilities[40,], 3), c(.041, .384, .491, .085))
+  expect_equal(round(probabilities$probabilities[1,], 3), c(.000, .025, .342, .633))
+  expect_equal(round(probabilities$probabilities[40,], 3), c(.000, .005, .178, .816))
   expect_equal(dim(probabilities$probabilities), c(50, 4))
   expect_equal(length(probabilities$likelihoods), 1)
   expect_equal(dim(attr(probabilities$likelihoods, "gradient")), c(1, 3))
@@ -236,7 +236,7 @@ test_that("model is GPCM, 3 dimensions, 4 categories, estimator is ML, deriv is 
 }) 
 
 test_that("model is GPCM, 3 dimensions, 4 categories, estimator is EAP, deriv is false", {
-  theta <- c(0, 0, 0)
+  theta <- c(-2, -1.3, -2.1)
   model <- "GPCM"
   administered <- 1:50
   number_dimensions <- 3
@@ -254,15 +254,15 @@ test_that("model is GPCM, 3 dimensions, 4 categories, estimator is EAP, deriv is
   
   probabilities <- probabilities_and_likelihoods(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, output = "probs")
   
-  expect_equal(round(probabilities[1,], 3), c(.013, .231, .567, .188))
-  expect_equal(round(probabilities[40,], 3), c(.041, .384, .491, .085))
+  expect_equal(round(probabilities[1,], 3), c(.380, .521, .097, .002))
+  expect_equal(round(probabilities[40,], 3), c(.775, .217, .008, .000))
   expect_equal(dim(probabilities), c(50, 4))
 }) 
 
 context("GRM model")
 
 test_that("model is GRM, 3 dimensions, 4 categories, estimator is EAP, deriv is true", {
-  theta <- c(0, 0, 0)
+  theta <- c(.2, 2, 2.5)
   model <- "GRM"
   administered <- 1:50
   number_dimensions <- 3
@@ -280,21 +280,21 @@ test_that("model is GRM, 3 dimensions, 4 categories, estimator is EAP, deriv is 
   
   probabilities <- probabilities_and_likelihoods(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, output = "both")
   
-  expect_equal(round(probabilities$probabilities[1,], 3), c(.052, .237, .461, .249))
-  expect_equal(round(probabilities$probabilities[40,], 3), c(.096, .343, .414, .148))
+  expect_equal(round(probabilities$probabilities[1,], 3), c(.007, .042, .226, .725))
+  expect_equal(round(probabilities$probabilities[40,], 3), c(.003, .021, .130, .846))
   expect_equal(dim(probabilities$probabilities), c(50, 4))
   expect_equal(dim(probabilities$likelihoods), c(1, 1))
   expect_equal(dim(attr(probabilities$likelihoods, "gradient")), c(1, 3))
   expect_equal(dim(attr(probabilities$likelihoods, "hessian")), c(3, 3))
   expect_equal(length(probabilities), 2)
   
-  expect_equal(round(probabilities$likelihoods[1], 3), -84.705)
-  expect_equal(round(attr(probabilities$likelihoods, "gradient"), 3), matrix(c(-11.185, -10.826, -11.789), ncol = 3))
-  expect_equal(round(attr(probabilities$likelihoods, "hessian")[1,], 3), c(-10.704, -10.179, -10.393))
+  expect_equal(round(probabilities$likelihoods[1], 3), -218.875)
+  expect_equal(round(attr(probabilities$likelihoods, "gradient"), 3), matrix(c(-43.099, -38.046, -40.282), ncol = 3))
+  expect_equal(round(attr(probabilities$likelihoods, "hessian")[1,], 3), c(-1.864, -3.085, -2.745))
 }) 
 
 test_that("model is GRM, 3 dimensions, 4 categories, estimator is ML, deriv is true", {
-  theta <- c(0, 0, 0)
+  theta <- c(2, 1, 3)
   model <- "GRM"
   administered <- 1:50
   number_dimensions <- 3
@@ -311,8 +311,8 @@ test_that("model is GRM, 3 dimensions, 4 categories, estimator is ML, deriv is t
   
   probabilities <- probabilities_and_likelihoods(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, output = "both")
   
-  expect_equal(round(probabilities$probabilities[1,], 3), c(.052, .237, .461, .249))
-  expect_equal(round(probabilities$probabilities[40,], 3), c(.096, .343, .414, .148))
+  expect_equal(round(probabilities$probabilities[1,], 3), c(.003, .018, .113, .867))
+  expect_equal(round(probabilities$probabilities[40,], 3), c(.002, .012, .081, .905))
   expect_equal(dim(probabilities$probabilities), c(50, 4))
   expect_equal(length(probabilities$likelihoods), 1)
   expect_equal(dim(attr(probabilities$likelihoods, "gradient")), c(1, 3))
@@ -321,7 +321,7 @@ test_that("model is GRM, 3 dimensions, 4 categories, estimator is ML, deriv is t
 }) 
 
 test_that("model is GRM, 3 dimensions, varying number of categories, estimator is EAP, deriv is true", {
-  theta <- c(0, 0, 0)
+  theta <- c(-2, -1.1, 2)
   model <- "GRM"
   administered <- 1:50
   number_dimensions <- 3
@@ -341,22 +341,22 @@ test_that("model is GRM, 3 dimensions, varying number of categories, estimator i
   
   probabilities <- probabilities_and_likelihoods(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, output = "both")
   
-  expect_equal(round(probabilities$probabilities[1,], 3), c(.052, .000, .989, NA, NA))
-  expect_equal(round(probabilities$probabilities[40,], 3), c(.096, .000, .020, .939, NA))
-  expect_equal(round(probabilities$probabilities[50,], 3), c(.039, .000, .000, .005, .992))
+  expect_equal(round(probabilities$probabilities[1,], 3), c(.069, .000, .985, NA, NA))
+  expect_equal(round(probabilities$probabilities[40,], 3), c(.113, .000, .023, .928, NA))
+  expect_equal(round(probabilities$probabilities[50,], 3), c(.261, .000, .000, .036, .933))
   expect_equal(dim(probabilities$probabilities), c(50, 5))
   expect_equal(dim(probabilities$likelihoods), c(1, 1))
   expect_equal(dim(attr(probabilities$likelihoods, "gradient")), c(1, 3))
   expect_equal(dim(attr(probabilities$likelihoods, "hessian")), c(3, 3))
   expect_equal(length(probabilities), 2)
   
-  expect_equal(round(probabilities$likelihoods[1], 3), -427.562)
-  expect_equal(round(attr(probabilities$likelihoods, "gradient"), 3), matrix(c(-26.099, -25.069, -25.222), ncol = 3))
-  expect_equal(round(attr(probabilities$likelihoods, "hessian")[1,], 3), c(-7.377, -7.087, -8.154))
+  expect_equal(round(probabilities$likelihoods[1], 3), -410.588)
+  expect_equal(round(attr(probabilities$likelihoods, "gradient"), 3), matrix(c(-15.236, -15.309, -13.404), ncol = 3))
+  expect_equal(round(attr(probabilities$likelihoods, "hessian")[1,], 3), c(-11.989, -11.077, -11.042))
 }) 
 
 test_that("model is GRM, 3 dimensions, 4 categories, estimator is EAP, deriv is false", {
-  theta <- c(0, 0, 0)
+  theta <- c(.1, 2.2, 1.8)
   model <- "GRM"
   administered <- 1:50
   number_dimensions <- 3
@@ -373,15 +373,15 @@ test_that("model is GRM, 3 dimensions, 4 categories, estimator is EAP, deriv is 
   
   probabilities <- probabilities_and_likelihoods(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, output = "probs")
   
-  expect_equal(round(probabilities[1,], 3), c(.052, .237, .461, .249))
-  expect_equal(round(probabilities[40,], 3), c(.096, .343, .414, .148))
+  expect_equal(round(probabilities[1,], 3), c(.010, .059, .285, .646))
+  expect_equal(round(probabilities[40,], 3), c(.005, .032, .185, .778))
   expect_equal(dim(probabilities), c(50, 4))
 }) 
 
 context("SM model")
 
 test_that("model is SM, 3 dimensions, 4 categories, estimator is EAP, deriv is true", {
-  theta <- c(0, 0, 0)
+  theta <- c(2, 1.2, -2.3)
   model <- "SM"
   administered <- 1:50
   number_dimensions <- 3
@@ -398,21 +398,21 @@ test_that("model is SM, 3 dimensions, 4 categories, estimator is EAP, deriv is t
   
   probabilities <- probabilities_and_likelihoods(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, output = "both")
   
-  expect_equal(round(probabilities$probabilities[1,], 3), c(.052, .275, .505, .168))
-  expect_equal(round(probabilities$probabilities[40,], 3), c(.096, .397, .433, .075))
+  expect_equal(round(probabilities$probabilities[1,], 3), c(.045, .245, .510, .201))
+  expect_equal(round(probabilities$probabilities[40,], 3), c(.094, .393, .436, .077))
   expect_equal(dim(probabilities$probabilities), c(50, 4))
   expect_equal(dim(probabilities$likelihoods), c(1, 1))
   expect_equal(dim(attr(probabilities$likelihoods, "gradient")), c(1, 3))
   expect_equal(dim(attr(probabilities$likelihoods, "hessian")), c(3, 3))
   expect_equal(length(probabilities), 2)
   
-  expect_equal(round(probabilities$likelihoods[1], 3), -84.888)
-  expect_equal(round(attr(probabilities$likelihoods, "gradient"), 3), matrix(c(-7.74, -7.28, -8.297), ncol = 3))
-  expect_equal(round(attr(probabilities$likelihoods, "hessian")[1,], 3), c(-12.905, -12.184, -12.239))
+  expect_equal(round(probabilities$likelihoods[1], 3), -93.544)
+  expect_equal(round(attr(probabilities$likelihoods, "gradient"), 3), matrix(c(-16.913, -14.88, -18.074), ncol = 3))
+  expect_equal(round(attr(probabilities$likelihoods, "hessian")[1,], 3), c(-9.229, -9.184, -10.147))
 }) 
 
 test_that("model is SM, 3 dimensions, varying number of categories, estimator is EAP, deriv is true", {
-  theta <- c(0, 0, 0)
+  theta <- c(1.8, -1.4, 2.5)
   model <- "SM"
   administered <- 1:50
   number_dimensions <- 3
@@ -432,22 +432,22 @@ test_that("model is SM, 3 dimensions, varying number of categories, estimator is
   
   probabilities <- probabilities_and_likelihoods(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, output = "both")
   
-  expect_equal(round(probabilities$probabilities[1,], 3), c(.052, .011, .937, NA, NA))
-  expect_equal(round(probabilities$probabilities[40,], 3), c(.096, .037, .053, .815, NA))
-  expect_equal(round(probabilities$probabilities[50,], 3), c(.039, 0.006, 0.004, 0.008, 0.943))
+  expect_equal(round(probabilities$probabilities[1,], 3), c(.009, .002, .990, NA, NA))
+  expect_equal(round(probabilities$probabilities[40,], 3), c(.017, .007, .010, .966, NA))
+  expect_equal(round(probabilities$probabilities[50,], 3), c(.003, .000, .000, .001, .996))
   expect_equal(dim(probabilities$probabilities), c(50, 5))
   expect_equal(dim(probabilities$likelihoods), c(1, 1))
   expect_equal(dim(attr(probabilities$likelihoods, "gradient")), c(1, 3))
   expect_equal(dim(attr(probabilities$likelihoods, "hessian")), c(3, 3))
   expect_equal(length(probabilities), 2)
   
-  expect_equal(round(probabilities$likelihoods[1], 3), -133.928)
-  expect_equal(round(attr(probabilities$likelihoods, "gradient"), 3), matrix(c(-22.653, -21.523, -21.73), ncol = 3))
-  expect_equal(round(attr(probabilities$likelihoods, "hessian")[1,], 3), c(-9.577, -9.092, -10.001))
+  expect_equal(round(probabilities$likelihoods[1], 3), -223.143)
+  expect_equal(round(attr(probabilities$likelihoods, "gradient"), 3), matrix(c(-36.651, -40.743, -36.271), ncol = 3))
+  expect_equal(round(attr(probabilities$likelihoods, "hessian")[1,], 3), c(-1.398, -3.486, -2.896))
 }) 
 
 test_that("model is SM, 3 dimensions, 4 categories, estimator is ML, deriv is true", {
-  theta <- c(0, 0, 0)
+  theta <- c(-2.4, 1, 2.7)
   model <- "SM"
   administered <- 1:50
   number_dimensions <- 3
@@ -464,8 +464,8 @@ test_that("model is SM, 3 dimensions, 4 categories, estimator is ML, deriv is tr
   
   probabilities <- probabilities_and_likelihoods(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, output = "both")
   
-  expect_equal(round(probabilities$probabilities[1,], 3), c(.052, .275, .505, .168))
-  expect_equal(round(probabilities$probabilities[40,], 3), c(.096, .397, .433, .075))
+  expect_equal(round(probabilities$probabilities[1,], 3), c(.032, .189, .500, .278))
+  expect_equal(round(probabilities$probabilities[40,], 3), c(.020, .127, .447, .407))
   expect_equal(dim(probabilities$probabilities), c(50, 4))
   expect_equal(length(probabilities$likelihoods), 1)
   expect_equal(dim(attr(probabilities$likelihoods, "gradient")), c(1, 3))
@@ -474,7 +474,7 @@ test_that("model is SM, 3 dimensions, 4 categories, estimator is ML, deriv is tr
 }) 
 
 test_that("model is SM, 3 dimensions, 4 categories, estimator is ML, deriv is false", {
-  theta <- c(0, 0, 0)
+  theta <- c(.2, -.4, 1.1)
   model <- "SM"
   administered <- 1:50
   number_dimensions <- 3
@@ -491,7 +491,7 @@ test_that("model is SM, 3 dimensions, 4 categories, estimator is ML, deriv is fa
   
   probabilities <- probabilities_and_likelihoods(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, output = "probs")
     
-  expect_equal(round(probabilities[1,], 3), c(.052, .275, .505, .168))
-  expect_equal(round(probabilities[40,], 3), c(.096, .397, .433, .075))
+  expect_equal(round(probabilities[1,], 3), c(.030, .181, .496, .293))
+  expect_equal(round(probabilities[40,], 3), c(.051, .271, .506, .171))
   expect_equal(dim(probabilities), c(50, 4))
 }) 
