@@ -11,7 +11,7 @@ test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing
   new_response <- NULL
   attr(initital_estimate, 'variance') <- initial_variance
   next_item_and_test_outcome <- shadowcat_roqua(new_response, estimate = initital_estimate , responses = numeric(0), administered = numeric(0), available = 1:nrow(beta), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta, item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml)
-  
+
   while (next_item_and_test_outcome$index_new_item != "stop_test") {
     new_response <- simulate_answer(true_theta, model, ncol(alpha), estimator, alpha, beta, guessing, ncol(beta), next_item_and_test_outcome$index_new_item)
     next_item_and_test_outcome <- shadowcat_roqua(new_response, next_item_and_test_outcome$estimate, next_item_and_test_outcome$responses, next_item_and_test_outcome$administered, next_item_and_test_outcome$available, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior,  guessing, eta, item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml)  
@@ -126,6 +126,37 @@ test_that("true theta is 2, estimator is ML", {
   expect_equal(length(test_outcome$administered), 100)
 })
 
+test_that("true theta is 2, estimator is EAP", {
+  # define true theta for simulation of responses
+  true_theta <- 2
+  
+  # define item characteristics
+  number_items <- 100
+  number_dimensions <- 1
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  
+  guessing <- NULL
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'random', n = 3)
+  stop_test <- list(n = 100)
+  estimator <- 'EAP'
+  information_summary <- 'PD'
+  item_selection <- 'MI'
+  
+  prior <- diag(number_dimensions) * 5
+  
+  test_outcome <- with_random_seed(2, test_shadowcat_roqua)(true_theta, prior = prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, initial_variance = diag(1))
+  
+  expect_equal(as.vector(round(test_outcome$estimate, 3)), 2.913)
+  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), .002)
+  expect_equal(test_outcome$available, numeric(0))
+  expect_equal(length(test_outcome$administered), 100)
+})
+
 
 test_that("true theta is 1, 0, 2, estimator is MAP", {  
   # define true theta for simulation of responses
@@ -191,6 +222,41 @@ test_that("true theta is 1, 0, 2, estimator is ML", {
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.755, -.070, 2.221))
   expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.063, .000, .000))
+  expect_equal(length(test_outcome$administered), 300)
+})
+
+test_that("true theta is 1, 0, 2, estimator is EAP", {  
+  # define true theta for simulation of responses
+  true_theta <- c(1, 0, 2)
+  
+  # define item characteristics
+  number_items <- 300
+  number_dimensions <- 3
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  
+  guessing <- NULL
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  alpha[1:100,2:3] <- 0
+  alpha[101:200,c(1,3)] <- 0
+  alpha[201:300,1:2] <- 0
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'random', n = 3)
+  stop_test <- list(n = 300)
+  estimator <- 'MAP'
+  information_summary <- 'PD'
+  item_selection <- 'MI'
+  
+  # define prior covariance matrix
+  prior <- diag(number_dimensions) * 20
+  
+  test_outcome <- with_random_seed(3, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  
+  expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.841, -.123, 1.947))
+  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.064, .000, .000))
   expect_equal(length(test_outcome$administered), 300)
 })
 
@@ -431,50 +497,6 @@ test_that("stop rule is variance", {
   expect_equal(test_outcome$administered, c(10, 30, 48, 7, 24, 5, 17))
   expect_equal(test_outcome$responses, c(1, 0, 1, 1, 0, 1, 0))
 })
-
-# gives error at this point due to bug in updated MultiGHQuad package
-if (FALSE) {  
-  context("problematic")
-  
-  # This one gets stuck after the 248st administered item. At that point, the estimated variance matrix becomes
-  # non-invertible (has an eigenvalue of -5.530436e-18). See the problems in the trans function within init.quad().
-  # Also, when running the 248 items, the resulting estimates are poor. 
-  # After update of MultiGHQuad the EAP estimate gives an error
-  test_that("true theta is 2, -2, 3", {
-    # define true theta for simulation of responses
-    true_theta <- c(2, -2, 3)
-    
-    # define item characteristics
-    number_items <- 300
-    number_dimensions <- 3
-    number_answer_categories <- 2 # can only be 2 for 3PLM model
-    
-    guessing <- NULL
-    alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
-    alpha[1:100,2:3] <- 0
-    alpha[101:200,c(1,3)] <- 0
-    alpha[201:300,1:2] <- 0
-    beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
-    
-    eta <- NULL # only relevant for GPCM model
-    
-    model <- '3PLM'
-    start_items <- list(type = 'random', n = 3)
-    stop_test <- list(n = 248)
-    estimator <- 'EAP'
-    information_summary <- 'PD'
-    item_selection <- 'MI'
-    
-    # define prior covariance matrix
-    prior <- diag(number_dimensions) * 5
-    
-    test_outcome <- with_random_seed(2, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
-    
-    expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.984, .171, -.055))
-    expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.238, .259, .122))
-    expect_equal(length(test_outcome$administered), 248)
-  })
-}
 
 # these simulations take a long time to run, if (FALSE) ensures that they are not each time the tests are run
 if (FALSE) {
