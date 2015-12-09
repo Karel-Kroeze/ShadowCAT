@@ -49,7 +49,7 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
                         conditions[condition, "true_theta"]
                         else
                           true_theta_vec )
-                      alpha_beta <- createTestBank(model = as.character(conditions[condition, "model"]), K = conditions[condition, "number_items"], Q = number_dimensions, M = conditions[condition, "number_answer_categories"] - 1, between = items_load_one_dimension, run_initItembank = FALSE)
+                      alpha_beta <- simulate_testbank(model = as.character(conditions[condition, "model"]), K = conditions[condition, "number_items"], Q = number_dimensions, M = conditions[condition, "number_answer_categories"] - 1, between = items_load_one_dimension, return_testbank_properties = FALSE)
                       estimate_theta <- tryCatch(test_shadowcat_roqua(true_theta, prior, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml),
                                                  error = function(e) e)
                       
@@ -502,9 +502,8 @@ test_that("stop rule is variance", {
 if (FALSE) {
   context("simulations")
   
-  test_that("one dimension, no constraints on item selection, one iteration per condition", {
-    # EAP estimation does not work
-    # PEKL information summaries give errors because it also makes use of EAP estimation
+  test_that("test EAP", {
+    # PEKL should be added yet
     iterations_per_unique_condition <- 1
     true_theta_vec <- c(-2, 1)
     number_items_vec <- c(15, 50)
@@ -513,17 +512,48 @@ if (FALSE) {
     lowerbound <- -3
     upperbound <- 3
     
+    start_items <- list(type = 'random', n = 3)
+    variance_target <- .1^2
+    model_vec <- c("3PLM","GRM","GPCM","SM")
+    estimator_vec <- "EAP"
+    information_summary_vec <- c("D", "PD", "A", "PA") 
+    item_selection <- 'MI'
+    prior <- diag(number_dimensions) * 100
+    
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound, prior = prior)
+    
+    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
+    
+    estimates_and_conditions <- cbind(t(estimates_and_variance), conditions[, c("true_theta", "number_items", "number_answer_categories", "model", "estimator", "information_summary")])
+    
+    average_per_true_theta_and_number_items <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"], estimates_and_conditions[,"number_items"]), "mean")
+    sd_per_true_theta_and_number_items <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"], estimates_and_conditions[,"number_items"]), "sd") 
+    
+    expect_equal(round(average_per_true_theta_and_number_items[,"x"], 3), c(-1.693, 1.918, -1.490, 1.974))
+    expect_equal(round(sd_per_true_theta_and_number_items[,"x"], 3), c(.841, .673, .614, .417))
+    expect_equal(round(fivenum(estimates_and_conditions[,"variance_estimate"]), 3), c(.000, .006, .010, .045, .228))    
+  })
+  
+  test_that("one dimension, no constraints on item selection, one iteration per condition, ML and MAP", {
+    # PEKL should be added yet 
+    iterations_per_unique_condition <- 1
+    true_theta_vec <- c(-2, 1)
+    number_items_vec <- c(15, 50)
+    number_answer_categories_vec <- c(2, 4)
+    number_dimensions <- 1
+    lowerbound <- -3
+    upperbound <- 3
     
     start_items <- list(type = 'random', n = 3)
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
-    estimator_vec <- c("ML", "MAP") # AEP
-    information_summary_vec <- c("D", "PD", "A", "PA") # PEKL 
+    estimator_vec <- c("ML", "MAP")
+    information_summary_vec <- c("D", "PD", "A", "PA") 
     item_selection <- 'MI'
     
     estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound)
     
-    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec, iterations_per_unique_condition, number_dimensions)
+    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
     
     estimates_and_conditions <- cbind(t(estimates_and_variance), conditions[, c("true_theta", "number_items", "number_answer_categories", "model", "estimator", "information_summary")])
     
