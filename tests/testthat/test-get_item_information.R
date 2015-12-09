@@ -352,31 +352,32 @@ test_that("First 10 item administered, information_summary is PA (posterior trac
   expect_equal(round(item_information[c(1:5, 35:38,47:50)], 3), c(.000, .000, .000, .000, .000, 8.095, 8.246, 7.936, 8.087, 8.513, 8.124, 8.230, 8.005))
 })
 
-# context("information_summary is PEKL")
-# 
-# test_that("First 1 item administered, information_summary is PEKL, one dimension, with padding", {
-#   model <- "3PLM"
-#   number_items <- 50
-#   number_dimensions <- 1
-#   estimator <- "MAP"
-#   estimate <- 0
-#   information_summary <- "PEKL"
-#   responses <- 1
-#   available <- 2:50
-#   administered <- 1
-#   prior <- .4
-#   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
-#   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
-#   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
-#   lower_bound <- -3
-#   upper_bound <- 3
-#   number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
-#   
-#   item_information <- get_item_information(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE)
-#   
-#   expect_equal(length(item_information), 50)
-#   expect_equal(round(item_information[c(1:5, 35:38,47:50)], 3), c(.000, .049, .019, .010, .075, .025, .034, .023, .013, .063, .017, .026, .034))
-# })
+context("information_summary is PEKL")
+
+test_that("First 1 item administered, information_summary is PEKL, one dimension, with padding", {
+  model <- "3PLM"
+  number_items <- 50
+  number_dimensions <- 1
+  estimator <- "MAP"
+  estimate <- 0
+  attr(estimate, 'variance') <- .4
+  information_summary <- "PEKL"
+  responses <- 1
+  available <- 2:50
+  administered <- 1
+  prior <- .4
+  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  lower_bound <- -3
+  upper_bound <- 3
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
+  
+  item_information <- get_item_information(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE)
+  
+  expect_equal(length(item_information), 50)
+  expect_equal(round(item_information[c(1:5, 35:38,47:50)], 3), c(.000, .049, .019, .010, .075, .025, .034, .023, .013, .063, .017, .026, .034))
+})
 
 
 context("many item characteristics equal")
@@ -406,31 +407,31 @@ test_that("information_summary is PD", {
   expect_equal(round(item_information[c(1:5, 35:38,47:50)], 3), c(.000, .000, 2.917, 2.917, 2.917, 2.880, 2.880, 2.880, 2.880, 2.880, 2.880, 2.880, 2.880))
 })
 
-# test_that("information_summary is PEKL", {
-#   item_information <- objective(initiated_test, initiated_person, pad = TRUE)
-#   model <- "3PLM"
-#   number_items <- 50
-#   number_dimensions <- 1
-#   estimator <- "MAP"
-#   estimate <- 0
-#   information_summary <- "PEKL"
-#   responses <- c(1, 0)
-#   available <- 3:50
-#   administered <- 1:2
-#   prior <- .4
-#   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
-#   alpha <- matrix(rep(1, number_items * number_dimensions), nrow = number_items, ncol = number_dimensions)
-#   beta <- matrix(rep(1, number_items), nrow = number_items, ncol = 1)
-#   
-#   lower_bound <- -3
-#   upper_bound <- 3
-#   number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
-#   
-#   item_information <- get_item_information(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE)
-#   
-#   expect_equal(length(item_information), 50)
-#   expect_equal(round(item_information[c(1:5, 35:38,47:50)], 3), c(.000, .000, .009, .009, .009, .007, .007, .007, .007, .007, .007, .007, .007))
-# })
+test_that("information_summary is PEKL", {
+  model <- "3PLM"
+  number_items <- 50
+  number_dimensions <- 1
+  estimator <- "MAP"
+  estimate <- 0
+  attr(estimate, 'variance') <- .4
+  information_summary <- "PEKL"
+  responses <- c(1, 0)
+  available <- 3:50
+  administered <- 1:2
+  prior <- .4
+  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
+  alpha <- matrix(rep(1, number_items * number_dimensions), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(rep(1, number_items), nrow = number_items, ncol = 1)
+  
+  lower_bound <- -3
+  upper_bound <- 3
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
+  
+  item_information <- get_item_information(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE)
+  
+  expect_equal(length(item_information), 50)
+  expect_equal(round(item_information[c(1:5, 35:38,47:50)], 3), c(.000, .000, .009, .009, .009, .007, .007, .007, .007, .007, .007, .007, .007))
+})
 
 context("invalid input")
 

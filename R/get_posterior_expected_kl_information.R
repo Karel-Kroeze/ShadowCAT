@@ -39,13 +39,10 @@ get_posterior_expected_kl_information <- function(estimate, model, responses, ad
   
   get_theta_estimate <- function() {
     # collect EAP estimate
-    if (estimator == "EAP") {
+    if (estimator == "EAP")
       estimate
-    } 
-    else {
-      estimator <- "EAP"
-      estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
-    }
+    else
+      estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator = "EAP", alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
   }
   
   #' Kullback Leibler Divergence for given items and pairs of thetas x posterior density.
