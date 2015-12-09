@@ -10,7 +10,7 @@ estimate_latent_trait(estimate, responses, prior, model, administered,
   prior_var_safe_ml = NULL)
 }
 \arguments{
-\item{estimate}{theta estimate}
+\item{estimate}{theta estimate with 'variance' as an attribute}
 
 \item{responses}{person responses}
 

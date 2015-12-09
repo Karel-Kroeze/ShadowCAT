@@ -63,7 +63,7 @@
 #' estimator <- "EAP"
 #' # system.time(estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL))
 #' 
-#' @param estimate theta estimate
+#' @param estimate theta estimate with 'variance' as an attribute
 #' @param responses person responses
 #' @param prior prior covariance matrix for theta
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively
