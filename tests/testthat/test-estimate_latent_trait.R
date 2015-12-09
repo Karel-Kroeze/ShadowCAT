@@ -142,7 +142,7 @@ test_that("estimator is MAP, 3 dimensions, varying number of categories", {
 
 
 # context("estimator is EAP")
-
+# 
 # test_that("estimator is EAP, 1 dimension, 2 categories", {
 #   model <- "3PLM"
 #   number_items <- 50
@@ -178,6 +178,26 @@ test_that("estimator is MAP, 3 dimensions, varying number of categories", {
 #   attr(initiated_person$estimate, "variance") <- 1.2
 #   
 #   estimated_latent_trait <- estimate(initiated_person, initiated_test)
+#   
+#   number_dimensions <- 3
+#   estimate <- rep(.3, number_dimensions)
+#   model <- "3PLM"
+#   number_items <- 50
+#   responses <- rep(c(1, 0), 17)
+#   administered <- c(6:20, 31:49)
+#   estimator <- "EAP"
+#   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+#   eta <- NULL
+#   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+#   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+#   number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
+#   lower_bound <- rep(-3, number_dimensions)
+#   upper_bound <- rep(3, number_dimensions)
+#   prior <- diag(number_dimensions)
+#   prior_var_safe_ml <- NULL
+#   
+#   estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+#   
 #   
 #   expect_equal(round(as.vector(estimated_latent_trait$estimate), 3), -.569)
 #   expect_equal(round(attr(estimated_latent_trait$estimate, "variance"), 3), matrix(.160))
