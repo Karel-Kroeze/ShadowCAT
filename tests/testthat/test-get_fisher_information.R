@@ -9,7 +9,7 @@ context("3PLM model")
 
 test_that("model is 3PLM, 1 dimensions, 2 categories", {
   number_dimensions <- 1
-  theta <- 0
+  theta <- .5
   model <- "3PLM"
   estimator <- "ML"
   number_items <- 50
@@ -21,12 +21,12 @@ test_that("model is 3PLM, 1 dimensions, 2 categories", {
   fisher_information <- get_fisher_information(theta, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
   
   expect_equal(dim(fisher_information), c(1, 1, 50))
-  expect_equal(round(fisher_information[,,c(1, 3, 40, 50)], 3), c(.055, .085, .039, .182))
+  expect_equal(round(fisher_information[,,c(1, 3, 40, 50)], 3), c(.051, .129, .039, .117))
 })
 
 test_that("model is 3PLM, 3 dimensions, 2 categories", {
   number_dimensions <- 3
-  theta <- rep(0, number_dimensions)
+  theta <- c(2.1, -1.1, .7 )
   model <- "3PLM"
   estimator <- "ML"
   number_items <- 50
@@ -39,15 +39,15 @@ test_that("model is 3PLM, 3 dimensions, 2 categories", {
   
   expect_equal(dim(fisher_information), c(3, 3, 50))
   expect_equal(dim(fisher_information[,,2]), c(3, 3))
-  expect_equal(round(fisher_information[,1,2], 3), c(.244, .068, .174))
-  expect_equal(round(fisher_information[,2,3], 3), c(0, 0, 0))
-  expect_equal(round(fisher_information[1,,24], 3), c(0.000, 0.000, 0.001))
-  expect_equal(round(fisher_information[3,,40], 3), c(.063, .093, .102))
+  expect_equal(round(fisher_information[,1,2], 3), c(.104, .029, .074))
+  expect_equal(round(fisher_information[,2,3], 3), c(.004, .004, .006))
+  expect_equal(round(fisher_information[1,,24], 3), c(.002, .002, .006))
+  expect_equal(round(fisher_information[3,,40], 3), c(.049, .072, .079))
 })
 
 test_that("model is GPCM, 1 dimensions, 2 categories", {
   number_dimensions <- 1
-  theta <- 0
+  theta <- -.7
   model <- "GPCM"
   estimator <- "MAP"
   number_items <- 50
@@ -59,13 +59,13 @@ test_that("model is GPCM, 1 dimensions, 2 categories", {
   fisher_information <- get_fisher_information(theta, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
   
   expect_equal(dim(fisher_information), c(1, 1, 50))
-  expect_equal(round(fisher_information[,,c(1,3, 40, 50)], 3), c(.056, .138, .057, .288))
+  expect_equal(round(fisher_information[,,c(1,3, 40, 50)], 3), c(.063, .082, .058, .395))
 }) 
 
 
 test_that("model is GPCM, 3 dimensions, varying numbers of categories", {
   number_dimensions <- 3
-  theta <- rep(0, number_dimensions)
+  theta <- c(2, 1, -2)
   model <- "GPCM"
   estimator <- "ML"
   number_items <- 50
@@ -83,17 +83,17 @@ test_that("model is GPCM, 3 dimensions, varying numbers of categories", {
   
   expect_equal(dim(fisher_information), c(3, 3, 50))
   expect_equal(dim(fisher_information[,,2]), c(3, 3))
-  expect_equal(round(fisher_information[,1,2], 3), c(.952, .265, .678))
-  expect_equal(round(fisher_information[,2,3], 3), c(.643, .729, .962))
-  expect_equal(round(fisher_information[1,,24], 3), c(.116, .126, .330))
-  expect_equal(round(fisher_information[3,,40], 3), c(.216, .319, .351))
+  expect_equal(round(fisher_information[,1,2], 3), c(.910, .253, .647))
+  expect_equal(round(fisher_information[,2,3], 3), c(.673, .763, 1.006))
+  expect_equal(round(fisher_information[1,,24], 3), c(.054, .058, .153))
+  expect_equal(round(fisher_information[3,,40], 3), c(.209, .307, .338))
 })
 
 context("SM model")
 
 test_that("model is SM 1 dimensions, 2 categories", {
   number_dimensions <- 1
-  theta <- 0
+  theta <- .9
   model <- "SM"
   estimator <- "ML"
   number_items <- 50
@@ -105,12 +105,12 @@ test_that("model is SM 1 dimensions, 2 categories", {
   fisher_information <- get_fisher_information(theta, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
   
   expect_equal(dim(fisher_information), c(1, 1, 50))
-  expect_equal(round(fisher_information[,,c(1,3, 40, 50)], 3), c(.056, .138, .057, .288))
+  expect_equal(round(fisher_information[,,c(1,3, 40, 50)], 3), c(.044, .217, .052, .129))
 })
 
 test_that("model is SM, 3 dimensions, 3 dimensions, 4 categories", {
   number_dimensions <- 3
-  theta <- rep(0, number_dimensions)
+  theta <- c(-.5, .6, 1.2)
   model <- "SM"
   estimator <- "ML"
   number_items <- 50
@@ -125,15 +125,15 @@ test_that("model is SM, 3 dimensions, 3 dimensions, 4 categories", {
   
   expect_equal(dim(fisher_information), c(3, 3, 50))
   expect_equal(dim(fisher_information[,,2]), c(3, 3))
-  expect_equal(round(fisher_information[,1,2], 3), c(.482, .134, .343))
-  expect_equal(round(fisher_information[,2,3], 3), c(.362, .410, .541))
-  expect_equal(round(fisher_information[1,,24], 3), c(.071, .077, .201))
-  expect_equal(round(fisher_information[3,,40], 3), c(.140, .206, .227))
+  expect_equal(round(fisher_information[,1,2], 3), c(.404, .112, .288))
+  expect_equal(round(fisher_information[,2,3], 3), c(.444, .504, .664))
+  expect_equal(round(fisher_information[1,,24], 3), c(.084, .091, .237))
+  expect_equal(round(fisher_information[3,,40], 3), c(.137, .202, .222))
 })
 
 test_that("model is SM, 3 dimensions, varying number of categories", {
   number_dimensions <- 3
-  theta <- rep(0, number_dimensions)
+  theta <- c(-2, 1, 2)
   model <- "SM"
   estimator <- "ML"
   number_items <- 50
@@ -151,17 +151,17 @@ test_that("model is SM, 3 dimensions, varying number of categories", {
   
   expect_equal(dim(fisher_information), c(3, 3, 50))
   expect_equal(dim(fisher_information[,,2]), c(3, 3))
-  expect_equal(round(fisher_information[,1,2], 3), c(.589, .164, .419))
-  expect_equal(round(fisher_information[,2,3], 3), c(.435, .494, .651))
-  expect_equal(round(fisher_information[1,,24], 3), c(.079, .085, .223))
-  expect_equal(round(fisher_information[3,,40], 3), c(.064, .095, 0.104))
+  expect_equal(round(fisher_information[,1,2], 3), c(.172, .048, .123))
+  expect_equal(round(fisher_information[,2,3], 3), c(.558, .633, .834))
+  expect_equal(round(fisher_information[1,,24], 3), c(.057, .062, .162))
+  expect_equal(round(fisher_information[3,,40], 3), c(.022, .032, .035))
 })
 
 context("GRM model")
 
 test_that("model is GRM 1 dimensions, 2 categories", {
   number_dimensions <- 1
-  theta <- 0
+  theta <- -2
   model <- "GRM"
   estimator <- "ML"
   number_items <- 50
@@ -173,12 +173,12 @@ test_that("model is GRM 1 dimensions, 2 categories", {
   fisher_information <- get_fisher_information(theta, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
   
   expect_equal(dim(fisher_information), c(1, 1, 50))
-  expect_equal(round(fisher_information[,,c(1,3, 40, 50)], 3), c(.056, .138, .057, .288))
+  expect_equal(round(fisher_information[,,c(1,3, 40, 50)], 3), c(.068, .026, .051, .265))
 })
 
 test_that("model is GRM, 3 dimensions, varying numbers of categories", {
   number_dimensions <- 3
-  theta <- rep(0, 3)
+  theta <- c(2, .1, -1)
   model <- "GRM"
   estimator <- "ML"
   number_items <- 50
@@ -193,15 +193,15 @@ test_that("model is GRM, 3 dimensions, varying numbers of categories", {
   
   expect_equal(dim(fisher_information), c(3, 3, 50))
   expect_equal(dim(fisher_information[,,2]), c(3, 3))
-  expect_equal(round(fisher_information[,1,2], 3), c(.385, .107, .274))
-  expect_equal(round(fisher_information[,2,3], 3), c(.315, .357, .470))
-  expect_equal(round(fisher_information[1,,24], 3), c(.063, .069, .180))
-  expect_equal(round(fisher_information[3,,40], 3), c(.110, .163, .179))
+  expect_equal(round(fisher_information[,1,2], 3), c(.326, .091, .232))
+  expect_equal(round(fisher_information[,2,3], 3), c(.281, .318, .420))
+  expect_equal(round(fisher_information[1,,24], 3), c(.043, .046, .121))
+  expect_equal(round(fisher_information[3,,40], 3), c(.110, .162, .178))
 })
 
 test_that("model is GRM, 3 dimensions, varying number of categories", {
   number_dimensions <- 3
-  theta <- rep(0, number_dimensions)
+  theta <- c(1.4, -1.4, 2.1)
   model <- "GRM"
   estimator <- "ML"
   number_items <- 50
@@ -217,12 +217,11 @@ test_that("model is GRM, 3 dimensions, varying number of categories", {
   
   fisher_information <- get_fisher_information(theta, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
   
-  
   expect_equal(dim(fisher_information), c(3, 3, 50))
   expect_equal(dim(fisher_information[,,2]), c(3, 3))
-  expect_equal(round(fisher_information[,1,2], 3), c(.382, .106, .272))
-  expect_equal(round(fisher_information[,2,3], 3), c(.330, .374, .493))
-  expect_equal(round(fisher_information[1,,24], 3), c(.066, .071, .186))
-  expect_equal(round(fisher_information[3,,40], 3), c(.024, .035, .039))
+  expect_equal(round(fisher_information[,1,2], 3), c(.335, .093, .238))
+  expect_equal(round(fisher_information[,2,3], 3), c(.307, .349, .459))
+  expect_equal(round(fisher_information[1,,24], 3), c(.061, .066, .173))
+  expect_equal(round(fisher_information[3,,40], 3), c(.008, .012, .013))
 })
 
