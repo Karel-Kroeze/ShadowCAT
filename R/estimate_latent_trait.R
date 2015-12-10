@@ -36,15 +36,15 @@
 #' lower_bound <- rep(-3, number_dimensions)
 #' upper_bound <- rep(3, number_dimensions)
 #' prior <- diag(1)
-#' prior_var_safe_ml <- NULL
+#' prior_var_safe_nlm <- diag(number_dimensions)
 #'
 #' # obtain estimates
 #' estimator <- "ML"
-#' ML <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+#' ML <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
 #' estimator <- "MAP"
-#' MAP <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+#' MAP <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
 #' estimator <- "EAP"
-#' EAP <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+#' EAP <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
 #' ML; MAP; EAP
 #' 
 #' # access variance
@@ -59,9 +59,9 @@
 #' prior <- diag(number_dimensions) 
 #' 
 #' estimator <- "MAP"
-#' system.time(estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL))
+#' system.time(estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = diag(number_dimensions)))
 #' estimator <- "EAP"
-#' system.time(estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL))
+#' system.time(estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound))
 #' 
 #' @param estimate theta estimate with 'variance' as an attribute
 #' @param responses person responses
@@ -76,11 +76,11 @@
 #' @param number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix
 #' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
-#' @param prior_var_safe_ml if not NULL, EAP estimate with prior variance equal to prior_var_safe_ml is computed instead of ML, if ML estimate fails
+#' @param prior_var_safe_nlm if not NULL, EAP estimate with prior variance equal to prior_var_safe_ml is computed instead of ML/MAP, if ML/MAP estimate fails
 #' @return updated estimate with variance as attribute
 #' @importFrom MultiGHQuad init.quad eval.quad
 #' @export
-estimate_latent_trait <- function(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL) {
+estimate_latent_trait <- function(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL) {
   result <- function() {
     updated_estimate <- get_updated_estimate_and_variance_attribute(estimator)
     trim_estimate(updated_estimate)
@@ -90,8 +90,8 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
     # for now, simple nlm (TODO: look at optim, and possible reintroducing pure N-R).
     # We want a maximum, but nlm produces minima -> reverse function call.
     estimate <- tryCatch(nlm(f = probabilities_and_likelihoods, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate,
-                         error = function(e) { safe_ml() },
-                         warning = function(w) { safe_ml() })
+                         error = function(e) { switch_to_eap_if_requested() },
+                         warning = function(w) { switch_to_eap_if_requested() })
     # TODO: We should really store info somewhere so we don't have to redo this (when using get_fisher_information based selection criteria).
     fisher_information_items <- get_fisher_information(estimate, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
     fisher_information_test_so_far <- apply(fisher_information_items[,,administered, drop = FALSE], c(1, 2), sum)
@@ -102,8 +102,9 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
   
   get_updated_estimate_and_variance_map <- function() {
     # note that prior is applied in probabilities_and_likelihoods (incorrectly it seems, but still).
-    estimate <- nlm(f = probabilities_and_likelihoods, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate
-    
+    estimate <- tryCatch(nlm(f = probabilities_and_likelihoods, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate,
+                         error = function(e) { switch_to_eap_if_requested() },
+                         warning = function(w) { switch_to_eap_if_requested() })
     fisher_information_items <- get_fisher_information(estimate, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
     fisher_information_test_so_far <- apply(fisher_information_items[,,administered, drop = FALSE], c(1, 2), sum) +
       solve(prior)
@@ -139,12 +140,10 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
     estimate
   }
   
-  safe_ml <- function() {
-    if (!is.null(prior_var_safe_ml)) {
-      estimator <- "EAP"
-      prior <- diag(number_dimensions) * prior_var_safe_ml
-      get_updated_estimate_and_variance_eap(prior)
-    }
+  switch_to_eap_if_requested <- function() {
+    if (is.null(prior_var_safe_nlm))
+      stop("something went wrong with nlm maximization and prior_var_safe_ml was set to NULL")
+    get_updated_estimate_and_variance_eap(prior = diag(number_dimensions) * prior_var_safe_nlm)
   }
   
   result()

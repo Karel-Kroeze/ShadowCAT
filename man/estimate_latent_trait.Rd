@@ -7,7 +7,7 @@
 estimate_latent_trait(estimate, responses, prior, model, administered,
   number_dimensions, estimator, alpha, beta, guessing,
   number_itemsteps_per_item, lower_bound, upper_bound,
-  prior_var_safe_ml = NULL)
+  prior_var_safe_nlm = NULL)
 }
 \arguments{
 \item{estimate}{theta estimate with 'variance' as an attribute}
@@ -36,7 +36,7 @@ estimate_latent_trait(estimate, responses, prior, model, administered,
 
 \item{upper_bound}{vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values}
 
-\item{prior_var_safe_ml}{if not NULL, EAP estimate with prior variance equal to prior_var_safe_ml is computed instead of ML, if ML estimate fails}
+\item{prior_var_safe_nlm}{if not NULL, EAP estimate with prior variance equal to prior_var_safe_ml is computed instead of ML/MAP, if ML/MAP estimate fails}
 }
 \value{
 updated estimate with variance as attribute
@@ -86,15 +86,15 @@ number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
 lower_bound <- rep(-3, number_dimensions)
 upper_bound <- rep(3, number_dimensions)
 prior <- diag(1)
-prior_var_safe_ml <- NULL
+prior_var_safe_nlm <- diag(number_dimensions)
 
 # obtain estimates
 estimator <- "ML"
-ML <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+ML <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
 estimator <- "MAP"
-MAP <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+MAP <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
 estimator <- "EAP"
-EAP <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+EAP <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
 ML; MAP; EAP
 
 # access variance
@@ -109,9 +109,9 @@ upper_bound <- rep(3, number_dimensions)
 prior <- diag(number_dimensions) 
 
 estimator <- "MAP"
-system.time(estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL))
+system.time(estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = diag(number_dimensions)))
 estimator <- "EAP"
-system.time(estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL))
+system.time(estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound))
 
 }
 

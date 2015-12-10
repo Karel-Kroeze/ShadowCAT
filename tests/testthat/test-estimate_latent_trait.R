@@ -23,9 +23,9 @@ test_that("estimator is ML, 1 dimension, 2 categories", {
   lower_bound <- rep(-3, number_dimensions)
   upper_bound <- rep(3, number_dimensions)
   prior <- NULL
-  prior_var_safe_ml <- NULL
+  prior_var_safe_nlm <- NULL
   
-  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL)
     
   expect_equal(round(as.vector(estimated_latent_trait), 3), -.799)
   expect_equal(round(attr(estimated_latent_trait, "variance"), 3), matrix(.271))
@@ -52,9 +52,9 @@ test_that("estimator is ML, 3 dimensions, varying number of categories", {
   lower_bound <- rep(-3, number_dimensions)
   upper_bound <- rep(3, number_dimensions)
   prior <- NULL
-  prior_var_safe_ml <- NULL
+  prior_var_safe_nlm <- NULL
   
-  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL)
   
   expect_equal(round(as.vector(estimated_latent_trait), 3), c(-2.03, -.408, -.449))
   expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[1,], c(.749, -.495, -.181))
@@ -77,9 +77,9 @@ test_that("test safe_ml", {
   lower_bound <- rep(-3, number_dimensions)
   upper_bound <- rep(3, number_dimensions)
   prior <- NULL
-  prior_var_safe_ml <- 1
+  prior_var_safe_nlm <- 1
   
-  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml)
+  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
   
   expect_equal(round(as.vector(estimated_latent_trait), 3), c(-.636, .808, 2.586))  
   expect_equal(round(as.vector(attr(estimated_latent_trait, 'variance')), 3)[1:3], c(13.630, -8.731, -4.954))
@@ -102,9 +102,9 @@ test_that("estimator is MAP, 1 dimension, 2 categories", {
   lower_bound <- rep(-3, number_dimensions)
   upper_bound <- rep(3, number_dimensions)
   prior <- 1
-  prior_var_safe_ml <- NULL
+  prior_var_safe_nlm <- NULL
   
-  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL)
   
   expect_equal(round(as.vector(estimated_latent_trait), 3), -.642)
   expect_equal(round(attr(estimated_latent_trait, "variance"), 3), matrix(.201))
@@ -131,9 +131,9 @@ test_that("estimator is MAP, 3 dimensions, varying number of categories", {
   lower_bound <- rep(-3, number_dimensions)
   upper_bound <- rep(3, number_dimensions)
   prior <- diag(number_dimensions)
-  prior_var_safe_ml <- NULL
+  prior_var_safe_nlm <- NULL
   
-  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL)
   
   expect_equal(round(as.vector(estimated_latent_trait), 3), c(-1.447, -.714, -.614))
   expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[1,], c(.343, -.191, -.117))
@@ -159,9 +159,9 @@ test_that("estimator is EAP, 1 dimension, 2 categories", {
   lower_bound <- rep(-3, number_dimensions)
   upper_bound <- rep(3, number_dimensions)
   prior <- diag(number_dimensions)
-  prior_var_safe_ml <- NULL
+  prior_var_safe_nlm <- NULL
   
-  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL)
   
   expect_equal(round(as.vector(estimated_latent_trait), 3), -.551)
   expect_equal(round(attr(estimated_latent_trait, "variance"), 3), matrix(.164))
@@ -188,9 +188,9 @@ test_that("estimator is EAP, 3 dimensions, varying number of categories", {
   lower_bound <- rep(-3, number_dimensions)
   upper_bound <- rep(3, number_dimensions)
   prior <- diag(c(1, 1.3, 1))
-  prior_var_safe_ml <- NULL
+  prior_var_safe_nlm <- NULL
   
-  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL)
   
   expect_equal(round(as.vector(estimated_latent_trait), 3), c(-.691, -1.143, -1.108))
   expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[1,], c(.041, -.018, -.014))
@@ -218,9 +218,9 @@ test_that("estimator is EAP, 3 dimensions, varying number of categories, 1 admin
   lower_bound <- rep(-3, number_dimensions)
   upper_bound <- rep(3, number_dimensions)
   prior <- diag(c(1, 1.3, 1))
-  prior_var_safe_ml <- NULL
+  prior_var_safe_nlm <- NULL
   
-  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL)
   
   expect_equal(round(as.vector(estimated_latent_trait), 3), c(-.197, -.152, -.205))
   expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[1,], c(.494, -.011, -.015))
@@ -248,9 +248,9 @@ test_that("estimates exceed boundaries", {
   lower_bound <- rep(-3, number_dimensions)
   upper_bound <- rep(3, number_dimensions)
   prior <- diag(c(5,5,5))
-  prior_var_safe_ml <- NULL
+  prior_var_safe_nlm <- NULL
   
-  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL)
+  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL)
   
   expect_equal(round(as.vector(estimated_latent_trait), 3), c(-3, 3, 3))
   expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[1,], c(0, 0, 0))

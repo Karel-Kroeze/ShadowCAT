@@ -45,7 +45,7 @@
 #' See constraints_lp_format() for details
 #' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values 
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
-#' @param prior_var_safe_ml if not NULL, MAP estimate with prior variance equal to prior_var_safe_ml is computed instead of ML, if ML estimate fails
+#' @param prior_var_safe_ml if not NULL, EAP estimate with prior variance equal to prior_var_safe_ml is computed instead of ML/MAP, if ML/MAP estimate fails
 #' @return a list containing the index of the next item to be administered given a new response (or "stop_test"), 
 #' updated estimate of theta, responses, indeces of administered items, and indeces of available items
 #' @export
