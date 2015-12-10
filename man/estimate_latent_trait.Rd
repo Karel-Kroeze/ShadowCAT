@@ -36,10 +36,10 @@ estimate_latent_trait(estimate, responses, prior, model, administered,
 
 \item{upper_bound}{vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values}
 
-\item{prior_var_safe_ml}{if not NULL, MAP estimate with prior variance equal to prior_var_safe_ml is computed instead of ML, if ML estimate fails}
+\item{prior_var_safe_ml}{if not NULL, EAP estimate with prior variance equal to prior_var_safe_ml is computed instead of ML, if ML estimate fails}
 }
 \value{
-person object, amended with the new estimate.
+updated estimate with variance as attribute
 }
 \description{
 ML, MAP and EAP estimates.

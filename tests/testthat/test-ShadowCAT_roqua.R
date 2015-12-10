@@ -565,7 +565,7 @@ if (FALSE) {
     average_per_true_theta_and_number_items <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"], estimates_and_conditions[,"number_items"]), "mean")
     sd_per_true_theta_and_number_items <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"], estimates_and_conditions[,"number_items"]), "sd") 
     
-    expect_equal(round(average_per_true_theta_and_number_items[,"x"], 3), c(-1.884, 1.145, -2.046, .996)
+    expect_equal(round(average_per_true_theta_and_number_items[,"x"], 3), c(-1.884, 1.145, -2.046, .996))
     expect_equal(round(sd_per_true_theta_and_number_items[,"x"], 3), c(.606, .696, .378, .386))
     expect_equal(fivenum(round(estimates_and_conditions[,"variance_estimate"], 3)), c(.049, .122, .212, .383, 4.547))
   })
@@ -596,7 +596,7 @@ if (FALSE) {
     average_per_true_theta_and_number_items <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"], estimates_and_conditions[,"number_items"]), "mean")
     sd_per_true_theta_and_number_items <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"], estimates_and_conditions[,"number_items"]), "sd") 
     
-    expect_equal(round(average_per_true_theta_and_number_items[,"x"], 3), c(-1.920, 1.231, -2.074, 1.012)
+    expect_equal(round(average_per_true_theta_and_number_items[,"x"], 3), c(-1.920, 1.231, -2.074, 1.012))
                  expect_equal(round(sd_per_true_theta_and_number_items[,"x"], 3), c(.606, .705, .404, .401))
                  expect_equal(fivenum(round(estimates_and_conditions[,"variance_estimate"], 3)), c(4.9e-02, 1.24e-01, 2.085e-01, 3.915e-01, 111839145))
                  # This extremely large variance corresponds to an estimated theta at the lowerbound of -3; setting the lowerbound to -5 does not help

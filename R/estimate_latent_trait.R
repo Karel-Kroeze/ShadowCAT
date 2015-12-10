@@ -112,7 +112,7 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
     estimate
   }
   
-  get_updated_estimate_and_variance_eap <- function(estimator, prior) {
+  get_updated_estimate_and_variance_eap <- function(prior) {
     # Multidimensional Gauss-Hermite Quadrature
     # TODO: prior mean is currently fixed at zero, update when/if possible.
     # TODO: allow setting ip through internals argument(s)
@@ -121,14 +121,14 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
                                         prior = list(mu = rep(0, number_dimensions), Sigma = prior),
                                         adapt = adapt,
                                         ip = switch(number_dimensions, 50, 15, 6, 4, 3))
-    eval.quad(FUN = probabilities_and_likelihoods, X = Q_dim_grid_quad_points, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, output = "likelihoods")
+    eval.quad(FUN = probabilities_and_likelihoods, X = Q_dim_grid_quad_points, responses, model, administered, number_dimensions, estimator = "EAP", alpha, beta, guessing, prior, output = "likelihoods")
   }
   
   get_updated_estimate_and_variance_attribute <- function(estimator) {
     switch(estimator,
            ML = get_updated_estimate_and_variance_ml(),
            MAP = get_updated_estimate_and_variance_map(),
-           EAP = get_updated_estimate_and_variance_eap(estimator, prior))
+           EAP = get_updated_estimate_and_variance_eap(prior))
   }
   
   trim_estimate <- function(estimate) {
@@ -143,7 +143,7 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
     if (!is.null(prior_var_safe_ml)) {
       estimator <- "EAP"
       prior <- diag(number_dimensions) * prior_var_safe_ml
-      get_updated_estimate_and_variance_eap(estimator, prior)
+      get_updated_estimate_and_variance_eap(prior)
     }
   }
   
