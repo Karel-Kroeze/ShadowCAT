@@ -604,8 +604,7 @@ if (FALSE) {
   
   
   test_that("one dimension, estimates ML and MAP, information summary D, PD, A, and PA, no constraints on item selection, 100 iterations per condition", {
-    # EAP estimation does not work
-    # PEKL information summaries give errors because it also makes use of EAP estimation
+    # EAP and PEKL not added yet
     iterations_per_unique_condition <- 100
     true_theta_vec <- c(-2, 1)
     number_items_vec <- c(50, 100)
@@ -644,13 +643,11 @@ if (FALSE) {
     
     # five number summary of reported sd of the theta estimate within each condition where max number of items is 50 and 100, respectively
     expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 50), "variance_estimate"])), 3), c(.188, .283, .351, .420, 1.300))
-    expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 100), "variance_estimate"])), 3), c(.142, .200, .249, .298, .569))
-    
+    expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 100), "variance_estimate"])), 3), c(.142, .200, .249, .298, .569))  
   })
   
   test_that("three dimensions, estimates ML and MAP, information summary D, PD, A, and PA, no constraints on item selection, 100 iterations per condition", {
-    # EAP estimation does not work
-    # PEKL information summaries give errors because it also makes use of EAP estimation
+    # EAP and PEKL not added yet
     iterations_per_unique_condition <- 100 
     true_theta_vec <- c(-2, 1, 2)
     number_items_vec <- c(300)
@@ -716,9 +713,8 @@ if (FALSE) {
   })
   
   test_that("test prior_var_safe_ml is 100", {
-    # EAP estimation does not work
-    # PEKL information summaries give errors because it also makes use of EAP estimation
-    # ML estimate gives error here
+    # run again with new safe_ml code in estimate_latent_trait()
+    # run ML only
     iterations_per_unique_condition <- 100
     true_theta_vec <- c(-2, 1, 2)
     number_items_vec <- c(300)
@@ -728,8 +724,8 @@ if (FALSE) {
     start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
-    estimator_vec <- c("ML", "MAP") # AEP
-    information_summary_vec <- c("D", "PD", "A", "PA") # PEKL 
+    estimator_vec <- c("ML", "MAP")
+    information_summary_vec <- c("D", "PD", "A", "PA")
     item_selection <- 'MI'
     
     estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, prior_var_safe_ml = 100)
@@ -775,11 +771,8 @@ if (FALSE) {
     expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "ML"), "x"], rep(0, 32))
   })
   
-  
   test_that("items load on all dimensions prior_var_safe_ml is 100", {
-    # find out where the occasional errors come from when estimator is ML
-    # EAP estimation does not work
-    # PEKL information summaries give errors because it also makes use of EAP estimation
+    # run again with new safe_ml code in estimate_latent_trait()
     iterations_per_unique_condition <- 100 
     true_theta_vec <- c(2, -1, -2)
     number_items_vec <- c(300)
@@ -846,9 +839,7 @@ if (FALSE) {
   })
   
   test_that("items load on all dimensions prior_var_safe_ml is 1", {
-    # find out where the occasional errors come from when estimator is ML
-    # EAP estimation does not work
-    # PEKL information summaries give errors because it also makes use of EAP estimation
+    # run again with new safe_ml code in estimate_latent_trait()
     iterations_per_unique_condition <- 100 
     true_theta_vec <- c(2, -1, -2)
     number_items_vec <- c(300)
@@ -916,9 +907,7 @@ if (FALSE) {
   
   
   test_that("simulate with constraints, max_n 130", {
-    # EAP estimation does not work
-    # PEKL information summaries give errors because it also makes use of EAP estimation
-    # ML estimate gives error here
+    # run again with new safe_ml code in estimate_latent_trait()
     iterations_per_unique_condition <- 100
     true_theta_vec <- c(-2, 1, 2)
     number_items_vec <- 300 # can only have length one here (with item characteristics) and should be divisible by 3, to keep things simple
@@ -1002,9 +991,7 @@ if (FALSE) {
   })
   
   test_that("simulate with constraints, max_n 260", {
-    # EAP estimation does not work
-    # PEKL information summaries give errors because it also makes use of EAP estimation
-    # ML estimate gives error here
+    # run again with new safe_ml code in estimate_latent_trait
     iterations_per_unique_condition <- 100
     true_theta_vec <- c(-2, 1, 2)
     number_items_vec <- 300 # can only have length one here (with item characteristics) and should be divisible by 3, to keep things simple
@@ -1057,9 +1044,7 @@ if (FALSE) {
   })
   
   test_that("MAP with informative prior", {
-    # EAP estimation does not work
-    # PEKL information summaries give errors because it also makes use of EAP estimation
-    # ML estimate gives error here
+    # run again with PEKL
     iterations_per_unique_condition <- 100
     true_theta_vec <- c(-2, 1, 2)
     number_items_vec <- c(300)

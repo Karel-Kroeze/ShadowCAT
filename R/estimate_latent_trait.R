@@ -76,8 +76,8 @@
 #' @param number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix
 #' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
-#' @param prior_var_safe_ml if not NULL, MAP estimate with prior variance equal to prior_var_safe_ml is computed instead of ML, if ML estimate fails
-#' @return person object, amended with the new estimate.
+#' @param prior_var_safe_ml if not NULL, EAP estimate with prior variance equal to prior_var_safe_ml is computed instead of ML, if ML estimate fails
+#' @return updated estimate with variance as attribute
 #' @importFrom MultiGHQuad init.quad eval.quad
 #' @export
 estimate_latent_trait <- function(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml = NULL) {
@@ -87,38 +87,16 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
   }
   
   get_updated_estimate_and_variance_ml <- function() {
-    if (is.null(prior_var_safe_ml))
-      get_updated_estimate_and_variance_ml_unsafe()
-    else
-      get_updated_estimate_and_variance_ml_safe()      
-  }
-  
-  get_updated_estimate_and_variance_ml_unsafe <- function() {
     # for now, simple nlm (TODO: look at optim, and possible reintroducing pure N-R).
     # We want a maximum, but nlm produces minima -> reverse function call.
-    estimate <- nlm(f = probabilities_and_likelihoods, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate
-    
+    estimate <- tryCatch(nlm(f = probabilities_and_likelihoods, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate,
+                         error = function(e) { safe_ml() },
+                         warning = function(w) { safe_ml() })
     # TODO: We should really store info somewhere so we don't have to redo this (when using get_fisher_information based selection criteria).
     fisher_information_items <- get_fisher_information(estimate, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
     fisher_information_test_so_far <- apply(fisher_information_items[,,administered, drop = FALSE], c(1, 2), sum)
     
     attr(estimate, "variance") <- solve(fisher_information_test_so_far)
-    estimate
-  }
-  
-  get_updated_estimate_and_variance_ml_safe <- function() { 
-    # suppress warnings and errors and do MAP with flat prior instead
-    estimate <- tryCatch(nlm(f = probabilities_and_likelihoods, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate,
-                         error = function(e) { safe_ml() },
-                         warning = function(w) { safe_ml() })
-    
-    fisher_information_items <- get_fisher_information(estimate, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
-    fisher_information_test_so_far <- apply(fisher_information_items[,,administered, drop = FALSE], c(1, 2), sum)
-    
-    attr(estimate, "variance") <- tryCatch(solve(fisher_information_test_so_far),
-                                           error = function(e) { solve(fisher_information_test_so_far + diag(number_dimensions) * prior_var_safe_ml) },
-                                           warning = function(w) { solve(fisher_information_test_so_far + diag(number_dimensions) * prior_var_safe_ml) })
-    
     estimate
   }
   
@@ -134,7 +112,7 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
     estimate
   }
   
-  get_updated_estimate_and_variance_eap <- function() {
+  get_updated_estimate_and_variance_eap <- function(estimator, prior) {
     # Multidimensional Gauss-Hermite Quadrature
     # TODO: prior mean is currently fixed at zero, update when/if possible.
     # TODO: allow setting ip through internals argument(s)
@@ -150,7 +128,7 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
     switch(estimator,
            ML = get_updated_estimate_and_variance_ml(),
            MAP = get_updated_estimate_and_variance_map(),
-           EAP = get_updated_estimate_and_variance_eap())
+           EAP = get_updated_estimate_and_variance_eap(estimator, prior))
   }
   
   trim_estimate <- function(estimate) {
@@ -162,9 +140,11 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
   }
   
   safe_ml <- function() {
-    estimator <- "MAP"
-    prior <- diag(number_dimensions) * prior_var_safe_ml
-    nlm(f = probabilities_and_likelihoods, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate
+    if (!is.null(prior_var_safe_ml)) {
+      estimator <- "EAP"
+      prior <- diag(number_dimensions) * prior_var_safe_ml
+      get_updated_estimate_and_variance_eap(estimator, prior)
+    }
   }
   
   result()

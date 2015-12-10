@@ -81,7 +81,8 @@ test_that("test safe_ml", {
   
   estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml)
   
-  expect_equal(round(as.vector(estimated_latent_trait), 3), c(.248, .366, .476))  
+  expect_equal(round(as.vector(estimated_latent_trait), 3), c(-.636, .808, 2.586))  
+  expect_equal(round(as.vector(attr(estimated_latent_trait, 'variance')), 3)[1:3], c(13.630, -8.731, -4.954))
 })
 
 context("estimator is MAP")
