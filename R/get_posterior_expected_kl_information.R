@@ -32,9 +32,9 @@ get_posterior_expected_kl_information <- function(estimate, model, responses, ad
     # we'll perform a very basic integration over the theta range
     # expand the grid for multidimensional models (number of calculations will be length(theta_range)**Q, which can still get quite high for high dimensionalities.)
     grid <- expand.grid(rep(list(theta_range), number_dimensions))
-    
+
     # sum over values of the grid
-    rowSums(apply(grid, 1, KLB, theta0 = get_theta_estimate()))
+    row_or_vector_sums(apply(grid, 1, KLB, theta0 = get_theta_estimate()))
   }
   
   get_theta_estimate <- function() {

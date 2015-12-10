@@ -52,7 +52,7 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
                       alpha_beta <- simulate_testbank(model = as.character(conditions[condition, "model"]), K = conditions[condition, "number_items"], Q = number_dimensions, M = conditions[condition, "number_answer_categories"] - 1, between = items_load_one_dimension, return_testbank_properties = FALSE)
                       estimate_theta <- tryCatch(test_shadowcat_roqua(true_theta, prior, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), item_selection, constraints, lowerbound, upperbound, prior_var_safe_ml),
                                                  error = function(e) e)
-                      
+
                       if (return_administered_item_indeces)
                         c("estimated_theta" = estimate_theta$estimate,
                           "variance_estimate" = attr(estimate_theta$estimate, "variance"),
@@ -223,6 +223,13 @@ test_that("true theta is 1, 0, 2, estimator is ML", {
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.755, -.070, 2.221))
   expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.063, .000, .000))
   expect_equal(length(test_outcome$administered), 300)
+  
+  # defining prior has no effect on outcome
+  test_outcome <- with_random_seed(3, test_shadowcat_roqua)(true_theta, prior = diag(number_dimensions) * 2, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, initial_variance = diag(1))
+  
+  expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.755, -.070, 2.221))
+  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.063, .000, .000))
+  expect_equal(length(test_outcome$administered), 300)  
 })
 
 test_that("true theta is 1, 0, 2, estimator is EAP", {  
@@ -502,8 +509,7 @@ test_that("stop rule is variance", {
 if (FALSE) {
   context("simulations")
   
-  test_that("test EAP", {
-    # PEKL should be added yet
+  test_that("one dimension, no constraints on item selection, one iteration per condition, EAP", {
     iterations_per_unique_condition <- 1
     true_theta_vec <- c(-2, 1)
     number_items_vec <- c(15, 50)
@@ -514,9 +520,9 @@ if (FALSE) {
     
     start_items <- list(type = 'random', n = 3)
     variance_target <- .1^2
-    model_vec <- c("3PLM","GRM","GPCM","SM")
+    model_vec <- c("3PLM", "GRM", "GPCM", "SM")
     estimator_vec <- "EAP"
-    information_summary_vec <- c("D", "PD", "A", "PA") 
+    information_summary_vec <- c("D", "PD", "A", "PA", "PEKL") 
     item_selection <- 'MI'
     prior <- diag(number_dimensions) * 100
     
@@ -529,13 +535,12 @@ if (FALSE) {
     average_per_true_theta_and_number_items <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"], estimates_and_conditions[,"number_items"]), "mean")
     sd_per_true_theta_and_number_items <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"], estimates_and_conditions[,"number_items"]), "sd") 
     
-    expect_equal(round(average_per_true_theta_and_number_items[,"x"], 3), c(-1.693, 1.918, -1.490, 1.974))
-    expect_equal(round(sd_per_true_theta_and_number_items[,"x"], 3), c(.841, .673, .614, .417))
-    expect_equal(round(fivenum(estimates_and_conditions[,"variance_estimate"]), 3), c(.000, .006, .010, .045, .228))    
+    expect_equal(round(average_per_true_theta_and_number_items[,"x"], 3), c(-1.668, 1.910, -1.535, 1.917))
+    expect_equal(round(sd_per_true_theta_and_number_items[,"x"], 3), c(.808, .679, .586, .426))
+    expect_equal(round(fivenum(estimates_and_conditions[,"variance_estimate"]), 3), c(.000, .008, .010, .044, .228))    
   })
   
-  test_that("one dimension, no constraints on item selection, one iteration per condition, ML and MAP", {
-    # PEKL should be added yet 
+  test_that("one dimension, no constraints on item selection, one iteration per condition, MAP", {
     iterations_per_unique_condition <- 1
     true_theta_vec <- c(-2, 1)
     number_items_vec <- c(15, 50)
@@ -547,8 +552,8 @@ if (FALSE) {
     start_items <- list(type = 'random', n = 3)
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
-    estimator_vec <- c("ML", "MAP")
-    information_summary_vec <- c("D", "PD", "A", "PA") 
+    estimator_vec <- "MAP"
+    information_summary_vec <- c("D", "PD", "A", "PA", "PEKL") 
     item_selection <- 'MI'
     
     estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound)
@@ -560,12 +565,43 @@ if (FALSE) {
     average_per_true_theta_and_number_items <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"], estimates_and_conditions[,"number_items"]), "mean")
     sd_per_true_theta_and_number_items <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"], estimates_and_conditions[,"number_items"]), "sd") 
     
-    expect_equal(round(average_per_true_theta_and_number_items[,"x"], 3), c(-1.943, 1.157, -2.084, 1.053))
-    expect_equal(round(sd_per_true_theta_and_number_items[,"x"], 3), c(.661, .593, .426, .376))
-    expect_equal(fivenum(round(estimates_and_conditions[,"variance_estimate"], 3)), c(4.4e-02, 1.2e-01, 2.06e-01, 3.76e-01, 138953441))
-    # This extremely large variance corresponds to an estimated theta at the lowerbound of -3; setting the lowerbound to -5 does not help
-    
+    expect_equal(round(average_per_true_theta_and_number_items[,"x"], 3), c(-1.884, 1.145, -2.046, .996)
+    expect_equal(round(sd_per_true_theta_and_number_items[,"x"], 3), c(.606, .696, .378, .386))
+    expect_equal(fivenum(round(estimates_and_conditions[,"variance_estimate"], 3)), c(.049, .122, .212, .383, 4.547))
   })
+  
+  test_that("one dimension, no constraints on item selection, one iteration per condition, MAP", {
+    # ML and PEKL do not go well together; makes sense to me, I think ML should be combined with D or A information summary
+    iterations_per_unique_condition <- 1
+    true_theta_vec <- c(-2, 1)
+    number_items_vec <- c(15, 50)
+    number_answer_categories_vec <- c(2, 4)
+    number_dimensions <- 1
+    lowerbound <- -3
+    upperbound <- 3
+    
+    start_items <- list(type = 'random', n = 3)
+    variance_target <- .1^2
+    model_vec <- c("3PLM","GRM","GPCM","SM")
+    estimator_vec <- "ML"
+    information_summary_vec <- c("D", "PD", "A", "PA") # PEKL
+    item_selection <- 'MI'
+    
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound)
+    
+    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
+    
+    estimates_and_conditions <- cbind(t(estimates_and_variance), conditions[, c("true_theta", "number_items", "number_answer_categories", "model", "estimator", "information_summary")])
+    
+    average_per_true_theta_and_number_items <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"], estimates_and_conditions[,"number_items"]), "mean")
+    sd_per_true_theta_and_number_items <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"], estimates_and_conditions[,"number_items"]), "sd") 
+    
+    expect_equal(round(average_per_true_theta_and_number_items[,"x"], 3), c(-1.920, 1.231, -2.074, 1.012)
+                 expect_equal(round(sd_per_true_theta_and_number_items[,"x"], 3), c(.606, .705, .404, .401))
+                 expect_equal(fivenum(round(estimates_and_conditions[,"variance_estimate"], 3)), c(4.9e-02, 1.24e-01, 2.085e-01, 3.915e-01, 111839145))
+                 # This extremely large variance corresponds to an estimated theta at the lowerbound of -3; setting the lowerbound to -5 does not help
+  })
+  
   
   test_that("one dimension, estimates ML and MAP, information summary D, PD, A, and PA, no constraints on item selection, 100 iterations per condition", {
     # EAP estimation does not work

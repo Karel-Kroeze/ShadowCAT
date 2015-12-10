@@ -99,6 +99,20 @@ row_cumsum <- function(x) {
     r_cumsum
 }
 
+#' get row sums of matrix or sum of vector
+#' 
+#' @param x matrix of which row sums are to be obtained, or vector of which sum is to be obtained
+#' @return row sums or sum of x
+#' @examples all(row_or_vector_sums(matrix(c(1:10), nrow = 2)) == c(25, 30)) || stop("wrong");
+#' row_or_vector_sums(1:5) == 15 || stop("wrong")
+#' @export
+row_or_vector_sums <- function(x) {
+  if (is.matrix(x))
+    rowSums(x)
+  else
+    sum(x)  
+}
+
 #' Recursive list apply, given a bunch of vectors, creates lists of lists with the elements as keys
 #'  and values determined by fn.
 #' @param ... vectors to loop over
