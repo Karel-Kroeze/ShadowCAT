@@ -570,7 +570,7 @@ if (FALSE) {
     expect_equal(fivenum(round(estimates_and_conditions[,"variance_estimate"], 3)), c(.049, .122, .212, .383, 4.547))
   })
   
-  test_that("one dimension, no constraints on item selection, one iteration per condition, MAP", {
+  test_that("one dimension, no constraints on item selection, one iteration per condition, ML", {
     # ML and PEKL do not go well together; makes sense to me, I think ML should be combined with D or A information summary
     iterations_per_unique_condition <- 1
     true_theta_vec <- c(-2, 1)
