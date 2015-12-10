@@ -8,8 +8,9 @@
 #' @param between is TRUE, force items to load on one dimension each
 #' @param return_testbank_properties if FALSE, a list of alpha and beta is returned; if TRUE, substract_testbank_properties() is applied on
 #' the simulated testbank and the result of this is returned 
+#' @param varying_number_item_steps if TRUE, some item steps are set to NA
 #' @return ShadowCAT.itembank
-simulate_testbank <- function(model, K = 50, Q = 1, M = 4, between = FALSE, return_testbank_properties = TRUE){
+simulate_testbank <- function(model, K = 50, Q = 1, M = 4, between = FALSE, return_testbank_properties = TRUE, varying_number_item_steps = FALSE){
   # 3PLM is dichotomous by definition
   if (model == "3PLM") M <- 1 
   
@@ -40,7 +41,13 @@ simulate_testbank <- function(model, K = 50, Q = 1, M = 4, between = FALSE, retu
   
   # reparameterize GPCM
   if (model == "GPCM") 
-    beta <- row_cumsum(beta) 
+    beta <- row_cumsum(beta)
+  
+  if (M > 1 && varying_number_item_steps) {
+    beta[sample(1:K, ceiling(K/10)), ncol(beta)] <- NA
+    if (ncol(beta > 2))
+      beta[sample(1:K, ceiling(K/10)), (ncol(beta) - 1):ncol(beta)] <- NA
+  }
   
   if (return_testbank_properties)
     substract_testbank_properties(model, alpha, beta, silent = TRUE)

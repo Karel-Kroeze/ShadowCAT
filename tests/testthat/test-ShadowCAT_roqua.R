@@ -36,7 +36,7 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
 # if number dimensions is larger than 1, true_theta_vec is interpreted as containing the true thetas for each dimension
 # item_selection can be "MI" or "Shadow". In case of "Shadow", constraints should be defined, and number_items_vec can only have length 1
 # max_n can only have length 1; if null, max_n is set to the number of items (which may differ accross conditions)
-run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints = NULL, guessing = NULL, items_load_one_dimension = TRUE, lowerbound = rep(-3, number_dimensions), upperbound = rep(3, number_dimensions), prior = diag(number_dimensions) * 20, prior_var_safe_nlm = NULL, return_administered_item_indeces = FALSE, max_n = NULL) {                   
+run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints = NULL, guessing = NULL, items_load_one_dimension = TRUE, lowerbound = rep(-3, number_dimensions), upperbound = rep(3, number_dimensions), prior = diag(number_dimensions) * 20, prior_var_safe_nlm = NULL, return_administered_item_indeces = FALSE, max_n = NULL, varying_number_item_steps = FALSE) {                   
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
   
   pbapply::pbsapply(1:nrow(conditions), 
@@ -46,10 +46,10 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
                         max_n <- conditions[condition, "number_items"] 
                       stop_test <- list(target = variance_target, n = max_n)
                       true_theta <- ( if (number_dimensions == 1) 
-                        conditions[condition, "true_theta"]
-                        else
-                          true_theta_vec )
-                      alpha_beta <- simulate_testbank(model = as.character(conditions[condition, "model"]), K = conditions[condition, "number_items"], Q = number_dimensions, M = conditions[condition, "number_answer_categories"] - 1, between = items_load_one_dimension, return_testbank_properties = FALSE)
+                                        conditions[condition, "true_theta"]
+                                      else
+                                        true_theta_vec )
+                      alpha_beta <- simulate_testbank(model = as.character(conditions[condition, "model"]), K = conditions[condition, "number_items"], Q = number_dimensions, M = conditions[condition, "number_answer_categories"] - 1, between = items_load_one_dimension, return_testbank_properties = FALSE, varying_number_item_steps = varying_number_item_steps)
                       estimate_theta <- tryCatch(test_shadowcat_roqua(true_theta, prior, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), item_selection, constraints, lowerbound, upperbound, prior_var_safe_nlm),
                                                  error = function(e) e)
 
