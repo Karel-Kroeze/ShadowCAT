@@ -22,7 +22,7 @@
 #' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
 #' @param pad Should the return vector be padded with zeros for items that have already been administered?
-#' @return vector
+#' @return vector with information for each available item
 #' @export
 get_item_information <- function(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE) {
   fisher_information <- get_fisher_information(estimate, model, number_dimensions, estimator, alpha, beta, guessing,  number_itemsteps_per_item)

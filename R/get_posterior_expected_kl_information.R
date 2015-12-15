@@ -25,7 +25,7 @@
 #' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
 #' @param theta_range Vector of theta values to be evaluated in the numerical integration. Using a sparser range may alleviate stress in higher dimensional tests.
-#' @return Vector with PEKL information for each item.
+#' @return Vector with PEKL information for each yet available item.
 #' @export
 get_posterior_expected_kl_information <- function(estimate, model, responses, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior, number_itemsteps_per_item, lower_bound, upper_bound, theta_range = -3:3) {
   result <- function() {
