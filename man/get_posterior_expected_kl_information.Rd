@@ -40,7 +40,7 @@ get_posterior_expected_kl_information(estimate, model, responses, administered,
 \item{theta_range}{Vector of theta values to be evaluated in the numerical integration. Using a sparser range may alleviate stress in higher dimensional tests.}
 }
 \value{
-Vector with PEKL information for each item.
+Vector with PEKL information for each yet available item.
 }
 \description{
 Kullback-Leibler divergence based on the EAP and ML estimates of ability under the posterior distribution of theta.

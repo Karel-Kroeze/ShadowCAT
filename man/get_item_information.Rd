@@ -50,7 +50,7 @@ get_item_information(information_summary, estimate, model, responses, prior,
 \item{pad}{Should the return vector be padded with zeros for items that have already been administered?}
 }
 \value{
-vector
+vector with information for each available item
 }
 \description{
 Obtain a vector with information for each available item (values of the objective function).

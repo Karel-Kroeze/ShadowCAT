@@ -2,65 +2,79 @@
 #' 
 #' Quick and simple itembanks for testing purposes.
 #' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
-#' @param K number of items
-#' @param Q number of dimensions
-#' @param M number of item steps (number of categories minus 1)
-#' @param between is TRUE, force items to load on one dimension each
+#' @param number_items number of items
+#' @param number_dimensions number of dimensions
+#' @param number_itemsteps number of item steps (number of categories minus 1); forced to 1 if model is 3PLM
+#' @param items_load_one_dimension if TRUE, force items to load on one dimension each
 #' @param return_testbank_properties if FALSE, a list of alpha and beta is returned; if TRUE, substract_testbank_properties() is applied on
 #' the simulated testbank and the result of this is returned 
-#' @param varying_number_item_steps if TRUE, some item steps are set to NA
-#' @return ShadowCAT.itembank
-simulate_testbank <- function(model, K = 50, Q = 1, M = 4, between = FALSE, return_testbank_properties = TRUE, varying_number_item_steps = FALSE){
-  # 3PLM is dichotomous by definition
-  if (model == "3PLM") M <- 1 
+#' @param varying_number_item_steps if TRUE, some item steps are set to NA; in this case number_itemsteps is the maximum number of itemsteps
+#' @return simulated itembank
+simulate_testbank <- function(model, number_items = 50, number_dimensions = 1, number_itemsteps = 4, items_load_one_dimension = FALSE, return_testbank_properties = TRUE, varying_number_item_steps = FALSE){
+  result <- function() {
+    number_items <- get_number_items()
+    number_itemsteps <- get_number_itemsteps()
+    
+    if (return_testbank_properties)
+      substract_testbank_properties(model, alpha, beta, silent = TRUE)
+    else
+      list(alpha = alpha,
+           beta = beta)
+  }
   
-  # make sure the number of items is divisible by the number of dimensions
-  if (between) K <- ceiling(K/Q) * Q 
+  get_number_itemsteps <- function() {
+    if (model == "3PLM") 
+      1
+    else
+      number_itemsteps
+  }
   
-  # set up alpha, very rough uniform from .3 to 1.5
-  alpha <- matrix(runif(K * Q, .3, 1.5), K, Q)
+  get_number_items <- function() {
+    # make sure the number of items is divisible by the number of dimensions
+    ceiling(number_items / number_dimensions) * number_dimensions
+  }
   
-  # if between, force items to load on one dimension each.
-  if (between){
-    set = K / Q
-    for (i in 1:Q){
-      alpha[((i-1)*set+1):(i*set), (1:Q)[-i]] <- 0    
+  get_alpha <- function() {
+    alpha <- matrix(runif(number_items * number_dimensions, .3, 1.5), number_items, number_dimensions)
+    if (items_load_one_dimension) {
+      set <- number_items / number_dimensions
+      for (dimension in 1:number_dimensions)
+        alpha[((dimension - 1) * set + 1):(dimension * set), (1:number_dimensions)[-i]] <- 0
+      alpha
+    }
+    else {
+      alpha
     }
   }
   
-  # spread polytomous items cats -2 to +2.
-  spread <- seq(-2,2,length.out=M)
-  
-  # base loading for items
-  beta <- matrix(rnorm(K), K, 1)
-  
-  # apply spread for polytomous, betas are strictly monotously increasing because the spread is.
-  # apply transposes the matrix...
-  if (M > 1) 
-    beta <- t(apply(beta, 1, function(x) x + spread))
-  
-  # reparameterize GPCM
-  if (model == "GPCM") 
-    beta <- row_cumsum(beta)
-  
-  if (M > 1 && varying_number_item_steps) {
-    beta[sample(1:K, ceiling(K/10)), ncol(beta)] <- NA
-    if (ncol(beta > 2))
-      beta[sample(1:K, ceiling(K/10)), (ncol(beta) - 1):ncol(beta)] <- NA
+  get_beta <- function() {
+    beta_one_itemstep <- matrix(rnorm(number_items), number_items, 1)
+    if (number_itemsteps == 1) {
+      beta_one_itemstep
+    }
+    else {
+      # spread polytomous items cats -2 to +2.
+      spread <- seq(-2, 2, length.out = number_itemsteps)
+      beta_multiple_itemsteps <- ( if (model == "GPCM") 
+                                 row_sumsum(t(apply(beta_one_itemstep, 1, function(x) x + spread))) 
+                                else
+                                  t(apply(beta_one_itemstep, 1, function(x) x + spread)) )
+      if (varying_number_item_steps)
+        induce_varying_number_item_steps(beta_multiple_itemsteps)
+      else
+        beta_multiple_itemsteps
+    }  
   }
   
-  if (return_testbank_properties)
-    substract_testbank_properties(model, alpha, beta, silent = TRUE)
-  else
-    list(alpha = alpha,
-         beta = beta)
+  induce_varying_number_item_steps <- function(beta_multiple_itemsteps) {
+    beta_multiple_itemsteps[sample(1:number_items, ceiling(number_items / 10)), ncol(beta_multiple_itemsteps)] <- NA
+    if (ncol(beta_multiple_itemsteps) > 2)
+      beta_multiple_itemsteps[sample(1:number_items, ceiling(number_items / 10)), (ncol(beta_multiple_itemsteps) - 1):ncol(beta_multiple_itemsteps)] <- NA
+  }
 }
 
 #' Substract extra information about testbank
 #' 
-#' Produce an itembank object from a list of parameters.
-#' 
-#' This is a convenience function to create an itembank object as expected by further ShadowCAT functions.
 #' For all models, alpha is required (but may be set to a 1 vector/matrix for Rasch-type models).
 #' Beta is required for all models, but in the case of GPCM, it will be computed from Eta if Eta is given and Beta omitted.
 #' Guessing is only valid for the 3PLM model, and may safely be omitted (which implies a guessing parameter of 0 on all items).

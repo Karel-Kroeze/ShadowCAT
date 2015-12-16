@@ -49,7 +49,7 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
                                         conditions[condition, "true_theta"]
                                       else
                                         true_theta_vec )
-                      alpha_beta <- simulate_testbank(model = as.character(conditions[condition, "model"]), K = conditions[condition, "number_items"], Q = number_dimensions, M = conditions[condition, "number_answer_categories"] - 1, between = items_load_one_dimension, return_testbank_properties = FALSE, varying_number_item_steps = varying_number_item_steps)
+                      alpha_beta <- simulate_testbank(model = as.character(conditions[condition, "model"]), number_items = conditions[condition, "number_items"], number_dimensions = number_dimensions, number_itemsteps = conditions[condition, "number_answer_categories"] - 1, items_load_one_dimension = items_load_one_dimension, return_testbank_properties = FALSE, varying_number_item_steps = varying_number_item_steps)
                       estimate_theta <- tryCatch(test_shadowcat_roqua(true_theta, prior, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), item_selection, constraints, lowerbound, upperbound, prior_var_safe_nlm),
                                                  error = function(e) e)
 
