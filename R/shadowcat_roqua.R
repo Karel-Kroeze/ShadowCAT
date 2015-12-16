@@ -20,9 +20,10 @@
 #' where n = total number of initial items, indices = vector of initial item indeces, 
 #' nByDimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
 #' @param stop_test rule for when to stop providing new items to patient; should be a list of the form
-#' list(target = ..., n = ...), 
-#' where n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule; n <= 0 never stops for max length), 
-#' target = vector of maximum acceptable variances per dimension; if target = NULL, only n is taken into account
+#' list(target = ..., max_n = ..., min_n = ...), 
+#' where max_n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule; NULL never stops for max length), 
+#' target = vector of maximum acceptable variances per dimension; if target = NULL, only max_n is taken into account,
+#' min_n = minimum test length; NULL means no mimimum test length
 #' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation) or "ML" (maximum likelihood); 
 #' "EAP" (Expected A Posteriori Estimation) is currently not working due to problems with the MultiGHQuad package
 #' @param information_summary called "objective" by Kroeze; how to summarize information; one of
@@ -56,7 +57,7 @@ shadowcat_roqua <- function(new_response, estimate, responses, administered, ava
   number_items <- nrow(beta)
   number_dimensions <- ncol(alpha)
   number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
-  lp_constraints_and_characts <- constraints_lp_format(stop_test$n, number_items, constraints_and_characts$characteristics, constraints_and_characts$constraints)
+  lp_constraints_and_characts <- constraints_lp_format(stop_test$max_n, number_items, constraints_and_characts$characteristics, constraints_and_characts$constraints)
   
   result <- function() {
     if (is.null(new_response)) { # first iteration: no responses given yet
@@ -70,7 +71,7 @@ shadowcat_roqua <- function(new_response, estimate, responses, administered, ava
     
     responses <- c(responses, new_response)
     estimate <- update_person_estimate(estimate, responses, administered, available)
-    continue_test <- !test_must_stop(length(responses), attr(estimate, 'variance'), stop_test$n, stop_test$target)
+    continue_test <- !test_must_stop(length(responses), attr(estimate, 'variance'), stop_test$min_n, stop_test$max_n, stop_test$target)
 
     if (continue_test) {
       index_new_item <- get_next_item(start_items, item_selection, information_summary, lp_constraints_and_characts$lp_constraints, lp_constraints_and_characts$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
@@ -130,6 +131,8 @@ shadowcat_roqua <- function(new_response, estimate, responses, administered, ava
       add_error("beta_and_eta", "objects do not match.")
     if ((estimator != "ML" || information_summary %in% c("PD", "PA")) && is.null(prior))
       add_error("prior", "is missing")
+    if (is.null(stop_test$max_n) && is.null(stop_test$target))
+      add_error("stop_test", "contains no stop rule; at least one of target and n should be defined")
   }
   
   invalid_result <- function() {

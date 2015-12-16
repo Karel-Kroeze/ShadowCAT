@@ -44,7 +44,7 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
                       prior <- prior
                       if (is.null(max_n))
                         max_n <- conditions[condition, "number_items"] 
-                      stop_test <- list(target = variance_target, n = max_n)
+                      stop_test <- list(target = variance_target, max_n = max_n)
                       true_theta <- ( if (number_dimensions == 1) 
                                         conditions[condition, "true_theta"]
                                       else
@@ -81,7 +81,7 @@ test_that("true theta is 2, estimator is MAP", {
   
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
-  stop_test <- list(n = 100)
+  stop_test <- list(max_n = 100)
   estimator <- 'MAP'
   information_summary <- 'PD'
   item_selection <- 'MI'
@@ -113,7 +113,7 @@ test_that("true theta is 2, estimator is ML", {
   
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
-  stop_test <- list(n = 100)
+  stop_test <- list(max_n = 100)
   estimator <- 'ML'
   information_summary <- 'D'
   item_selection <- 'MI'
@@ -142,7 +142,7 @@ test_that("true theta is 2, estimator is EAP", {
   
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
-  stop_test <- list(n = 100)
+  stop_test <- list(max_n = 100)
   estimator <- 'EAP'
   information_summary <- 'PD'
   item_selection <- 'MI'
@@ -178,7 +178,7 @@ test_that("true theta is 1, 0, 2, estimator is MAP", {
   
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
-  stop_test <- list(n = 300)
+  stop_test <- list(max_n = 300)
   estimator <- 'MAP'
   information_summary <- 'PD'
   item_selection <- 'MI'
@@ -213,7 +213,7 @@ test_that("true theta is 1, 0, 2, estimator is ML", {
   
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
-  stop_test <- list(n = 300)
+  stop_test <- list(max_n = 300)
   estimator <- 'ML'
   information_summary <- 'D'
   item_selection <- 'MI'
@@ -252,7 +252,7 @@ test_that("true theta is 1, 0, 2, estimator is EAP", {
   
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
-  stop_test <- list(n = 300)
+  stop_test <- list(max_n = 300)
   estimator <- 'MAP'
   information_summary <- 'PD'
   item_selection <- 'MI'
@@ -285,7 +285,7 @@ test_that("items load on three dimensions", {
   
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
-  stop_test <- list(n = 300)
+  stop_test <- list(max_n = 300)
   estimator <- 'MAP'
   information_summary <- 'PD'
   item_selection <- 'MI'
@@ -320,7 +320,7 @@ test_that("true theta is 2, 2, 2", {
   
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
-  stop_test <- list(n = 300)
+  stop_test <- list(max_n = 300)
   estimator <- 'MAP'
   information_summary <- 'PD'
   item_selection <- 'MI'
@@ -355,7 +355,7 @@ test_that("with constraints max_n 260", {
   
   model <- '3PLM'
   start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
-  stop_test <- list(n = 260)
+  stop_test <- list(max_n = 260)
   estimator <- 'MAP'
   information_summary <- 'PD'
   item_selection <- 'Shadow'  
@@ -406,7 +406,7 @@ test_that("with constraints max_n 130", {
   
   model <- '3PLM'
   start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
-  stop_test <- list(n = 130)
+  stop_test <- list(max_n = 130)
   estimator <- 'MAP'
   information_summary <- 'PD'
   item_selection <- 'Shadow'  
@@ -455,7 +455,7 @@ test_that("stop rule is number of items", {
   
   model <- '3PLM'
   start_items <- list(type = 'random', n = 5)
-  stop_test <- list(n = 10)
+  stop_test <- list(max_n = 10)
   estimator <- 'MAP'
   information_summary <- 'PD'
   item_selection <- 'MI'
@@ -488,7 +488,7 @@ test_that("stop rule is variance", {
   
   model <- '3PLM'
   start_items <- list(type = 'random', n = 5)
-  stop_test <- list(target = .5, n = 50)
+  stop_test <- list(target = .5, max_n = 50)
   estimator <- 'MAP'
   information_summary <- 'PD'
   item_selection <- 'MI'
@@ -504,6 +504,39 @@ test_that("stop rule is variance", {
   expect_equal(test_outcome$administered, c(10, 30, 48, 7, 24, 5, 17))
   expect_equal(test_outcome$responses, c(1, 0, 1, 1, 0, 1, 0))
 })
+
+test_that("stop rule is variance and minimum number of items is taken into account", {
+  # define true theta for simulation of responses
+  true_theta <- 0
+  
+  # define item characteristics
+  number_items <- 50
+  number_dimensions <- 1
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  
+  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'random', n = 5)
+  stop_test <- list(target = .5, max_n = 50, min_n = 10)
+  estimator <- 'MAP'
+  information_summary <- 'PD'
+  item_selection <- 'MI'
+  
+  # define prior covariance matrix
+  prior <- diag(number_dimensions)
+  
+  test_outcome <- with_random_seed(2, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  
+  expect_equal(as.vector(round(test_outcome$estimate, 3)), 0.405)
+  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), .315)
+  expect_equal(test_outcome$administered, c(10, 30, 48, 7, 24, 5, 17, 6, 45, 47))
+  expect_equal(test_outcome$responses, c(1, 0, 1, 1, 0, 1, 0, 1, 0, 1))
+})
+
 
 # these simulations take a long time to run, if (FALSE) ensures that they are not each time the tests are run
 if (FALSE) {

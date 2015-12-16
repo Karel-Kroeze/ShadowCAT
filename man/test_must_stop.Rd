@@ -4,7 +4,7 @@
 \alias{test_must_stop}
 \title{Done}
 \usage{
-test_must_stop(number_responses, variance_current_estimate, max_n,
+test_must_stop(number_responses, variance_current_estimate, min_n, max_n,
   stop_variance_target = NULL)
 }
 \arguments{
@@ -12,7 +12,9 @@ test_must_stop(number_responses, variance_current_estimate, max_n,
 
 \item{variance_current_estimate}{variance(s) of the current estimate(s)}
 
-\item{max_n}{test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule; n <= 0 never stops for max length)}
+\item{min_n}{minimum test length; NULL means no minimum test length}
+
+\item{max_n}{test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule; NULL never stops for max length)}
 
 \item{stop_variance_target}{a vector with the variance target for each dimension; if null, variance is not taken into account}
 }
