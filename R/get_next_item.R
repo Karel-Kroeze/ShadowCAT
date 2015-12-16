@@ -1,6 +1,6 @@
 #' Next item
 #' 
-#' Control function to select the next item, takes account of starting / stopping conditions.
+#' Control function to select the next item, takes account of starting conditions.
 #' 
 #' @param start_items items that are shown to the patient before adaptive proces starts; one of
 #' list(type = 'random', n)

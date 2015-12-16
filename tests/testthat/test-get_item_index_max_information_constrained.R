@@ -54,7 +54,7 @@ test_that("First 4 items administered", {
 })
 
 test_that("7 items administered", {
-  responses = c(1, 0, 1, 0, 1, 0, 1)
+  responses <- c(1, 0, 1, 0, 1, 0, 1)
   available <- c(2, 4, 6, 8, 10, 12, 14:50)
   administered <- c(1, 3, 5, 7, 9, 11, 13)
   
@@ -65,7 +65,7 @@ test_that("7 items administered", {
 })
 
 test_that("First 10 items administered", {
-  responses = rep(1, 10)
+  responses <- rep(1, 10)
   available <- c(11:50)
   administered <- c(1:10)
   
@@ -75,5 +75,15 @@ test_that("First 10 items administered", {
   expect_equal(best_item, 47)
 })
 
+test_that("None administered", {
+  responses <- numeric(0)
+  available <- 1:50
+  administered <- numeric(0)
+  
+  item_information <- get_item_information(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE) 
+  best_item <- get_item_index_max_information_constrained(number_items, administered, available, responses, chars_constraints_lp$lp_constraints, chars_constraints_lp$lp_chars, item_information)
+  
+  expect_equal(best_item, 5)
+})
 
 

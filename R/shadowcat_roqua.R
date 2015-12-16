@@ -19,6 +19,7 @@
 #' list(type = 'randomByDimension', nByDimension, n)
 #' where n = total number of initial items, indices = vector of initial item indeces, 
 #' nByDimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
+#' If n is 0, only n needs to be defined
 #' @param stop_test rule for when to stop providing new items to patient; should be a list of the form
 #' list(target = ..., max_n = ..., min_n = ...), 
 #' where max_n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule; NULL never stops for max length), 
@@ -133,6 +134,8 @@ shadowcat_roqua <- function(new_response, estimate, responses, administered, ava
       add_error("prior", "is missing")
     if (is.null(stop_test$max_n) && is.null(stop_test$target))
       add_error("stop_test", "contains no stop rule; at least one of target and n should be defined")
+    if (start_items$n == 0 && information_summary == "PEKL")
+      add_error("start_items", "requires n > 0 for PEKL information summary")
   }
   
   invalid_result <- function() {
