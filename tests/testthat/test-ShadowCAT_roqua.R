@@ -41,7 +41,6 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
   
   pbapply::pbsapply(1:nrow(conditions), 
                     FUN = function(condition) {
-                      prior <- prior
                       if (is.null(max_n))
                         max_n <- conditions[condition, "number_items"] 
                       stop_test <- list(target = variance_target, max_n = max_n)
