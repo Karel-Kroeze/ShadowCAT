@@ -61,15 +61,6 @@ shadowcat_roqua <- function(new_response, estimate, responses, administered, ava
   lp_constraints_and_characts <- constraints_lp_format(stop_test$max_n, number_items, constraints_and_characts$characteristics, constraints_and_characts$constraints)
   
   result <- function() {
-    if (is.null(new_response)) { # first iteration: no responses given yet
-      index_new_item <- get_next_item(start_items, item_selection, information_summary, lp_constraints_and_characts$lp_constraints, lp_constraints_and_characts$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
-      return(list(index_new_item = index_new_item,
-                  estimate = estimate,
-                  responses = responses,
-                  administered = index_new_item,
-                  available = available[-which(available %in% index_new_item)]))
-    }     
-    
     responses <- c(responses, new_response)
     estimate <- update_person_estimate(estimate, responses, administered, available)
     continue_test <- !test_must_stop(length(responses), attr(estimate, 'variance'), stop_test$min_n, stop_test$max_n, stop_test$target)
