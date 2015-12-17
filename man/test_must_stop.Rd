@@ -4,22 +4,25 @@
 \alias{test_must_stop}
 \title{Done}
 \usage{
-test_must_stop(number_responses, variance_current_estimate, min_n, max_n,
-  stop_variance_target = NULL)
+test_must_stop(number_responses, estimate, min_n, max_n,
+  stop_variance_target = NULL, cutoffs = NULL)
 }
 \arguments{
 \item{number_responses}{number of responses given}
 
-\item{variance_current_estimate}{variance(s) of the current estimate(s)}
+\item{estimate}{vector with current theta estimate(s), with covariance matrix as its attribute}
 
 \item{min_n}{minimum test length; NULL means no minimum test length}
 
-\item{max_n}{test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule; NULL never stops for max length)}
+\item{max_n}{test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule)}
 
 \item{stop_variance_target}{a vector with the variance target for each dimension; if null, variance is not taken into account}
+
+\item{cutoffs}{matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
+administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at certain iteration, test stops; NULL means no cut off values}
 }
 \value{
-boolean completed
+TRUE if test should stop, FALSE otherwise
 }
 \description{
 Control function to check if the test is completed.

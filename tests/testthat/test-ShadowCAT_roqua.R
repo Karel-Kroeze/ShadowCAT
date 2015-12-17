@@ -622,6 +622,41 @@ test_that("stop rule is variance and minimum number of items is taken into accou
   expect_equal(test_outcome$responses, c(1, 0, 1, 1, 0, 1, 0, 1, 0, 1))
 })
 
+test_that("stop rule is cutoff", {  
+  # define true theta for simulation of responses
+  true_theta <- c(.2, 0, -2)
+  
+  # define item characteristics
+  number_items <- 300
+  number_dimensions <- 3
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  
+  guessing <- NULL
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  alpha[1:100,2:3] <- 0
+  alpha[101:200,c(1,3)] <- 0
+  alpha[201:300,1:2] <- 0
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
+  stop_test <- list(max_n = 300, cutoffs = with_random_seed(2, matrix)(runif(903, 1, 2), ncol = 3))
+  estimator <- 'MAP'
+  information_summary <- 'PD'
+  item_selection <- 'MI'
+  
+  # define prior covariance matrix
+  prior <- diag(number_dimensions) * 20
+  
+  test_outcome <- with_random_seed(3, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  
+  expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.105, -.110, -1.794))
+  expect_equal(diag(round(attr(test_outcome$estimate, "variance"), 3)),c(.234, .233, .351))
+  expect_equal(length(test_outcome$administered), 32)
+})
+
 
 # these simulations take a long time to run, if (FALSE) ensures that they are not each time the tests are run
 if (FALSE) {

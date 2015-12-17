@@ -37,13 +37,17 @@ list(type = 'random', n)
 list(type = 'fixed', indices, n)
 list(type = 'randomByDimension', nByDimension, n)
 where n = total number of initial items, indices = vector of initial item indeces, 
-nByDimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension}
+nByDimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
+If n is 0, only n needs to be defined}
 
 \item{stop_test}{rule for when to stop providing new items to patient; should be a list of the form
-list(target = ..., max_n = ..., min_n = ...), 
-where max_n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule; NULL never stops for max length), 
+list(target = ..., max_n = ..., min_n = ..., cutoffs = ...), 
+where max_n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule), 
 target = vector of maximum acceptable variances per dimension; if target = NULL, only max_n is taken into account,
-min_n = minimum test length; NULL means no mimimum test length}
+min_n = minimum test length; NULL means no mimimum test length,
+cutoffs = matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
+administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at certain iteration, test stops; 
+NULL means no cut off values}
 
 \item{estimator}{type of estimator to be used, one of "MAP" (Maximum a posteriori estimation) or "ML" (maximum likelihood); 
 "EAP" (Expected A Posteriori Estimation) is currently not working due to problems with the MultiGHQuad package}

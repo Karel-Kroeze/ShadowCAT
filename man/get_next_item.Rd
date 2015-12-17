@@ -64,6 +64,6 @@ nByDimension = scalar of number of initial items per dimension, or vector with n
 integer item index next item
 }
 \description{
-Control function to select the next item, takes account of starting / stopping conditions.
+Control function to select the next item, takes account of starting conditions.
 }
 
