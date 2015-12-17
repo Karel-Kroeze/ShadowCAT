@@ -91,7 +91,7 @@ context("start type is random by dimension")
 model <- "3PLM"
 number_items <- 50
 number_dimensions <- 3
-start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9) 
+start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9) 
 estimator <- "MAP"
 item_selection <- "MI"
 information_summary <- "PD"
@@ -138,7 +138,7 @@ test_that("number of responses is 0, number of required starting items for each 
 })
 
 test_that("number of responses is 6, number of required starting items for each dimension is 2, 5, 1, random by dimension", {
-  start_items <- list(type = 'randomByDimension', nByDimension = c(2, 5, 1), n = 8)
+  start_items <- list(type = 'random_by_dimension', n_by_dimension = c(2, 5, 1), n = 8)
   
   available <- c(2, 4:5, 7:15, 17:18, 20:26, 28:50)
   responses <- rep(1, 6)
@@ -149,7 +149,7 @@ test_that("number of responses is 6, number of required starting items for each 
 })
 
 
-test_that("items load on all three dimension while start type is nByDimension", {
+test_that("items load on all three dimension while start type is n_by_dimension", {
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
   available <- c(2, 4:5, 7:15, 17:18, 20:26, 28:50)
@@ -167,18 +167,18 @@ available <- c(2, 4:5, 7:15, 17:18, 20:26, 28:50)
 administered <- c(1, 3, 6, 16, 19, 27)
 responses <- rep(1, 6)
 
-test_that("sum nByDimension is not equal to n, same n for each dimension", {
-  start_items <- list(type = 'randomByDimension', nByDimension = 2, n = 9)
+test_that("sum n_by_dimension is not equal to n, same n for each dimension", {
+  start_items <- list(type = 'random_by_dimension', n_by_dimension = 2, n = 9)
   
   item_next <- get_next_item(start_items, item_selection, information_summary, lp_constraints, lp_characters, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
   expect_equal(item_next$errors$start, "contains inconsistent information. Total length of start phase and sum of length per dimension do not match")
 })
 
-test_that("sum nByDimension is not equal to n, different n for each dimension", {
-  start_items <- list(type = 'randomByDimension', nByDimension = c(2, 5, 1), n = 9)
+test_that("sum n_by_dimension is not equal to n, different n for each dimension", {
+  start_items <- list(type = 'random_by_dimension', n_by_dimension = c(2, 5, 1), n = 9)
                          
   item_next <- get_next_item(start_items, item_selection, information_summary, lp_constraints, lp_characters, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
-  expect_equal(item_next$errors$start, "contains inconsistent information. Total length of start phase and sum of length per dimension do not match (n != sum(nByDimension)")
+  expect_equal(item_next$errors$start, "contains inconsistent information. Total length of start phase and sum of length per dimension do not match (n != sum(n_by_dimension)")
 })
 
 

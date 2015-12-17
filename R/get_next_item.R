@@ -5,9 +5,9 @@
 #' @param start_items items that are shown to the patient before adaptive proces starts; one of
 #' list(type = 'random', n)
 #' list(type = 'fixed', indices, n)
-#' list(type = 'randomByDimension', nByDimension, n)
+#' list(type = 'random_by_dimension', n_by_dimension, n)
 #' where n = total number of initial items, indices = vector of initial item indeces, 
-#' nByDimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
+#' n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
 #' @param item_selection selection criterion; one of "MI" (maximum information) or "Shadow" (maximum information and take constraints into account)
 #' @param information_summary called "objective" by Kroeze; how to summarize information; one of
 #' "D" = determinant: compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
@@ -46,7 +46,7 @@ get_next_item <- function(start_items, item_selection, information_summary, lp_c
     switch(start_type,
            "random" = get_start_item_random(),
            "fixed" = get_start_item_fixed(),
-           "randomByDimension" = get_start_item_randomByDimension())
+           "random_by_dimension" = get_start_item_random_by_dimension())
   }
   
   get_start_item_random <- function() {
@@ -57,10 +57,10 @@ get_next_item <- function(start_items, item_selection, information_summary, lp_c
     start_items$indices[length(responses) + 1]
   }
   
-  # picks nByDimension starting items per dimension (or n_i if nByDimension is a length Q vector), assumes between models, 
+  # picks n_by_dimension starting items per dimension (or n_i if n_by_dimension is a length Q vector), assumes between models, 
   # if any item has a non-zero loading on a dimension, it is considered to be part of that dimension. 
   # they CAN overlap, which may cause unwanted side effects, and in within models the result is identical to 'normal' random starting.
-  get_start_item_randomByDimension <- function() {
+  get_start_item_random_by_dimension <- function() {
     n_by_dimension_vector <- get_n_by_dimension_vector()
     design_matrix_item_loadings <- alpha > 0
     
@@ -74,10 +74,10 @@ get_next_item <- function(start_items, item_selection, information_summary, lp_c
   }
   
   get_n_by_dimension_vector <- function() {
-    if (length(start_items$nByDimension) == 1) 
-      rep(start_items$nByDimension, number_dimensions)
+    if (length(start_items$n_by_dimension) == 1) 
+      rep(start_items$n_by_dimension, number_dimensions)
     else
-      start_items$nByDimension
+      start_items$n_by_dimension
   }
   
   find_dimension_to_draw_from <- function(n_by_dimension_vector) {
@@ -85,9 +85,9 @@ get_next_item <- function(start_items, item_selection, information_summary, lp_c
   }
   
   validate <- function() {
-    if (start_items$type == "randomByDimension" && length(start_items$nByDimension) > 1 && start_items$n != sum(start_items$nByDimension))
-      return(add_error("start_items", "contains inconsistent information. Total length of start phase and sum of length per dimension do not match (n != sum(nByDimension)"))
-    if (start_items$type == "randomByDimension" && length(start_items$nByDimension) == 1 && start_items$n != sum(rep(start_items$nByDimension, number_dimensions)))
+    if (start_items$type == "random_by_dimension" && length(start_items$n_by_dimension) > 1 && start_items$n != sum(start_items$n_by_dimension))
+      return(add_error("start_items", "contains inconsistent information. Total length of start phase and sum of length per dimension do not match (n != sum(n_by_dimension)"))
+    if (start_items$type == "random_by_dimension" && length(start_items$n_by_dimension) == 1 && start_items$n != sum(rep(start_items$n_by_dimension, number_dimensions)))
       return(add_error("start_items", "contains inconsistent information. Total length of start phase and sum of length per dimension do not match"))
   }
   

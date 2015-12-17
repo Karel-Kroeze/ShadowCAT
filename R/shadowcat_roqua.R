@@ -16,9 +16,9 @@
 #' @param start_items items that are shown to the patient before adaptive proces starts; one of
 #' list(type = 'random', n)
 #' list(type = 'fixed', indices, n)
-#' list(type = 'randomByDimension', nByDimension, n)
+#' list(type = 'random_by_dimension', n_by_dimension, n)
 #' where n = total number of initial items, indices = vector of initial item indeces, 
-#' nByDimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
+#' n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
 #' If n is 0, only n needs to be defined
 #' @param stop_test rule for when to stop providing new items to patient; should be a list of the form
 #' list(target = ..., max_n = ..., min_n = ..., cutoffs = ...), 

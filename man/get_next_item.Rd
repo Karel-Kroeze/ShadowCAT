@@ -13,9 +13,9 @@ get_next_item(start_items, item_selection, information_summary, lp_constraints,
 \item{start_items}{items that are shown to the patient before adaptive proces starts; one of
 list(type = 'random', n)
 list(type = 'fixed', indices, n)
-list(type = 'randomByDimension', nByDimension, n)
+list(type = 'random_by_dimension', n_by_dimension, n)
 where n = total number of initial items, indices = vector of initial item indeces, 
-nByDimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension}
+n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension}
 
 \item{item_selection}{selection criterion; one of "MI" (maximum information) or "Shadow" (maximum information and take constraints into account)}
 

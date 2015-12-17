@@ -353,7 +353,7 @@ test_that("with constraints max_n 260", {
   eta <- NULL # only relevant for GPCM model
   
   model <- '3PLM'
-  start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
+  start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
   stop_test <- list(max_n = 260)
   estimator <- 'MAP'
   information_summary <- 'PD'
@@ -404,7 +404,7 @@ test_that("with constraints max_n 130", {
   eta <- NULL # only relevant for GPCM model
   
   model <- '3PLM'
-  start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
+  start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
   stop_test <- list(max_n = 130)
   estimator <- 'MAP'
   information_summary <- 'PD'
@@ -641,7 +641,7 @@ test_that("stop rule is cutoff", {
   eta <- NULL # only relevant for GPCM model
   
   model <- '3PLM'
-  start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
+  start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
   stop_test <- list(max_n = 300, cutoffs = with_random_seed(2, matrix)(runif(903, 1, 2), ncol = 3))
   estimator <- 'MAP'
   information_summary <- 'PD'
@@ -904,7 +904,7 @@ test_that("three dimensions, ML, information summary D, PD, A, and PA, no constr
   number_answer_categories_vec <- c(2, 4)
   number_dimensions <- 3
   
-  start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
+  start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
   variance_target <- .1^2
   model_vec <- c("3PLM","GRM","GPCM","SM")
   estimator_vec <- "ML"
@@ -967,7 +967,7 @@ test_that("three dimensions, MAP, no constraints on item selection, 100 iteratio
   number_answer_categories_vec <- c(2, 4)
   number_dimensions <- 3
   
-  start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
+  start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
   variance_target <- .1^2
   model_vec <- c("3PLM","GRM","GPCM","SM")
   estimator_vec <- "MAP"
@@ -1020,7 +1020,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
   number_answer_categories_vec <- c(2, 4)
   number_dimensions <- 3
   
-  start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
+  start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
   variance_target <- .1^2
   model_vec <- c("3PLM","GRM","GPCM","SM")
   estimator_vec <- "AEP"
@@ -1080,7 +1080,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     number_answer_categories_vec <- c(2, 4)
     number_dimensions <- 3
     
-    start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
+    start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
     estimator_vec <- c("ML", "MAP")
@@ -1138,7 +1138,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     number_answer_categories_vec <- c(2, 4)
     number_dimensions <- 3
     
-    start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
+    start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
     estimator_vec <- c("ML", "MAP") # AEP
@@ -1205,7 +1205,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     number_answer_categories_vec <- c(2, 4)
     number_dimensions <- 3
     
-    start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
+    start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
     estimator_vec <- c("ML", "MAP") # AEP
@@ -1273,7 +1273,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     number_answer_categories_vec <- 4
     number_dimensions <- 3
     
-    start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
+    start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
     variance_target <- .001^2
     model_vec <- "SM"
     estimator_vec <- c("ML", "MAP") # AEP
@@ -1357,7 +1357,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     number_answer_categories_vec <- 4
     number_dimensions <- 3
     
-    start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
+    start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
     variance_target <- .001^2
     model_vec <- "SM"
     estimator_vec <- c("ML", "MAP") # AEP
@@ -1410,7 +1410,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     number_answer_categories_vec <- c(2, 4)
     number_dimensions <- 3
     
-    start_items <- list(type = 'randomByDimension', nByDimension = 3, n = 9)
+    start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
     estimator_vec <- "MAP"
