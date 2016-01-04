@@ -7,6 +7,55 @@ library(stringr) # only for test constraints simulations
 
 make_random_seed_exist <- rnorm(1)
 
+#' simulate a testing routine with shadowcat
+#' 
+#' @param true_theta true theta value or vector
+#' @param prior covariance matrix of the (multi variate) normal prior for theta; mean vector is fixed at zero; not used for ML estimator
+#' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
+#' @param alpha Matrix of alpha parameters, one column per dimension, one row per item. Note that so called within-dimensional models still use an alpha matrix, they simply 
+#' have only one non-zero loading per item.
+#' @param beta Matrix of beta parameters, one column per item step, one row per item. Note that ShadowCAT expects response categories to be sequential,
+#' and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, and equal to the position of the 'location' of the beta parameter in the Beta matrix.
+#' The matrix will have a number of columns equal to the largest number of response categories, items with fewer response categories should be 
+#' right-padded with \code{NA}. \code{NA} values between response categories are not allowed, and will lead to errors.
+#' @param guessing vector of guessing parameters per item. Optionally used in 3PLM model, ignored for all others.
+#' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others.
+#' @param start_items items that are shown to the patient before adaptive proces starts; one of
+#' list(type = 'random', n)
+#' list(type = 'fixed', indices, n)
+#' list(type = 'random_by_dimension', n_by_dimension, n)
+#' where n = total number of initial items, indices = vector of initial item indeces, 
+#' n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
+#' If n is 0, only n needs to be defined
+#' @param stop_test rule for when to stop providing new items to patient; should be a list of the form
+#' list(target = ..., max_n = ..., min_n = ..., cutoffs = ...), 
+#' where max_n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule), 
+#' target = vector of maximum acceptable variances per dimension; if target = NULL, only max_n is taken into account,
+#' min_n = minimum test length; NULL means no mimimum test length,
+#' cutoffs = matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
+#' administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at certain iteration, test stops; 
+#' NULL means no cut off values
+#' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation) or "ML" (maximum likelihood); 
+#' "EAP" (Expected A Posteriori Estimation) is currently not working due to problems with the MultiGHQuad package
+#' @param information_summary called "objective" by Kroeze; how to summarize information; one of
+#' "D" = determinant: compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
+#' "PD" = posterior determinant: compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+#' "A" = trace: compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
+#' "PA" = posterior trace: compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+#' "PEKL" = compute Posterior expected Kullback-Leibler Information
+#' @param item_selection selection criterion; one of "MI" (maximum information) or "Shadow" (maximum information and take constraints into account)
+#' @param constraints list with constraints and characteristics: constraints = list(constraints = ..., characteristics = ...)
+#' constraints should be specified as a list of constraints, each constraint is a list with three named values;
+#' name: the column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as name/value.
+#' op: the logical operator to be used. Valid options are "<", "=", ">" and "><".
+#' target: the target value, numeric. If the operator is "><", this should be a length two vector in between which the target should fall.
+#' characteristics should be a data.frame with characteristics, one row per item, one column per characteristic.
+#' See constraints_lp_format() for details
+#' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values 
+#' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
+#' @param prior_var_safe_ml if not NULL, EAP estimate with prior variance equal to prior_var_safe_ml is computed instead of ML/MAP, if ML/MAP estimate fails
+#' @param initital_estimate vector containing the initial theta estimates (starting values)
+#' @param initial_variance matrix containing the initial covariance matrix (staring values)
 test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection = "MI", constraints = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha)), prior_var_safe_nlm = NULL, initital_estimate = rep(0, ncol(alpha)), initial_variance = prior) {
   new_response <- NULL
   attr(initital_estimate, 'variance') <- initial_variance
