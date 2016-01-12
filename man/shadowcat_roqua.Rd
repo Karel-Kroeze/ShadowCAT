@@ -80,7 +80,7 @@ See constraints_lp_format() for details}
 
 \item{upper_bound}{vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values}
 
-\item{prior_var_safe_ml}{if not NULL, EAP estimate with prior variance equal to prior_var_safe_ml is computed instead of ML/MAP, if ML/MAP estimate fails}
+\item{prior_var_safe_ml}{if not NULL, EAP estimate with prior variance equal to prior_var_safe_ml (scalar or vector) is computed instead of ML/MAP, if ML/MAP estimate fails}
 }
 \value{
 a list containing the index of the next item to be administered given a new response (or "stop_test"), 

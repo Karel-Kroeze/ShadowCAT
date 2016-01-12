@@ -53,9 +53,10 @@ make_random_seed_exist <- rnorm(1)
 #' See constraints_lp_format() for details
 #' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values 
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
-#' @param prior_var_safe_ml if not NULL, EAP estimate with prior variance equal to prior_var_safe_ml is computed instead of ML/MAP, if ML/MAP estimate fails
+#' @param prior_var_safe_ml if not NULL, EAP estimate with prior variance equal to prior_var_safe_ml (scalar or vector) is computed instead of ML/MAP, if ML/MAP estimate fails.
 #' @param initital_estimate vector containing the initial theta estimates (starting values)
 #' @param initial_variance matrix containing the initial covariance matrix (staring values)
+#' @return
 test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection = "MI", constraints = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha)), prior_var_safe_nlm = NULL, initital_estimate = rep(0, ncol(alpha)), initial_variance = prior) {
   new_response <- NULL
   attr(initital_estimate, 'variance') <- initial_variance
@@ -69,6 +70,24 @@ test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing
   next_item_and_test_outcome
 }
 
+#' get conditions for simulation
+#' 
+#' @param true_theta_vec vector containing true theta values. If number dimensions is 1, simulations are performed for each true theta value in true_theta_vec;
+#' if number dimensions is larger than 1, true_theta_vec is interpreted as containing the true thetas for each dimension
+#' @param number_items_vec vector containing conditions for number of test bank items to be simulated. Simulations are performed for each value in number_items_vec.
+#' If item_selection is "Shadow", number_items_vec can only have length 1
+#' @param number_answer_categories_vec vector containing conditions for the number of answer categories to be simulated. 
+#' Simulations are performed for each value in number_answer_categories_vec
+#' @param model_vec vector containing the conditions for the model to be used. Simulations are performed for each model in model_vec. Model options are
+#' '3PLM', 'GPCM', 'SM' and 'GRM'
+#' @param estimator_vec vector containing the conditions for the estimator to be used. Simulations are performed for each estimator in estimator_vec.
+#' Options are "ML", "MAP", and "EAP"
+#' @param information_summary_vec vector containing the conditions for the information_summary to be used. Simulations are performed for each model summary in estimator_vec,
+#' Options are "D", "PD", "A", "PA", and "PEKL"
+#' @param item_selection selection criterion; one of "MI" (maximum information) or "Shadow" (maximum information and take constraints into account).
+#' In case of "Shadow", number_items_vec should have length 1 
+#' @param iterations_per_unique_condition number of iterations to be performed within each unique condition
+#' @param number_dimensions the number of dimensions of the model (either 1 or the length of true_theta_vec)
 get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions) {
   if (number_dimensions == 1) {
     conditions <- expand.grid(1:iterations_per_unique_condition, true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection)
@@ -81,10 +100,53 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
   conditions
 }
 
-# if number dimensions is 1, simulations are performed for each true theta value in true_theta_vec
-# if number dimensions is larger than 1, true_theta_vec is interpreted as containing the true thetas for each dimension
 # item_selection can be "MI" or "Shadow". In case of "Shadow", constraints should be defined, and number_items_vec can only have length 1
 # max_n can only have length 1; if null, max_n is set to the number of items (which may differ accross conditions)
+
+#' simulate testing routines with shadowcat, for several conditions
+#' 
+#' @param true_theta_vec vector containing true theta values. If number dimensions is 1, simulations are performed for each true theta value in true_theta_vec;
+#' if number dimensions is larger than 1, true_theta_vec is interpreted as containing the true thetas for each dimension
+#' @param number_items_vec vector containing conditions for number of test bank items to be simulated. Simulations are performed for each value in number_items_vec.
+#' If item_selection is "Shadow", number_items_vec can only have length 1
+#' @param number_answer_categories_vec vector containing conditions for the number of answer categories to be simulated. 
+#' Simulations are performed for each value in number_answer_categories_vec
+#' @param model_vec vector containing the conditions for the model to be used. Simulations are performed for each model in model_vec. Model options are
+#' '3PLM', 'GPCM', 'SM' and 'GRM'
+#' @param estimator_vec vector containing the conditions for the estimator to be used. Simulations are performed for each estimator in estimator_vec.
+#' Options are "ML", "MAP", and "EAP"
+#' @param information_summary_vec vector containing the conditions for the information_summary to be used. Simulations are performed for each model summary in estimator_vec,
+#' Options are "D", "PD", "A", "PA", and "PEKL"
+#' @param item_selection selection criterion; one of "MI" (maximum information) or "Shadow" (maximum information and take constraints into account).
+#' In case of "Shadow", number_items_vec should have length 1
+#' @param start_items items that are shown to the patient before adaptive proces starts; one of
+#' list(type = 'random', n)
+#' list(type = 'fixed', indices, n)
+#' list(type = 'random_by_dimension', n_by_dimension, n)
+#' where n = total number of initial items, indices = vector of initial item indeces, 
+#' n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
+#' If n is 0, only n needs to be defined
+#' @param variance_target variance of theta at which testing should stop
+#' @param iterations_per_unique_condition number of iterations to be performed within each unique condition
+#' @param number_dimensions the number of dimensions of the model (either 1 or the length of true_theta_vec)
+#' @param constraints list with constraints and characteristics: constraints = list(constraints = ..., characteristics = ...)
+#' constraints should be specified as a list of constraints, each constraint is a list with three named values;
+#' name: the column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as name/value.
+#' op: the logical operator to be used. Valid options are "<", "=", ">" and "><".
+#' target: the target value, numeric. If the operator is "><", this should be a length two vector in between which the target should fall.
+#' characteristics should be a data.frame with characteristics, one row per item, one column per characteristic.
+#' See constraints_lp_format() for details
+#' @param guessing vector of guessing parameters per item. Optionally used in 3PLM model, ignored for all others.
+#' @param items_load_one_dimension if TRUE, items are simulated which load on one dimension. If FALSE, items are simulated which load on all dimensions
+#' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values 
+#' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
+#' @param prior covariance matrix of the (multi variate) normal prior for theta; mean vector is fixed at zero; not used for ML estimator
+#' @param prior_var_safe_ml if not NULL, EAP estimate with prior variance equal to prior_var_safe_ml (scalar or vector) is computed instead of ML/MAP, if ML/MAP estimate fails.
+#' @param return_administered_item_indeces if TRUE, indeces of administered items are added to the output
+#' @param max_n the maxixmum number of items to administer (test stops at this number, even if variance target has not been reached)
+#' @param varying_number_item_steps if TRUE, the simulated number of item steps differs over items. In that case, number_answer_categories_vec (number of itemsteps + 1)
+#' is considered the maxixmum number of categories
+#' @return matrix with in each row (= one condition): named vector containing estimated theta, variance of the estimate, and if return_administered_item_indeces is TRUE, the indeces of the administered items
 run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints = NULL, guessing = NULL, items_load_one_dimension = TRUE, lowerbound = rep(-3, number_dimensions), upperbound = rep(3, number_dimensions), prior = diag(number_dimensions) * 20, prior_var_safe_nlm = NULL, return_administered_item_indeces = FALSE, max_n = NULL, varying_number_item_steps = FALSE) {                   
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
   
