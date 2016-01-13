@@ -59,7 +59,7 @@ get_item_information <- function(information_summary, estimate, model, responses
                                "PD" = item_information_post_determinant(),
                                "PEKL" = item_information_pekl())
     
-    # If all objective values are 0, something went horribly wrong.
+    # If all item_information values are 0, something went horribly wrong.
     # This is made worse by lpSolve -> it will give back a full vector, not respecting constraints.
     # TODO: check if this is ok.
     if (all(item_information == 0)) {
@@ -102,7 +102,7 @@ get_item_information <- function(information_summary, estimate, model, responses
   
   validate <- function() {
     if (information_summary %not_in% c("A", "PA", "D", "PD", "PEKL"))
-      add_error("objective", "of unknown type")
+      add_error("information_summary", "of unknown type")
   }
   
   invalid_result <- function() {
