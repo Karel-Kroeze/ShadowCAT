@@ -456,7 +456,7 @@ test_that("information_summary is of unknown type", {
   
   item_information <- with_random_seed(2, get_item_information)(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE)
     
-  expect_equal(item_information$errors$objective, "of unknown type")
+  expect_equal(item_information$errors$information_summary, "of unknown type")
 })
 
 test_that("zero item information", {
