@@ -4,7 +4,7 @@
 #' 
 #' Selects the item with the highest value of a specified objective function.
 #' @param available indeces of available items
-#' @param item_information vector with information of each yet available item, with zeros for administered items (returned by objective() with pad = TRUE)
+#' @param item_information vector with information of each yet available item, with zeros for administered items (returned by get_item_information() with pad = TRUE)
 #' @return item index of item with the highest value of the objective function.
 #' @export
 get_item_index_max_information <- function(available, item_information) {

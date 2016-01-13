@@ -9,7 +9,7 @@ get_item_index_max_information(available, item_information)
 \arguments{
 \item{available}{indeces of available items}
 
-\item{item_information}{vector with information of each yet available item, with zeros for administered items (returned by objective() with pad = TRUE)}
+\item{item_information}{vector with information of each yet available item, with zeros for administered items (returned by get_item_information() with pad = TRUE)}
 }
 \value{
 item index of item with the highest value of the objective function.
