@@ -62,7 +62,7 @@ get_fisher_information <- function(estimate, model, number_dimensions, estimator
   
   get_D_GRM <- function() {
     # Graded Response Model (Glas & Dagohoy, 2007)
-    inner_product_alpha_theta <- apply(alpha * drop(estimate), 1, sum)
+    inner_product_alpha_theta <- as.vector(alpha %*% drop(estimate))
     D <- numeric(number_items)
     for (item in 1:number_items) {
       for (item_step in 1:(number_itemsteps_per_item[item] + 1)) {
@@ -76,7 +76,7 @@ get_fisher_information <- function(estimate, model, number_dimensions, estimator
   get_D_SM <- function() {
     # Sequential Model (Tutz, xxxx)
     # TODO: triple check this.
-    inner_product_alpha_theta <- apply(alpha * drop(estimate), 1, sum)
+    inner_product_alpha_theta <- as.vector(alpha %*% drop(estimate))
     D <- numeric(number_items)
     for (item in 1:number_items) {
       for (item_step in 1:(number_itemsteps_per_item[item] + 1)) {

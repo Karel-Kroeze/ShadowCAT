@@ -125,10 +125,10 @@ test_that("model is SM, 3 dimensions, 3 dimensions, 4 categories", {
   
   expect_equal(dim(fisher_information), c(3, 3, 50))
   expect_equal(dim(fisher_information[,,2]), c(3, 3))
-  expect_equal(round(fisher_information[,1,2], 3), c(.404, .112, .288))
-  expect_equal(round(fisher_information[,2,3], 3), c(.444, .504, .664))
-  expect_equal(round(fisher_information[1,,24], 3), c(.084, .091, .237))
-  expect_equal(round(fisher_information[3,,40], 3), c(.137, .202, .222))
+  expect_equal(round(fisher_information[,1,2], 3), c(.487, .135, .347))
+  expect_equal(round(fisher_information[,2,3], 3), c(.413, .468, .617))
+  expect_equal(round(fisher_information[1,,24], 3), c(.085, .092, .241))
+  expect_equal(round(fisher_information[3,,40], 3), c(.136, .200, .221))
 })
 
 test_that("model is SM, 3 dimensions, varying number of categories", {
@@ -151,10 +151,10 @@ test_that("model is SM, 3 dimensions, varying number of categories", {
   
   expect_equal(dim(fisher_information), c(3, 3, 50))
   expect_equal(dim(fisher_information[,,2]), c(3, 3))
-  expect_equal(round(fisher_information[,1,2], 3), c(.172, .048, .123))
-  expect_equal(round(fisher_information[,2,3], 3), c(.558, .633, .834))
-  expect_equal(round(fisher_information[1,,24], 3), c(.057, .062, .162))
-  expect_equal(round(fisher_information[3,,40], 3), c(.022, .032, .035))
+  expect_equal(round(fisher_information[,1,2], 3), c(.620, .172, .441))
+  expect_equal(round(fisher_information[,2,3], 3), c(.416, .471, .621))
+  expect_equal(round(fisher_information[1,,24], 3), c(.081, .088, .231))
+  expect_equal(round(fisher_information[3,,40], 3), c(.020, .030, .033))
 })
 
 context("GRM model")
@@ -193,9 +193,9 @@ test_that("model is GRM, 3 dimensions, varying numbers of categories", {
   
   expect_equal(dim(fisher_information), c(3, 3, 50))
   expect_equal(dim(fisher_information[,,2]), c(3, 3))
-  expect_equal(round(fisher_information[,1,2], 3), c(.326, .091, .232))
-  expect_equal(round(fisher_information[,2,3], 3), c(.281, .318, .420))
-  expect_equal(round(fisher_information[1,,24], 3), c(.043, .046, .121))
+  expect_equal(round(fisher_information[,1,2], 3), c(.376, .104, .268))
+  expect_equal(round(fisher_information[,2,3], 3), c(.321, .364, .480))
+  expect_equal(round(fisher_information[1,,24], 3), c(.059, .064, .169))
   expect_equal(round(fisher_information[3,,40], 3), c(.110, .162, .178))
 })
 
@@ -219,9 +219,9 @@ test_that("model is GRM, 3 dimensions, varying number of categories", {
   
   expect_equal(dim(fisher_information), c(3, 3, 50))
   expect_equal(dim(fisher_information[,,2]), c(3, 3))
-  expect_equal(round(fisher_information[,1,2], 3), c(.335, .093, .238))
-  expect_equal(round(fisher_information[,2,3], 3), c(.307, .349, .459))
-  expect_equal(round(fisher_information[1,,24], 3), c(.061, .066, .173))
-  expect_equal(round(fisher_information[3,,40], 3), c(.008, .012, .013))
+  expect_equal(round(fisher_information[,1,2], 3), c(.125, .035, .089))
+  expect_equal(round(fisher_information[,2,3], 3), c(.301, .341, .449))
+  expect_equal(round(fisher_information[1,,24], 3), c(.061, .067, .174))
+  expect_equal(round(fisher_information[3,,40], 3), c(.006, .010, .011))
 })
 

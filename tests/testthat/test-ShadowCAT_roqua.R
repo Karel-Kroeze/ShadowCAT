@@ -770,6 +770,8 @@ test_that("stop rule is cutoff", {
 
 
 # these simulations take a long time to run, if (FALSE) ensures that they are not each time the tests are run
+# For the GRM and SM models, the variance estimates differ from original estimates from Kroeze's code, due to 
+# bug in Kroeze's fisher information function
 if (FALSE) {
   context("simulations")
   
