@@ -92,15 +92,24 @@ next_item <- function(person, test) {
 #'  This is a simple wrapper to call the right methods, options should be defined in the test object.
 #'
 #' Details
-#' @param person
-#' @param test
-#' @return person
+#' @param person Person object
+#' @param test Test object
+#' @param responses Response vector (if set, responses will be taken from this vector, if NULL, responses will be simulated)
+#' @param verbose Print extra debug output? ( default = FALSE, 1/TRUE = basic output, 2 = detailed output )
+#' @return person Final person object
 #' @export
-ShadowCAT <- function(person, test, verbose = FALSE) {
+ShadowCAT <- function(person, test, verbose = FALSE, responses = NULL ) {
   ## Start CAT
   if (verbose > 0) cat("\n")
   while(! stop_test(person, test)) {
-    person <- answer(person, test, next_item(person, test))
+    next_item_index <- next_item(person, test)
+    if (is.null(responses)){
+      person <- answer(person, test, next_item_index)
+    } else {
+      person$administered <- c(person$administered, next_item_index)
+      person$responses <- c(person$responses, responses[next_item_index])
+      person$available <- person$available[-which(person$available %in% indeces)]
+    }
     if (length(person$responses) > test$start$n) person <- estimate(person, test)
     if (verbose > 1) cat("\r", paste0(round(person$estimate, 2), collapse = ', '), " | ", paste0(round(diag(attr(person$estimate,'variance')), 2), collapse = ', '), '         ')
   }
