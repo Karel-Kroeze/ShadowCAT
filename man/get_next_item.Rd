@@ -4,9 +4,9 @@
 \alias{get_next_item}
 \title{Next item}
 \usage{
-get_next_item(start_items, item_selection, information_summary, lp_constraints,
-  lp_characters, estimate, model, responses, prior, available, administered,
-  number_items, number_dimensions, estimator, alpha, beta, guessing,
+get_next_item(start_items, information_summary, lp_constraints, lp_characters,
+  estimate, model, responses, prior, available, administered, number_items,
+  number_dimensions, estimator, alpha, beta, guessing,
   number_itemsteps_per_item, lower_bound, upper_bound)
 }
 \arguments{
@@ -17,8 +17,6 @@ list(type = 'random_by_dimension', n_by_dimension, n)
 where n = total number of initial items, indices = vector of initial item indeces, 
 n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension}
 
-\item{item_selection}{selection criterion; one of "MI" (maximum information) or "Shadow" (maximum information and take constraints into account)}
-
 \item{information_summary}{called "objective" by Kroeze; how to summarize information; one of
 "D" = determinant: compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
 "PD" = posterior determinant: compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
@@ -26,9 +24,9 @@ n_by_dimension = scalar of number of initial items per dimension, or vector with
 "PA" = posterior trace: compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
 "PEKL" = compute Posterior expected Kullback-Leibler Information}
 
-\item{lp_constraints}{data frame with constraints in lp format: the lp_constraints from the list returned by constraints_lp_format()}
+\item{lp_constraints}{data frame with constraints in lp format: the lp_constraints from the list returned by constraints_lp_format(); NULL means no constraints}
 
-\item{lp_characters}{data frame with constraint characters in lp format: the lp_chars from the list returned by constraints_lp_format()}
+\item{lp_characters}{data frame with constraint characters in lp format: the lp_chars from the list returned by constraints_lp_format(); NULL means no constraints}
 
 \item{estimate}{current theta estimate}
 

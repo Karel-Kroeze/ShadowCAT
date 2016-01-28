@@ -8,15 +8,14 @@
 #' list(type = 'random_by_dimension', n_by_dimension, n)
 #' where n = total number of initial items, indices = vector of initial item indeces, 
 #' n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
-#' @param item_selection selection criterion; one of "MI" (maximum information) or "Shadow" (maximum information and take constraints into account)
 #' @param information_summary called "objective" by Kroeze; how to summarize information; one of
 #' "D" = determinant: compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
 #' "PD" = posterior determinant: compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
 #' "A" = trace: compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
 #' "PA" = posterior trace: compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
 #' "PEKL" = compute Posterior expected Kullback-Leibler Information
-#' @param lp_constraints data frame with constraints in lp format: the lp_constraints from the list returned by constraints_lp_format()
-#' @param lp_characters data frame with constraint characters in lp format: the lp_chars from the list returned by constraints_lp_format()
+#' @param lp_constraints data frame with constraints in lp format: the lp_constraints from the list returned by constraints_lp_format(); NULL means no constraints
+#' @param lp_characters data frame with constraint characters in lp format: the lp_chars from the list returned by constraints_lp_format(); NULL means no constraints
 #' @param estimate current theta estimate
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param responses vector with person responses
@@ -34,12 +33,12 @@
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
 #' @return integer item index next item
 #' @export
-get_next_item <- function(start_items, item_selection, information_summary, lp_constraints, lp_characters, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound) {
+get_next_item <- function(start_items, information_summary, lp_constraints, lp_characters, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound) {
   result <- function() {
     if (length(responses) < start_items$n)
       get_start_item(start_items$type)
     else
-      get_best_item(item_selection, information_summary, lp_constraints, lp_characters, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
+      get_best_item(information_summary, lp_constraints, lp_characters, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
   }
   
   get_start_item <- function(start_type) {

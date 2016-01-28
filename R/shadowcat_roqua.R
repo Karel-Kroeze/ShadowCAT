@@ -40,8 +40,7 @@
 #' #' note that this prior should be a square matrix with number of rows and columns equal to the number of dimensions; values on the diagonal should be larger than 0
 #' @param guessing vector of guessing parameters per item. Optionally used in 3PLM model, ignored for all others.
 #' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others.
-#' @param item_selection selection criterion; one of "MI" (maximum information) or "Shadow" (maximum information and take constraints into account)
-#' @param constraints_and_characts list with constraints and characteristics
+#' @param constraints_and_characts list with constraints and characteristics; NULL means no constraints
 #' constraints should be specified as a list of constraints, each constraint is a list with three named values;
 #' name: the column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as name/value.
 #' op: the logical operator to be used. Valid options are "<", "=", ">" and "><".
@@ -54,7 +53,7 @@
 #' @return a list containing the index of the next item to be administered given a new response (or "stop_test"), 
 #' updated estimate of theta, responses, indeces of administered items, and indeces of available items
 #' @export
-shadowcat_roqua <- function(new_response, estimate, responses, administered, available, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior = NULL, guessing = NULL, eta = NULL, item_selection = "MI", constraints_and_characts = NULL, lower_bound = rep(-3, ncol(alpha)), upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL) {    
+shadowcat_roqua <- function(new_response, estimate, responses, administered, available, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior = NULL, guessing = NULL, eta = NULL, constraints_and_characts = NULL, lower_bound = rep(-3, ncol(alpha)), upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL) {    
   alpha <- as.matrix(alpha)
   beta <- get_beta(model, beta, eta)
   guessing <- get_guessing(guessing, beta) 
@@ -69,7 +68,7 @@ shadowcat_roqua <- function(new_response, estimate, responses, administered, ava
     continue_test <- !test_must_stop(length(responses), estimate, stop_test$min_n, stop_test$max_n, stop_test$target, stop_test$cutoffs)
 
     if (continue_test) {
-      index_new_item <- get_next_item(start_items, item_selection, information_summary, lp_constraints_and_characts$lp_constraints, lp_constraints_and_characts$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
+      index_new_item <- get_next_item(start_items, information_summary, lp_constraints_and_characts$lp_constraints, lp_constraints_and_characts$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
       list(index_new_item = index_new_item,
            estimate = estimate,
            responses = responses,

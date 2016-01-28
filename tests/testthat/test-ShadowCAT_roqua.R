@@ -43,7 +43,6 @@ make_random_seed_exist <- rnorm(1)
 #' "A" = trace: compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
 #' "PA" = posterior trace: compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
 #' "PEKL" = compute Posterior expected Kullback-Leibler Information
-#' @param item_selection selection criterion; one of "MI" (maximum information) or "Shadow" (maximum information and take constraints into account)
 #' @param constraints_and_characts list with constraints and characteristics: constraints_and_characts = list(constraints = ..., characteristics = ...)
 #' constraints should be specified as a list of constraints, each constraint is a list with three named values;
 #' name: the column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as name/value.
@@ -57,14 +56,14 @@ make_random_seed_exist <- rnorm(1)
 #' @param initital_estimate vector containing the initial theta estimates (starting values)
 #' @param initial_variance matrix containing the initial covariance matrix (staring values)
 #' @return
-test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection = "MI", constraints_and_characts = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha)), prior_var_safe_nlm = NULL, initital_estimate = rep(0, ncol(alpha)), initial_variance = prior) {
+test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints_and_characts = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha)), prior_var_safe_nlm = NULL, initital_estimate = rep(0, ncol(alpha)), initial_variance = prior) {
   new_response <- NULL
   attr(initital_estimate, 'variance') <- initial_variance
-  next_item_and_test_outcome <- shadowcat_roqua(new_response, estimate = initital_estimate , responses = numeric(0), administered = numeric(0), available = 1:nrow(beta), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta, item_selection, constraints_and_characts, lowerbound, upperbound, prior_var_safe_nlm)
+  next_item_and_test_outcome <- shadowcat_roqua(new_response, estimate = initital_estimate , responses = numeric(0), administered = numeric(0), available = 1:nrow(beta), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta, constraints_and_characts, lowerbound, upperbound, prior_var_safe_nlm)
 
   while (next_item_and_test_outcome$index_new_item != "stop_test") {
     new_response <- simulate_answer(true_theta, model, ncol(alpha), estimator, alpha, beta, guessing, ncol(beta), next_item_and_test_outcome$index_new_item)
-    next_item_and_test_outcome <- shadowcat_roqua(new_response, next_item_and_test_outcome$estimate, next_item_and_test_outcome$responses, next_item_and_test_outcome$administered, next_item_and_test_outcome$available, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior,  guessing, eta, item_selection, constraints_and_characts, lowerbound, upperbound, prior_var_safe_nlm)  
+    next_item_and_test_outcome <- shadowcat_roqua(new_response, next_item_and_test_outcome$estimate, next_item_and_test_outcome$responses, next_item_and_test_outcome$administered, next_item_and_test_outcome$available, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior,  guessing, eta, constraints_and_characts, lowerbound, upperbound, prior_var_safe_nlm)  
   }
   
   next_item_and_test_outcome
@@ -75,7 +74,7 @@ test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing
 #' @param true_theta_vec vector containing true theta values. If number dimensions is 1, simulations are performed for each true theta value in true_theta_vec;
 #' if number dimensions is larger than 1, true_theta_vec is interpreted as containing the true thetas for each dimension
 #' @param number_items_vec vector containing conditions for number of test bank items to be simulated. Simulations are performed for each value in number_items_vec.
-#' If item_selection is "Shadow", number_items_vec can only have length 1
+#' If constraints are added, number_items_vec can only have length 1
 #' @param number_answer_categories_vec vector containing conditions for the number of answer categories to be simulated. 
 #' Simulations are performed for each value in number_answer_categories_vec
 #' @param model_vec vector containing the conditions for the model to be used. Simulations are performed for each model in model_vec. Model options are
@@ -83,24 +82,22 @@ test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing
 #' @param estimator_vec vector containing the conditions for the estimator to be used. Simulations are performed for each estimator in estimator_vec.
 #' Options are "ML", "MAP", and "EAP"
 #' @param information_summary_vec vector containing the conditions for the information_summary to be used. Simulations are performed for each model summary in estimator_vec,
-#' Options are "D", "PD", "A", "PA", and "PEKL"
-#' @param item_selection selection criterion; one of "MI" (maximum information) or "Shadow" (maximum information and take constraints into account).
-#' In case of "Shadow", number_items_vec should have length 1 
+#' Options are "D", "PD", "A", "PA", and "PEKL" 
 #' @param iterations_per_unique_condition number of iterations to be performed within each unique condition
 #' @param number_dimensions the number of dimensions of the model (either 1 or the length of true_theta_vec)
-get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions) {
+get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions) {
   if (number_dimensions == 1) {
-    conditions <- expand.grid(1:iterations_per_unique_condition, true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection)
-    colnames(conditions) <- c("iteration", "true_theta", "number_items", "number_answer_categories", "model", "estimator", "information_summary", "item_selection")
+    conditions <- expand.grid(1:iterations_per_unique_condition, true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec)
+    colnames(conditions) <- c("iteration", "true_theta", "number_items", "number_answer_categories", "model", "estimator", "information_summary")
   }
   else {
-    conditions <- expand.grid(1:iterations_per_unique_condition, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection)
-    colnames(conditions) <- c("iteration", "number_items", "number_answer_categories", "model", "estimator", "information_summary", "item_selection") 
+    conditions <- expand.grid(1:iterations_per_unique_condition, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec)
+    colnames(conditions) <- c("iteration", "number_items", "number_answer_categories", "model", "estimator", "information_summary") 
   }
   conditions
 }
 
-# item_selection can be "MI" or "Shadow". In case of "Shadow", constraints_and_characts should be defined, and number_items_vec can only have length 1
+# If constraints_and_characts is defined (i.e., not NULL), number_items_vec can only have length 1
 # max_n can only have length 1; if null, max_n is set to the number of items (which may differ accross conditions)
 
 #' simulate testing routines with shadowcat, for several conditions
@@ -108,7 +105,7 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
 #' @param true_theta_vec vector containing true theta values. If number dimensions is 1, simulations are performed for each true theta value in true_theta_vec;
 #' if number dimensions is larger than 1, true_theta_vec is interpreted as containing the true thetas for each dimension
 #' @param number_items_vec vector containing conditions for number of test bank items to be simulated. Simulations are performed for each value in number_items_vec.
-#' If item_selection is "Shadow", number_items_vec can only have length 1
+#' If constraints_and_characts is defined, number_items_vec can only have length 1
 #' @param number_answer_categories_vec vector containing conditions for the number of answer categories to be simulated. 
 #' Simulations are performed for each value in number_answer_categories_vec
 #' @param model_vec vector containing the conditions for the model to be used. Simulations are performed for each model in model_vec. Model options are
@@ -117,8 +114,6 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
 #' Options are "ML", "MAP", and "EAP"
 #' @param information_summary_vec vector containing the conditions for the information_summary to be used. Simulations are performed for each model summary in estimator_vec,
 #' Options are "D", "PD", "A", "PA", and "PEKL"
-#' @param item_selection selection criterion; one of "MI" (maximum information) or "Shadow" (maximum information and take constraints_and_characts into account).
-#' In case of "Shadow", number_items_vec should have length 1
 #' @param start_items items that are shown to the patient before adaptive proces starts; one of
 #' list(type = 'random', n)
 #' list(type = 'fixed', indices, n)
@@ -147,8 +142,8 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
 #' @param varying_number_item_steps if TRUE, the simulated number of item steps differs over items. In that case, number_answer_categories_vec (number of itemsteps + 1)
 #' is considered the maxixmum number of categories
 #' @return matrix with in each row (= one condition): named vector containing estimated theta, variance of the estimate, and if return_administered_item_indeces is TRUE, the indeces of the administered items
-run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints_and_characts = NULL, guessing = NULL, items_load_one_dimension = TRUE, lowerbound = rep(-3, number_dimensions), upperbound = rep(3, number_dimensions), prior = diag(number_dimensions) * 20, prior_var_safe_nlm = NULL, return_administered_item_indeces = FALSE, max_n = NULL, varying_number_item_steps = FALSE) {                   
-  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
+run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints_and_characts = NULL, guessing = NULL, items_load_one_dimension = TRUE, lowerbound = rep(-3, number_dimensions), upperbound = rep(3, number_dimensions), prior = diag(number_dimensions) * 20, prior_var_safe_nlm = NULL, return_administered_item_indeces = FALSE, max_n = NULL, varying_number_item_steps = FALSE) {                   
+  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
   
   pbapply::pbsapply(1:nrow(conditions), 
                     FUN = function(condition) {
@@ -160,7 +155,7 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
                                       else
                                         true_theta_vec )
                       alpha_beta <- simulate_testbank(model = as.character(conditions[condition, "model"]), number_items = conditions[condition, "number_items"], number_dimensions = number_dimensions, number_itemsteps = conditions[condition, "number_answer_categories"] - 1, items_load_one_dimension = items_load_one_dimension, return_testbank_properties = FALSE, varying_number_item_steps = varying_number_item_steps)
-                      estimate_theta <- tryCatch(test_shadowcat_roqua(true_theta, prior, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), item_selection, constraints_and_characts, lowerbound, upperbound, prior_var_safe_nlm),
+                      estimate_theta <- tryCatch(test_shadowcat_roqua(true_theta, prior, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), constraints_and_characts, lowerbound, upperbound, prior_var_safe_nlm),
                                                  error = function(e) e)
 
                       if (return_administered_item_indeces)
@@ -194,7 +189,6 @@ test_that("true theta is 2, estimator is MAP", {
   stop_test <- list(max_n = 100)
   estimator <- 'MAP'
   information_summary <- 'PD'
-  item_selection <- 'MI'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 5
@@ -226,7 +220,6 @@ test_that("true theta is 2, estimator is ML", {
   stop_test <- list(max_n = 100)
   estimator <- 'ML'
   information_summary <- 'D'
-  item_selection <- 'MI'
   
   test_outcome <- with_random_seed(2, test_shadowcat_roqua)(true_theta, prior = NULL, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, initial_variance = diag(1))
   
@@ -255,7 +248,6 @@ test_that("true theta is 2, estimator is EAP", {
   stop_test <- list(max_n = 100)
   estimator <- 'EAP'
   information_summary <- 'PD'
-  item_selection <- 'MI'
   
   prior <- diag(number_dimensions) * 5
   
@@ -291,7 +283,6 @@ test_that("true theta is 1, 0, 2, estimator is MAP", {
   stop_test <- list(max_n = 300)
   estimator <- 'MAP'
   information_summary <- 'PD'
-  item_selection <- 'MI'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
@@ -326,7 +317,6 @@ test_that("true theta is 1, 0, 2, estimator is ML", {
   stop_test <- list(max_n = 300)
   estimator <- 'ML'
   information_summary <- 'D'
-  item_selection <- 'MI'
   
   test_outcome <- with_random_seed(3, test_shadowcat_roqua)(true_theta, prior = NULL, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, initial_variance = diag(1))
   
@@ -365,7 +355,6 @@ test_that("true theta is 1, 0, 2, estimator is EAP", {
   stop_test <- list(max_n = 300)
   estimator <- 'MAP'
   information_summary <- 'PD'
-  item_selection <- 'MI'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
@@ -398,7 +387,6 @@ test_that("items load on three dimensions", {
   stop_test <- list(max_n = 300)
   estimator <- 'MAP'
   information_summary <- 'PD'
-  item_selection <- 'MI'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
@@ -433,7 +421,6 @@ test_that("true theta is 2, 2, 2", {
   stop_test <- list(max_n = 300)
   estimator <- 'MAP'
   information_summary <- 'PD'
-  item_selection <- 'MI'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
@@ -468,7 +455,6 @@ test_that("with constraints max_n 260", {
   stop_test <- list(max_n = 260)
   estimator <- 'MAP'
   information_summary <- 'PD'
-  item_selection <- 'Shadow'  
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
@@ -482,7 +468,7 @@ test_that("with constraints max_n 260", {
                            op = '><',
                            target = c(75, 90)))
   
-  test_outcome <- with_random_seed(3, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection =  item_selection, constraints_and_characts = list(characteristics = characteristics, constraints = constraints))
+  test_outcome <- with_random_seed(3, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints_and_characts = list(characteristics = characteristics, constraints = constraints))
   
   number_depression_items <- sum(test_outcome$administered <= 100)
   number_anxiety_items <- sum(test_outcome$administered > 100 & test_outcome$administered <= 200)
@@ -519,7 +505,6 @@ test_that("with constraints max_n 130", {
   stop_test <- list(max_n = 130)
   estimator <- 'MAP'
   information_summary <- 'PD'
-  item_selection <- 'Shadow'  
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
@@ -533,7 +518,7 @@ test_that("with constraints max_n 130", {
                            op = '><',
                            target = c(75, 90)))
   
-  test_outcome <- with_random_seed(3, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection =  item_selection, constraints_and_characts = list(characteristics = characteristics, constraints = constraints))
+  test_outcome <- with_random_seed(3, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints_and_characts = list(characteristics = characteristics, constraints = constraints))
   
   number_depression_items <- sum(test_outcome$administered <= 100)
   number_anxiety_items <- sum(test_outcome$administered > 100 & test_outcome$administered <= 200)
@@ -570,7 +555,6 @@ test_that("start n is zero, no constraints", {
   stop_test <- list(max_n = 300)
   estimator <- 'MAP'
   information_summary <- 'PD'
-  item_selection <- 'MI'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
@@ -605,7 +589,6 @@ test_that("start n is zero, with constraints", {
   stop_test <- list(max_n = 130)
   estimator <- 'MAP'
   information_summary <- 'PD'
-  item_selection <- 'Shadow'  
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
@@ -619,7 +602,7 @@ test_that("start n is zero, with constraints", {
                            op = '><',
                            target = c(75, 90)))
   
-  test_outcome <- with_random_seed(3, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, item_selection =  item_selection, constraints_and_characts = list(characteristics = characteristics, constraints = constraints, initital_estimate = rep(.2, number_dimensions), initial_variance = diag(number_dimensions) * 20))
+  test_outcome <- with_random_seed(3, test_shadowcat_roqua)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints_and_characts = list(characteristics = characteristics, constraints = constraints, initital_estimate = rep(.2, number_dimensions), initial_variance = diag(number_dimensions) * 20))
   
   number_depression_items <- sum(test_outcome$administered <= 100)
   number_anxiety_items <- sum(test_outcome$administered > 100 & test_outcome$administered <= 200)
@@ -654,7 +637,6 @@ test_that("stop rule is number of items", {
   stop_test <- list(max_n = 10)
   estimator <- 'MAP'
   information_summary <- 'PD'
-  item_selection <- 'MI'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions)
@@ -687,7 +669,6 @@ test_that("stop rule is variance", {
   stop_test <- list(target = .5, max_n = 50)
   estimator <- 'MAP'
   information_summary <- 'PD'
-  item_selection <- 'MI'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions)
@@ -720,7 +701,6 @@ test_that("stop rule is variance and minimum number of items is taken into accou
   stop_test <- list(target = .5, max_n = 50, min_n = 10)
   estimator <- 'MAP'
   information_summary <- 'PD'
-  item_selection <- 'MI'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions)
@@ -756,7 +736,6 @@ test_that("stop rule is cutoff", {
   stop_test <- list(max_n = 300, cutoffs = with_random_seed(2, matrix)(runif(903, 1, 2), ncol = 3))
   estimator <- 'MAP'
   information_summary <- 'PD'
-  item_selection <- 'MI'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
@@ -789,12 +768,11 @@ if (FALSE) {
     model_vec <- c("3PLM", "GRM", "GPCM", "SM")
     estimator_vec <- "EAP"
     information_summary_vec <- c("D", "PD", "A", "PA", "PEKL") 
-    item_selection <- 'MI'
     prior <- diag(number_dimensions) * 100
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound, prior = prior)
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound, prior = prior)
     
-    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
+    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
     
     estimates_and_conditions <- cbind(t(estimates_and_variance), conditions[, c("true_theta", "number_items", "number_answer_categories", "model", "estimator", "information_summary")])
     
@@ -820,11 +798,10 @@ if (FALSE) {
     model_vec <- c("3PLM","GRM","GPCM","SM")
     estimator_vec <- "MAP"
     information_summary_vec <- c("D", "PD", "A", "PA", "PEKL") 
-    item_selection <- 'MI'
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound)
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound)
     
-    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
+    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
     
     estimates_and_conditions <- cbind(t(estimates_and_variance), conditions[, c("true_theta", "number_items", "number_answer_categories", "model", "estimator", "information_summary")])
     
@@ -851,11 +828,10 @@ if (FALSE) {
     model_vec <- c("3PLM","GRM","GPCM","SM")
     estimator_vec <- "ML"
     information_summary_vec <- c("D", "PD", "A", "PA") # PEKL
-    item_selection <- 'MI'
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound)
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound)
     
-    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
+    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
     
     estimates_and_conditions <- cbind(t(estimates_and_variance), conditions[, c("true_theta", "number_items", "number_answer_categories", "model", "estimator", "information_summary")])
     
@@ -882,9 +858,8 @@ if (FALSE) {
     model_vec <- c("3PLM","GRM","GPCM","SM")
     estimator_vec <- "ML"
     information_summary_vec <- c("D", "PD", "A", "PA") # PEKL 
-    item_selection <- 'MI'
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
     estimates_and_variance_without_errors <- sapply(estimates_and_variance, 
                                                     FUN = function(x) { 
                                                       if (is.null(x)) 
@@ -892,7 +867,7 @@ if (FALSE) {
                                                       else 
                                                         x } ) 
     
-    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
+    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
     
     condition_vector <- sort(rep(1:(ncol(estimates_and_variance_without_errors)/iterations_per_unique_condition), iterations_per_unique_condition))
     
@@ -938,11 +913,10 @@ test_that("one dimension, estimator MAP, no constraints on item selection, 100 i
   model_vec <- c("3PLM","GRM","GPCM","SM")
   estimator_vec <- "MAP"
   information_summary_vec <- c("D", "PD", "A", "PA", "PEKL")
-  item_selection <- 'MI'
   
-  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
   
-  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
+  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
   condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/iterations_per_unique_condition), iterations_per_unique_condition))
   
   estimates_and_conditions <- cbind(t(estimates_and_variance), conditions[, c("true_theta", "iteration", "number_items", "number_answer_categories", "model", "estimator", "information_summary")], condition_vector)
@@ -980,11 +954,10 @@ test_that("one dimension, estimator EAP, no constraints on item selection, 100 i
   model_vec <- c("3PLM","GRM","GPCM","SM")
   estimator_vec <- "EAP"
   information_summary_vec <- c("D", "PD", "A", "PA", "PEKL")
-  item_selection <- 'MI'
   
-  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
   
-  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
+  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
   condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/iterations_per_unique_condition), iterations_per_unique_condition))
   
   estimates_and_conditions <- cbind(t(estimates_and_variance), conditions[, c("true_theta", "iteration", "number_items", "number_answer_categories", "model", "estimator", "information_summary")], condition_vector)
@@ -1022,9 +995,8 @@ test_that("three dimensions, ML, information summary D, PD, A, and PA, no constr
   model_vec <- c("3PLM","GRM","GPCM","SM")
   estimator_vec <- "ML"
   information_summary_vec <- c("D", "PD", "A", "PA") # PEKL 
-  item_selection <- 'MI'
   
-  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
   estimates_and_variance_without_errors <- sapply(estimates_and_variance, 
                                                   FUN = function(x) { 
                                                     if (is.null(x)) 
@@ -1032,7 +1004,7 @@ test_that("three dimensions, ML, information summary D, PD, A, and PA, no constr
                                                     else 
                                                       x } ) 
   
-  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
+  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
   
   condition_vector <- sort(rep(1:(ncol(estimates_and_variance_without_errors)/iterations_per_unique_condition), iterations_per_unique_condition))
   
@@ -1085,11 +1057,10 @@ test_that("three dimensions, MAP, no constraints on item selection, 100 iteratio
   model_vec <- c("3PLM","GRM","GPCM","SM")
   estimator_vec <- "MAP"
   information_summary_vec <- c("D", "PD", "A", "PA", "PEKL")
-  item_selection <- 'MI'
   
-  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
  
-  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
+  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
   
   condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/iterations_per_unique_condition), iterations_per_unique_condition))
   
@@ -1138,9 +1109,8 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
   model_vec <- c("3PLM","GRM","GPCM","SM")
   estimator_vec <- "AEP"
   information_summary_vec <- c("D", "PD", "A", "PA", "PEKL") 
-  item_selection <- 'MI'
   
-  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
   estimates_and_variance_without_errors <- sapply(estimates_and_variance, 
                                                   FUN = function(x) { 
                                                     if (is.list(x)) 
@@ -1148,7 +1118,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
                                                     else 
                                                       x } ) 
   
-  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
+  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
   
   condition_vector <- sort(rep(1:(ncol(estimates_and_variance_without_errors)/iterations_per_unique_condition), iterations_per_unique_condition))
   
@@ -1198,11 +1168,10 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     model_vec <- c("3PLM","GRM","GPCM","SM")
     estimator_vec <- c("ML", "MAP")
     information_summary_vec <- c("D", "PD", "A", "PA")
-    item_selection <- 'MI'
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, prior_var_safe_nlm = 100)
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, prior_var_safe_nlm = 100)
     
-    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec, iterations_per_unique_condition, number_dimensions)
+    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
     
     condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/iterations_per_unique_condition), iterations_per_unique_condition))
     
@@ -1256,9 +1225,8 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     model_vec <- c("3PLM","GRM","GPCM","SM")
     estimator_vec <- c("ML", "MAP") # AEP
     information_summary_vec <- c("D", "PD", "A", "PA") # PEKL 
-    item_selection <- 'MI'
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, items_load_one_dimension = FALSE, prior_var_safe_nlm = 100)
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, items_load_one_dimension = FALSE, prior_var_safe_nlm = 100)
     #save(estimates_and_variance, file = "/Users/rivkadevries/Desktop/simulationsCAT/estimates_and_variance_within.R")
     estimates_and_variance_without_errors <- sapply(estimates_and_variance, 
                                                     FUN = function(x) { 
@@ -1267,7 +1235,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
                                                       else 
                                                         x } ) 
     
-    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
+    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
     
     condition_vector <- sort(rep(1:(ncol(estimates_and_variance_without_errors)/iterations_per_unique_condition), iterations_per_unique_condition))
     
@@ -1323,9 +1291,8 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     model_vec <- c("3PLM","GRM","GPCM","SM")
     estimator_vec <- c("ML", "MAP") # AEP
     information_summary_vec <- c("D", "PD", "A", "PA") # PEKL 
-    item_selection <- 'MI'
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, items_load_one_dimension = FALSE, prior_var_safe_nlm = 1)
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, items_load_one_dimension = FALSE, prior_var_safe_nlm = 1)
     #save(estimates_and_variance, file = "/Users/rivkadevries/Desktop/simulationsCAT/estimates_and_variance_within_safe_var1.R")
     estimates_and_variance_without_errors <- sapply(estimates_and_variance, 
                                                     FUN = function(x) { 
@@ -1334,7 +1301,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
                                                       else 
                                                         x } ) 
     
-    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
+    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
     
     condition_vector <- sort(rep(1:(ncol(estimates_and_variance_without_errors)/iterations_per_unique_condition), iterations_per_unique_condition))
     
@@ -1391,7 +1358,6 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     model_vec <- "SM"
     estimator_vec <- c("ML", "MAP") # AEP
     information_summary_vec <- "D" # PEKL 
-    item_selection <- 'Shadow' 
     max_n = 130
     
     #create item characteristics and constraints
@@ -1403,10 +1369,10 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
                              op = '><',
                              target = c(75, 100)))
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints_and_characts = list(characteristics = characteristics, constraints = constraints), prior_var_safe_nlm = 100, return_administered_item_indeces = TRUE, max_n = max_n)
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints_and_characts = list(characteristics = characteristics, constraints = constraints), prior_var_safe_nlm = 100, return_administered_item_indeces = TRUE, max_n = max_n)
     #save(estimates_and_variance, file = "/Users/rivkadevries/Desktop/simulationsCAT/estimates_and_variance_3dim_constraints_maxn130.R")
     
-    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
+    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
     
     condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/iterations_per_unique_condition), iterations_per_unique_condition))
     
@@ -1475,7 +1441,6 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     model_vec <- "SM"
     estimator_vec <- c("ML", "MAP") # AEP
     information_summary_vec <- "D" # PEKL 
-    item_selection <- 'Shadow' 
     max_n = 260
     
     #create item characteristics and constraints
@@ -1487,10 +1452,10 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
                              op = '><',
                              target = c(75, 90)))
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints_and_characts = list(characteristics = characteristics, constraints = constraints), prior_var_safe_nlm = 100, return_administered_item_indeces = TRUE, max_n = max_n)
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints_and_characts = list(characteristics = characteristics, constraints = constraints), prior_var_safe_nlm = 100, return_administered_item_indeces = TRUE, max_n = max_n)
     #save(estimates_and_variance, file = "/Users/rivkadevries/Desktop/simulationsCAT/estimates_and_variance_3dim_constraints_maxn260.R")
     
-    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, iterations_per_unique_condition, number_dimensions)
+    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
     
     condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/iterations_per_unique_condition), iterations_per_unique_condition))
     
@@ -1528,11 +1493,10 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     model_vec <- c("3PLM","GRM","GPCM","SM")
     estimator_vec <- "MAP"
     information_summary_vec <- c("D", "PD", "A", "PA") # PEKL 
-    item_selection <- 'MI'
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection, start_items, variance_target, iterations_per_unique_condition, number_dimensions, prior = diag(3) * .5, prior_var_safe_nlm = 100)
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, prior = diag(3) * .5, prior_var_safe_nlm = 100)
     
-    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, item_selection_vec, iterations_per_unique_condition, number_dimensions)
+    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
     
     condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/iterations_per_unique_condition), iterations_per_unique_condition))
     

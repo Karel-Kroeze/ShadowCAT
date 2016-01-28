@@ -2,15 +2,14 @@
 #' 
 #' This function is a wrapper that sends the actual work to the correct subroutines.
 #' 
-#' @param item_selection selection criterion; one of "MI" (maximum information) or "Shadow" (maximum information and take constraints into account)
 #' @param information_summary called "objective" by Kroeze; how to summarize information; one of
 #' "D" = determinant: compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
 #' "PD" = posterior determinant: compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
 #' "A" = trace: compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
 #' "PA" = posterior trace: compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
 #' "PEKL" = compute Posterior expected Kullback-Leibler Information
-#' @param lp_constraints data frame with constraints in lp format: the lp_constraints from the list returned by constraints_lp_format()
-#' @param lp_characters data frame with constraint characters in lp format: the lp_chars from the list returned by constraints_lp_format()
+#' @param lp_constraints data frame with constraints in lp format: the lp_constraints from the list returned by constraints_lp_format(); NULL means no constraints
+#' @param lp_characters data frame with constraint characters in lp format: the lp_chars from the list returned by constraints_lp_format(); NULL means no constraints
 #' @param estimate current theta estimate
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param responses vector with person responses
@@ -28,7 +27,7 @@
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
 #' @return integer item index
 #' @export
-get_best_item <- function(item_selection, information_summary, lp_constraints, lp_characters, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound) {
+get_best_item <- function(information_summary, lp_constraints, lp_characters, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound) {
   # TODO: make selection with 0 responses work as expected
   result <- function() {
     item_with_max_information <- get_item_with_max_information()
@@ -46,15 +45,22 @@ get_best_item <- function(item_selection, information_summary, lp_constraints, l
     item_information <- get_item_information(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE)
     
     # find item with largest information; 'MI' is a simple maximum, 'Shadow' does ShadowTesting.
-    item_with_max_information <- switch(item_selection,
-                                        "MI" = get_item_index_max_information(available, item_information),
-                                        "Shadow" = get_item_index_max_information_constrained(number_items, administered, available, responses, lp_constraints, lp_characters, item_information))
+    item_with_max_information <- switch(item_selection_type(),
+                                        "maximum_information_only" = get_item_index_max_information(available, item_information),
+                                        "with_constraints" = get_item_index_max_information_constrained(number_items, administered, available, responses, lp_constraints, lp_characters, item_information))
     
     # if there's more than one, select one at random (edge case)
     if (length(item_with_max_information) > 1) 
       sample(item_with_max_information, 1)
     else
       item_with_max_information
+  }
+  
+  item_selection_type <- function() {
+    if (is.null(lp_constraints))
+      "maximum_information_only"
+    else
+      "with_constraints"
   }
   
   result()

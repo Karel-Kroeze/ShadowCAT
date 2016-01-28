@@ -6,7 +6,7 @@
 \usage{
 shadowcat_roqua(new_response, estimate, responses, administered, available,
   model, alpha, beta, start_items, stop_test, estimator, information_summary,
-  prior = NULL, guessing = NULL, eta = NULL, item_selection = "MI",
+  prior = NULL, guessing = NULL, eta = NULL,
   constraints_and_characts = NULL, lower_bound = rep(-3, ncol(alpha)),
   upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL)
 }
@@ -66,9 +66,7 @@ NULL means no cut off values}
 
 \item{eta}{Matrix of location parameters, optionally used in GPCM model, ignored for all others.}
 
-\item{item_selection}{selection criterion; one of "MI" (maximum information) or "Shadow" (maximum information and take constraints into account)}
-
-\item{constraints_and_characts}{list with constraints and characteristics
+\item{constraints_and_characts}{list with constraints and characteristics; NULL means no constraints
 constraints should be specified as a list of constraints, each constraint is a list with three named values;
 name: the column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as name/value.
 op: the logical operator to be used. Valid options are "<", "=", ">" and "><".
