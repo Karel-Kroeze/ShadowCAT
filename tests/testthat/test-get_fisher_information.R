@@ -45,6 +45,8 @@ test_that("model is 3PLM, 3 dimensions, 2 categories", {
   expect_equal(round(fisher_information[3,,40], 3), c(.049, .072, .079))
 })
 
+context("GPCM model")
+
 test_that("model is GPCM, 1 dimensions, 2 categories", {
   number_dimensions <- 1
   theta <- -.7

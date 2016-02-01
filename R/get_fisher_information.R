@@ -59,18 +59,15 @@ get_fisher_information <- function(estimate, model, number_dimensions, estimator
     # p[,1] = q, p[, 2] = p
     (probabilities[,1] / probabilities[,2]) * ((probabilities[,2] - guessing)/(1 - guessing))^2
   }
-  
+    
   get_D_GRM <- function() {
     # Graded Response Model (Glas & Dagohoy, 2007)
     inner_product_alpha_theta <- as.vector(alpha %*% drop(estimate))
-    D <- numeric(number_items)
-    for (item in 1:number_items) {
-      for (item_step in 1:(number_itemsteps_per_item[item] + 1)) {
-        Psi <- c(1, logistic_function(inner_product_alpha_theta[item] - beta[item, 1:number_itemsteps_per_item[item]]), 0)
-        D[item] <- D[item] + probabilities[item, item_step] * (Psi[item_step] * (1 - Psi[item_step]) + Psi[item_step + 1] * (1 - Psi[item_step + 1]))
-      }
-    }
-    D
+    sapply(1:number_items, 
+           function(item) {
+             Psi <- c(1, logistic_function(inner_product_alpha_theta[item] - beta[item, 1:number_itemsteps_per_item[item]]), 0)
+             sum(probabilities[item, 1:(number_itemsteps_per_item[item] + 1)] * (Psi[1:(number_itemsteps_per_item[item] + 1)] * (1 - Psi[1:(number_itemsteps_per_item[item] + 1)]) + Psi[2:(number_itemsteps_per_item[item] + 2)] * (1 - Psi[2:(number_itemsteps_per_item[item] + 2)])))
+            })
   }
 
   get_D_SM <- function() {
@@ -89,14 +86,13 @@ get_fisher_information <- function(estimate, model, number_dimensions, estimator
   
   get_D_GPCM <- function() {
     # Generalized Partial Credit Model (Muraki, 1992)
-    D <- numeric(number_items)
-    for (item in 1:number_items) {
-      mi <- 1:number_itemsteps_per_item[item]
-      pi <- probabilities[item, mi + 1] # remove j = 0, index is now also correct.
-      mp <- sum(mi*pi)  
-      D[item] <- sum((mi * pi) * (mi - mp))
-    }
-    D
+    sapply(1:number_items,
+           function(item) {
+             mi <- 1:number_itemsteps_per_item[item]
+             pi <- probabilities[item, mi + 1] # remove j = 0, index is now also correct.
+             mp <- sum(mi*pi)  
+             sum((mi * pi) * (mi - mp))
+           })
   }
   
   result()
