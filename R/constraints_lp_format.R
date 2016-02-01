@@ -67,14 +67,14 @@ constraints_lp_format <- function(max_n, number_items, characteristics = NULL, c
       return(data.frame(length = rep(1, number_items)))
     
     numeric_characteristics_list <- lapply(colnames(characteristics), 
-                                           FUN = function(key) {   
-                                            if (is.character(characteristics[[key]]) || is.factor(characteristics[[key]])) {
-                                              dummy_matrix <- sapply(unique(characteristics[[key]]), FUN = categorical_to_dummy, categorical_vector = characteristics[[key]])
-                                              colnames(dummy_matrix) <- paste(key, unique(characteristics[[key]]), sep = '/')
-                                              dummy_matrix 
+                                           function(key) {   
+                                             if (is.character(characteristics[[key]]) || is.factor(characteristics[[key]])) {
+                                               dummy_matrix <- sapply(unique(characteristics[[key]]), categorical_to_dummy, categorical_vector = characteristics[[key]])
+                                               colnames(dummy_matrix) <- paste(key, unique(characteristics[[key]]), sep = '/')
+                                               dummy_matrix 
                                             }  
-                                            else
-                                              matrix(characteristics[[key]], ncol = 1, dimnames = list(c(), key))
+                                             else
+                                               matrix(characteristics[[key]], ncol = 1, dimnames = list(c(), key))
                                             } 
                                     )
 
@@ -86,20 +86,20 @@ constraints_lp_format <- function(max_n, number_items, characteristics = NULL, c
  
   
   get_names_numeric_characteristics_list <- function(numeric_characteristics_list) {
-    unlist(sapply(numeric_characteristics_list, 
-                  FUN = function(key) { colnames(key) }))
+    unlist(sapply(numeric_characteristics_list, function(key) { colnames(key) }))
   }
   
   get_constraints_lp <- function() {
     if (is.null(constraints))
       return(data.frame(name = 'length', op = '=', target = max_n, stringsAsFactors = FALSE))
     
-    constraints_lp_format_list <- lapply(constraints, FUN = function(constraint) { if (constraint$op == "><")  
-                                                                                     rbind(c(constraint$name, ">", constraint$target[1]), 
-                                                                                           c(constraint$name, "<", constraint$target[2]))
-                                                                                   else
-                                                                                     c(constraint$name, constraint$op, constraint$target)
-                                                                                 }) 
+    constraints_lp_format_list <- lapply(constraints, function(constraint) { 
+                                                        if (constraint$op == "><")  
+                                                          rbind(c(constraint$name, ">", constraint$target[1]), 
+                                                                c(constraint$name, "<", constraint$target[2]))
+                                                        else
+                                                          c(constraint$name, constraint$op, constraint$target)
+                                                       }) 
 
     constraints_lp_format <- unlist_and_name_constraints_lp_format(constraints_lp_format_list)    
 
