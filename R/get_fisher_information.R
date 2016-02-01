@@ -32,59 +32,59 @@ get_fisher_information <- function(estimate, model, number_dimensions, estimator
   probabilities <- probabilities_and_likelihoods(estimate, responses = NULL, model, 1:number_items, number_dimensions, estimator, alpha, beta, guessing)
   
   result <- function() {
-    D = get_D(model)
+    information_vector <- get_information_vector(model)
     
     # just dump everything back, how to deal with information is up to caller function.  
     lapply_return_array(1:number_items, 
                         dim = c(number_dimensions, number_dimensions, number_items), 
                         FUN = function(item) { 
-                          (alpha[item,] %*% t(alpha[item,])) * D[item] 
+                          (alpha[item,] %*% t(alpha[item,])) * information_vector[item] 
                         } )
   }
   
-  get_D <- function(model) {
+  get_information_vector <- function(model) {
     switch(model,
-           "3PLM" = get_D_3PLM(),
-           "GRM" = get_D_GRM(),
-           "SM" = get_D_SM(),
-           "GPCM" = get_D_GPCM())
+           "3PLM" = get_information_vector_3plm(),
+           "GRM" = get_information_vector_grm(),
+           "SM" = get_information_vector_sm(),
+           "GPCM" = get_information_vector_gpcm())
   }
   
   logistic_function <- function(x) {
-    exp(x)/(1+exp(x))
+    exp(x) / (1 + exp(x))
   }
   
-  get_D_3PLM <- function() {
+  get_information_vector_3plm <- function() {
     # exact form Segall 1997, CAT book, p. 72
     # p[,1] = q, p[, 2] = p
     (probabilities[,1] / probabilities[,2]) * ((probabilities[,2] - guessing)/(1 - guessing))^2
   }
     
-  get_D_GRM <- function() {
+  get_information_vector_grm <- function() {
     # Graded Response Model (Glas & Dagohoy, 2007)
     inner_product_alpha_theta <- as.vector(alpha %*% drop(estimate))
     sapply(1:number_items, 
            function(item) {
-             Psi <- c(1, logistic_function(inner_product_alpha_theta[item] - beta[item, 1:number_itemsteps_per_item[item]]), 0)
-             sum(probabilities[item, 1:(number_itemsteps_per_item[item] + 1)] * (Psi[1:(number_itemsteps_per_item[item] + 1)] * (1 - Psi[1:(number_itemsteps_per_item[item] + 1)]) + Psi[2:(number_itemsteps_per_item[item] + 2)] * (1 - Psi[2:(number_itemsteps_per_item[item] + 2)])))
+             psi <- c(1, logistic_function(inner_product_alpha_theta[item] - beta[item, 1:number_itemsteps_per_item[item]]), 0)
+             sum(probabilities[item, 1:(number_itemsteps_per_item[item] + 1)] * (psi[1:(number_itemsteps_per_item[item] + 1)] * (1 - psi[1:(number_itemsteps_per_item[item] + 1)]) + psi[2:(number_itemsteps_per_item[item] + 2)] * (1 - psi[2:(number_itemsteps_per_item[item] + 2)])))
             })
   }
 
-  get_D_SM <- function() {
+  get_information_vector_sm <- function() {
     # Sequential Model (Tutz, xxxx)
     # TODO: triple check this.
     inner_product_alpha_theta <- as.vector(alpha %*% drop(estimate))
-    D <- numeric(number_items)
+    information_vector <- numeric(number_items)
     for (item in 1:number_items) {
       for (item_step in 1:(number_itemsteps_per_item[item] + 1)) {
-        Psi <- c(1, logistic_function(inner_product_alpha_theta[item] - beta[item, 1:number_itemsteps_per_item[item]]), 0) # basically: 1, logistic_function(inner_product_alpha_theta - b), 0.
-        D[item] <- D[item] + probabilities[item, item_step] * sum(Psi[2:(item_step + 1)] * (1 - Psi[2:(item_step + 1)]))
+        psi <- c(1, logistic_function(inner_product_alpha_theta[item] - beta[item, 1:number_itemsteps_per_item[item]]), 0) # basically: 1, logistic_function(inner_product_alpha_theta - b), 0.
+        information_vector[item] <- information_vector[item] + probabilities[item, item_step] * sum(psi[2:(item_step + 1)] * (1 - psi[2:(item_step + 1)]))
       }
     }
-    D
+    information_vector
   }
   
-  get_D_GPCM <- function() {
+  get_information_vector_gpcm <- function() {
     # Generalized Partial Credit Model (Muraki, 1992)
     sapply(1:number_items,
            function(item) {

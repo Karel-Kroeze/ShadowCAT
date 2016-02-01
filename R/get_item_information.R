@@ -25,7 +25,7 @@
 #' @return vector with information for each available item
 #' @export
 get_item_information <- function(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE) {
-  fisher_information <- get_fisher_information(estimate, model, number_dimensions, estimator, alpha, beta, guessing,  number_itemsteps_per_item)
+  fisher_information <- get_fisher_information(estimate, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
   result <- function() {
     item_information <- get_item_information_switch()
     item_information_imputed_missings <- impute_zero_for_na(item_information)   
