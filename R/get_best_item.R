@@ -3,11 +3,11 @@
 #' This function is a wrapper that sends the actual work to the correct subroutines.
 #' 
 #' @param information_summary called "objective" by Kroeze; how to summarize information; one of
-#' "D" = determinant: compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
-#' "PD" = posterior determinant: compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
-#' "A" = trace: compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
-#' "PA" = posterior trace: compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
-#' "PEKL" = compute Posterior expected Kullback-Leibler Information
+#' "determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
+#' "posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+#' "trace": compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
+#' "posterior_trace": compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+#' "posterior_expected_kullback_leibler" = compute Posterior expected Kullback-Leibler Information
 #' @param lp_constraints data frame with constraints in lp format: the lp_constraints from the list returned by constraints_lp_format(); NULL means no constraints
 #' @param lp_characters data frame with constraint characters in lp format: the lp_chars from the list returned by constraints_lp_format(); NULL means no constraints
 #' @param estimate vector containing current theta estimate

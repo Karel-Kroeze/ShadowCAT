@@ -1,11 +1,11 @@
 #' Obtain a vector with information for each available item (values of the objective function). 
 #'
 #' @param information_summary called "objective" by Kroeze; how to summarize information; one of
-#' "D" = determinant: compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
-#' "PD" = posterior determinant: compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
-#' "A" = trace: compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
-#' "PA" = posterior trace: compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
-#' "PEKL" = compute Posterior expected Kullback-Leibler Information
+#' "determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
+#' "posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+#' "trace": compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
+#' "posterior_trace": compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+#' "posterior_expected_kullback_leibler" = compute Posterior expected Kullback-Leibler Information
 #' @param estimate vector with current theta estimate
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param responses vector with person responses
@@ -53,11 +53,11 @@ get_item_information <- function(information_summary, estimate, model, responses
   
   get_item_information_switch <- function() {
     item_information <- switch(information_summary,
-                               "A" = item_information_trace(),
-                               "PA" = item_information_post_trace(),
-                               "D" = item_information_determinant(),
-                               "PD" = item_information_post_determinant(),
-                               "PEKL" = item_information_pekl())
+                               "trace" = item_information_trace(),
+                               "posterior_trace" = item_information_post_trace(),
+                               "determinant" = item_information_determinant(),
+                               "posterior_determinant" = item_information_post_determinant(),
+                               "posterior_expected_kullback_leibler" = item_information_pekl())
     
     # If all item_information values are 0, something went horribly wrong.
     # This is made worse by lpSolve -> it will give back a full vector, not respecting constraints.
@@ -71,37 +71,32 @@ get_item_information <- function(information_summary, estimate, model, responses
     }        
   }
   
-  # A
   item_information_trace <- function() {
     information_administered <- apply(fisher_information[,,administered, drop = FALSE], c(1, 2), sum)
     apply(fisher_information[,,available, drop = FALSE], 3, function(x) sum(diag(information_administered + x)))
   }
   
-  # PA
   item_information_post_trace <- function() {
     information_administered <- apply(fisher_information[,,administered, drop = FALSE], c(1, 2), sum) + solve(prior)
     apply(fisher_information[,,available, drop = FALSE], 3, function(x) sum(diag(information_administered + x)))
   }
   
-  # D
   item_information_determinant <- function() {
     information_administered <- apply(fisher_information[,,administered, drop = FALSE], c(1, 2), sum)
     apply(fisher_information[,,available, drop = FALSE], 3, function(x) det(information_administered + x))
   }
-  
-  # PD
+
   item_information_post_determinant <- function() {
     information_administered <- apply(fisher_information[,,administered, drop = FALSE], c(1, 2), sum) + solve(prior)
     apply(fisher_information[,,available, drop = FALSE], 3, function(x) det(information_administered + x))
   }
-  
-  # PEKL
+
   item_information_pekl <- function() {
     get_posterior_expected_kl_information(estimate, model, responses, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior, number_itemsteps_per_item, lower_bound, upper_bound)
   }
   
   validate <- function() {
-    if (information_summary %not_in% c("A", "PA", "D", "PD", "PEKL"))
+    if (information_summary %not_in% c("trace", "posterior_trace", "determinant", "posterior_determinant", "posterior_expected_kullback_leibler"))
       add_error("information_summary", "of unknown type")
   }
   

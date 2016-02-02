@@ -38,11 +38,11 @@ make_random_seed_exist <- rnorm(1)
 #' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation) or "ML" (maximum likelihood); 
 #' "EAP" (Expected A Posteriori Estimation) is currently not working due to problems with the MultiGHQuad package
 #' @param information_summary called "objective" by Kroeze; how to summarize information; one of
-#' "D" = determinant: compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
-#' "PD" = posterior determinant: compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
-#' "A" = trace: compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
-#' "PA" = posterior trace: compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
-#' "PEKL" = compute Posterior expected Kullback-Leibler Information
+#' "determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
+#' "posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+#' "trace": compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
+#' "posterior_trace": compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+#' "posterior_expected_kullback_leibler" = compute Posterior expected Kullback-Leibler Information
 #' @param constraints_and_characts list with constraints and characteristics: constraints_and_characts = list(constraints = ..., characteristics = ...)
 #' constraints should be specified as a list of constraints, each constraint is a list with three named values;
 #' name: the column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as name/value.
@@ -82,7 +82,7 @@ test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing
 #' @param estimator_vec vector containing the conditions for the estimator to be used. Simulations are performed for each estimator in estimator_vec.
 #' Options are "ML", "MAP", and "EAP"
 #' @param information_summary_vec vector containing the conditions for the information_summary to be used. Simulations are performed for each model summary in estimator_vec,
-#' Options are "D", "PD", "A", "PA", and "PEKL" 
+#' Options are "determinant", "posterior_determinant", "trace", "posterior_trace", and "posterior_expected_kullback_leibler" 
 #' @param iterations_per_unique_condition number of iterations to be performed within each unique condition
 #' @param number_dimensions the number of dimensions of the model (either 1 or the length of true_theta_vec)
 get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions) {
@@ -113,7 +113,7 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
 #' @param estimator_vec vector containing the conditions for the estimator to be used. Simulations are performed for each estimator in estimator_vec.
 #' Options are "ML", "MAP", and "EAP"
 #' @param information_summary_vec vector containing the conditions for the information_summary to be used. Simulations are performed for each model summary in estimator_vec,
-#' Options are "D", "PD", "A", "PA", and "PEKL"
+#' Options are "determinant", "posterior_determinant", "trace", "posterior_trace", and "posterior_expected_kullback_leibler"
 #' @param start_items items that are shown to the patient before adaptive proces starts; one of
 #' list(type = 'random', n)
 #' list(type = 'fixed', indeces, n)
@@ -188,7 +188,7 @@ test_that("true theta is 2, estimator is MAP", {
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 100)
   estimator <- 'MAP'
-  information_summary <- 'PD'
+  information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 5
@@ -219,7 +219,7 @@ test_that("true theta is 2, estimator is ML", {
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 100)
   estimator <- 'ML'
-  information_summary <- 'D'
+  information_summary <- 'determinant'
   
   test_outcome <- with_random_seed(2, test_shadowcat_roqua)(true_theta, prior = NULL, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, initial_variance = diag(1))
   
@@ -247,7 +247,7 @@ test_that("true theta is 2, estimator is EAP", {
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 100)
   estimator <- 'EAP'
-  information_summary <- 'PD'
+  information_summary <- 'posterior_determinant'
   
   prior <- diag(number_dimensions) * 5
   
@@ -282,7 +282,7 @@ test_that("true theta is 1, 0, 2, estimator is MAP", {
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
   estimator <- 'MAP'
-  information_summary <- 'PD'
+  information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
@@ -316,7 +316,7 @@ test_that("true theta is 1, 0, 2, estimator is ML", {
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
   estimator <- 'ML'
-  information_summary <- 'D'
+  information_summary <- 'determinant'
   
   test_outcome <- with_random_seed(3, test_shadowcat_roqua)(true_theta, prior = NULL, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, initial_variance = diag(1))
   
@@ -354,7 +354,7 @@ test_that("true theta is 1, 0, 2, estimator is EAP", {
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
   estimator <- 'MAP'
-  information_summary <- 'PD'
+  information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
@@ -386,7 +386,7 @@ test_that("items load on three dimensions", {
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
   estimator <- 'MAP'
-  information_summary <- 'PD'
+  information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
@@ -420,7 +420,7 @@ test_that("true theta is 2, 2, 2", {
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
   estimator <- 'MAP'
-  information_summary <- 'PD'
+  information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
@@ -454,7 +454,7 @@ test_that("with constraints max_n 260", {
   start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
   stop_test <- list(max_n = 260)
   estimator <- 'MAP'
-  information_summary <- 'PD'
+  information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
@@ -504,7 +504,7 @@ test_that("with constraints max_n 130", {
   start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
   stop_test <- list(max_n = 130)
   estimator <- 'MAP'
-  information_summary <- 'PD'
+  information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
@@ -554,7 +554,7 @@ test_that("start n is zero, no constraints", {
   start_items <- list(n = 0)
   stop_test <- list(max_n = 300)
   estimator <- 'MAP'
-  information_summary <- 'PD'
+  information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
@@ -588,7 +588,7 @@ test_that("start n is zero, with constraints", {
   start_items <- list(n = 0)
   stop_test <- list(max_n = 130)
   estimator <- 'MAP'
-  information_summary <- 'PD'
+  information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
@@ -636,7 +636,7 @@ test_that("stop rule is number of items", {
   start_items <- list(type = 'random', n = 5)
   stop_test <- list(max_n = 10)
   estimator <- 'MAP'
-  information_summary <- 'PD'
+  information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions)
@@ -668,7 +668,7 @@ test_that("stop rule is variance", {
   start_items <- list(type = 'random', n = 5)
   stop_test <- list(target = .5, max_n = 50)
   estimator <- 'MAP'
-  information_summary <- 'PD'
+  information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions)
@@ -700,7 +700,7 @@ test_that("stop rule is variance and minimum number of items is taken into accou
   start_items <- list(type = 'random', n = 5)
   stop_test <- list(target = .5, max_n = 50, min_n = 10)
   estimator <- 'MAP'
-  information_summary <- 'PD'
+  information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions)
@@ -735,7 +735,7 @@ test_that("stop rule is cutoff", {
   start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
   stop_test <- list(max_n = 300, cutoffs = with_random_seed(2, matrix)(runif(903, 1, 2), ncol = 3))
   estimator <- 'MAP'
-  information_summary <- 'PD'
+  information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
@@ -767,7 +767,7 @@ if (FALSE) {
     variance_target <- .1^2
     model_vec <- c("3PLM", "GRM", "GPCM", "SM")
     estimator_vec <- "EAP"
-    information_summary_vec <- c("D", "PD", "A", "PA", "PEKL") 
+    information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler") 
     prior <- diag(number_dimensions) * 100
     
     estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound, prior = prior)
@@ -797,7 +797,7 @@ if (FALSE) {
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
     estimator_vec <- "MAP"
-    information_summary_vec <- c("D", "PD", "A", "PA", "PEKL") 
+    information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler")  
     
     estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound)
     
@@ -827,7 +827,7 @@ if (FALSE) {
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
     estimator_vec <- "ML"
-    information_summary_vec <- c("D", "PD", "A", "PA") # PEKL
+    information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace")  # "posterior_expected_kullback_leibler"
     
     estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound)
     
@@ -857,7 +857,7 @@ if (FALSE) {
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
     estimator_vec <- "ML"
-    information_summary_vec <- c("D", "PD", "A", "PA") # PEKL 
+    information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace")  # "posterior_expected_kullback_leibler" 
     
     estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
     estimates_and_variance_without_errors <- sapply(estimates_and_variance, 
@@ -912,7 +912,7 @@ test_that("one dimension, estimator MAP, no constraints on item selection, 100 i
   variance_target <- .1^2
   model_vec <- c("3PLM","GRM","GPCM","SM")
   estimator_vec <- "MAP"
-  information_summary_vec <- c("D", "PD", "A", "PA", "PEKL")
+  information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler")
   
   estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
   
@@ -953,7 +953,7 @@ test_that("one dimension, estimator EAP, no constraints on item selection, 100 i
   variance_target <- .1^2
   model_vec <- c("3PLM","GRM","GPCM","SM")
   estimator_vec <- "EAP"
-  information_summary_vec <- c("D", "PD", "A", "PA", "PEKL")
+  information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler")
   
   estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
   
@@ -994,7 +994,7 @@ test_that("three dimensions, ML, information summary D, PD, A, and PA, no constr
   variance_target <- .1^2
   model_vec <- c("3PLM","GRM","GPCM","SM")
   estimator_vec <- "ML"
-  information_summary_vec <- c("D", "PD", "A", "PA") # PEKL 
+  information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace") 
   
   estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
   estimates_and_variance_without_errors <- sapply(estimates_and_variance, 
@@ -1056,7 +1056,7 @@ test_that("three dimensions, MAP, no constraints on item selection, 100 iteratio
   variance_target <- .1^2
   model_vec <- c("3PLM","GRM","GPCM","SM")
   estimator_vec <- "MAP"
-  information_summary_vec <- c("D", "PD", "A", "PA", "PEKL")
+  information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler")
   
   estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
  
@@ -1108,7 +1108,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
   variance_target <- .1^2
   model_vec <- c("3PLM","GRM","GPCM","SM")
   estimator_vec <- "AEP"
-  information_summary_vec <- c("D", "PD", "A", "PA", "PEKL") 
+  information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler")
   
   estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
   estimates_and_variance_without_errors <- sapply(estimates_and_variance, 
@@ -1167,7 +1167,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
     estimator_vec <- c("ML", "MAP")
-    information_summary_vec <- c("D", "PD", "A", "PA")
+    information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace")
     
     estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, prior_var_safe_nlm = 100)
     
@@ -1224,7 +1224,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
     estimator_vec <- c("ML", "MAP") # AEP
-    information_summary_vec <- c("D", "PD", "A", "PA") # PEKL 
+    information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace") # "posterior_expected_kullback_leibler"
     
     estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, items_load_one_dimension = FALSE, prior_var_safe_nlm = 100)
     #save(estimates_and_variance, file = "/Users/rivkadevries/Desktop/simulationsCAT/estimates_and_variance_within.R")
@@ -1290,7 +1290,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
     estimator_vec <- c("ML", "MAP") # AEP
-    information_summary_vec <- c("D", "PD", "A", "PA") # PEKL 
+    information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace") # PEKL 
     
     estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, items_load_one_dimension = FALSE, prior_var_safe_nlm = 1)
     #save(estimates_and_variance, file = "/Users/rivkadevries/Desktop/simulationsCAT/estimates_and_variance_within_safe_var1.R")
@@ -1357,7 +1357,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     variance_target <- .001^2
     model_vec <- "SM"
     estimator_vec <- c("ML", "MAP") # AEP
-    information_summary_vec <- "D" # PEKL 
+    information_summary_vec <- "determinant" 
     max_n = 130
     
     #create item characteristics and constraints
@@ -1440,7 +1440,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     variance_target <- .001^2
     model_vec <- "SM"
     estimator_vec <- c("ML", "MAP") # AEP
-    information_summary_vec <- "D" # PEKL 
+    information_summary_vec <- "determinant"
     max_n = 260
     
     #create item characteristics and constraints
@@ -1492,7 +1492,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
     estimator_vec <- "MAP"
-    information_summary_vec <- c("D", "PD", "A", "PA") # PEKL 
+    information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace") # PEKL 
     
     estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, prior = diag(3) * .5, prior_var_safe_nlm = 100)
     

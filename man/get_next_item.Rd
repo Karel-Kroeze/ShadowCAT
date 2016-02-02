@@ -18,11 +18,11 @@ where n = total number of initial items, indeces = vector of initial item indece
 n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension}
 
 \item{information_summary}{called "objective" by Kroeze; how to summarize information; one of
-"D" = determinant: compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
-"PD" = posterior determinant: compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
-"A" = trace: compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
-"PA" = posterior trace: compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
-"PEKL" = compute Posterior expected Kullback-Leibler Information}
+"determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
+"posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+"trace": compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
+"posterior_trace": compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+"posterior_expected_kullback_leibler" = compute Posterior expected Kullback-Leibler Information}
 
 \item{lp_constraints}{data frame with constraints in lp format: the lp_constraints from the list returned by constraints_lp_format(); NULL means no constraints}
 

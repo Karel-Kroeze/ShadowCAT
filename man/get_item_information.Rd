@@ -11,11 +11,11 @@ get_item_information(information_summary, estimate, model, responses, prior,
 }
 \arguments{
 \item{information_summary}{called "objective" by Kroeze; how to summarize information; one of
-"D" = determinant: compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
-"PD" = posterior determinant: compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
-"A" = trace: compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
-"PA" = posterior trace: compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
-"PEKL" = compute Posterior expected Kullback-Leibler Information}
+"determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
+"posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+"trace": compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
+"posterior_trace": compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+"posterior_expected_kullback_leibler" = compute Posterior expected Kullback-Leibler Information}
 
 \item{estimate}{vector with current theta estimate}
 

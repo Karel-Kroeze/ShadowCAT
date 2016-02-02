@@ -12,7 +12,7 @@ number_dimensions <- 1
 number_items <- 50
 max_n <- 20
 estimator <- "MAP"
-information_summary <- "PD"
+information_summary <- "posterior_determinant"
 estimate <- 0
 prior <- .4
 lower_bound <- -3

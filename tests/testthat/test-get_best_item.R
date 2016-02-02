@@ -7,7 +7,7 @@ library(lpSolve)
 make_random_seed_exist <- rnorm(1)
 
 model <- "3PLM"
-information_summary <- "PD"
+information_summary <- "posterior_determinant"
 estimator <- "MAP"
 max_n <- 20
 number_items <- 50
@@ -104,7 +104,7 @@ test_that("First 10 items administered, Shadow", {
 context("many item characteristics equal")
 
 model <- "3PLM"
-information_summary <- "PD"
+information_summary <- "posterior_determinant"
 estimator <- "MAP"
 max_n <- 20
 number_items <- 50

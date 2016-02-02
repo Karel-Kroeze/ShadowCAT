@@ -6,7 +6,7 @@ library(testthat)
 make_random_seed_exist <- rnorm(1)
 
 test_that("with padding in objective function", {
-  information_summary <- "PD"
+  information_summary <- "posterior_determinant"
   estimate <- 0
   model <- "3PLM"
   estimator <- "ML"

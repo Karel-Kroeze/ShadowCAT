@@ -14,7 +14,7 @@ test_that("First 1 item administered, information_summary is D (determinant), on
   number_dimensions <- 1
   estimator <- "MAP"
   estimate <- rep(0, number_dimensions)
-  information_summary <- "D"
+  information_summary <- "determinant"
   responses <- 1
   available <- 2:50
   administered <- 1
@@ -38,7 +38,7 @@ test_that("First 1 item administered, information_summary is D (determinant), th
   number_dimensions <- 3
   estimator <- "MAP"
   estimate <- rep(0, number_dimensions)
-  information_summary <- "D"
+  information_summary <- "determinant"
   responses <- 1
   available <- 2:50
   administered <- 1
@@ -62,7 +62,7 @@ test_that("First 10 item administered, information_summary is D (determinant), t
   number_dimensions <- 3
   estimator <- "MAP"
   estimate <- rep(0, number_dimensions)
-  information_summary <- "D"
+  information_summary <- "determinant"
   responses <- rep(c(1, 0), 5)
   available <- 11:50
   administered <- 1:10
@@ -88,7 +88,7 @@ test_that("First 1 item administered, objective is PD (posterior determinant), o
   number_dimensions <- 1
   estimator <- "MAP"
   estimate <- rep(0, number_dimensions)
-  information_summary <- "PD"
+  information_summary <- "posterior_determinant"
   responses <- 1
   available <- 2:50
   administered <- 1
@@ -112,7 +112,7 @@ test_that("First 1 item administered, information_summary is PD (posterior deter
   number_dimensions <- 3
   estimator <- "MAP"
   estimate <- rep(0, number_dimensions)
-  information_summary <- "PD"
+  information_summary <- "posterior_determinant"
   responses <- 1
   available <- 2:50
   administered <- 1
@@ -136,7 +136,7 @@ test_that("First 10 item administered, information_summary is PD (posterior dete
   number_dimensions <- 3
   estimator <- "MAP"
   estimate <- rep(0, number_dimensions)
-  information_summary <- "PD"
+  information_summary <- "posterior_determinant"
   responses <- rep(c(1, 0), 5)
   available <- 11:50
   administered <- 1:10
@@ -160,7 +160,7 @@ test_that("10 scattered items administered, information_summary is PD (posterior
   number_dimensions <- 1
   estimator <- "MAP"
   estimate <- rep(0, number_dimensions)
-  information_summary <- "PD"
+  information_summary <- "posterior_determinant"
   responses <- rep(c(1, 0), 5)
   available <- c(1, 3, 4, 6, 7, 9, 10, 12:18, 20:24, 31:50)
   administered <- c(2, 5, 8, 11, 19, 25:30)
@@ -185,7 +185,7 @@ test_that("10 scattered items administered, information_summary is PD (posterior
   number_dimensions <- 3
   estimator <- "MAP"
   estimate <- rep(0, number_dimensions)
-  information_summary <- "PD"
+  information_summary <- "posterior_determinant"
   responses <- rep(c(1, 0), 5)
   available <- c(1, 3, 4, 6, 7, 9, 10, 12:18, 20:24, 31:50)
   administered <- c(2, 5, 8, 11, 19, 25:30)
@@ -212,7 +212,7 @@ test_that("First 1 item administered, objective is A (trace), one dimension, wit
   number_dimensions <- 1
   estimator <- "MAP"
   estimate <- rep(0, number_dimensions)
-  information_summary <- "A"
+  information_summary <- "trace"
   responses <- 1
   available <- 2:50
   administered <- 1
@@ -236,7 +236,7 @@ test_that("First 1 item administered, information_summary is A (trace), three di
   number_dimensions <- 3
   estimator <- "MAP"
   estimate <- rep(0, number_dimensions)
-  information_summary <- "A"
+  information_summary <- "trace"
   responses <- 1
   available <- 2:50
   administered <- 1
@@ -259,7 +259,7 @@ test_that("First 10 item administered, information_summary is A (trace), three d
   number_dimensions <- 3
   estimator <- "MAP"
   estimate <- rep(0, number_dimensions)
-  information_summary <- "A"
+  information_summary <- "trace"
   responses <- rep(c(1, 0), 5)
   available <- 11:50
   administered <- 1:10
@@ -285,7 +285,7 @@ test_that("First 1 item administered, information_summary is PA (posterior trace
   number_dimensions <- 1
   estimator <- "MAP"
   estimate <- rep(0, number_dimensions)
-  information_summary <- "PA"
+  information_summary <- "posterior_trace"
   responses <- 1
   available <- 2:50
   administered <- 1
@@ -309,7 +309,7 @@ test_that("First 1 item administered, information_summary is PA (posterior trace
   number_dimensions <- 3
   estimator <- "MAP"
   estimate <- rep(0, number_dimensions)
-  information_summary <- "PA"
+  information_summary <- "posterior_trace"
   responses <- 1
   available <- 2:50
   administered <- 1
@@ -333,7 +333,7 @@ test_that("First 10 item administered, information_summary is PA (posterior trac
   number_dimensions <- 3
   estimator <- "MAP"
   estimate <- rep(0, number_dimensions)
-  information_summary <- "PA"
+  information_summary <- "posterior_trace"
   responses <- rep(c(1, 0), 5)
   available <- 11:50
   administered <- 1:10
@@ -360,7 +360,7 @@ test_that("First 1 item administered, information_summary is PEKL, one dimension
   estimator <- "MAP"
   estimate <- rep(0, number_dimensions)
   attr(estimate, 'variance') <- .4
-  information_summary <- "PEKL"
+  information_summary <- "posterior_expected_kullback_leibler"
   responses <- 1
   available <- 2:50
   administered <- 1
@@ -387,7 +387,7 @@ test_that("information_summary is PD", {
   number_dimensions <- 1
   estimator <- "MAP"
   estimate <- rep(0, number_dimensions)
-  information_summary <- "PD"
+  information_summary <- "posterior_determinant"
   responses <- c(1, 0)
   available <- 3:50
   administered <- 1:2
@@ -413,7 +413,7 @@ test_that("information_summary is PEKL", {
   estimator <- "MAP"
   estimate <- rep(0, number_dimensions)
   attr(estimate, 'variance') <- .4
-  information_summary <- "PEKL"
+  information_summary <- "posterior_expected_kullback_leibler"
   responses <- c(1, 0)
   available <- 3:50
   administered <- 1:2
@@ -464,7 +464,7 @@ test_that("zero item information", {
   number_dimensions <- 3
   estimator <- "MAP"
   estimate <- rep(0, number_dimensions)
-  information_summary <- "D"
+  information_summary <- "determinant"
   responses <- rep(c(1, 0), 15)
   available <- 31:50
   administered <- 1:30

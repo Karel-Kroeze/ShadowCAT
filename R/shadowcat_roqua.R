@@ -33,11 +33,11 @@
 #' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation) or "ML" (maximum likelihood); 
 #' "EAP" (Expected A Posteriori Estimation) is currently not working due to problems with the MultiGHQuad package
 #' @param information_summary called "objective" by Kroeze; how to summarize information; one of
-#' "D" = determinant: compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
-#' "PD" = posterior determinant: compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
-#' "A" = trace: compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
-#' "PA" = posterior trace: compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
-#' "PEKL" = compute Posterior expected Kullback-Leibler Information
+#' "determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
+#' "posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+#' "trace": compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
+#' "posterior_trace": compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+#' "posterior_expected_kullback_leibler" = compute Posterior expected Kullback-Leibler Information
 #' @param prior covariance matrix of the (multi variate) normal prior for theta; mean vector is fixed at zero; not used for ML estimator
 #' #' note that this prior should be a square matrix with number of rows and columns equal to the number of dimensions; values on the diagonal should be larger than 0
 #' @param guessing vector of guessing parameters per item. Optionally used in 3PLM model, ignored for all others.
