@@ -22,9 +22,9 @@ make_random_seed_exist <- rnorm(1)
 #' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others.
 #' @param start_items items that are shown to the patient before adaptive proces starts; one of
 #' list(type = 'random', n)
-#' list(type = 'fixed', indices, n)
+#' list(type = 'fixed', indeces, n)
 #' list(type = 'random_by_dimension', n_by_dimension, n)
-#' where n = total number of initial items, indices = vector of initial item indeces, 
+#' where n = total number of initial items, indeces = vector of initial item indeces, 
 #' n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
 #' If n is 0, only n needs to be defined
 #' @param stop_test rule for when to stop providing new items to patient; should be a list of the form
@@ -116,9 +116,9 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
 #' Options are "D", "PD", "A", "PA", and "PEKL"
 #' @param start_items items that are shown to the patient before adaptive proces starts; one of
 #' list(type = 'random', n)
-#' list(type = 'fixed', indices, n)
+#' list(type = 'fixed', indeces, n)
 #' list(type = 'random_by_dimension', n_by_dimension, n)
-#' where n = total number of initial items, indices = vector of initial item indeces, 
+#' where n = total number of initial items, indeces = vector of initial item indeces, 
 #' n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
 #' If n is 0, only n needs to be defined
 #' @param variance_target variance of theta at which testing should stop

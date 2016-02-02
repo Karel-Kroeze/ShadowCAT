@@ -66,7 +66,7 @@ test_that("number of responses is 2, number of required starting items 5, start 
 
 context("start type is fixed")
 
-start_items <- list(type = 'fixed', indices = c(2, 4, 7:9), n = 5)
+start_items <- list(type = 'fixed', indeces = c(2, 4, 7:9), n = 5)
 
 test_that("number of responses is 0, number of required starting items 5, start type fixed", {
   responses <- numeric(0)
