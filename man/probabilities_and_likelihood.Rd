@@ -20,7 +20,7 @@ probabilities_and_likelihood(theta, responses = NULL, model, items_to_include,
 
 \item{number_dimensions}{number of dimensions}
 
-\item{estimator}{type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "EAP" (Expected A Posteriori Estimation), or "ML" (maximum likelihood)}
+\item{estimator}{type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"}
 
 \item{alpha}{matrix containing the alpha parameters}
 
@@ -28,7 +28,7 @@ probabilities_and_likelihood(theta, responses = NULL, model, items_to_include,
 
 \item{guessing}{matrix containing the quessing parameters}
 
-\item{prior}{prior covariance matrix for theta; only required if estimator is "MAP" or "EAP" and output is "likelihood" or "both"}
+\item{prior}{prior covariance matrix for theta; only required if estimator is "maximum_aposteriori" or "expected_aposteriori" and output is "likelihood" or "both"}
 
 \item{return_log_likelihood}{if TRUE, log of likelihood is returned, else likelihood}
 
@@ -39,7 +39,7 @@ or "both" (return list containing both)}
 }
 \value{
 if output = "probs": matrix with for each included item (rows) the probability of scoring in each answer category (columns), given theta
-if output = "likelihood": the likelihood (estimator = ML) or posterior density (MAP/EAP) of theta, with first and second derivatives as attributes
+if output = "likelihood": the likelihood (estimator = maximum_likelihood) or posterior density (maximum_aposteriori/expected_aposteriori) of theta, with first and second derivatives as attributes
 if output = "both": al list containing both
 }
 \description{

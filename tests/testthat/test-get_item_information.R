@@ -12,7 +12,7 @@ test_that("First 1 item administered, information_summary is D (determinant), on
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 1
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   estimate <- rep(0, number_dimensions)
   information_summary <- "determinant"
   responses <- 1
@@ -36,7 +36,7 @@ test_that("First 1 item administered, information_summary is D (determinant), th
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 3
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   estimate <- rep(0, number_dimensions)
   information_summary <- "determinant"
   responses <- 1
@@ -60,7 +60,7 @@ test_that("First 10 item administered, information_summary is D (determinant), t
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 3
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   estimate <- rep(0, number_dimensions)
   information_summary <- "determinant"
   responses <- rep(c(1, 0), 5)
@@ -86,7 +86,7 @@ test_that("First 1 item administered, objective is PD (posterior determinant), o
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 1
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   estimate <- rep(0, number_dimensions)
   information_summary <- "posterior_determinant"
   responses <- 1
@@ -110,7 +110,7 @@ test_that("First 1 item administered, information_summary is PD (posterior deter
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 3
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   estimate <- rep(0, number_dimensions)
   information_summary <- "posterior_determinant"
   responses <- 1
@@ -134,7 +134,7 @@ test_that("First 10 item administered, information_summary is PD (posterior dete
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 3
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   estimate <- rep(0, number_dimensions)
   information_summary <- "posterior_determinant"
   responses <- rep(c(1, 0), 5)
@@ -158,7 +158,7 @@ test_that("10 scattered items administered, information_summary is PD (posterior
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 1
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   estimate <- rep(0, number_dimensions)
   information_summary <- "posterior_determinant"
   responses <- rep(c(1, 0), 5)
@@ -183,7 +183,7 @@ test_that("10 scattered items administered, information_summary is PD (posterior
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 3
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   estimate <- rep(0, number_dimensions)
   information_summary <- "posterior_determinant"
   responses <- rep(c(1, 0), 5)
@@ -210,7 +210,7 @@ test_that("First 1 item administered, objective is A (trace), one dimension, wit
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 1
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   estimate <- rep(0, number_dimensions)
   information_summary <- "trace"
   responses <- 1
@@ -234,7 +234,7 @@ test_that("First 1 item administered, information_summary is A (trace), three di
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 3
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   estimate <- rep(0, number_dimensions)
   information_summary <- "trace"
   responses <- 1
@@ -257,7 +257,7 @@ test_that("First 10 item administered, information_summary is A (trace), three d
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 3
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   estimate <- rep(0, number_dimensions)
   information_summary <- "trace"
   responses <- rep(c(1, 0), 5)
@@ -283,7 +283,7 @@ test_that("First 1 item administered, information_summary is PA (posterior trace
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 1
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   estimate <- rep(0, number_dimensions)
   information_summary <- "posterior_trace"
   responses <- 1
@@ -307,7 +307,7 @@ test_that("First 1 item administered, information_summary is PA (posterior trace
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 3
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   estimate <- rep(0, number_dimensions)
   information_summary <- "posterior_trace"
   responses <- 1
@@ -331,7 +331,7 @@ test_that("First 10 item administered, information_summary is PA (posterior trac
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 3
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   estimate <- rep(0, number_dimensions)
   information_summary <- "posterior_trace"
   responses <- rep(c(1, 0), 5)
@@ -351,13 +351,13 @@ test_that("First 10 item administered, information_summary is PA (posterior trac
   expect_equal(round(item_information[c(1:5, 35:38,47:50)], 3), c(.000, .000, .000, .000, .000, 8.095, 8.246, 7.936, 8.087, 8.513, 8.124, 8.230, 8.005))
 })
 
-context("information_summary is PEKL")
+context("information_summary is posterior_expected_kullback_leibler")
 
 test_that("First 1 item administered, information_summary is PEKL, one dimension, with padding", {
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 1
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   estimate <- rep(0, number_dimensions)
   attr(estimate, 'variance') <- .4
   information_summary <- "posterior_expected_kullback_leibler"
@@ -385,7 +385,7 @@ test_that("information_summary is PD", {
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 1
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   estimate <- rep(0, number_dimensions)
   information_summary <- "posterior_determinant"
   responses <- c(1, 0)
@@ -410,7 +410,7 @@ test_that("information_summary is PEKL", {
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 1
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   estimate <- rep(0, number_dimensions)
   attr(estimate, 'variance') <- .4
   information_summary <- "posterior_expected_kullback_leibler"
@@ -438,7 +438,7 @@ test_that("information_summary is of unknown type", {
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 1
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   estimate <- rep(0, number_dimensions)
   information_summary <- "PPP"
   responses <- c(1, 0)
@@ -462,7 +462,7 @@ test_that("zero item information", {
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 3
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   estimate <- rep(0, number_dimensions)
   information_summary <- "determinant"
   responses <- rep(c(1, 0), 15)

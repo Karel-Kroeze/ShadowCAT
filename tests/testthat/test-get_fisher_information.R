@@ -11,7 +11,7 @@ test_that("model is 3PLM, 1 dimensions, 2 categories", {
   number_dimensions <- 1
   theta <- .5
   model <- "3PLM"
-  estimator <- "ML"
+  estimator <- "maximum_likelihood"
   number_items <- 50
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
@@ -28,7 +28,7 @@ test_that("model is 3PLM, 3 dimensions, 2 categories", {
   number_dimensions <- 3
   theta <- c(2.1, -1.1, .7 )
   model <- "3PLM"
-  estimator <- "ML"
+  estimator <- "maximum_likelihood"
   number_items <- 50
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
@@ -51,7 +51,7 @@ test_that("model is GPCM, 1 dimensions, 2 categories", {
   number_dimensions <- 1
   theta <- -.7
   model <- "GPCM"
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   number_items <- 50
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
@@ -69,7 +69,7 @@ test_that("model is GPCM, 3 dimensions, varying numbers of categories", {
   number_dimensions <- 3
   theta <- c(2, 1, -2)
   model <- "GPCM"
-  estimator <- "ML"
+  estimator <- "maximum_likelihood"
   number_items <- 50
   max_number_answer_categories <- 5
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
@@ -97,7 +97,7 @@ test_that("model is SM 1 dimensions, 2 categories", {
   number_dimensions <- 1
   theta <- .9
   model <- "SM"
-  estimator <- "ML"
+  estimator <- "maximum_likelihood"
   number_items <- 50
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
@@ -114,7 +114,7 @@ test_that("model is SM, 3 dimensions, 3 dimensions, 4 categories", {
   number_dimensions <- 3
   theta <- c(-.5, .6, 1.2)
   model <- "SM"
-  estimator <- "ML"
+  estimator <- "maximum_likelihood"
   number_items <- 50
   number_answer_categories <- 4
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
@@ -137,7 +137,7 @@ test_that("model is SM, 3 dimensions, varying number of categories", {
   number_dimensions <- 3
   theta <- c(-2, 1, 2)
   model <- "SM"
-  estimator <- "ML"
+  estimator <- "maximum_likelihood"
   number_items <- 50
   max_number_answer_categories <- 5
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
@@ -165,7 +165,7 @@ test_that("model is GRM 1 dimensions, 2 categories", {
   number_dimensions <- 1
   theta <- -2
   model <- "GRM"
-  estimator <- "ML"
+  estimator <- "maximum_likelihood"
   number_items <- 50
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
@@ -182,7 +182,7 @@ test_that("model is GRM, 3 dimensions, varying numbers of categories", {
   number_dimensions <- 3
   theta <- c(2, .1, -1)
   model <- "GRM"
-  estimator <- "ML"
+  estimator <- "maximum_likelihood"
   number_items <- 50
   number_answer_categories <- 4
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
@@ -205,7 +205,7 @@ test_that("model is GRM, 3 dimensions, varying number of categories", {
   number_dimensions <- 3
   theta <- c(1.4, -1.4, 2.1)
   model <- "GRM"
-  estimator <- "ML"
+  estimator <- "maximum_likelihood"
   number_items <- 50
   max_number_answer_categories <- 5
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)

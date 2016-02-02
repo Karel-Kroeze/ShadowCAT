@@ -4,13 +4,12 @@
 #' items <- simulate_testbank("GPCM")
 #' 
 #' # simulates responses on items indicated by indeces, given true theta
-#' simulate_answer(.3, "GPCM", 1, "MAP", items$pars$alpha, items$pars$beta, items$pars$guessing, items$M, 3)
+#' simulate_answer(.3, "GPCM", 1, "maximum_aposteriori", items$pars$alpha, items$pars$beta, items$pars$guessing, items$M, 3)
 #' 
 #' @param theta vector with true theta
 #' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param number_dimensions number of dimensions
-#' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation) or "ML" (maximum likelihood); 
-#' "EAP" (Expected A Posteriori Estimation) is currently not working due to problems with the MultiGHQuad package
+#' @param estimator type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"
 #' @param alpha matrix of alpha parameters
 #' @param beta matrix of beta parameters
 #' @param guessing vector of guessing parameters

@@ -16,11 +16,11 @@
 #' @param administered vector with indeces of administered items
 #' @param available vector with indeces of available items
 #' @param number_dimensions number of dimensions
-#' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "EAP" (Expected A Posteriori Estimation), or "ML" (maximum likelihood)
+#' @param estimator type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"
 #' @param alpha matrix containing the alpha parameters
 #' @param beta matrix containing the beta parameters
 #' @param guessing matrix containing the quessing parameters
-#' @param prior prior covariance matrix for theta; only required if estimator is "MAP" or "EAP" and output is "likelihood" or "both"
+#' @param prior prior covariance matrix for theta
 #' @param number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix
 #' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
@@ -38,15 +38,15 @@ get_posterior_expected_kl_information <- function(estimate, model, responses, ad
   }
   
   get_theta_estimate <- function() {
-    # collect EAP estimate
-    if (estimator == "EAP")
+    # collect expected a posteriori estimate
+    if (estimator == "expected_aposteriori")
       estimate
     else
-      estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator = "EAP", alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
+      estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator = "expected_aposteriori", alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
   }
   
   #' Kullback Leibler Divergence for given items and pairs of thetas x posterior density.
-  #' theta0 is theta estimated with EAP
+  #' theta0 is theta estimated with expected_aposteriori
   #' returns vector containing information for each yet available item
   KLB <- function(theta, theta0) {
     # TODO: wrap this into PEKL, do not recompute P0 for each theta (considering it is constant for the current posterior).

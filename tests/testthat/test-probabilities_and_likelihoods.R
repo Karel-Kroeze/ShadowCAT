@@ -7,12 +7,12 @@ make_random_seed_exist <- rnorm(1)
 
 context("3PLM model")
 
-test_that("model is 3PLM, 1 dimension, 2 categories, estimator is MAP, deriv is false", {
+test_that("model is 3PLM, 1 dimension, 2 categories, estimator is maximum_aposteriori, deriv is false", {
   theta <- .5
   model <- "3PLM"
   administered <- 1:50
   number_dimensions <- 1
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
  
   number_items <- 50
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
@@ -26,12 +26,12 @@ test_that("model is 3PLM, 1 dimension, 2 categories, estimator is MAP, deriv is 
   expect_equal(dim(probabilities), c(50, 2))
 })
 
-test_that("model is 3PLM, 2 dimensions, 2 categories, estimator is ML, deriv is true", {
+test_that("model is 3PLM, 2 dimensions, 2 categories, estimator is maximum_likelihood, deriv is true", {
   theta <- c(.3, .5)
   model <- "3PLM"
   administered <- 1:50
   number_dimensions <- 2
-  estimator <- "ML"
+  estimator <- "maximum_likelihood"
   responses <- rep(c(1, 0), 25)
   
   number_items <- 50
@@ -54,12 +54,12 @@ test_that("model is 3PLM, 2 dimensions, 2 categories, estimator is ML, deriv is 
   expect_equal(round(attr(probabilities$likelihood, "hessian"), 3), matrix(c(-3.005, -2.816, -2.816, -3.373), ncol = 2))
 })
 
-test_that("model is 3PLM, 1 dimension, 2 categories, estimator is MAP, deriv is true", {
+test_that("model is 3PLM, 1 dimension, 2 categories, estimator is maximum_aposteriori, deriv is true", {
   theta <- .2
   model <- "3PLM"
   administered <- 1:50
   number_dimensions <- 1
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   responses <- rep(c(1, 0), 25)
   prior <- diag(1)
   
@@ -83,12 +83,12 @@ test_that("model is 3PLM, 1 dimension, 2 categories, estimator is MAP, deriv is 
   expect_equal(round(attr(probabilities$likelihood, "hessian"), 3), matrix(-6.35))
 })
 
-test_that("model is 3PLM, 3 dimensions, 2 categories, estimator is EAP, deriv is true", {
+test_that("model is 3PLM, 3 dimensions, 2 categories, estimator is expected_aposteriori, deriv is true", {
   theta <- c(.1, -.4, 2)
   model <- "3PLM"
   administered <- 1:50
   number_dimensions <- 3
-  estimator <- "EAP"
+  estimator <- "expected_aposteriori"
   responses <- rep(c(1, 0), 25)
   prior <- matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3)
   
@@ -110,12 +110,12 @@ test_that("model is 3PLM, 3 dimensions, 2 categories, estimator is EAP, deriv is
 
 context("model is GPCM")
 
-test_that("model is GPCM, 1 dimensions, 2 categories, estimator is MAP, deriv is true", {
+test_that("model is GPCM, 1 dimensions, 2 categories, estimator is maximum_aposteriori, deriv is true", {
   theta <- .6
   model <- "GPCM"
   administered <- 1:50
   number_dimensions <- 1
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   responses <- rep(c(0, 1), 25)
   prior <- diag(1) * .6
   
@@ -139,12 +139,12 @@ test_that("model is GPCM, 1 dimensions, 2 categories, estimator is MAP, deriv is
   expect_equal(round(attr(probabilities$likelihood, "hessian"), 3), matrix(-10.722))
 }) 
 
-test_that("model is GPCM, 3 dimensions, 4 categories, estimator is EAP, deriv is true", {
+test_that("model is GPCM, 3 dimensions, 4 categories, estimator is expected_aposteriori, deriv is true", {
   theta <- c(-2, 1, .4)
   model <- "GPCM"
   administered <- 1:50
   number_dimensions <- 3
-  estimator <- "EAP"
+  estimator <- "expected_aposteriori"
   responses <- c(rep(c(0, 1, 2), 16), 1, 1)
   prior <-  matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3)
   
@@ -171,12 +171,12 @@ test_that("model is GPCM, 3 dimensions, 4 categories, estimator is EAP, deriv is
   expect_equal(round(attr(probabilities$likelihood, "hessian")[1,], 3), c(-18.092, -17.893, -17.446))
 }) 
 
-test_that("model is GPCM, 3 dimensions, varying number of categories, estimator is EAP, deriv is true", {
+test_that("model is GPCM, 3 dimensions, varying number of categories, estimator is expected_aposteriori, deriv is true", {
   theta <- c(.7, -1.2, 2)
   model <- "GPCM"
   administered <- 1:50
   number_dimensions <- 3
-  estimator <- "EAP"
+  estimator <- "expected_aposteriori"
   responses <- c(rep(c(0, 1, 2), 16), 1, 1)
   prior <-  matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3)
   
@@ -207,12 +207,12 @@ test_that("model is GPCM, 3 dimensions, varying number of categories, estimator 
 }) 
 
 
-test_that("model is GPCM, 3 dimensions, 4 categories, estimator is ML, deriv is true", {
+test_that("model is GPCM, 3 dimensions, 4 categories, estimator is maximum_likelihood, deriv is true", {
   theta <- c(-1, 2, 3)
   model <- "GPCM"
   administered <- 1:50
   number_dimensions <- 3
-  estimator <- "ML"
+  estimator <- "maximum_likelihood"
   responses <- c(rep(c(0, 1, 2), 16), 1, 1)
   prior <- NULL
   
@@ -235,12 +235,12 @@ test_that("model is GPCM, 3 dimensions, 4 categories, estimator is ML, deriv is 
   expect_equal(length(probabilities), 2)
 }) 
 
-test_that("model is GPCM, 3 dimensions, 4 categories, estimator is EAP, deriv is false", {
+test_that("model is GPCM, 3 dimensions, 4 categories, estimator is expected_aposteriori, deriv is false", {
   theta <- c(-2, -1.3, -2.1)
   model <- "GPCM"
   administered <- 1:50
   number_dimensions <- 3
-  estimator <- "EAP"
+  estimator <- "expected_aposteriori"
   responses <- c(rep(c(0, 1, 2), 16), 1, 1)
   prior <- NULL
   
@@ -261,12 +261,12 @@ test_that("model is GPCM, 3 dimensions, 4 categories, estimator is EAP, deriv is
 
 context("GRM model")
 
-test_that("model is GRM, 3 dimensions, 4 categories, estimator is EAP, deriv is true", {
+test_that("model is GRM, 3 dimensions, 4 categories, estimator is expected_aposteriori, deriv is true", {
   theta <- c(.2, 2, 2.5)
   model <- "GRM"
   administered <- 1:50
   number_dimensions <- 3
-  estimator <- "EAP"
+  estimator <- "expected_aposteriori"
   responses <- c(rep(c(0, 1, 2), 16), 0, 1)
   prior <- matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3)
   
@@ -293,12 +293,12 @@ test_that("model is GRM, 3 dimensions, 4 categories, estimator is EAP, deriv is 
   expect_equal(round(attr(probabilities$likelihood, "hessian")[1,], 3), c(-1.864, -3.085, -2.745))
 }) 
 
-test_that("model is GRM, 3 dimensions, 4 categories, estimator is ML, deriv is true", {
+test_that("model is GRM, 3 dimensions, 4 categories, estimator is maximum_likelihood, deriv is true", {
   theta <- c(2, 1, 3)
   model <- "GRM"
   administered <- 1:50
   number_dimensions <- 3
-  estimator <- "ML"
+  estimator <- "maximum_likelihood"
   responses <- c(rep(c(0, 1, 2), 16), 1, 1)
   prior <- NULL
   
@@ -320,12 +320,12 @@ test_that("model is GRM, 3 dimensions, 4 categories, estimator is ML, deriv is t
   expect_equal(length(probabilities), 2)
 }) 
 
-test_that("model is GRM, 3 dimensions, varying number of categories, estimator is EAP, deriv is true", {
+test_that("model is GRM, 3 dimensions, varying number of categories, estimator is expected_aposteriori, deriv is true", {
   theta <- c(-2, -1.1, 2)
   model <- "GRM"
   administered <- 1:50
   number_dimensions <- 3
-  estimator <- "EAP"
+  estimator <- "expected_aposteriori"
   responses <- c(rep(c(0, 1, 2), 16), 1, 1)
   prior <- matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3)
   
@@ -355,12 +355,12 @@ test_that("model is GRM, 3 dimensions, varying number of categories, estimator i
   expect_equal(round(attr(probabilities$likelihood, "hessian")[1,], 3), c(-11.989, -11.077, -11.042))
 }) 
 
-test_that("model is GRM, 3 dimensions, 4 categories, estimator is EAP, deriv is false", {
+test_that("model is GRM, 3 dimensions, 4 categories, estimator is expected_aposteriori, deriv is false", {
   theta <- c(.1, 2.2, 1.8)
   model <- "GRM"
   administered <- 1:50
   number_dimensions <- 3
-  estimator <- "EAP"
+  estimator <- "expected_aposteriori"
   responses <- c(rep(c(0, 1, 2), 16), 1, 1)
   prior <- NULL
   
@@ -380,12 +380,12 @@ test_that("model is GRM, 3 dimensions, 4 categories, estimator is EAP, deriv is 
 
 context("SM model")
 
-test_that("model is SM, 3 dimensions, 4 categories, estimator is EAP, deriv is true", {
+test_that("model is SM, 3 dimensions, 4 categories, estimator is expected_aposteriori, deriv is true", {
   theta <- c(2, 1.2, -2.3)
   model <- "SM"
   administered <- 1:50
   number_dimensions <- 3
-  estimator <- "EAP"
+  estimator <- "expected_aposteriori"
   responses <- c(rep(c(0, 1, 2), 16), 0, 1)
   prior <- matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3)
   
@@ -411,12 +411,12 @@ test_that("model is SM, 3 dimensions, 4 categories, estimator is EAP, deriv is t
   expect_equal(round(attr(probabilities$likelihood, "hessian")[1,], 3), c(-9.229, -9.184, -10.147))
 }) 
 
-test_that("model is SM, 3 dimensions, varying number of categories, estimator is EAP, deriv is true", {
+test_that("model is SM, 3 dimensions, varying number of categories, estimator is expected_aposteriori, deriv is true", {
   theta <- c(1.8, -1.4, 2.5)
   model <- "SM"
   administered <- 1:50
   number_dimensions <- 3
-  estimator <- "EAP"
+  estimator <- "expected_aposteriori"
   responses <- c(rep(c(0, 1, 2), 16), 1, 1)
   prior <- matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3)
   
@@ -446,12 +446,12 @@ test_that("model is SM, 3 dimensions, varying number of categories, estimator is
   expect_equal(round(attr(probabilities$likelihood, "hessian")[1,], 3), c(-1.398, -3.486, -2.896))
 }) 
 
-test_that("model is SM, 3 dimensions, 4 categories, estimator is ML, deriv is true", {
+test_that("model is SM, 3 dimensions, 4 categories, estimator is maximum_likelihood, deriv is true", {
   theta <- c(-2.4, 1, 2.7)
   model <- "SM"
   administered <- 1:50
   number_dimensions <- 3
-  estimator <- "ML"
+  estimator <- "maximum_likelihood"
   responses <- c(rep(c(0, 1, 2), 16), 1, 1)
   prior <- NULL
   
@@ -473,12 +473,12 @@ test_that("model is SM, 3 dimensions, 4 categories, estimator is ML, deriv is tr
   expect_equal(length(probabilities), 2)
 }) 
 
-test_that("model is SM, 3 dimensions, 4 categories, estimator is ML, deriv is false", {
+test_that("model is SM, 3 dimensions, 4 categories, estimator is maximum_likelihood, deriv is false", {
   theta <- c(.2, -.4, 1.1)
   model <- "SM"
   administered <- 1:50
   number_dimensions <- 3
-  estimator <- "ML"
+  estimator <- "maximum_likelihood"
   responses <- c(rep(c(0, 1, 2), 16), 1, 1)
   prior <- NULL
   

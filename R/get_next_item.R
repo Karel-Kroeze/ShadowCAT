@@ -19,7 +19,7 @@
 #' @param estimate vector with current theta estimate
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param responses vector with person responses
-#' @param prior prior covariance matrix for theta; only required if estimator is "MAP" or "EAP" and output is "likelihoods" or "both"
+#' @param prior covariance matrix of the (multi variate) normal prior for theta
 #' @param available vector with indeces of yet available items
 #' @param administered vector with indeces of administered items
 #' @param number_items number of items in test bank

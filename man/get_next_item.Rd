@@ -34,7 +34,7 @@ n_by_dimension = scalar of number of initial items per dimension, or vector with
 
 \item{responses}{vector with person responses}
 
-\item{prior}{prior covariance matrix for theta; only required if estimator is "MAP" or "EAP" and output is "likelihoods" or "both"}
+\item{prior}{covariance matrix of the (multi variate) normal prior for theta}
 
 \item{available}{vector with indeces of yet available items}
 

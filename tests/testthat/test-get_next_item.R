@@ -11,7 +11,7 @@ model <- "3PLM"
 number_items <- 50
 number_dimensions <- 1
 start_items <- list(type = 'random', n = 5)
-estimator <- "MAP"
+estimator <- "maximum_aposteriori"
 information_summary <- "posterior_determinant"
 lp_constraints <- NULL
 lp_characters <- NULL
@@ -91,7 +91,7 @@ model <- "3PLM"
 number_items <- 50
 number_dimensions <- 3
 start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9) 
-estimator <- "MAP"
+estimator <- "maximum_aposteriori"
 information_summary <- "posterior_determinant"
 lp_constraints <- NULL
 lp_characters <- NULL

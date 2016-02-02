@@ -23,7 +23,7 @@ get_item_information(information_summary, estimate, model, responses, prior,
 
 \item{responses}{vector with person responses}
 
-\item{prior}{prior covariance matrix for theta; only required if estimator is "MAP" or "EAP" and output is "likelihoods" or "both"}
+\item{prior}{prior covariance matrix for theta}
 
 \item{available}{vector with indeces of yet available items}
 
@@ -33,7 +33,7 @@ get_item_information(information_summary, estimate, model, responses, prior,
 
 \item{number_dimensions}{number of dimensions}
 
-\item{estimator}{type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "EAP" (Expected A Posteriori Estimation), or "ML" (maximum likelihood)}
+\item{estimator}{type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"}
 
 \item{alpha}{matrix containing the alpha parameters}
 

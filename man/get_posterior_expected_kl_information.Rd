@@ -21,7 +21,7 @@ get_posterior_expected_kl_information(estimate, model, responses, administered,
 
 \item{number_dimensions}{number of dimensions}
 
-\item{estimator}{type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "EAP" (Expected A Posteriori Estimation), or "ML" (maximum likelihood)}
+\item{estimator}{type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"}
 
 \item{alpha}{matrix containing the alpha parameters}
 
@@ -29,7 +29,7 @@ get_posterior_expected_kl_information(estimate, model, responses, administered,
 
 \item{guessing}{matrix containing the quessing parameters}
 
-\item{prior}{prior covariance matrix for theta; only required if estimator is "MAP" or "EAP" and output is "likelihood" or "both"}
+\item{prior}{prior covariance matrix for theta}
 
 \item{number_itemsteps_per_item}{vector containing the number of non missing cells per row of the beta matrix}
 

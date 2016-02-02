@@ -14,7 +14,7 @@ get_fisher_information(estimate, model, number_dimensions, estimator, alpha,
 
 \item{number_dimensions}{number of dimensions}
 
-\item{estimator}{type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "EAP" (Expected A Posteriori Estimation), or "ML" (maximum likelihood)}
+\item{estimator}{type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"}
 
 \item{alpha}{matrix containing the alpha parameters}
 

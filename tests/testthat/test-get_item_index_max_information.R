@@ -9,7 +9,7 @@ test_that("with padding in objective function", {
   information_summary <- "posterior_determinant"
   estimate <- 0
   model <- "3PLM"
-  estimator <- "ML"
+  estimator <- "maximum_likelihood"
   number_items <- 50
   number_dimensions <- 1
   available <- c(6:10, 21:30, 50)

@@ -5,11 +5,11 @@ library(testthat)
 
 make_random_seed_exist <- rnorm(1)
 
-test_that("1 dimensions, 2 categories, estimator is ML", {
+test_that("1 dimensions, 2 categories, estimator is maximum_likelihood", {
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 1
-  estimator <- "ML"
+  estimator <- "maximum_likelihood"
   estimate <- 0
   responses <- rep(c(1, 0), 17)
   administered <- c(6:20, 31:49)
@@ -28,11 +28,11 @@ test_that("1 dimensions, 2 categories, estimator is ML", {
   expect_equal(round(posterior_expected_kl_information[c(1, 3, 16)], 19), c(4.112e-13, 3.457e-13, 1.753e-12))
 })
 
-test_that("1 dimensions, 2 categories, estimator is EAP", {
+test_that("1 dimensions, 2 categories, estimator is expected_aposteriori", {
   model <- "3PLM"
   number_items <- 50
   number_dimensions <- 1
-  estimator <- "EAP"
+  estimator <- "expected_aposteriori"
   estimate <- 0
   responses <- rep(c(1, 0), 17)
   administered <- c(6:20, 31:49)
@@ -56,7 +56,7 @@ test_that("model is GPCM, 3 dimensions, varying numbers of categories", {
   model <- "GPCM"
   number_items <- 50
   number_dimensions <- 3
-  estimator <- "EAP"
+  estimator <- "expected_aposteriori"
   estimate <- 0
   responses <- rep(c(1, 0), 17)
   administered <-  c(6:20, 31:49)

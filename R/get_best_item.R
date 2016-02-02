@@ -13,12 +13,12 @@
 #' @param estimate vector containing current theta estimate
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param responses vector with person responses
-#' @param prior prior covariance matrix for theta; only required if estimator is "MAP" or "EAP" and output is "likelihoods" or "both"
+#' @param prior prior covariance matrix for theta
 #' @param available vector with indeces of yet available items
 #' @param administered vector with indeces of administered items
 #' @param number_items number of items in the test bank
 #' @param number_dimensions number of dimensions
-#' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "EAP" (Expected A Posteriori Estimation), or "ML" (maximum likelihood)
+#' @param estimator type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"
 #' @param alpha matrix containing the alpha parameters
 #' @param beta matrix containing the beta parameters
 #' @param guessing matrix containing the quessing parameters

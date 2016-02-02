@@ -11,7 +11,7 @@ number_items <- 50
 number_dimensions <- 1
 number_items <- 50
 max_n <- 20
-estimator <- "MAP"
+estimator <- "maximum_aposteriori"
 information_summary <- "posterior_determinant"
 estimate <- 0
 prior <- .4

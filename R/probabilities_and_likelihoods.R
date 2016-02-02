@@ -5,17 +5,17 @@
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param items_to_include vector with indeces of items to include in computations, usually indeces of either the administered items or all items
 #' @param number_dimensions number of dimensions
-#' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "EAP" (Expected A Posteriori Estimation), or "ML" (maximum likelihood)
+#' @param estimator type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"
 #' @param alpha matrix containing the alpha parameters
 #' @param beta matrix containing the beta parameters
 #' @param guessing matrix containing the quessing parameters
-#' @param prior prior covariance matrix for theta; only required if estimator is "MAP" or "EAP" and output is "likelihood" or "both"
+#' @param prior prior covariance matrix for theta; only required if estimator is "maximum_aposteriori" or "expected_aposteriori" and output is "likelihood" or "both"
 #' @param return_log_likelihood if TRUE, log of likelihood is returned, else likelihood
 #' @param inverse_likelihood should likelihood values be reversed (useful for minimization, reverses LL as well as derivatives)
 #' @param output string, one of "probs" (return matrix with probabilities for each included item), "likelihood" (return likelihood or posterior density of theta, with first and second derivatives as attributes),
 #' or "both" (return list containing both)
 #' @return if output = "probs": matrix with for each included item (rows) the probability of scoring in each answer category (columns), given theta
-#' if output = "likelihood": the likelihood (estimator = ML) or posterior density (MAP/EAP) of theta, with first and second derivatives as attributes
+#' if output = "likelihood": the likelihood (estimator = maximum_likelihood) or posterior density (maximum_aposteriori/expected_aposteriori) of theta, with first and second derivatives as attributes
 #' if output = "both": al list containing both
 #' @importFrom mvtnorm dmvnorm
 #' @importFrom Rcpp evalCpp
@@ -90,7 +90,7 @@ probabilities_and_likelihood <- function(theta, responses = NULL, model, items_t
     # likelihoods can never truly be zero, let alone negative
     probabilities$l[which(probabilities$l <= 0)] <- 1e-10  
     log_likelihood <- sum(log(probabilities$l))
-    if (estimator == "ML")
+    if (estimator == "maximum_likelihood")
       log_likelihood
     else
       log_likelihood - (t(theta) %*% solve(prior) %*% theta) / 2    
@@ -99,7 +99,7 @@ probabilities_and_likelihood <- function(theta, responses = NULL, model, items_t
   # TODO: derivatives are correct for a single item, but not for K > 1?
   get_first_derivative <- function(probabilities) {
     derivative1 <- matrix(probabilities$d, nrow = 1) %*% alpha
-    if (estimator == "ML")
+    if (estimator == "maximum_likelihood")
       derivative1
     else
       derivative1 - t(solve(prior) %*% theta)  
@@ -111,16 +111,16 @@ probabilities_and_likelihood <- function(theta, responses = NULL, model, items_t
                                     FUN = function(item, alpha, D) { alpha[item,] %*% t(alpha[item,]) * D[item] }, 
                                     alpha = alpha, 
                                     D = probabilities$D)
-    if (estimator == "ML")
+    if (estimator == "maximum_likelihood")
       derivative2
     else
       derivative2 - solve(prior)  
   }
   
   validate <- function() {
-   # if (!is.null(prior) && estimator == "ML" && output != "probs")
-   #   add_error("prior", "set for ML estimator, this makes no sense")
-    if (is.null(prior) && estimator %in% c("MAP", "EAP") && output != "probs")
+   # if (!is.null(prior) && estimator == "maximum_likelihood" && output != "probs")
+   #   add_error("prior", "set for maximum_likelihood estimator, this makes no sense")
+    if (is.null(prior) && estimator %in% c("maximum_aposteriori", "expected_aposteriori") && output != "probs")
       add_error("prior", "is missing but required for estimate")
   }
     

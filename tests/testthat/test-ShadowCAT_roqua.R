@@ -10,7 +10,7 @@ make_random_seed_exist <- rnorm(1)
 #' simulate a testing routine with shadowcat
 #' 
 #' @param true_theta true theta value or vector
-#' @param prior covariance matrix of the (multi variate) normal prior for theta; mean vector is fixed at zero; not used for ML estimator
+#' @param prior covariance matrix of the (multi variate) normal prior for theta; mean vector is fixed at zero; not used for maximum_likelihood estimator
 #' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param alpha Matrix of alpha parameters, one column per dimension, one row per item. Note that so called within-dimensional models still use an alpha matrix, they simply 
 #' have only one non-zero loading per item.
@@ -35,8 +35,7 @@ make_random_seed_exist <- rnorm(1)
 #' cutoffs = matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
 #' administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at certain iteration, test stops; 
 #' NULL means no cut off values
-#' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation) or "ML" (maximum likelihood); 
-#' "EAP" (Expected A Posteriori Estimation) is currently not working due to problems with the MultiGHQuad package
+#' @param estimator type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"
 #' @param information_summary called "objective" by Kroeze; how to summarize information; one of
 #' "determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
 #' "posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
@@ -52,18 +51,18 @@ make_random_seed_exist <- rnorm(1)
 #' See constraints_lp_format() for details
 #' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values 
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
-#' @param prior_var_safe_ml if not NULL, EAP estimate with prior variance equal to prior_var_safe_ml (scalar or vector) is computed instead of ML/MAP, if ML/MAP estimate fails.
+#' @param prior_var_safe_ml if not NULL, expected_aposteriori estimate with prior variance equal to prior_var_safe_ml (scalar or vector) is computed instead of maximum_likelihood/maximum_aposteriori, if maximum_likelihood/maximum_aposteriori estimate fails.
 #' @param initital_estimate vector containing the initial theta estimates (starting values)
 #' @param initial_variance matrix containing the initial covariance matrix (staring values)
 #' @return
-test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints_and_characts = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha)), prior_var_safe_nlm = NULL, initital_estimate = rep(0, ncol(alpha)), initial_variance = prior) {
+test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints_and_characts = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL, initital_estimate = rep(0, ncol(alpha)), initial_variance = prior) {
   new_response <- NULL
   attr(initital_estimate, 'variance') <- initial_variance
-  next_item_and_test_outcome <- shadowcat_roqua(new_response, estimate = initital_estimate , responses = numeric(0), administered = numeric(0), available = 1:nrow(beta), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta, constraints_and_characts, lowerbound, upperbound, prior_var_safe_nlm)
+  next_item_and_test_outcome <- shadowcat_roqua(new_response, estimate = initital_estimate , responses = numeric(0), administered = numeric(0), available = 1:nrow(beta), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta, constraints_and_characts, lowerbound, upperbound, prior_var_safe_ml)
 
   while (next_item_and_test_outcome$index_new_item != "stop_test") {
     new_response <- simulate_answer(true_theta, model, ncol(alpha), estimator, alpha, beta, guessing, ncol(beta), next_item_and_test_outcome$index_new_item)
-    next_item_and_test_outcome <- shadowcat_roqua(new_response, next_item_and_test_outcome$estimate, next_item_and_test_outcome$responses, next_item_and_test_outcome$administered, next_item_and_test_outcome$available, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior,  guessing, eta, constraints_and_characts, lowerbound, upperbound, prior_var_safe_nlm)  
+    next_item_and_test_outcome <- shadowcat_roqua(new_response, next_item_and_test_outcome$estimate, next_item_and_test_outcome$responses, next_item_and_test_outcome$administered, next_item_and_test_outcome$available, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior,  guessing, eta, constraints_and_characts, lowerbound, upperbound, prior_var_safe_ml)  
   }
   
   next_item_and_test_outcome
@@ -80,7 +79,7 @@ test_shadowcat_roqua <- function(true_theta, prior, model, alpha, beta, guessing
 #' @param model_vec vector containing the conditions for the model to be used. Simulations are performed for each model in model_vec. Model options are
 #' '3PLM', 'GPCM', 'SM' and 'GRM'
 #' @param estimator_vec vector containing the conditions for the estimator to be used. Simulations are performed for each estimator in estimator_vec.
-#' Options are "ML", "MAP", and "EAP"
+#' Options are "maximum_likelihood", "maximum_aposteriori", and "expected_aposteriori"
 #' @param information_summary_vec vector containing the conditions for the information_summary to be used. Simulations are performed for each model summary in estimator_vec,
 #' Options are "determinant", "posterior_determinant", "trace", "posterior_trace", and "posterior_expected_kullback_leibler" 
 #' @param iterations_per_unique_condition number of iterations to be performed within each unique condition
@@ -111,7 +110,7 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
 #' @param model_vec vector containing the conditions for the model to be used. Simulations are performed for each model in model_vec. Model options are
 #' '3PLM', 'GPCM', 'SM' and 'GRM'
 #' @param estimator_vec vector containing the conditions for the estimator to be used. Simulations are performed for each estimator in estimator_vec.
-#' Options are "ML", "MAP", and "EAP"
+#' Options are "maximum_likelihood", "maximum_aposteriori", and "expected_aposteriori"
 #' @param information_summary_vec vector containing the conditions for the information_summary to be used. Simulations are performed for each model summary in estimator_vec,
 #' Options are "determinant", "posterior_determinant", "trace", "posterior_trace", and "posterior_expected_kullback_leibler"
 #' @param start_items items that are shown to the patient before adaptive proces starts; one of
@@ -135,14 +134,14 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
 #' @param items_load_one_dimension if TRUE, items are simulated which load on one dimension. If FALSE, items are simulated which load on all dimensions
 #' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values 
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
-#' @param prior covariance matrix of the (multi variate) normal prior for theta; mean vector is fixed at zero; not used for ML estimator
-#' @param prior_var_safe_ml if not NULL, EAP estimate with prior variance equal to prior_var_safe_ml (scalar or vector) is computed instead of ML/MAP, if ML/MAP estimate fails.
+#' @param prior covariance matrix of the (multi variate) normal prior for theta; mean vector is fixed at zero; not used for maximum_likelihood estimator
+#' @param prior_var_safe_ml if not NULL, expected_aposteriori estimate with prior variance equal to prior_var_safe_ml (scalar or vector) is computed instead of maximum_likelihood/maximum_aposteriori, if maximum_likelihood/maximum_aposteriori estimate fails.
 #' @param return_administered_item_indeces if TRUE, indeces of administered items are added to the output
 #' @param max_n the maxixmum number of items to administer (test stops at this number, even if variance target has not been reached)
 #' @param varying_number_item_steps if TRUE, the simulated number of item steps differs over items. In that case, number_answer_categories_vec (number of itemsteps + 1)
 #' is considered the maxixmum number of categories
 #' @return matrix with in each row (= one condition): named vector containing estimated theta, variance of the estimate, and if return_administered_item_indeces is TRUE, the indeces of the administered items
-run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints_and_characts = NULL, guessing = NULL, items_load_one_dimension = TRUE, lowerbound = rep(-3, number_dimensions), upperbound = rep(3, number_dimensions), prior = diag(number_dimensions) * 20, prior_var_safe_nlm = NULL, return_administered_item_indeces = FALSE, max_n = NULL, varying_number_item_steps = FALSE) {                   
+run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints_and_characts = NULL, guessing = NULL, items_load_one_dimension = TRUE, lowerbound = rep(-3, number_dimensions), upperbound = rep(3, number_dimensions), prior = diag(number_dimensions) * 20, prior_var_safe_ml = NULL, return_administered_item_indeces = FALSE, max_n = NULL, varying_number_item_steps = FALSE) {                   
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
   
   pbapply::pbsapply(1:nrow(conditions), 
@@ -155,7 +154,7 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
                                       else
                                         true_theta_vec )
                       alpha_beta <- simulate_testbank(model = as.character(conditions[condition, "model"]), number_items = conditions[condition, "number_items"], number_dimensions = number_dimensions, number_itemsteps = conditions[condition, "number_answer_categories"] - 1, items_load_one_dimension = items_load_one_dimension, return_testbank_properties = FALSE, varying_number_item_steps = varying_number_item_steps)
-                      estimate_theta <- tryCatch(test_shadowcat_roqua(true_theta, prior, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), constraints_and_characts, lowerbound, upperbound, prior_var_safe_nlm),
+                      estimate_theta <- tryCatch(test_shadowcat_roqua(true_theta, prior, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), constraints_and_characts, lowerbound, upperbound, prior_var_safe_ml),
                                                  error = function(e) e)
 
                       if (return_administered_item_indeces)
@@ -170,7 +169,7 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
 
 context("validate shadowcat_roqua single conditions")
 
-test_that("true theta is 2, estimator is MAP", {
+test_that("true theta is 2, estimator is maximum_aposteriori", {
   # define true theta for simulation of responses
   true_theta <- 2
   
@@ -187,7 +186,7 @@ test_that("true theta is 2, estimator is MAP", {
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 100)
-  estimator <- 'MAP'
+  estimator <- 'maximum_aposteriori'
   information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
@@ -201,7 +200,7 @@ test_that("true theta is 2, estimator is MAP", {
   expect_equal(length(test_outcome$administered), 100)
 })
 
-test_that("true theta is 2, estimator is ML", {
+test_that("true theta is 2, estimator is maximum_likelihood", {
   # define true theta for simulation of responses
   true_theta <- 2
   
@@ -218,7 +217,7 @@ test_that("true theta is 2, estimator is ML", {
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 100)
-  estimator <- 'ML'
+  estimator <- 'maximum_likelihood'
   information_summary <- 'determinant'
   
   test_outcome <- with_random_seed(2, test_shadowcat_roqua)(true_theta, prior = NULL, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, initial_variance = diag(1))
@@ -229,7 +228,7 @@ test_that("true theta is 2, estimator is ML", {
   expect_equal(length(test_outcome$administered), 100)
 })
 
-test_that("true theta is 2, estimator is EAP", {
+test_that("true theta is 2, estimator is expected_aposteriori", {
   # define true theta for simulation of responses
   true_theta <- 2
   
@@ -246,7 +245,7 @@ test_that("true theta is 2, estimator is EAP", {
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 100)
-  estimator <- 'EAP'
+  estimator <- 'expected_aposteriori'
   information_summary <- 'posterior_determinant'
   
   prior <- diag(number_dimensions) * 5
@@ -260,7 +259,7 @@ test_that("true theta is 2, estimator is EAP", {
 })
 
 
-test_that("true theta is 1, 0, 2, estimator is MAP", {  
+test_that("true theta is 1, 0, 2, estimator is maximum_aposteriori", {  
   # define true theta for simulation of responses
   true_theta <- c(1, 0, 2)
   
@@ -281,7 +280,7 @@ test_that("true theta is 1, 0, 2, estimator is MAP", {
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
-  estimator <- 'MAP'
+  estimator <- 'maximum_aposteriori'
   information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
@@ -294,7 +293,7 @@ test_that("true theta is 1, 0, 2, estimator is MAP", {
   expect_equal(length(test_outcome$administered), 300)
 })
 
-test_that("true theta is 1, 0, 2, estimator is ML", {  
+test_that("true theta is 1, 0, 2, estimator is maximum_likelihood", {  
   # define true theta for simulation of responses
   true_theta <- c(1, 0, 2)
   
@@ -315,7 +314,7 @@ test_that("true theta is 1, 0, 2, estimator is ML", {
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
-  estimator <- 'ML'
+  estimator <- 'maximum_likelihood'
   information_summary <- 'determinant'
   
   test_outcome <- with_random_seed(3, test_shadowcat_roqua)(true_theta, prior = NULL, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, initial_variance = diag(1))
@@ -332,7 +331,7 @@ test_that("true theta is 1, 0, 2, estimator is ML", {
   expect_equal(length(test_outcome$administered), 300)  
 })
 
-test_that("true theta is 1, 0, 2, estimator is EAP", {  
+test_that("true theta is 1, 0, 2, estimator is expected_aposteriori", {  
   # define true theta for simulation of responses
   true_theta <- c(1, 0, 2)
   
@@ -353,7 +352,7 @@ test_that("true theta is 1, 0, 2, estimator is EAP", {
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
-  estimator <- 'MAP'
+  estimator <- 'maximum_aposteriori'
   information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
@@ -385,7 +384,7 @@ test_that("items load on three dimensions", {
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
-  estimator <- 'MAP'
+  estimator <- 'maximum_aposteriori'
   information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
@@ -419,7 +418,7 @@ test_that("true theta is 2, 2, 2", {
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
-  estimator <- 'MAP'
+  estimator <- 'maximum_aposteriori'
   information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
@@ -453,7 +452,7 @@ test_that("with constraints max_n 260", {
   model <- '3PLM'
   start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
   stop_test <- list(max_n = 260)
-  estimator <- 'MAP'
+  estimator <- 'maximum_aposteriori'
   information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
@@ -503,7 +502,7 @@ test_that("with constraints max_n 130", {
   model <- '3PLM'
   start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
   stop_test <- list(max_n = 130)
-  estimator <- 'MAP'
+  estimator <- 'maximum_aposteriori'
   information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
@@ -553,7 +552,7 @@ test_that("start n is zero, no constraints", {
   model <- '3PLM'
   start_items <- list(n = 0)
   stop_test <- list(max_n = 300)
-  estimator <- 'MAP'
+  estimator <- 'maximum_aposteriori'
   information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
@@ -587,7 +586,7 @@ test_that("start n is zero, with constraints", {
   model <- '3PLM'
   start_items <- list(n = 0)
   stop_test <- list(max_n = 130)
-  estimator <- 'MAP'
+  estimator <- 'maximum_aposteriori'
   information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
@@ -635,7 +634,7 @@ test_that("stop rule is number of items", {
   model <- '3PLM'
   start_items <- list(type = 'random', n = 5)
   stop_test <- list(max_n = 10)
-  estimator <- 'MAP'
+  estimator <- 'maximum_aposteriori'
   information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
@@ -667,7 +666,7 @@ test_that("stop rule is variance", {
   model <- '3PLM'
   start_items <- list(type = 'random', n = 5)
   stop_test <- list(target = .5, max_n = 50)
-  estimator <- 'MAP'
+  estimator <- 'maximum_aposteriori'
   information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
@@ -699,7 +698,7 @@ test_that("stop rule is variance and minimum number of items is taken into accou
   model <- '3PLM'
   start_items <- list(type = 'random', n = 5)
   stop_test <- list(target = .5, max_n = 50, min_n = 10)
-  estimator <- 'MAP'
+  estimator <- 'maximum_aposteriori'
   information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
@@ -734,7 +733,7 @@ test_that("stop rule is cutoff", {
   model <- '3PLM'
   start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
   stop_test <- list(max_n = 300, cutoffs = with_random_seed(2, matrix)(runif(903, 1, 2), ncol = 3))
-  estimator <- 'MAP'
+  estimator <- 'maximum_aposteriori'
   information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
@@ -754,7 +753,7 @@ test_that("stop rule is cutoff", {
 if (FALSE) {
   context("simulations")
   
-  test_that("one dimension, no constraints on item selection, one iteration per condition, EAP", {
+  test_that("one dimension, no constraints on item selection, one iteration per condition, expected_aposteriori", {
     iterations_per_unique_condition <- 1
     true_theta_vec <- c(-2, 1)
     number_items_vec <- c(15, 50)
@@ -766,7 +765,7 @@ if (FALSE) {
     start_items <- list(type = 'random', n = 3)
     variance_target <- .1^2
     model_vec <- c("3PLM", "GRM", "GPCM", "SM")
-    estimator_vec <- "EAP"
+    estimator_vec <- "expected_aposteriori"
     information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler") 
     prior <- diag(number_dimensions) * 100
     
@@ -784,7 +783,7 @@ if (FALSE) {
     expect_equal(round(fivenum(estimates_and_conditions[,"variance_estimate"]), 3), c(.000, .008, .010, .044, .228))    
   })
   
-  test_that("one dimension, no constraints on item selection, one iteration per condition, MAP", {
+  test_that("one dimension, no constraints on item selection, one iteration per condition, maximum_aposteriori", {
     iterations_per_unique_condition <- 1
     true_theta_vec <- c(-2, 1)
     number_items_vec <- c(15, 50)
@@ -796,7 +795,7 @@ if (FALSE) {
     start_items <- list(type = 'random', n = 3)
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
-    estimator_vec <- "MAP"
+    estimator_vec <- "maximum_aposteriori"
     information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler")  
     
     estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound)
@@ -813,8 +812,8 @@ if (FALSE) {
     expect_equal(fivenum(round(estimates_and_conditions[,"variance_estimate"], 3)), c(.049, .122, .212, .383, 4.547))
   })
   
-  test_that("one dimension, no constraints on item selection, one iteration per condition, ML", {
-    # ML and PEKL do not go well together; makes sense to me, I think ML should be combined with D or A information summary
+  test_that("one dimension, no constraints on item selection, one iteration per condition, maximum_likelihood", {
+    # maximum_likelihood and PEKL do not go well together; makes sense to me, I think maximum_likelihood should be combined with D or A information summary
     iterations_per_unique_condition <- 1
     true_theta_vec <- c(-2, 1)
     number_items_vec <- c(15, 50)
@@ -826,7 +825,7 @@ if (FALSE) {
     start_items <- list(type = 'random', n = 3)
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
-    estimator_vec <- "ML"
+    estimator_vec <- "maximum_likelihood"
     information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace")  # "posterior_expected_kullback_leibler"
     
     estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound)
@@ -845,7 +844,7 @@ if (FALSE) {
   })
   
   
-  test_that("one dimension, estimator ML, information summary D, PD, A, and PA, no constraints on item selection, 100 iterations per condition", {
+  test_that("one dimension, estimator maximum_likelihood, information summary D, PD, A, and PA, no constraints on item selection, 100 iterations per condition", {
     # run one more time to check
     iterations_per_unique_condition <- 100
     true_theta_vec <- c(-2, 1)
@@ -856,7 +855,7 @@ if (FALSE) {
     start_items <- list(type = 'random', n = 3)
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
-    estimator_vec <- "ML"
+    estimator_vec <- "maximum_likelihood"
     information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace")  # "posterior_expected_kullback_leibler" 
     
     estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
@@ -901,7 +900,7 @@ if (FALSE) {
     expect_equal(number_na_per_condition[ ,"x"], c(rep(0, 126), 1, 0))
   })
   
-test_that("one dimension, estimator MAP, no constraints on item selection, 100 iterations per condition", {
+test_that("one dimension, estimator maximum_aposteriori, no constraints on item selection, 100 iterations per condition", {
   iterations_per_unique_condition <- 100
   true_theta_vec <- c(-2, 1)
   number_items_vec <- c(50, 100)
@@ -911,7 +910,7 @@ test_that("one dimension, estimator MAP, no constraints on item selection, 100 i
   start_items <- list(type = 'random', n = 3)
   variance_target <- .1^2
   model_vec <- c("3PLM","GRM","GPCM","SM")
-  estimator_vec <- "MAP"
+  estimator_vec <- "maximum_aposteriori"
   information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler")
   
   estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
@@ -942,7 +941,7 @@ test_that("one dimension, estimator MAP, no constraints on item selection, 100 i
   expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 100), "variance_estimate"])), 3), c(.142, .200, .248, .298, .543))  
 })
 
-test_that("one dimension, estimator EAP, no constraints on item selection, 100 iterations per condition", {
+test_that("one dimension, estimator expected_aposteriori, no constraints on item selection, 100 iterations per condition", {
   iterations_per_unique_condition <- 100
   true_theta_vec <- c(-2, 1)
   number_items_vec <- c(50, 100)
@@ -952,7 +951,7 @@ test_that("one dimension, estimator EAP, no constraints on item selection, 100 i
   start_items <- list(type = 'random', n = 3)
   variance_target <- .1^2
   model_vec <- c("3PLM","GRM","GPCM","SM")
-  estimator_vec <- "EAP"
+  estimator_vec <- "expected_aposteriori"
   information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler")
   
   estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
@@ -983,7 +982,7 @@ test_that("one dimension, estimator EAP, no constraints on item selection, 100 i
   expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 100), "variance_estimate"])), 3), c(.054, .097, .098, .099, .100))  
 })
 
-test_that("three dimensions, ML, information summary D, PD, A, and PA, no constraints on item selection, 100 iterations per condition", {
+test_that("three dimensions, maximum_likelihood, information summary D, PD, A, and PA, no constraints on item selection, 100 iterations per condition", {
   iterations_per_unique_condition <- 100 
   true_theta_vec <- c(-2, 1, 2)
   number_items_vec <- c(300)
@@ -993,7 +992,7 @@ test_that("three dimensions, ML, information summary D, PD, A, and PA, no constr
   start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
   variance_target <- .1^2
   model_vec <- c("3PLM","GRM","GPCM","SM")
-  estimator_vec <- "ML"
+  estimator_vec <- "maximum_likelihood"
   information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace") 
   
   estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
@@ -1039,12 +1038,12 @@ test_that("three dimensions, ML, information summary D, PD, A, and PA, no constr
   expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), c(.145, .208, .247, .277, .361))
   expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.159, .207, .289, .316, .507))
   
-  # some errors/missings for ML estimator because prior_var_safe_nlm = NULL
+  # some errors/missings for maximum_likelihood estimator because prior_var_safe_ml = NULL
   expect_equal(number_na_per_condition[, "x"], 
                c(rep(0, 18), 1, 0, 0, 0, 2, rep(0, 7), 1, 0))
 })
 
-test_that("three dimensions, MAP, no constraints on item selection, 100 iterations per condition", {
+test_that("three dimensions, maximum_aposteriori, no constraints on item selection, 100 iterations per condition", {
   # To be run yet
   iterations_per_unique_condition <- 100 
   true_theta_vec <- c(-2, 1, 2)
@@ -1055,7 +1054,7 @@ test_that("three dimensions, MAP, no constraints on item selection, 100 iteratio
   start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
   variance_target <- .1^2
   model_vec <- c("3PLM","GRM","GPCM","SM")
-  estimator_vec <- "MAP"
+  estimator_vec <- "maximum_aposteriori"
   information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler")
   
   estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions)
@@ -1096,7 +1095,7 @@ test_that("three dimensions, MAP, no constraints on item selection, 100 iteratio
   expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.161, .213, .288, .314, .760)) 
 })
 
-test_that("three dimensions, EAP, no constraints on item selection, 100 iterations per condition", {
+test_that("three dimensions, expected_aposteriori, no constraints on item selection, 100 iterations per condition", {
   # To be run yet
   iterations_per_unique_condition <- 100 
   true_theta_vec <- c(-2, 1, 2)
@@ -1154,9 +1153,9 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
   expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), )
 })
 
-  test_that("test prior_var_safe_nlm is 100", {
+  test_that("test prior_var_safe_ml is 100", {
     # run again with new safe_ml code in estimate_latent_trait()
-    # run ML only
+    # run maximum_likelihood only
     iterations_per_unique_condition <- 100
     true_theta_vec <- c(-2, 1, 2)
     number_items_vec <- c(300)
@@ -1166,10 +1165,10 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
-    estimator_vec <- c("ML", "MAP")
+    estimator_vec <- c("maximum_likelihood", "maximum_aposteriori")
     information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace")
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, prior_var_safe_nlm = 100)
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, prior_var_safe_ml = 100)
     
     conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
     
@@ -1206,13 +1205,13 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), c(.100, .206, .248, .277, .382))
     expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.100, .210, .289, .316, .522))
     
-    # no errors/missings for MAP estimator
-    expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "MAP"), "x"], rep(0, 32))
-    # no errors/missings for ML estimator
-    expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "ML"), "x"], rep(0, 32))
+    # no errors/missings for maximum_aposteriori estimator
+    expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "maximum_aposteriori"), "x"], rep(0, 32))
+    # no errors/missings for maximum_likelihood estimator
+    expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "maximum_likelihood"), "x"], rep(0, 32))
   })
   
-  test_that("items load on all dimensions prior_var_safe_nlm is 100", {
+  test_that("items load on all dimensions prior_var_safe_ml is 100", {
     # run again with new safe_ml code in estimate_latent_trait()
     iterations_per_unique_condition <- 100 
     true_theta_vec <- c(2, -1, -2)
@@ -1223,10 +1222,10 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
-    estimator_vec <- c("ML", "MAP") # AEP
+    estimator_vec <- c("maximum_likelihood", "maximum_aposteriori") # AEP
     information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace") # "posterior_expected_kullback_leibler"
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, items_load_one_dimension = FALSE, prior_var_safe_nlm = 100)
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, items_load_one_dimension = FALSE, prior_var_safe_ml = 100)
     #save(estimates_and_variance, file = "/Users/rivkadevries/Desktop/simulationsCAT/estimates_and_variance_within.R")
     estimates_and_variance_without_errors <- sapply(estimates_and_variance, 
                                                     FUN = function(x) { 
@@ -1270,15 +1269,15 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), c(.100, .365, .419, .549, 2.178))
     expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.100, .382, .427, .544, 1.992))
     
-    # no errors/missings for MAP estimator
-    expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "MAP"), "x"], rep(0, 32))
-    # some errors/missings for ML estimator
-    expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "ML"), "x"], 
+    # no errors/missings for maximum_aposteriori estimator
+    expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "maximum_aposteriori"), "x"], rep(0, 32))
+    # some errors/missings for maximum_likelihood estimator
+    expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "maximum_likelihood"), "x"], 
                  c(0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 1, 0))
     
   })
   
-  test_that("items load on all dimensions prior_var_safe_nlm is 1", {
+  test_that("items load on all dimensions prior_var_safe_ml is 1", {
     # run again with new safe_ml code in estimate_latent_trait()
     iterations_per_unique_condition <- 100 
     true_theta_vec <- c(2, -1, -2)
@@ -1289,10 +1288,10 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
-    estimator_vec <- c("ML", "MAP") # AEP
+    estimator_vec <- c("maximum_likelihood", "maximum_aposteriori") # AEP
     information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace") # PEKL 
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, items_load_one_dimension = FALSE, prior_var_safe_nlm = 1)
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, items_load_one_dimension = FALSE, prior_var_safe_ml = 1)
     #save(estimates_and_variance, file = "/Users/rivkadevries/Desktop/simulationsCAT/estimates_and_variance_within_safe_var1.R")
     estimates_and_variance_without_errors <- sapply(estimates_and_variance, 
                                                     FUN = function(x) { 
@@ -1336,10 +1335,10 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), c(.195, .367, .420, .557, 2.749))
     expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.195, .383, .429, .553, 2.143))
     
-    # no errors/missings for MAP estimator
-    expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "MAP"), "x"], rep(0, 32))
-    # some errors/missings for ML estimator
-    expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "ML"), "x"], 
+    # no errors/missings for maximum_aposteriori estimator
+    expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "maximum_aposteriori"), "x"], rep(0, 32))
+    # some errors/missings for maximum_likelihood estimator
+    expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "maximum_likelihood"), "x"], 
                  c(0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0))
     
   })
@@ -1356,7 +1355,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
     variance_target <- .001^2
     model_vec <- "SM"
-    estimator_vec <- c("ML", "MAP") # AEP
+    estimator_vec <- c("maximum_likelihood", "maximum_aposteriori") # AEP
     information_summary_vec <- "determinant" 
     max_n = 130
     
@@ -1369,7 +1368,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
                              op = '><',
                              target = c(75, 100)))
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints_and_characts = list(characteristics = characteristics, constraints = constraints), prior_var_safe_nlm = 100, return_administered_item_indeces = TRUE, max_n = max_n)
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints_and_characts = list(characteristics = characteristics, constraints = constraints), prior_var_safe_ml = 100, return_administered_item_indeces = TRUE, max_n = max_n)
     #save(estimates_and_variance, file = "/Users/rivkadevries/Desktop/simulationsCAT/estimates_and_variance_3dim_constraints_maxn130.R")
     
     conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
@@ -1418,10 +1417,10 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), c(.546, .618, .674, .711, .841))
     expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.172, .182, .188, .193, .214))
     
-    # no errors/missings for MAP estimator
-    expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "MAP"), "x"], 0)
-    # no errors/missings for ML estimator
-    expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "ML"), "x"], 0)
+    # no errors/missings for maximum_aposteriori estimator
+    expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "maximum_aposteriori"), "x"], 0)
+    # no errors/missings for maximum_likelihood estimator
+    expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "maximum_likelihood"), "x"], 0)
     
     expect_equal(number_depression_items, rep(50, 200))
     expect_equal(number_anxiety_items, rep(5, 200))
@@ -1439,7 +1438,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
     variance_target <- .001^2
     model_vec <- "SM"
-    estimator_vec <- c("ML", "MAP") # AEP
+    estimator_vec <- c("maximum_likelihood", "maximum_aposteriori") # AEP
     information_summary_vec <- "determinant"
     max_n = 260
     
@@ -1452,7 +1451,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
                              op = '><',
                              target = c(75, 90)))
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints_and_characts = list(characteristics = characteristics, constraints = constraints), prior_var_safe_nlm = 100, return_administered_item_indeces = TRUE, max_n = max_n)
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, constraints_and_characts = list(characteristics = characteristics, constraints = constraints), prior_var_safe_ml = 100, return_administered_item_indeces = TRUE, max_n = max_n)
     #save(estimates_and_variance, file = "/Users/rivkadevries/Desktop/simulationsCAT/estimates_and_variance_3dim_constraints_maxn260.R")
     
     conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
@@ -1480,7 +1479,7 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     expect_equal(all(number_somatic_items < 91 & number_somatic_items > 87), TRUE)
   })
   
-  test_that("MAP with informative prior", {
+  test_that("maximum_aposteriori with informative prior", {
     # run again with PEKL
     iterations_per_unique_condition <- 100
     true_theta_vec <- c(-2, 1, 2)
@@ -1491,10 +1490,10 @@ test_that("three dimensions, EAP, no constraints on item selection, 100 iteratio
     start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
     variance_target <- .1^2
     model_vec <- c("3PLM","GRM","GPCM","SM")
-    estimator_vec <- "MAP"
+    estimator_vec <- "maximum_aposteriori"
     information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace") # PEKL 
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, prior = diag(3) * .5, prior_var_safe_nlm = 100)
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, iterations_per_unique_condition, number_dimensions, prior = diag(3) * .5, prior_var_safe_ml = 100)
     
     conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, iterations_per_unique_condition, number_dimensions)
     

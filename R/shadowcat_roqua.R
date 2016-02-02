@@ -30,15 +30,14 @@
 #' cutoffs = matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
 #' administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at certain iteration, test stops; 
 #' NULL means no cut off values
-#' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation) or "ML" (maximum likelihood); 
-#' "EAP" (Expected A Posteriori Estimation) is currently not working due to problems with the MultiGHQuad package
+#' @param estimator type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"
 #' @param information_summary called "objective" by Kroeze; how to summarize information; one of
 #' "determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
 #' "posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
 #' "trace": compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
 #' "posterior_trace": compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
 #' "posterior_expected_kullback_leibler" = compute Posterior expected Kullback-Leibler Information
-#' @param prior covariance matrix of the (multi variate) normal prior for theta; mean vector is fixed at zero; not used for ML estimator
+#' @param prior covariance matrix of the (multi variate) normal prior for theta; mean vector is fixed at zero; not used for maximum likelihood estimator
 #' #' note that this prior should be a square matrix with number of rows and columns equal to the number of dimensions; values on the diagonal should be larger than 0
 #' @param guessing vector of guessing parameters per item. Optionally used in 3PLM model, ignored for all others.
 #' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others.
@@ -51,7 +50,7 @@
 #' See constraints_lp_format() for details
 #' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values 
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
-#' @param prior_var_safe_ml if not NULL, EAP estimate with prior variance equal to prior_var_safe_ml (scalar or vector) is computed instead of ML/MAP, if ML/MAP estimate fails
+#' @param prior_var_safe_ml if not NULL, expected a posteriori estimate with prior variance equal to prior_var_safe_ml (scalar or vector) is computed instead of maximum likelihood/maximum a posteriori, if maximum likelihood/maximum a posteriori estimate fails
 #' @return a list containing the index of the next item to be administered given a new response (or "stop_test"), 
 #' updated estimate of theta, responses, indeces of administered items, and indeces of available items
 #' @export
@@ -125,7 +124,7 @@ shadowcat_roqua <- function(new_response, estimate, responses, administered, ava
       add_error("beta_and_eta", "are both missing; define at least one of them")
     if (model == "GPCM" && !is.null(beta) && !is.null(eta) && !all.equal(row_cumsum(eta), as.matrix(beta)))
       add_error("beta_and_eta", "objects do not match.")
-    if ((estimator != "ML" || information_summary %in% c("PD", "PA")) && is.null(prior))
+    if ((estimator != "maximum_likelihood" || information_summary %in% c("PD", "PA")) && is.null(prior))
       add_error("prior", "is missing")
     if (is.null(stop_test$max_n))
       add_error("stop_test", "contains no max_n")

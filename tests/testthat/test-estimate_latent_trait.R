@@ -6,16 +6,16 @@ library(MultiGHQuad)
 
 make_random_seed_exist <- rnorm(1)
 
-context("estimator is ML")
+context("estimator is maximum_likelihood")
 
-test_that("estimator is ML, 1 dimension, 2 categories", {
+test_that("estimator is maximum_likelihood, 1 dimension, 2 categories", {
   number_dimensions <- 1
   estimate <- rep(.3, number_dimensions)
   model <- "3PLM"
   number_items <- 50
   responses <- rep(c(1, 0), 17)
   administered <- c(6:20, 31:49)
-  estimator <- "ML"
+  estimator <- "maximum_likelihood"
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
@@ -32,14 +32,14 @@ test_that("estimator is ML, 1 dimension, 2 categories", {
 })
 
 
-test_that("estimator is ML, 3 dimensions, varying number of categories", {
+test_that("estimator is maximum_likelihood, 3 dimensions, varying number of categories", {
   number_dimensions <- 3
   estimate <- c(2, .3, -1.2)
   model <- "GPCM"
   number_items <- 50
   responses <- rep(c(1, 0), 17)
   administered <- c(6:20, 31:49)
-  estimator <- "ML"
+  estimator <- "maximum_likelihood"
   max_number_answer_categories <- 5
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   temp_vector <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
@@ -61,7 +61,7 @@ test_that("estimator is ML, 3 dimensions, varying number of categories", {
   expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[3,], c(-.181, -.281, .484))
 })
 
-test_that("test safe_ml", {
+test_that("test safe_maximum_likelihood", {
   number_dimensions <- 3
   estimate <- c(0, 0, 0)
   attr(estimate, "variance") <- diag(3) * 20
@@ -69,7 +69,7 @@ test_that("test safe_ml", {
   number_items <- 300
   responses <- c(0, 0, 0, 1, 1, 1, 1, 1, 1, 0)
   administered <- c(38, 27, 4, 182, 187, 200, 241, 274, 227, 298)
-  estimator <- "ML"
+  estimator <- "maximum_likelihood"
   alpha <- matrix(with_random_seed(107, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(107, rnorm)(number_items), nrow = number_items, ncol = 1)
   guessing <- NULL
@@ -85,16 +85,16 @@ test_that("test safe_ml", {
   expect_equal(round(as.vector(attr(estimated_latent_trait, 'variance')), 3)[1:3], c(6.870, -3.257, -5.352))
 })
 
-context("estimator is MAP")
+context("estimator is maximum_aposteriori")
 
-test_that("estimator is MAP, 1 dimension, 2 categories", { 
+test_that("estimator is maximum_aposteriori, 1 dimension, 2 categories", { 
   number_dimensions <- 1
   estimate <- rep(.3, number_dimensions)
   model <- "3PLM"
   number_items <- 50
   responses <- rep(c(1, 0), 17)
   administered <- c(6:20, 31:49)
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
@@ -111,14 +111,14 @@ test_that("estimator is MAP, 1 dimension, 2 categories", {
 })
 
 
-test_that("estimator is MAP, 3 dimensions, varying number of categories", {
+test_that("estimator is maximum_aposteriori, 3 dimensions, varying number of categories", {
   number_dimensions <- 3
   estimate <- c(2, .3, -1.2)
   model <- "GPCM"
   number_items <- 50
   responses <- rep(c(1, 0), 17)
   administered <- c(6:20, 31:49)
-  estimator <- "MAP"
+  estimator <- "maximum_aposteriori"
   max_number_answer_categories <- 5
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   temp_vector <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
@@ -140,9 +140,9 @@ test_that("estimator is MAP, 3 dimensions, varying number of categories", {
   expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[3,], c(-.117, -.131, .280))
 })
 
-context("estimator is EAP")
+context("estimator is expected_aposteriori")
 
-test_that("estimator is EAP, 1 dimension, 2 categories", {
+test_that("estimator is expected_aposteriori, 1 dimension, 2 categories", {
   number_dimensions <- 1
   estimate <- rep(.3, number_dimensions)
   attr(estimate, "variance") <- 1.2
@@ -150,7 +150,7 @@ test_that("estimator is EAP, 1 dimension, 2 categories", {
   number_items <- 50
   responses <- rep(c(1, 0), 17)
   administered <- c(6:20, 31:49)
-  estimator <- "EAP"
+  estimator <- "expected_aposteriori"
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
   eta <- NULL
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
@@ -167,7 +167,7 @@ test_that("estimator is EAP, 1 dimension, 2 categories", {
   expect_equal(round(attr(estimated_latent_trait, "variance"), 3), matrix(.164))
 })
 
-test_that("estimator is EAP, 3 dimensions, varying number of categories", {
+test_that("estimator is expected_aposteriori, 3 dimensions, varying number of categories", {
   number_dimensions <- 3
   estimate <- c(2, .3, -1.2)
   attr(estimate, "variance") <- diag(c(2, 1.2, 1.5))
@@ -175,7 +175,7 @@ test_that("estimator is EAP, 3 dimensions, varying number of categories", {
   number_items <- 50
   responses <- rep(c(1, 0), 17)
   administered <- c(6:20, 31:49)
-  estimator <- "EAP"
+  estimator <- "expected_aposteriori"
   max_number_answer_categories <- 5
   guessing <- NULL
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
@@ -197,7 +197,7 @@ test_that("estimator is EAP, 3 dimensions, varying number of categories", {
   expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[3,], c(-.014, -.509, .562))
 })
 
-test_that("estimator is EAP, 3 dimensions, varying number of categories, 1 administered", {
+test_that("estimator is expected_aposteriori, 3 dimensions, varying number of categories, 1 administered", {
   number_dimensions <- 3
   estimate <- c(2, .3, -1.2)
   attr(estimate, "variance") <- diag(c(2, 1.2, 1.5))
@@ -205,7 +205,7 @@ test_that("estimator is EAP, 3 dimensions, varying number of categories, 1 admin
   number_items <- 50
   responses <- 1
   administered <- 1
-  estimator <- "EAP"
+  estimator <- "expected_aposteriori"
   max_number_answer_categories <- 5
   guessing <- NULL
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
@@ -235,7 +235,7 @@ test_that("estimates exceed boundaries", {
   number_items <- 50
   responses <- rep(1, 50)
   administered <- 1:50
-  estimator <- "EAP"
+  estimator <- "expected_aposteriori"
   max_number_answer_categories <- 5
   guessing <- NULL
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)

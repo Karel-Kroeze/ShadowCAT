@@ -1,26 +1,26 @@
 #' Latent trait estimation
 #' 
-#' ML, MAP and EAP estimates.
+#' maximum likelihood, maximum a posteriori and expected a posteriori estimates.
 #' 
 #' Obtains a latent trait estimate and variance of the estimate.
 #' 
-#' @section ML and MAP:
+#' @section Maximum Likelihood and Maximum A Posteriori:
 #' Maximum Likelihood and Maximum A-Posteriori estimates are based on a Newton-type non-linear minimization algorithm,
 #' and handled with package \code{\link{nlm}}.
 #'  
-#' @section EAP:
+#' @section Expected A Posteriori:
 #' Expected A-Posteriori estimates require the repeated evaluation of Q nested integrals, where Q is the dimensionality of the test.
 #' This is performed with adaptive multidimensional Gauss-Hermite quadrature, and handled by package MultiGHQuad, see the documentation there for further details.
 #' Note that the number of quadrature points used rises exponentially with the dimensionality of the test - use of EAP estimates with 
 #' a 3+ dimensional test may not be a good idea.
 #' 
-#' @section WML:
+#' @section Weighted Maximum Likelihood:
 #' TODO: UPDATE WITH REFERENCES - MORE PRECISE DETAILS.
 #' Note that WML estimation is not included. There is no satisfying solution to multidimensional Weighted Maximum Likelihood Estimation,
 #' current WML estimators as used in other sources do not account for the covariance between dimensions. 
 #' 
 #' @section Variance:
-#' Variance of the estimate is added to the estimate as an attribute.
+#' Covariance matrix of the estimate is added to the estimate as an attribute.
 #' 
 #' @examples 
 #' number_dimensions <- 1
@@ -39,18 +39,18 @@
 #' prior_var_safe_nlm <- diag(number_dimensions)
 #'
 #' # obtain estimates
-#' estimator <- "ML"
+#' estimator <- "maximum_likelihood"
 #' ML <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
-#' estimator <- "MAP"
+#' estimator <- "maximum_aposteriori"
 #' MAP <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
-#' estimator <- "EAP"
+#' estimator <- "expected_aposteriori"
 #' EAP <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
 #' ML; MAP; EAP
 #' 
 #' # access variance
 #' attr(ML, "variance")
 #' 
-#' # Note that EAP takes considerably more time when dimensionality is higher...
+#' # Note that expected_aposteriori takes considerably more time when dimensionality is higher...
 #' number_dimensions <- 5
 #' estimate <- rep(.3, number_dimensions)
 #' alpha <- matrix(runif(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
@@ -58,9 +58,9 @@
 #' upper_bound <- rep(3, number_dimensions)
 #' prior <- diag(number_dimensions) 
 #' 
-#' estimator <- "MAP"
+#' estimator <- "maximum_aposteriori"
 #' system.time(estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = diag(number_dimensions)))
-#' estimator <- "EAP"
+#' estimator <- "expected_aposteriori"
 #' system.time(estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound))
 #' 
 #' @param estimate vector containing theta estimate, with covariance matrix as an attribute
@@ -69,14 +69,14 @@
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively
 #' @param administered vector with indeces of administered items
 #' @param number_dimensions number of dimensions
-#' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "ML" (maximum likelihood), or "EAP" (Expected A Posteriori Estimation)
+#' @param estimator type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"
 #' @param alpha matrix of alpha paramteres
 #' @param beta matrix of beta paramteres
 #' @param guessing matrix of guessing parameters
 #' @param number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix
 #' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
-#' @param prior_var_safe_nlm if not NULL, EAP estimate with prior variance(s) equal to prior_var_safe_ml is computed instead of ML/MAP, if ML/MAP estimate fails. Can be a scalar 
+#' @param prior_var_safe_nlm if not NULL, expected a posteriori estimate with prior variance(s) equal to prior_var_safe_ml is computed instead of maximum_likelihood/maximum_aposteriori, if maximum_likelihood/maximum_aposteriori estimate fails. Can be a scalar 
 #' (if variance for each dimension is equal) or vector
 #' @return vector containing the updated estimate with the covariance matrix as attribute
 #' @importFrom MultiGHQuad init.quad eval.quad
@@ -123,14 +123,14 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
                                         prior = list(mu = rep(0, number_dimensions), Sigma = prior),
                                         adapt = adapt,
                                         ip = switch(number_dimensions, 50, 15, 6, 4, 3))
-    eval.quad(FUN = probabilities_and_likelihood, X = Q_dim_grid_quad_points, responses, model, administered, number_dimensions, estimator = "EAP", alpha, beta, guessing, prior, output = "likelihood")
+    eval.quad(FUN = probabilities_and_likelihood, X = Q_dim_grid_quad_points, responses, model, administered, number_dimensions, estimator = "expected_aposteriori", alpha, beta, guessing, prior, output = "likelihood")
   }
   
   get_updated_estimate_and_variance_attribute <- function(estimator) {
     switch(estimator,
-           ML = get_updated_estimate_and_variance_ml(),
-           MAP = get_updated_estimate_and_variance_map(),
-           EAP = get_updated_estimate_and_variance_eap(prior))
+           maximum_likelihood = get_updated_estimate_and_variance_ml(),
+           maximum_aposteriori = get_updated_estimate_and_variance_map(),
+           expected_aposteriori = get_updated_estimate_and_variance_eap(prior))
   }
   
   trim_estimate <- function(estimate) {
