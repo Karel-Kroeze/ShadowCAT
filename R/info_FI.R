@@ -37,7 +37,7 @@ FI <- function(test, person) {
   lf <- function(x) exp(x)/(1+exp(x))
   
   # compensatory -> inner product of alpha * theta
-  at <- apply(a * drop(person$estimate),1,sum)
+  at <- apply(a, 1, function(a) sum(as.vector(a) %*% person$estimate) )
   
   if(model == "3PLM"){
     # exact form Segall 1997, CAT book, p. 72
