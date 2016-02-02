@@ -108,7 +108,7 @@ ShadowCAT <- function(person, test, verbose = FALSE, responses = NULL ) {
     } else {
       person$administered <- c(person$administered, next_item_index)
       person$responses <- c(person$responses, responses[next_item_index])
-      person$available <- person$available[-which(person$available %in% indeces)]
+      person$available <- person$available[-which(person$available %in% person$administered)]
     }
     if (length(person$responses) > test$start$n) person <- estimate(person, test)
     if (verbose > 1) cat("\r", paste0(round(person$estimate, 2), collapse = ', '), " | ", paste0(round(diag(attr(person$estimate,'variance')), 2), collapse = ', '), '         ')
