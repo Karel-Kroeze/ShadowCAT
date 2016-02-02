@@ -9,7 +9,7 @@ get_posterior_expected_kl_information(estimate, model, responses, administered,
   number_itemsteps_per_item, lower_bound, upper_bound, theta_range = -3:3)
 }
 \arguments{
-\item{estimate}{current theta estimate}
+\item{estimate}{vector with current theta estimate}
 
 \item{model}{string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
 
@@ -27,9 +27,9 @@ get_posterior_expected_kl_information(estimate, model, responses, administered,
 
 \item{beta}{matrix containing the beta parameters}
 
-\item{guessing}{matrix containing the quessing}
+\item{guessing}{matrix containing the quessing parameters}
 
-\item{prior}{prior covariance matrix for theta; only required if estimator is "MAP" or "EAP" and output is "likelihoods" or "both"}
+\item{prior}{prior covariance matrix for theta; only required if estimator is "MAP" or "EAP" and output is "likelihood" or "both"}
 
 \item{number_itemsteps_per_item}{vector containing the number of non missing cells per row of the beta matrix}
 

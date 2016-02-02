@@ -10,7 +10,7 @@ test_must_stop(number_responses, estimate, min_n, max_n,
 \arguments{
 \item{number_responses}{number of responses given}
 
-\item{estimate}{vector with current theta estimate(s), with covariance matrix as its attribute}
+\item{estimate}{vector with current theta estimate, with covariance matrix as its attribute}
 
 \item{min_n}{minimum test length; NULL means no minimum test length}
 

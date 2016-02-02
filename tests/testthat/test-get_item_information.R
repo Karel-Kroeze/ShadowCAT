@@ -13,7 +13,7 @@ test_that("First 1 item administered, information_summary is D (determinant), on
   number_items <- 50
   number_dimensions <- 1
   estimator <- "MAP"
-  estimate <- 0
+  estimate <- rep(0, number_dimensions)
   information_summary <- "D"
   responses <- 1
   available <- 2:50
@@ -37,7 +37,7 @@ test_that("First 1 item administered, information_summary is D (determinant), th
   number_items <- 50
   number_dimensions <- 3
   estimator <- "MAP"
-  estimate <- 0
+  estimate <- rep(0, number_dimensions)
   information_summary <- "D"
   responses <- 1
   available <- 2:50
@@ -61,7 +61,7 @@ test_that("First 10 item administered, information_summary is D (determinant), t
   number_items <- 50
   number_dimensions <- 3
   estimator <- "MAP"
-  estimate <- 0
+  estimate <- rep(0, number_dimensions)
   information_summary <- "D"
   responses <- rep(c(1, 0), 5)
   available <- 11:50
@@ -87,7 +87,7 @@ test_that("First 1 item administered, objective is PD (posterior determinant), o
   number_items <- 50
   number_dimensions <- 1
   estimator <- "MAP"
-  estimate <- 0
+  estimate <- rep(0, number_dimensions)
   information_summary <- "PD"
   responses <- 1
   available <- 2:50
@@ -111,7 +111,7 @@ test_that("First 1 item administered, information_summary is PD (posterior deter
   number_items <- 50
   number_dimensions <- 3
   estimator <- "MAP"
-  estimate <- 0
+  estimate <- rep(0, number_dimensions)
   information_summary <- "PD"
   responses <- 1
   available <- 2:50
@@ -135,7 +135,7 @@ test_that("First 10 item administered, information_summary is PD (posterior dete
   number_items <- 50
   number_dimensions <- 3
   estimator <- "MAP"
-  estimate <- 0
+  estimate <- rep(0, number_dimensions)
   information_summary <- "PD"
   responses <- rep(c(1, 0), 5)
   available <- 11:50
@@ -159,7 +159,7 @@ test_that("10 scattered items administered, information_summary is PD (posterior
   number_items <- 50
   number_dimensions <- 1
   estimator <- "MAP"
-  estimate <- 0
+  estimate <- rep(0, number_dimensions)
   information_summary <- "PD"
   responses <- rep(c(1, 0), 5)
   available <- c(1, 3, 4, 6, 7, 9, 10, 12:18, 20:24, 31:50)
@@ -184,7 +184,7 @@ test_that("10 scattered items administered, information_summary is PD (posterior
   number_items <- 50
   number_dimensions <- 3
   estimator <- "MAP"
-  estimate <- 0
+  estimate <- rep(0, number_dimensions)
   information_summary <- "PD"
   responses <- rep(c(1, 0), 5)
   available <- c(1, 3, 4, 6, 7, 9, 10, 12:18, 20:24, 31:50)
@@ -211,7 +211,7 @@ test_that("First 1 item administered, objective is A (trace), one dimension, wit
   number_items <- 50
   number_dimensions <- 1
   estimator <- "MAP"
-  estimate <- 0
+  estimate <- rep(0, number_dimensions)
   information_summary <- "A"
   responses <- 1
   available <- 2:50
@@ -235,7 +235,7 @@ test_that("First 1 item administered, information_summary is A (trace), three di
   number_items <- 50
   number_dimensions <- 3
   estimator <- "MAP"
-  estimate <- 0
+  estimate <- rep(0, number_dimensions)
   information_summary <- "A"
   responses <- 1
   available <- 2:50
@@ -249,7 +249,6 @@ test_that("First 1 item administered, information_summary is A (trace), three di
   number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   
   item_information <- with_random_seed(2, get_item_information)(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE)
-  
   expect_equal(length(item_information), 50)
   expect_equal(round(item_information[c(1:5, 35:38,47:50)], 3), c(.000, .488, .101, .190, .691, .266, .417, .107, .258, .684, .295, .401, .176))
 })
@@ -259,7 +258,7 @@ test_that("First 10 item administered, information_summary is A (trace), three d
   number_items <- 50
   number_dimensions <- 3
   estimator <- "MAP"
-  estimate <- 0
+  estimate <- rep(0, number_dimensions)
   information_summary <- "A"
   responses <- rep(c(1, 0), 5)
   available <- 11:50
@@ -285,7 +284,7 @@ test_that("First 1 item administered, information_summary is PA (posterior trace
   number_items <- 50
   number_dimensions <- 1
   estimator <- "MAP"
-  estimate <- 0
+  estimate <- rep(0, number_dimensions)
   information_summary <- "PA"
   responses <- 1
   available <- 2:50
@@ -309,7 +308,7 @@ test_that("First 1 item administered, information_summary is PA (posterior trace
   number_items <- 50
   number_dimensions <- 3
   estimator <- "MAP"
-  estimate <- 0
+  estimate <- rep(0, number_dimensions)
   information_summary <- "PA"
   responses <- 1
   available <- 2:50
@@ -333,7 +332,7 @@ test_that("First 10 item administered, information_summary is PA (posterior trac
   number_items <- 50
   number_dimensions <- 3
   estimator <- "MAP"
-  estimate <- 0
+  estimate <- rep(0, number_dimensions)
   information_summary <- "PA"
   responses <- rep(c(1, 0), 5)
   available <- 11:50
@@ -359,7 +358,7 @@ test_that("First 1 item administered, information_summary is PEKL, one dimension
   number_items <- 50
   number_dimensions <- 1
   estimator <- "MAP"
-  estimate <- 0
+  estimate <- rep(0, number_dimensions)
   attr(estimate, 'variance') <- .4
   information_summary <- "PEKL"
   responses <- 1
@@ -387,7 +386,7 @@ test_that("information_summary is PD", {
   number_items <- 50
   number_dimensions <- 1
   estimator <- "MAP"
-  estimate <- 0
+  estimate <- rep(0, number_dimensions)
   information_summary <- "PD"
   responses <- c(1, 0)
   available <- 3:50
@@ -412,7 +411,7 @@ test_that("information_summary is PEKL", {
   number_items <- 50
   number_dimensions <- 1
   estimator <- "MAP"
-  estimate <- 0
+  estimate <- rep(0, number_dimensions)
   attr(estimate, 'variance') <- .4
   information_summary <- "PEKL"
   responses <- c(1, 0)
@@ -440,7 +439,7 @@ test_that("information_summary is of unknown type", {
   number_items <- 50
   number_dimensions <- 1
   estimator <- "MAP"
-  estimate <- 0
+  estimate <- rep(0, number_dimensions)
   information_summary <- "PPP"
   responses <- c(1, 0)
   available <- 3:50
@@ -464,7 +463,7 @@ test_that("zero item information", {
   number_items <- 50
   number_dimensions <- 3
   estimator <- "MAP"
-  estimate <- 0
+  estimate <- rep(0, number_dimensions)
   information_summary <- "D"
   responses <- rep(c(1, 0), 15)
   available <- 31:50

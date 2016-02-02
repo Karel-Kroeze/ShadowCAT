@@ -14,13 +14,13 @@
 #' Note: get_fisher_information always returns the 'raw' information, information given by prior distributions is added by the calling functions, 
 #' and get_fisher_information(..) is normally called internally.
 #' 
-#' @param estimate theta estimate
+#' @param estimate vector containing theta estimate
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param number_dimensions number of dimensions
 #' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "EAP" (Expected A Posteriori Estimation), or "ML" (maximum likelihood)
 #' @param alpha matrix containing the alpha parameters
 #' @param beta matrix containing the beta parameters
-#' @param guessing matrix containing the quessing
+#' @param guessing matrix containing the quessing parameters
 #' @param number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix
 #' @return array with an information matrix for each item (QxQxK).
 #' @export
@@ -29,7 +29,7 @@ get_fisher_information <- function(estimate, model, number_dimensions, estimator
   # minus the expectation of the second derivative of the log-likelihood
   # Expectation -> sum of derivatives for each category, 'weighted' by their probability.
   number_items <- nrow(alpha)
-  probabilities <- probabilities_and_likelihoods(estimate, responses = NULL, model, 1:number_items, number_dimensions, estimator, alpha, beta, guessing)
+  probabilities <- probabilities_and_likelihood(estimate, responses = NULL, model, 1:number_items, number_dimensions, estimator, alpha, beta, guessing)
   
   result <- function() {
     second_derivatives <- get_second_derivatives(model)

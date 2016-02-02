@@ -8,7 +8,7 @@ get_fisher_information(estimate, model, number_dimensions, estimator, alpha,
   beta, guessing, number_itemsteps_per_item)
 }
 \arguments{
-\item{estimate}{theta estimate}
+\item{estimate}{vector containing theta estimate}
 
 \item{model}{string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
 
@@ -20,7 +20,7 @@ get_fisher_information(estimate, model, number_dimensions, estimator, alpha,
 
 \item{beta}{matrix containing the beta parameters}
 
-\item{guessing}{matrix containing the quessing}
+\item{guessing}{matrix containing the quessing parameters}
 
 \item{number_itemsteps_per_item}{vector containing the number of non missing cells per row of the beta matrix}
 }

@@ -6,7 +6,7 @@
 #' # simulates responses on items indicated by indeces, given true theta
 #' simulate_answer(.3, "GPCM", 1, "MAP", items$pars$alpha, items$pars$beta, items$pars$guessing, items$M, 3)
 #' 
-#' @param theta true theta
+#' @param theta vector with true theta
 #' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param number_dimensions number of dimensions
 #' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation) or "ML" (maximum likelihood); 
@@ -15,13 +15,13 @@
 #' @param beta matrix of beta parameters
 #' @param guessing vector of guessing parameters
 #' @param number_itemsteps number of itemsteps
-#' @param indeces answer questions with the given indeces
-#' @return vector responses, or updated person object if indeces is set.
+#' @param indeces vector of indeces for which answers should be simulated
+#' @return vector with responses
 simulate_answer <- function(theta, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps, indeces) {
   result <- function() {
     guessing <- get_guessing()
-    # probabilities, generated with TRUE theta.
-    probabilities <- probabilities_and_likelihoods(theta, responses = NULL, model, indeces, number_dimensions, estimator, alpha, beta, guessing, output = "probs")
+    # probabilities, generated with true theta.
+    probabilities <- probabilities_and_likelihood(theta, responses = NULL, model, indeces, number_dimensions, estimator, alpha, beta, guessing, output = "probs")
     cumulative_probabilities <- row_cumsum(probabilities) 
     random_numbers <- runif(length(indeces))
     

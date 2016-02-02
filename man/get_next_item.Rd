@@ -28,7 +28,7 @@ n_by_dimension = scalar of number of initial items per dimension, or vector with
 
 \item{lp_characters}{data frame with constraint characters in lp format: the lp_chars from the list returned by constraints_lp_format(); NULL means no constraints}
 
-\item{estimate}{current theta estimate}
+\item{estimate}{vector with current theta estimate}
 
 \item{model}{string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
 
@@ -40,7 +40,7 @@ n_by_dimension = scalar of number of initial items per dimension, or vector with
 
 \item{administered}{vector with indeces of administered items}
 
-\item{number_items}{number of items}
+\item{number_items}{number of items in test bank}
 
 \item{number_dimensions}{number of dimensions}
 
@@ -50,9 +50,9 @@ n_by_dimension = scalar of number of initial items per dimension, or vector with
 
 \item{beta}{matrix containing the beta parameters}
 
-\item{guessing}{matrix containing the quessing}
+\item{guessing}{matrix containing the quessing parameters}
 
-\item{number_itemsteps_per_item}{number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix}
+\item{number_itemsteps_per_item}{vector containing the number of non missing cells per row of the beta matrix}
 
 \item{lower_bound}{vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values}
 

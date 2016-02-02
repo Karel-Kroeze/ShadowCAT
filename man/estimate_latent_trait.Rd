@@ -10,15 +10,15 @@ estimate_latent_trait(estimate, responses, prior, model, administered,
   prior_var_safe_nlm = NULL)
 }
 \arguments{
-\item{estimate}{theta estimate with 'variance' as an attribute}
+\item{estimate}{vector containing theta estimate, with covariance matrix as an attribute}
 
-\item{responses}{person responses}
+\item{responses}{vector with person responses}
 
 \item{prior}{prior covariance matrix for theta}
 
 \item{model}{string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively}
 
-\item{administered}{indeces of administered items}
+\item{administered}{vector with indeces of administered items}
 
 \item{number_dimensions}{number of dimensions}
 
@@ -36,10 +36,11 @@ estimate_latent_trait(estimate, responses, prior, model, administered,
 
 \item{upper_bound}{vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values}
 
-\item{prior_var_safe_nlm}{if not NULL, EAP estimate with prior variance equal to prior_var_safe_ml is computed instead of ML/MAP, if ML/MAP estimate fails}
+\item{prior_var_safe_nlm}{if not NULL, EAP estimate with prior variance(s) equal to prior_var_safe_ml is computed instead of ML/MAP, if ML/MAP estimate fails. Can be a scalar 
+(if variance for each dimension is equal) or vector}
 }
 \value{
-updated estimate with variance as attribute
+vector containing the updated estimate with the covariance matrix as attribute
 }
 \description{
 ML, MAP and EAP estimates.

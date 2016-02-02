@@ -17,7 +17,7 @@ get_item_information(information_summary, estimate, model, responses, prior,
 "PA" = posterior trace: compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
 "PEKL" = compute Posterior expected Kullback-Leibler Information}
 
-\item{estimate}{current theta estimate}
+\item{estimate}{vector with current theta estimate}
 
 \item{model}{string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
 
@@ -29,7 +29,7 @@ get_item_information(information_summary, estimate, model, responses, prior,
 
 \item{administered}{vector with indeces of administered items}
 
-\item{number_items}{number of items}
+\item{number_items}{number of items in test bank}
 
 \item{number_dimensions}{number of dimensions}
 
@@ -39,9 +39,9 @@ get_item_information(information_summary, estimate, model, responses, prior,
 
 \item{beta}{matrix containing the beta parameters}
 
-\item{guessing}{matrix containing the quessing}
+\item{guessing}{matrix containing the quessing parameters}
 
-\item{number_itemsteps_per_item}{number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix}
+\item{number_itemsteps_per_item}{vector containing the number of non missing cells per row of the beta matrix}
 
 \item{lower_bound}{vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values}
 

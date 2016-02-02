@@ -1,7 +1,7 @@
 #' Returns a list with the index of the next item to be administered given a new response, and an updated person object
 #'
 #' @param new_response new response from respondent, should be initialized with NULL
-#' @param estimate estimate of latent trait theta, with variance as attribute
+#' @param estimate estimate of latent trait theta, with covariance matrix as its attribute
 #' @param responses vector of given responses; should be initialized with numeric(0)
 #' @param administered vector containing indeces of administered items; should be initialized with numeric(0)
 #' @param available vector containing indeces of yet available items
@@ -20,6 +20,8 @@
 #' where n = total number of initial items, indices = vector of initial item indeces, 
 #' n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
 #' If n is 0, only n needs to be defined
+#' 'random_by_dimension' assumes between models, if any item has a non-zero loading on a dimension, it is considered to be part of that dimension. 
+#  They CAN overlap, which may cause unwanted side effects, and in within models the result is identical to 'normal' random starting.
 #' @param stop_test rule for when to stop providing new items to patient; should be a list of the form
 #' list(target = ..., max_n = ..., min_n = ..., cutoffs = ...), 
 #' where max_n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule), 

@@ -63,11 +63,11 @@
 #' estimator <- "EAP"
 #' system.time(estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound))
 #' 
-#' @param estimate theta estimate with 'variance' as an attribute
-#' @param responses person responses
+#' @param estimate vector containing theta estimate, with covariance matrix as an attribute
+#' @param responses vector with person responses
 #' @param prior prior covariance matrix for theta
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively
-#' @param administered indeces of administered items
+#' @param administered vector with indeces of administered items
 #' @param number_dimensions number of dimensions
 #' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "ML" (maximum likelihood), or "EAP" (Expected A Posteriori Estimation)
 #' @param alpha matrix of alpha paramteres
@@ -76,8 +76,9 @@
 #' @param number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix
 #' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
-#' @param prior_var_safe_nlm if not NULL, EAP estimate with prior variance equal to prior_var_safe_ml is computed instead of ML/MAP, if ML/MAP estimate fails
-#' @return updated estimate with variance as attribute
+#' @param prior_var_safe_nlm if not NULL, EAP estimate with prior variance(s) equal to prior_var_safe_ml is computed instead of ML/MAP, if ML/MAP estimate fails. Can be a scalar 
+#' (if variance for each dimension is equal) or vector
+#' @return vector containing the updated estimate with the covariance matrix as attribute
 #' @importFrom MultiGHQuad init.quad eval.quad
 #' @export
 estimate_latent_trait <- function(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL) {
@@ -89,7 +90,7 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
   get_updated_estimate_and_variance_ml <- function() {
     # for now, simple nlm (TODO: look at optim, and possible reintroducing pure N-R).
     # We want a maximum, but nlm produces minima -> reverse function call.
-    estimate <- tryCatch(nlm(f = probabilities_and_likelihoods, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate,
+    estimate <- tryCatch(nlm(f = probabilities_and_likelihood, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihood = TRUE, output = "likelihood")$estimate,
                          error = function(e) { switch_to_eap_if_requested() },
                          warning = function(w) { switch_to_eap_if_requested() })
     # TODO: We should really store info somewhere so we don't have to redo this (when using get_fisher_information based selection criteria).
@@ -101,8 +102,8 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
   }
   
   get_updated_estimate_and_variance_map <- function() {
-    # note that prior is applied in probabilities_and_likelihoods (incorrectly it seems, but still).
-    estimate <- tryCatch(nlm(f = probabilities_and_likelihoods, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihoods = TRUE, output = "likelihoods")$estimate,
+    # note that prior is applied in probabilities_and_likelihood (incorrectly it seems, but still).
+    estimate <- tryCatch(nlm(f = probabilities_and_likelihood, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihood = TRUE, output = "likelihood")$estimate,
                          error = function(e) { switch_to_eap_if_requested() },
                          warning = function(w) { switch_to_eap_if_requested() })
     fisher_information_items <- get_fisher_information(estimate, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
@@ -122,7 +123,7 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
                                         prior = list(mu = rep(0, number_dimensions), Sigma = prior),
                                         adapt = adapt,
                                         ip = switch(number_dimensions, 50, 15, 6, 4, 3))
-    eval.quad(FUN = probabilities_and_likelihoods, X = Q_dim_grid_quad_points, responses, model, administered, number_dimensions, estimator = "EAP", alpha, beta, guessing, prior, output = "likelihoods")
+    eval.quad(FUN = probabilities_and_likelihood, X = Q_dim_grid_quad_points, responses, model, administered, number_dimensions, estimator = "EAP", alpha, beta, guessing, prior, output = "likelihood")
   }
   
   get_updated_estimate_and_variance_attribute <- function(estimator) {

@@ -7,17 +7,17 @@
 get_item_index_max_information(available, item_information)
 }
 \arguments{
-\item{available}{indeces of available items}
+\item{available}{vector with indeces of available items}
 
 \item{item_information}{vector with information of each yet available item, with zeros for administered items (returned by get_item_information() with pad = TRUE)}
 }
 \value{
-item index of item with the highest value of the objective function.
+item index of item with maximum information.
 }
 \description{
 Naive item selection based on maximum information only.
 }
 \details{
-Selects the item with the highest value of a specified objective function.
+Selects the item with the highest information.
 }
 

@@ -3,7 +3,7 @@
 #' Control function to check if the test is completed.
 #' 
 #' @param number_responses number of responses given
-#' @param estimate vector with current theta estimate(s), with covariance matrix as its attribute
+#' @param estimate vector with current theta estimate, with covariance matrix as its attribute
 #' @param min_n minimum test length; NULL means no minimum test length
 #' @param max_n test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule) 
 #' @param stop_variance_target a vector with the variance target for each dimension; if null, variance is not taken into account

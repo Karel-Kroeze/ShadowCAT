@@ -9,7 +9,7 @@
 #' @param return_testbank_properties if FALSE, a list of alpha and beta is returned; if TRUE, substract_testbank_properties() is applied on
 #' the simulated testbank and the result of this is returned 
 #' @param varying_number_item_steps if TRUE, some item steps are set to NA; in this case number_itemsteps is the maximum number of itemsteps
-#' @return simulated itembank
+#' @return list containing simulated itembank
 simulate_testbank <- function(model, number_items = 50, number_dimensions = 1, number_itemsteps = 4, items_load_one_dimension = FALSE, return_testbank_properties = TRUE, varying_number_item_steps = FALSE){
   result <- function() {
     number_items <- get_number_items()

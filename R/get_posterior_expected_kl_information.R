@@ -10,7 +10,7 @@
 #'   
 #' TODO: Add references.
 #' 
-#' @param estimate current theta estimate
+#' @param estimate vector with current theta estimate
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param responses vector with person responses
 #' @param administered vector with indeces of administered items
@@ -19,8 +19,8 @@
 #' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "EAP" (Expected A Posteriori Estimation), or "ML" (maximum likelihood)
 #' @param alpha matrix containing the alpha parameters
 #' @param beta matrix containing the beta parameters
-#' @param guessing matrix containing the quessing
-#' @param prior prior covariance matrix for theta; only required if estimator is "MAP" or "EAP" and output is "likelihoods" or "both"
+#' @param guessing matrix containing the quessing parameters
+#' @param prior prior covariance matrix for theta; only required if estimator is "MAP" or "EAP" and output is "likelihood" or "both"
 #' @param number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix
 #' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
@@ -50,9 +50,9 @@ get_posterior_expected_kl_information <- function(estimate, model, responses, ad
   #' returns vector containing information for each yet available item
   KLB <- function(theta, theta0) {
     # TODO: wrap this into PEKL, do not recompute P0 for each theta (considering it is constant for the current posterior).
-    P <- probabilities_and_likelihoods(theta, NULL, model, available, number_dimensions, estimator, alpha, beta, guessing, output = "probs")
-    P0 <- probabilities_and_likelihoods(theta0, NULL, model, available, number_dimensions, estimator, alpha, beta, guessing, output = "probs")
-    LL <- probabilities_and_likelihoods(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, output = "likelihoods")
+    P <- probabilities_and_likelihood(theta, NULL, model, available, number_dimensions, estimator, alpha, beta, guessing, output = "probs")
+    P0 <- probabilities_and_likelihood(theta0, NULL, model, available, number_dimensions, estimator, alpha, beta, guessing, output = "probs")
+    LL <- probabilities_and_likelihood(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, output = "likelihood")
     
     rowSums(P0 * (log(P0) - log(P)), na.rm = TRUE) * exp(LL)
   }

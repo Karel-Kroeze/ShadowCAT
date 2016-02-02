@@ -1,25 +1,27 @@
 #' Probabilities, likelihood, and derivatives for a given (subset of) items.
 #' 
-#' @param theta true or estimated theta
-#' @param responses person responses to the administered items; only required if output is "likelihoods" or "both"
+#' @param theta vector with true or estimated theta
+#' @param responses vector with person responses to the administered items; only required if output is "likelihood" or "both"
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
-#' @param items_to_include indeces of items to include in computations, usually indeces of either the administered items or all items
+#' @param items_to_include vector with indeces of items to include in computations, usually indeces of either the administered items or all items
 #' @param number_dimensions number of dimensions
 #' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "EAP" (Expected A Posteriori Estimation), or "ML" (maximum likelihood)
 #' @param alpha matrix containing the alpha parameters
 #' @param beta matrix containing the beta parameters
-#' @param guessing matrix containing the quessing
-#' @param prior prior covariance matrix for theta; only required if estimator is "MAP" or "EAP" and output is "likelihoods" or "both"
-#' @param return_log_likelihoods if TRUE, log of likelihoods are returned, else likelihoods
-#' @param inverse_likelihoods should likelihood values be reversed (useful for minimization, reverses LL as well as derivatives)
-#' @param output string, one of "probs" (return vector of probabilities only), "likelihoods" (return vector of likelihoods with first and second derivatives as attributes),
-#' or "both" (return list of both probabilities and likelihoods with first and second derivatives as attributes)
-#' @return probabilities and/or likelihoods, depending on output parameter
+#' @param guessing matrix containing the quessing parameters
+#' @param prior prior covariance matrix for theta; only required if estimator is "MAP" or "EAP" and output is "likelihood" or "both"
+#' @param return_log_likelihood if TRUE, log of likelihood is returned, else likelihood
+#' @param inverse_likelihood should likelihood values be reversed (useful for minimization, reverses LL as well as derivatives)
+#' @param output string, one of "probs" (return matrix with probabilities for each included item), "likelihood" (return likelihood or posterior density of theta, with first and second derivatives as attributes),
+#' or "both" (return list containing both)
+#' @return if output = "probs": matrix with for each included item (rows) the probability of scoring in each answer category (columns), given theta
+#' if output = "likelihood": the likelihood (estimator = ML) or posterior density (MAP/EAP) of theta, with first and second derivatives as attributes
+#' if output = "both": al list containing both
 #' @importFrom mvtnorm dmvnorm
 #' @importFrom Rcpp evalCpp
 #' @useDynLib ShadowCAT
 #' @export
-probabilities_and_likelihoods <- function(theta, responses = NULL, model, items_to_include, number_dimensions, estimator, alpha, beta, guessing, prior = NULL, return_log_likelihoods = TRUE, inverse_likelihoods = FALSE, output = "probs") {
+probabilities_and_likelihood <- function(theta, responses = NULL, model, items_to_include, number_dimensions, estimator, alpha, beta, guessing, prior = NULL, return_log_likelihood = TRUE, inverse_likelihood = FALSE, output = "probs") {
   # TODO: Check input.
   # TODO priors: mean? 
   # priors: Alleen variabele deel van multivariaat normaal verdeling (exp).
@@ -32,7 +34,7 @@ probabilities_and_likelihoods <- function(theta, responses = NULL, model, items_
     probabilities <- get_probabilities()
     switch(output,
            probs = return_probs(probabilities),
-           likelihoods = return_likelihoods(probabilities),
+           likelihood = return_likelihood(probabilities),
            both = return_both(probabilities))
   }
 
@@ -40,25 +42,25 @@ probabilities_and_likelihoods <- function(theta, responses = NULL, model, items_
     probabilities$P
   }
   
-  return_likelihoods <- function(probabilities) {
-    log_likelihoods <- get_log_likelihoods(probabilities) * (-1) ^ inverse_likelihoods
-    attr(log_likelihoods, "gradient") <- get_first_derivative(probabilities) * (-1) ^ inverse_likelihoods
-    attr(log_likelihoods, "hessian") <- get_second_derivative(probabilities) * (-1) ^ inverse_likelihoods
+  return_likelihood <- function(probabilities) {
+    log_likelihood <- get_log_likelihood(probabilities) * (-1) ^ inverse_likelihood
+    attr(log_likelihood, "gradient") <- get_first_derivative(probabilities) * (-1) ^ inverse_likelihood
+    attr(log_likelihood, "hessian") <- get_second_derivative(probabilities) * (-1) ^ inverse_likelihood
 
-    if (return_log_likelihoods)  
-      log_likelihoods
+    if (return_log_likelihood)  
+      log_likelihood
     else
-      exp(log_likelihoods)
+      exp(log_likelihood)
   }
 
   return_both <- function(probabilities) {
     out <- list(probabilities = probabilities$P,
-                likelihoods = if (return_log_likelihoods) 
-                                get_log_likelihoods(probabilities) * (-1) ^ inverse_likelihoods
+                likelihood = if (return_log_likelihood) 
+                                get_log_likelihood(probabilities) * (-1) ^ inverse_likelihood
                               else
-                                exp(get_log_likelihoods(probabilities) * (-1) ^ inverse_likelihoods))
-    attr(out$likelihoods, "gradient") <- get_first_derivative(probabilities) * (-1) ^ inverse_likelihoods
-    attr(out$likelihoods, "hessian") <- get_second_derivative(probabilities) * (-1) ^ inverse_likelihoods
+                                exp(get_log_likelihood(probabilities) * (-1) ^ inverse_likelihood))
+    attr(out$likelihood, "gradient") <- get_first_derivative(probabilities) * (-1) ^ inverse_likelihood
+    attr(out$likelihood, "hessian") <- get_second_derivative(probabilities) * (-1) ^ inverse_likelihood
     out
   }
 
@@ -80,19 +82,18 @@ probabilities_and_likelihoods <- function(theta, responses = NULL, model, items_
     # likelihoods can never truly be zero, let alone negative
     # TODO: make debug output toggleable
     # if (any(out$P <= 0)) cat("\nProbability <= 0 (k =", length(person$responses), ", estimate = ", paste0(round(person$estimate, 2), collapse = ", "), ").")
-      
     probs$P[which(probs$P <= 0)] <- 1e-10
     probs
   }
   
-  get_log_likelihoods <- function(probabilities) {
+  get_log_likelihood <- function(probabilities) {
     # likelihoods can never truly be zero, let alone negative
     probabilities$l[which(probabilities$l <= 0)] <- 1e-10  
-    log_likelihoods <- sum(log(probabilities$l))
+    log_likelihood <- sum(log(probabilities$l))
     if (estimator == "ML")
-      log_likelihoods
+      log_likelihood
     else
-      log_likelihoods - (t(theta) %*% solve(prior) %*% theta) / 2    
+      log_likelihood - (t(theta) %*% solve(prior) %*% theta) / 2    
   }
   
   # TODO: derivatives are correct for a single item, but not for K > 1?
