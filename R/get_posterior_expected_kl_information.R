@@ -50,8 +50,8 @@ get_posterior_expected_kl_information <- function(estimate, model, responses, ad
   #' returns vector containing information for each yet available item
   kullback_leibler_divergence <- function(theta, theta0) {
     # TODO: wrap this into PEKL, do not recompute P0 for each theta (considering it is constant for the current posterior).
-    probabilities_given_theta <- get_probabilities(theta, model, available, alpha, beta, guessing)
-    probabilities_given_theta0 <- get_probabilities(theta0, model, available, alpha, beta, guessing)
+    probabilities_given_theta <- get_probs_and_likelihoods_per_item(theta, model, get_subset(alpha, available), get_subset(beta, available), get_subset(guessing, available), with_likelihoods = FALSE)$P
+    probabilities_given_theta0 <- get_probs_and_likelihoods_per_item(theta0, model, get_subset(alpha, available), get_subset(beta, available), get_subset(guessing, available), with_likelihoods = FALSE)$P
     likelihood_or_post_density_theta <- likelihood_or_post_density(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, return_log_likelihood_or_post_density = FALSE)
     
     rowSums(probabilities_given_theta0 * (log(probabilities_given_theta0) - log(probabilities_given_theta)), na.rm = TRUE) * likelihood_or_post_density_theta

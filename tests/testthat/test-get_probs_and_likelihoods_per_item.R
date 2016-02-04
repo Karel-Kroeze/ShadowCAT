@@ -141,7 +141,7 @@ test_that("model is GPCM, 3 dimensions, varying number of categories", {
 
 context("GRM model")
 
-test_that("model is GRM, 1 dimensions, 2 categories, estimator is expected_aposteriori, deriv is true", {
+test_that("model is GRM, 1 dimensions, 2 categories", {
   theta <- .5
   model <- "GRM"
   administered <- 1:50
@@ -165,7 +165,7 @@ test_that("model is GRM, 1 dimensions, 2 categories, estimator is expected_apost
   expect_equal(length(probs_and_likelihoods_per_item$D), 50)
 }) 
 
-test_that("model is GRM, 3 dimensions, 4 categories, estimator is expected_aposteriori, deriv is true", {
+test_that("model is GRM, 3 dimensions, 4 categories", {
   theta <- c(.2, 2, 2.5)
   model <- "GRM"
   administered <- 1:50
@@ -191,7 +191,7 @@ test_that("model is GRM, 3 dimensions, 4 categories, estimator is expected_apost
   expect_equal(length(probs_and_likelihoods_per_item$D), 50)
 }) 
 
-test_that("model is GRM, 3 dimensions, varying number of categories, estimator is expected_aposteriori, deriv is true", {
+test_that("model is GRM, 3 dimensions, varying number of categories", {
   theta <- c(-2, -1.1, 2)
   model <- "GRM"
   administered <- 1:50

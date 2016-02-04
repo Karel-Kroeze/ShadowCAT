@@ -1,4 +1,4 @@
-#' Get Likelihood or posterior density, and derivatives, based on a a given set of items
+#' Get Likelihood or posterior density over all included items, and derivatives, based on a a given set of items
 #' 
 #' @param theta vector with true or estimated theta
 #' @param responses vector with person responses to the administered items

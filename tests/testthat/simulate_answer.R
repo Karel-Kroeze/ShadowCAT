@@ -20,7 +20,7 @@ simulate_answer <- function(theta, model, number_dimensions, estimator, alpha, b
   result <- function() {
     guessing <- get_guessing()
     # probabilities, generated with true theta.
-    probabilities <- get_probabilities(theta, model, indeces, alpha, beta, guessing)
+    probabilities <- get_probs_and_likelihoods_per_item(theta, model, get_subset(alpha, indeces), get_subset(beta, indeces), get_subset(guessing, indeces), with_likelihoods = FALSE)$P
     cumulative_probabilities <- row_cumsum(probabilities) 
     random_numbers <- runif(length(indeces))
     

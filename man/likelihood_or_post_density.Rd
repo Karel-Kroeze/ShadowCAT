@@ -2,7 +2,7 @@
 % Please edit documentation in R/likelihood_or_post_density.R
 \name{likelihood_or_post_density}
 \alias{likelihood_or_post_density}
-\title{Get Likelihood or posterior density, and derivatives, based on a a given set of items}
+\title{Get Likelihood or posterior density over all included items, and derivatives, based on a a given set of items}
 \usage{
 likelihood_or_post_density(theta, responses = NULL, model, items_to_include,
   number_dimensions, estimator, alpha, beta, guessing, prior = NULL,
@@ -38,6 +38,6 @@ likelihood_or_post_density(theta, responses = NULL, model, items_to_include,
 the likelihood (estimator = maximum_likelihood) or posterior density (estimator = maximum_aposteriori or expected_aposteriori) of theta, with first and second derivatives as attributes
 }
 \description{
-Get Likelihood or posterior density, and derivatives, based on a a given set of items
+Get Likelihood or posterior density over all included items, and derivatives, based on a a given set of items
 }
 
