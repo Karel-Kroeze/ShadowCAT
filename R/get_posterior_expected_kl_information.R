@@ -34,7 +34,7 @@ get_posterior_expected_kl_information <- function(estimate, model, responses, ad
     grid <- expand.grid(rep(list(theta_range), number_dimensions))
 
     # sum over values of the grid
-    row_or_vector_sums(apply(grid, 1, KLB, theta0 = get_theta_estimate()))
+    row_or_vector_sums(apply(grid, 1, kullback_leibler_divergence, theta0 = get_theta_estimate()))
   }
   
   get_theta_estimate <- function() {
@@ -48,13 +48,13 @@ get_posterior_expected_kl_information <- function(estimate, model, responses, ad
   #' Kullback Leibler Divergence for given items and pairs of thetas x posterior density.
   #' theta0 is theta estimated with expected_aposteriori
   #' returns vector containing information for each yet available item
-  KLB <- function(theta, theta0) {
+  kullback_leibler_divergence <- function(theta, theta0) {
     # TODO: wrap this into PEKL, do not recompute P0 for each theta (considering it is constant for the current posterior).
-    P <- probabilities_and_likelihood(theta, NULL, model, available, number_dimensions, estimator, alpha, beta, guessing, output = "probs")
-    P0 <- probabilities_and_likelihood(theta0, NULL, model, available, number_dimensions, estimator, alpha, beta, guessing, output = "probs")
-    LL <- probabilities_and_likelihood(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, output = "likelihood")
+    probabilities_given_theta <- get_probabilities(theta, model, available, alpha, beta, guessing)
+    probabilities_given_theta0 <- get_probabilities(theta0, model, available, alpha, beta, guessing)
+    likelihood_or_post_density_theta <- likelihood_or_post_density(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, return_log_likelihood_or_post_density = FALSE)
     
-    rowSums(P0 * (log(P0) - log(P)), na.rm = TRUE) * exp(LL)
+    rowSums(probabilities_given_theta0 * (log(probabilities_given_theta0) - log(probabilities_given_theta)), na.rm = TRUE) * likelihood_or_post_density_theta
   }
   
   result()

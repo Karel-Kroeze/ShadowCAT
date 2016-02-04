@@ -90,7 +90,7 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
   get_updated_estimate_and_variance_ml <- function() {
     # for now, simple nlm (TODO: look at optim, and possible reintroducing pure N-R).
     # We want a maximum, but nlm produces minima -> reverse function call.
-    estimate <- tryCatch(nlm(f = probabilities_and_likelihood, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihood = TRUE, output = "likelihood")$estimate,
+    estimate <- tryCatch(nlm(f = likelihood_or_post_density, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihood_or_post_density = TRUE)$estimate,
                          error = function(e) { switch_to_eap_if_requested() },
                          warning = function(w) { switch_to_eap_if_requested() })
     # TODO: We should really store info somewhere so we don't have to redo this (when using get_fisher_information based selection criteria).
@@ -103,7 +103,7 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
   
   get_updated_estimate_and_variance_map <- function() {
     # note that prior is applied in probabilities_and_likelihood (incorrectly it seems, but still).
-    estimate <- tryCatch(nlm(f = probabilities_and_likelihood, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihood = TRUE, output = "likelihood")$estimate,
+    estimate <- tryCatch(nlm(f = likelihood_or_post_density, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihood_or_post_density = TRUE)$estimate,
                          error = function(e) { switch_to_eap_if_requested() },
                          warning = function(w) { switch_to_eap_if_requested() })
     fisher_information_items <- get_fisher_information(estimate, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
@@ -123,7 +123,7 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
                                         prior = list(mu = rep(0, number_dimensions), Sigma = prior),
                                         adapt = adapt,
                                         ip = switch(number_dimensions, 50, 15, 6, 4, 3))
-    eval.quad(FUN = probabilities_and_likelihood, X = Q_dim_grid_quad_points, responses, model, administered, number_dimensions, estimator = "expected_aposteriori", alpha, beta, guessing, prior, output = "likelihood")
+    eval.quad(FUN = likelihood_or_post_density, X = Q_dim_grid_quad_points, responses, model, administered, number_dimensions, estimator = "expected_aposteriori", alpha, beta, guessing, prior)
   }
   
   get_updated_estimate_and_variance_attribute <- function(estimator) {
