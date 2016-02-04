@@ -46,7 +46,6 @@ probabilities_and_likelihood <- function(theta, responses = NULL, model, items_t
     log_likelihood <- get_log_likelihood(probabilities) * (-1) ^ inverse_likelihood
     attr(log_likelihood, "gradient") <- get_first_derivative(probabilities) * (-1) ^ inverse_likelihood
     attr(log_likelihood, "hessian") <- get_second_derivative(probabilities) * (-1) ^ inverse_likelihood
-
     if (return_log_likelihood)  
       log_likelihood
     else
@@ -54,14 +53,14 @@ probabilities_and_likelihood <- function(theta, responses = NULL, model, items_t
   }
 
   return_both <- function(probabilities) {
-    out <- list(probabilities = probabilities$P,
-                likelihood = if (return_log_likelihood) 
-                                get_log_likelihood(probabilities) * (-1) ^ inverse_likelihood
-                              else
-                                exp(get_log_likelihood(probabilities) * (-1) ^ inverse_likelihood))
-    attr(out$likelihood, "gradient") <- get_first_derivative(probabilities) * (-1) ^ inverse_likelihood
-    attr(out$likelihood, "hessian") <- get_second_derivative(probabilities) * (-1) ^ inverse_likelihood
-    out
+    probs_and_likelihood <- list(probabilities = probabilities$P,
+                                 likelihood = if (return_log_likelihood) 
+                                                get_log_likelihood(probabilities) * (-1) ^ inverse_likelihood
+                                              else
+                                                exp(get_log_likelihood(probabilities) * (-1) ^ inverse_likelihood))
+    attr(probs_and_likelihood$likelihood, "gradient") <- get_first_derivative(probabilities) * (-1) ^ inverse_likelihood
+    attr(probs_and_likelihood$likelihood, "hessian") <- get_second_derivative(probabilities) * (-1) ^ inverse_likelihood
+    probs_and_likelihood
   }
 
   get_responses <- function() {
@@ -80,8 +79,6 @@ probabilities_and_likelihood <- function(theta, responses = NULL, model, items_t
                     "GPCM" = PROB_GPCM(theta, alpha, beta, responses, output != "probs"))
     
     # likelihoods can never truly be zero, let alone negative
-    # TODO: make debug output toggleable
-    # if (any(out$P <= 0)) cat("\nProbability <= 0 (k =", length(person$responses), ", estimate = ", paste0(round(person$estimate, 2), collapse = ", "), ").")
     probs$P[which(probs$P <= 0)] <- 1e-10
     probs
   }
@@ -118,8 +115,6 @@ probabilities_and_likelihood <- function(theta, responses = NULL, model, items_t
   }
   
   validate <- function() {
-   # if (!is.null(prior) && estimator == "maximum_likelihood" && output != "probs")
-   #   add_error("prior", "set for maximum_likelihood estimator, this makes no sense")
     if (is.null(prior) && estimator %in% c("maximum_aposteriori", "expected_aposteriori") && output != "probs")
       add_error("prior", "is missing but required for estimate")
   }
