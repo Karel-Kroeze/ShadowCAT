@@ -226,7 +226,7 @@ context("SM model")
 test_that("model is SM, 1 dimension, 2 categories", {
   theta <- -2.3
   model <- "SM"
-  administered <- 1:5
+  administered <- 1:50
   number_dimensions <- 3
   number_items <- 50
   number_answer_categories <- 2

@@ -53,43 +53,42 @@
 #' @return a list containing the key of the next item to be administered given a new response (or "stop_test"), 
 #' updated estimate of theta, and the responses to the administered items (named list)
 #' @export
-shadowcat_roqua <- function(responses, estimate, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior = NULL, guessing = NULL, eta = NULL, constraints_and_characts = NULL, lower_bound = rep(-3, ncol(alpha)), upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL) {    
-  beta <- get_beta(model, beta, eta)
-  guessing <- get_guessing(guessing, beta) 
-  number_items <- nrow(beta)
-  number_dimensions <- ncol(alpha)
-  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
-  lp_constraints_and_characts <- constraints_lp_format(stop_test$max_n, number_items, constraints_and_characts$characteristics, constraints_and_characts$constraints)
-  item_keys <- rownames(alpha)
-  
+shadowcat_roqua <- function(responses, estimate, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior = NULL, guessing = NULL, eta = NULL, constraints_and_characts = NULL, lower_bound = rep(-3, ncol(alpha)), upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL) {      
   result <- function() {
+    beta <- get_beta(model, beta, eta)
+    guessing <- get_guessing(guessing, beta) 
+    number_items <- nrow(beta)
+    number_dimensions <- ncol(alpha)
+    number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
+    lp_constraints_and_characts <- constraints_lp_format(stop_test$max_n, number_items, constraints_and_characts$characteristics, constraints_and_characts$constraints)
+    item_keys <- rownames(alpha)
     item_keys_administered <- names(responses)
-    item_keys_available <- get_item_keys_available(item_keys_administered)
-    estimate <- update_person_estimate(estimate, unlist(responses), match(item_keys_administered, item_keys))
-    continue_test <- !test_must_stop(length(responses), estimate, stop_test$min_n, stop_test$max_n, stop_test$target, stop_test$cutoffs)
+    item_keys_available <- get_item_keys_available(item_keys_administered, item_keys)
     
+    estimate <- update_person_estimate(estimate, unlist(responses), match(item_keys_administered, item_keys), number_dimensions, alpha, beta, guessing, number_itemsteps_per_item)
+    continue_test <- !test_must_stop(length(responses), estimate, stop_test$min_n, stop_test$max_n, stop_test$target, stop_test$cutoffs)
     if (continue_test) {
       index_new_item <- get_next_item(start_items, information_summary, lp_constraints_and_characts$lp_constraints, lp_constraints_and_characts$lp_chars, estimate, model, unlist(responses), prior, match(item_keys_available, item_keys), match(item_keys_administered, item_keys), number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
-      list(key_new_item = item_keys[index_new_item],
-           estimate = estimate,
-           responses = responses)
+      key_new_item <- item_keys[index_new_item]
     }
     else {
-      list(key_new_item = "stop_test",
-           estimate = estimate,
-           responses = responses)
-    } 
+      key_new_item <- "stop_test"
+    }
+    
+    list(key_new_item = key_new_item,
+         estimate = estimate,
+         responses = responses)
   }
   
   # if inititial items have been administered (so we are in the CAT phase), update person estimate after each newly answered item
-  update_person_estimate <- function(estimate, responses_vector, item_indeces_administered) { 
+  update_person_estimate <- function(estimate, responses_vector, item_indeces_administered, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item) { 
     if (length(responses) > start_items$n)
       estimate_latent_trait(estimate, responses_vector, prior, model, item_indeces_administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml)
     else
       estimate
   }
   
-  get_item_keys_available <- function(item_keys_administered) {
+  get_item_keys_available <- function(item_keys_administered, item_keys) {
     if (is.null(item_keys_administered))
       item_keys
     else
@@ -121,7 +120,7 @@ shadowcat_roqua <- function(responses, estimate, model, alpha, beta, start_items
       return(add_error("eta", "should be a matrix with item keys as row names"))
     if (!is.null(guessing) && (!is.matrix(guessing) || ncol(guessing) != 1 || is.null(rownames(guessing))))
       return(add_error("guessing", "should be a single column matrix with item keys as row names"))
-    if (!row_names_are_equal(item_keys, list(alpha, beta, eta, guessing)))
+    if (!row_names_are_equal(rownames(alpha), list(alpha, beta, eta, guessing)))
       add_error("alpha_beta_eta_guessing", "should have equal row names, in same order")
     if (model != "GPCM" && is.null(beta))
       add_error("beta", "is missing")
