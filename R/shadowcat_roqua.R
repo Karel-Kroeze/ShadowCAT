@@ -167,8 +167,6 @@ get_beta <- function(model, beta, eta) {
 #' @return matrix containing guessing parameters
 #' @export
 get_guessing <- function(guessing, beta) {
-  if (is.null(beta))
-    return(NULL)
   if (is.null(guessing))
     matrix(0, nrow(as.matrix(beta)), 1, dimnames = list(rownames(beta), NULL))
   else
