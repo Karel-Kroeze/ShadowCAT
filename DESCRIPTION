@@ -20,5 +20,5 @@ Imports:
     lpSolve 
 Suggests:
     testthat (>= 0.8.1),
-    pbapply
+    stringr
 RoxygenNote: 5.0.0

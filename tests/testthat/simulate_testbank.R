@@ -1,4 +1,4 @@
-#' Simulate testbank
+#' Simulate alpha and beta matrices
 #' 
 #' Quick and simple itembanks for testing purposes.
 #' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
@@ -6,22 +6,17 @@
 #' @param number_dimensions number of dimensions
 #' @param number_itemsteps number of item steps (number of categories minus 1); forced to 1 if model is 3PLM
 #' @param items_load_one_dimension if TRUE, force items to load on one dimension each
-#' @param return_testbank_properties if FALSE, a list of alpha and beta is returned; if TRUE, substract_testbank_properties() is applied on
-#' the simulated testbank and the result of this is returned 
 #' @param varying_number_item_steps if TRUE, some item steps are set to NA; in this case number_itemsteps is the maximum number of itemsteps
-#' @return list containing simulated itembank
-simulate_testbank <- function(model, number_items = 50, number_dimensions = 1, number_itemsteps = 4, items_load_one_dimension = FALSE, return_testbank_properties = TRUE, varying_number_item_steps = FALSE){
+#' @return list containing simulated alpha and beta matrix
+simulate_testbank <- function(model, number_items = 50, number_dimensions = 1, number_itemsteps = 4, items_load_one_dimension = FALSE, varying_number_item_steps = FALSE){
   result <- function() {
     number_items <- get_number_items()
     number_itemsteps <- get_number_itemsteps()
     alpha <- get_alpha(number_items, number_itemsteps)
+    rownames(alpha) <- str_c("item", 1:number_items)
     beta <- get_beta(number_items, number_itemsteps)
-    
-    if (return_testbank_properties)
-      substract_testbank_properties(model, alpha, beta, silent = TRUE)
-    else
-      list(alpha = alpha,
-           beta = beta)
+    rownames(beta) <- str_c("item", 1:number_items)
+    list(alpha = alpha, beta = beta)
   }
   
   get_number_itemsteps <- function() {

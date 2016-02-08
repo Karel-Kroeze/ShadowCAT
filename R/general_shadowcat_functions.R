@@ -113,6 +113,28 @@ row_or_vector_sums <- function(x) {
     sum(x)  
 }
 
+#' Check whether all matrices have equal row names, in same order
+#' 
+#' @param row_names the correct character vector of row names
+#' @param list_of_matrices_to_check list containing the matrices for which the row names should be checked. NULL elements in the list are ignored.
+#' @return TRUE if the row names of all the matrices are equal to row_names, including the order; FALSE otherwise
+#' @examples row_names_are_equal(c("a", "b", "c"), list("matrix1" = matrix(1:3, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
+#'                                                      "matrix2" = matrix(2:4, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
+#'                                                      "matrix3" = matrix(3:5, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
+#'                                                      "matrix4" = NULL)) == TRUE || stop("wrong")
+#' row_names_are_equal(c("a", "b", "c"), list("matrix1" = matrix(1:3, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
+#'                                            "matrix2" = matrix(2:4, ncol = 1, dimnames = list(c("a", "c", "b"), NULL)),
+#'                                            "matrix3" = matrix(3:5, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)))) == FALSE || stop("wrong")
+#' @export
+row_names_are_equal <- function(row_names, list_of_matrices_to_check) {
+  row_names_are_equal_per_matrix <- sapply(1:length(list_of_matrices_to_check), 
+                                           function(x) { 
+                                             if (is.null(x))
+                                               return(TRUE)
+                                             all(rownames(list_of_matrices_to_check[[x]]) == row_names) })
+  all(row_names_are_equal_per_matrix)
+}
+
 #' Recursive list apply, given a bunch of vectors, creates lists of lists with the elements as keys
 #'  and values determined by fn.
 #' @param ... vectors to loop over

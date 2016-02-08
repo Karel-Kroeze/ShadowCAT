@@ -1,4 +1,4 @@
-#' Next item in an adaptive test. Takes a person and test object, and returns the index of the next item based 
+#' Best item in an adaptive test.
 #' 
 #' This function is a wrapper that sends the actual work to the correct subroutines.
 #' 
@@ -25,7 +25,7 @@
 #' @param number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix
 #' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
-#' @return integer item index
+#' @return integer item index of best item
 #' @export
 get_best_item <- function(information_summary, lp_constraints, lp_characters, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound) {
   # TODO: make selection with 0 responses work as expected

@@ -4,7 +4,7 @@
 #' items <- simulate_testbank("GPCM")
 #' 
 #' # simulates responses on items indicated by indeces, given true theta
-#' simulate_answer(.3, "GPCM", 1, "maximum_aposteriori", items$pars$alpha, items$pars$beta, items$pars$guessing, items$M, 3)
+#' simulate_answer(.3, "GPCM", 1, "maximum_aposteriori", items$alpha, items$beta, NULL, number_non_missing_cells_per_row(beta), 3)
 #' 
 #' @param theta vector with true theta
 #' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.

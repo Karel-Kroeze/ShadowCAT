@@ -2,34 +2,29 @@
 % Please edit documentation in R/shadowcat_roqua.R
 \name{shadowcat_roqua}
 \alias{shadowcat_roqua}
-\title{Returns a list with the index of the next item to be administered given a new response, and an updated person object}
+\title{Returns a list with the key of the next item to be administered given a new response,
+an updated estimate of theta, and the responses to the administered items}
 \usage{
-shadowcat_roqua(new_response, estimate, responses, administered, available,
-  model, alpha, beta, start_items, stop_test, estimator, information_summary,
-  prior = NULL, guessing = NULL, eta = NULL,
-  constraints_and_characts = NULL, lower_bound = rep(-3, ncol(alpha)),
-  upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL)
+shadowcat_roqua(responses, estimate, model, alpha, beta, start_items, stop_test,
+  estimator, information_summary, prior = NULL, guessing = NULL,
+  eta = NULL, constraints_and_characts = NULL, lower_bound = rep(-3,
+  ncol(alpha)), upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL)
 }
 \arguments{
-\item{new_response}{new response from respondent, should be initialized with NULL}
+\item{responses}{named list of previous responses and new response, with names being the item keys; should be initialized with NULL}
 
 \item{estimate}{estimate of latent trait theta, with covariance matrix as its attribute}
 
-\item{responses}{vector of given responses; should be initialized with numeric(0)}
-
-\item{administered}{vector containing indeces of administered items; should be initialized with numeric(0)}
-
-\item{available}{vector containing indeces of yet available items}
-
 \item{model}{String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
 
-\item{alpha}{Matrix of alpha parameters, one column per dimension, one row per item. Note that so called within-dimensional models still use an alpha matrix, they simply 
+\item{alpha}{Matrix of alpha parameters, one column per dimension, one row per item. Row names should contain the item keys. Note that so called within-dimensional models still use an alpha matrix, they simply 
 have only one non-zero loading per item.}
 
-\item{beta}{Matrix of beta parameters, one column per item step, one row per item. Note that ShadowCAT expects response categories to be sequential,
+\item{beta}{Matrix of beta parameters, one column per item step, one row per item. Row names should contain the item keys. Note that ShadowCAT expects response categories to be sequential,
 and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, and equal to the position of the 'location' of the beta parameter in the Beta matrix.
 The matrix will have a number of columns equal to the largest number of response categories, items with fewer response categories should be 
 right-padded with \code{NA}. \code{NA} values between response categories are not allowed, and will lead to errors.
+Beta matrix can be set to NULL if model is GPCM and eta is defined
 More flexibility in Beta parameters might be added in future versions.}
 
 \item{start_items}{items that are shown to the patient before adaptive proces starts; one of
@@ -62,16 +57,16 @@ NULL means no cut off values}
 \item{prior}{covariance matrix of the (multi variate) normal prior for theta; mean vector is fixed at zero; not used for maximum likelihood estimator
 #' note that this prior should be a square matrix with number of rows and columns equal to the number of dimensions; values on the diagonal should be larger than 0}
 
-\item{guessing}{vector of guessing parameters per item. Optionally used in 3PLM model, ignored for all others.}
+\item{guessing}{matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.}
 
-\item{eta}{Matrix of location parameters, optionally used in GPCM model, ignored for all others.}
+\item{eta}{Matrix of location parameters, optionally used in GPCM model, ignored for all others. Row names should contain the item keys.}
 
 \item{constraints_and_characts}{list with constraints and characteristics; NULL means no constraints
 constraints should be specified as a list of constraints, each constraint is a list with three named values;
 name: the column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as name/value.
 op: the logical operator to be used. Valid options are "<", "=", ">" and "><".
 target: the target value, numeric. If the operator is "><", this should be a length two vector in between which the target should fall.
-characteristics should be a data.frame with characteristics, one row per item, one column per characteristic.
+characteristics should be a data.frame with characteristics, one row per item, one column per characteristic. Row names should contain the item keys.
 See constraints_lp_format() for details}
 
 \item{lower_bound}{vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values}
@@ -81,10 +76,11 @@ See constraints_lp_format() for details}
 \item{prior_var_safe_ml}{if not NULL, expected a posteriori estimate with prior variance equal to prior_var_safe_ml (scalar or vector) is computed instead of maximum likelihood/maximum a posteriori, if maximum likelihood/maximum a posteriori estimate fails}
 }
 \value{
-a list containing the index of the next item to be administered given a new response (or "stop_test"), 
-updated estimate of theta, responses, indeces of administered items, and indeces of available items
+a list containing the key of the next item to be administered given a new response (or "stop_test"), 
+updated estimate of theta, and the responses to the administered items (named list)
 }
 \description{
-Returns a list with the index of the next item to be administered given a new response, and an updated person object
+Returns a list with the key of the next item to be administered given a new response,
+an updated estimate of theta, and the responses to the administered items
 }
 

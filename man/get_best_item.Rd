@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_best_item.R
 \name{get_best_item}
 \alias{get_best_item}
-\title{Next item in an adaptive test. Takes a person and test object, and returns the index of the next item based}
+\title{Best item in an adaptive test.}
 \usage{
 get_best_item(information_summary, lp_constraints, lp_characters, estimate,
   model, responses, prior, available, administered, number_items,
@@ -52,7 +52,7 @@ get_best_item(information_summary, lp_constraints, lp_characters, estimate,
 \item{upper_bound}{vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values}
 }
 \value{
-integer item index
+integer item index of best item
 }
 \description{
 This function is a wrapper that sends the actual work to the correct subroutines.

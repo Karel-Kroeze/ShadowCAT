@@ -1,17 +1,16 @@
-#' Returns a list with the index of the next item to be administered given a new response, and an updated person object
+#' Returns a list with the key of the next item to be administered given a new response,
+#' an updated estimate of theta, and the responses to the administered items
 #'
-#' @param new_response new response from respondent, should be initialized with NULL
+#' @param responses named list of previous responses and new response, with names being the item keys; should be initialized with NULL
 #' @param estimate estimate of latent trait theta, with covariance matrix as its attribute
-#' @param responses vector of given responses; should be initialized with numeric(0)
-#' @param administered vector containing indeces of administered items; should be initialized with numeric(0)
-#' @param available vector containing indeces of yet available items
 #' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
-#' @param alpha Matrix of alpha parameters, one column per dimension, one row per item. Note that so called within-dimensional models still use an alpha matrix, they simply 
+#' @param alpha Matrix of alpha parameters, one column per dimension, one row per item. Row names should contain the item keys. Note that so called within-dimensional models still use an alpha matrix, they simply 
 #' have only one non-zero loading per item.
-#' @param beta Matrix of beta parameters, one column per item step, one row per item. Note that ShadowCAT expects response categories to be sequential,
+#' @param beta Matrix of beta parameters, one column per item step, one row per item. Row names should contain the item keys. Note that ShadowCAT expects response categories to be sequential,
 #' and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, and equal to the position of the 'location' of the beta parameter in the Beta matrix.
 #' The matrix will have a number of columns equal to the largest number of response categories, items with fewer response categories should be 
 #' right-padded with \code{NA}. \code{NA} values between response categories are not allowed, and will lead to errors.
+#' Beta matrix can be set to NULL if model is GPCM and eta is defined
 #' More flexibility in Beta parameters might be added in future versions.
 #' @param start_items items that are shown to the patient before adaptive proces starts; one of
 #' list(type = 'random', n)
@@ -39,58 +38,62 @@
 #' "posterior_expected_kullback_leibler" = compute Posterior expected Kullback-Leibler Information
 #' @param prior covariance matrix of the (multi variate) normal prior for theta; mean vector is fixed at zero; not used for maximum likelihood estimator
 #' #' note that this prior should be a square matrix with number of rows and columns equal to the number of dimensions; values on the diagonal should be larger than 0
-#' @param guessing vector of guessing parameters per item. Optionally used in 3PLM model, ignored for all others.
-#' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others.
+#' @param guessing matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.
+#' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others. Row names should contain the item keys.
 #' @param constraints_and_characts list with constraints and characteristics; NULL means no constraints
 #' constraints should be specified as a list of constraints, each constraint is a list with three named values;
 #' name: the column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as name/value.
 #' op: the logical operator to be used. Valid options are "<", "=", ">" and "><".
 #' target: the target value, numeric. If the operator is "><", this should be a length two vector in between which the target should fall.
-#' characteristics should be a data.frame with characteristics, one row per item, one column per characteristic.
+#' characteristics should be a data.frame with characteristics, one row per item, one column per characteristic. Row names should contain the item keys.
 #' See constraints_lp_format() for details
 #' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values 
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
 #' @param prior_var_safe_ml if not NULL, expected a posteriori estimate with prior variance equal to prior_var_safe_ml (scalar or vector) is computed instead of maximum likelihood/maximum a posteriori, if maximum likelihood/maximum a posteriori estimate fails
-#' @return a list containing the index of the next item to be administered given a new response (or "stop_test"), 
-#' updated estimate of theta, responses, indeces of administered items, and indeces of available items
+#' @return a list containing the key of the next item to be administered given a new response (or "stop_test"), 
+#' updated estimate of theta, and the responses to the administered items (named list)
 #' @export
-shadowcat_roqua <- function(new_response, estimate, responses, administered, available, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior = NULL, guessing = NULL, eta = NULL, constraints_and_characts = NULL, lower_bound = rep(-3, ncol(alpha)), upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL) {    
-  alpha <- as.matrix(alpha)
+shadowcat_roqua <- function(responses, estimate, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior = NULL, guessing = NULL, eta = NULL, constraints_and_characts = NULL, lower_bound = rep(-3, ncol(alpha)), upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL) {    
   beta <- get_beta(model, beta, eta)
   guessing <- get_guessing(guessing, beta) 
   number_items <- nrow(beta)
   number_dimensions <- ncol(alpha)
   number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   lp_constraints_and_characts <- constraints_lp_format(stop_test$max_n, number_items, constraints_and_characts$characteristics, constraints_and_characts$constraints)
+  item_keys <- rownames(alpha)
   
   result <- function() {
-    responses <- c(responses, new_response)
-    estimate <- update_person_estimate(estimate, responses, administered, available)
+    item_keys_administered <- names(responses)
+    item_keys_available <- get_item_keys_available(item_keys_administered)
+    estimate <- update_person_estimate(estimate, unlist(responses), match(item_keys_administered, item_keys))
     continue_test <- !test_must_stop(length(responses), estimate, stop_test$min_n, stop_test$max_n, stop_test$target, stop_test$cutoffs)
-
+    
     if (continue_test) {
-      index_new_item <- get_next_item(start_items, information_summary, lp_constraints_and_characts$lp_constraints, lp_constraints_and_characts$lp_chars, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
-      list(index_new_item = index_new_item,
+      index_new_item <- get_next_item(start_items, information_summary, lp_constraints_and_characts$lp_constraints, lp_constraints_and_characts$lp_chars, estimate, model, unlist(responses), prior, match(item_keys_available, item_keys), match(item_keys_administered, item_keys), number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
+      list(key_new_item = item_keys[index_new_item],
            estimate = estimate,
-           responses = responses,
-           administered = c(administered, index_new_item),
-           available = available[-which(available %in% index_new_item)])
+           responses = responses)
     }
     else {
-      list(index_new_item = "stop_test",
+      list(key_new_item = "stop_test",
            estimate = estimate,
-           responses = responses,
-           administered = administered,
-           available = available)
+           responses = responses)
     } 
   }
   
   # if inititial items have been administered (so we are in the CAT phase), update person estimate after each newly answered item
-  update_person_estimate <- function(estimate, responses, administered, available) { 
+  update_person_estimate <- function(estimate, responses_vector, item_indeces_administered) { 
     if (length(responses) > start_items$n)
-      estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml)
+      estimate_latent_trait(estimate, responses_vector, prior, model, item_indeces_administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml)
     else
       estimate
+  }
+  
+  get_item_keys_available <- function(item_keys_administered) {
+    if (is.null(item_keys_administered))
+      item_keys
+    else
+      item_keys[-which(item_keys %in% item_keys_administered)]
   }
   
   validate <- function() {
@@ -98,18 +101,10 @@ shadowcat_roqua <- function(new_response, estimate, responses, administered, ava
       return(add_error("estimate", "is missing"))
     if (is.null(attr(estimate, "variance")))
       return(add_error("variance", "is missing as an attribute of estimate"))
-    if (is.null(responses))
-      return(add_error("responses", "is missing"))
-    if (is.null(administered))
-      return(add_error("administered", "is missing"))
-    if (is.null(available))
-      return(add_error("available", "is missing"))
     if (is.null(model))
       return(add_error("model", "is missing"))
     if (is.null(alpha))
       return(add_error("alpha", "is missing"))
-    if (is.null(beta))
-      return(add_error("beta", "is missing"))
     if (is.null(start_items))
       return(add_error("start_items", "is missing"))
     if (is.null(stop_test))
@@ -118,6 +113,16 @@ shadowcat_roqua <- function(new_response, estimate, responses, administered, ava
       return(add_error("estimator", "is missing"))
     if (is.null(information_summary))
       return(add_error("information_summary", "is missing"))
+    if (!is.matrix(alpha) || is.null(rownames(alpha)))
+      return(add_error("alpha", "should be a matrix with item keys as row names"))
+    if (!is.null(beta) && (!is.matrix(beta) || is.null(rownames(beta))))
+      return(add_error("beta", "should be a matrix with item keys as row names"))
+    if (!is.null(eta) && (!is.matrix(eta) || is.null(rownames(eta))))
+      return(add_error("eta", "should be a matrix with item keys as row names"))
+    if (!is.null(guessing) && (!is.matrix(guessing) || ncol(guessing) != 1 || is.null(rownames(guessing))))
+      return(add_error("guessing", "should be a single column matrix with item keys as row names"))
+    if (!row_names_are_equal(item_keys, list(alpha, beta, eta, guessing)))
+      add_error("alpha_beta_eta_guessing", "should have equal row names, in same order")
     if (model != "GPCM" && is.null(beta))
       add_error("beta", "is missing")
     if (model == "GPCM" && is.null(beta) && is.null(eta))
@@ -153,7 +158,7 @@ get_beta <- function(model, beta, eta) {
   if (model == "GPCM" && is.null(beta) && !is.null(eta))
     row_cumsum(eta)
   else
-    as.matrix(beta)
+    beta
 }
 
 #' get guessing matrix
@@ -163,9 +168,11 @@ get_beta <- function(model, beta, eta) {
 #' @return matrix containing guessing parameters
 #' @export
 get_guessing <- function(guessing, beta) {
+  if (is.null(beta))
+    return(NULL)
   if (is.null(guessing))
-    matrix(0, nrow(as.matrix(beta)), 1)
+    matrix(0, nrow(as.matrix(beta)), 1, dimnames = list(rownames(beta), NULL))
   else
-    as.matrix(guessing)
+    guessing
 }
 
