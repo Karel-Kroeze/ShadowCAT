@@ -2,7 +2,7 @@
 '
 library(testthat)
 library(pbapply)
-library(stringr) # only for test constraints simulations
+library(stringr)
 '
 
 make_random_seed_exist <- rnorm(1)
