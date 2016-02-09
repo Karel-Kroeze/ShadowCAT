@@ -227,7 +227,7 @@ test_that("model is SM, 1 dimension, 2 categories", {
   theta <- -2.3
   model <- "SM"
   administered <- 1:50
-  number_dimensions <- 3
+  number_dimensions <- 1
   number_items <- 50
   number_answer_categories <- 2
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
