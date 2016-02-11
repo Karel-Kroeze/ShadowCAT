@@ -38,7 +38,6 @@ get_posterior_expected_kl_information <- function(estimate, model, responses, ad
   }
   
   get_theta_estimate <- function() {
-    # collect expected a posteriori estimate
     if (estimator == "expected_aposteriori")
       estimate
     else

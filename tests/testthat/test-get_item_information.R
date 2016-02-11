@@ -458,25 +458,3 @@ test_that("information_summary is of unknown type", {
   expect_equal(item_information$errors$information_summary, "of unknown type")
 })
 
-test_that("zero item information", {
-  model <- "3PLM"
-  number_items <- 50
-  number_dimensions <- 3
-  estimator <- "maximum_aposteriori"
-  estimate <- rep(0, number_dimensions)
-  information_summary <- "determinant"
-  responses <- rep(c(1, 0), 15)
-  available <- 31:50
-  administered <- 1:30
-  prior <- diag(c(.4, .8, 1.5))
-  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
-  alpha <- matrix(rep(0, number_items * number_dimensions), nrow = number_items, ncol = number_dimensions)
-  beta <- matrix(rep(0, number_items), nrow = number_items, ncol = 1)
-  lower_bound <- rep(-3, number_dimensions)
-  upper_bound <- rep(3, number_dimensions)
-  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
-  
-  item_information <- get_item_information(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE)
-  
-  expect_equal(round(item_information, 3), c(rep(0, 30), rep(1, 20)))
-})

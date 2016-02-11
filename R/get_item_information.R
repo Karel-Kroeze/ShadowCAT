@@ -28,27 +28,16 @@ get_item_information <- function(information_summary, estimate, model, responses
   fisher_information <- get_fisher_information(estimate, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
   result <- function() {
     item_information <- get_item_information_switch()
-    item_information_imputed_missings <- impute_zero_for_na(item_information)   
     if (pad) 
-      pad_zeros(item_information_imputed_missings)
+      pad_zeros(item_information)
     else
-      item_information_imputed_missings  
+      item_information  
   }
   
   pad_zeros <- function(item_information) {
     item_information_padded <- rep(0, number_items)
     item_information_padded[available] <- item_information
     item_information_padded
-  }
-  
-  # set missings to 0. I'm hoping this is underflow.
-  # TODO: investigate / remove, (mostly occurs in 3PLM weirdly enough.)
-  impute_zero_for_na <- function(item_information) {
-    if (any(is.na(item_information))) {
-      cat("\nMissing values in objective function.\n")
-      item_information[is.na(item_information)] <- 0
-    }
-    item_information
   }
   
   get_item_information_switch <- function() {
@@ -58,17 +47,11 @@ get_item_information <- function(information_summary, estimate, model, responses
                                "determinant" = item_information_determinant(),
                                "posterior_determinant" = item_information_post_determinant(),
                                "posterior_expected_kullback_leibler" = item_information_pekl())
-    
-    # If all item_information values are 0, something went horribly wrong.
-    # This is made worse by lpSolve -> it will give back a full vector, not respecting constraints.
-    # TODO: check if this is ok.
-    if (all(item_information == 0)) {
-      cat("\nObjective is (computationally) zero for all items.\n")
-      rep(1, length(item_information))   
-    }
-    else {
-      item_information
-    }        
+    if (any(is.na(item_information)))
+      stop("Information is NA from some items ")
+    if (all(item_information == 0))
+      stop("Information is zero for all items.\n")
+    item_information      
   }
   
   item_information_trace <- function() {
