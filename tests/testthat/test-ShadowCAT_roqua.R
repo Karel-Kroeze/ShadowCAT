@@ -761,10 +761,86 @@ test_that("stop rule is cutoff", {
   expect_equal(length(test_outcome$responses), 32)
 })
 
+test_that("invalid input", {  
+  # define item characteristics
+  number_items <- 300
+  number_dimensions <- 3
+  number_answer_categories <- 2
+  item_keys <- str_c("item", 1:number_items)
+  guessing <- NULL
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
+  stop_test <- list(max_n = 300, cutoffs = with_random_seed(2, matrix)(runif(903, 1, 2), ncol = 3))
+  estimator <- 'maximum_aposteriori'
+  information_summary <- 'posterior_determinant'
+  
+  # define prior covariance matrix
+  prior <- diag(number_dimensions) * 20
+  estimate <- .3
+  attr(estimate, "variance") <- .5
+  estimate_without_attr <- .3
+  
+  error_message_estimate <- shadowcat_roqua(responses = NULL, estimate = NULL, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_variance <- shadowcat_roqua(responses = NULL, estimate_without_attr, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_model <- shadowcat_roqua(responses = NULL, estimate, model = NULL, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_alpha <- shadowcat_roqua(responses = NULL, estimate, model, alpha = NULL, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_start_items <- shadowcat_roqua(responses = NULL, estimate, model, alpha, beta, start_items = NULL, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_stop_test <- shadowcat_roqua(responses = NULL, estimate, model, alpha, beta, start_items, stop_test = NULL, estimator, information_summary, prior, guessing, eta)
+  error_message_estimator <- shadowcat_roqua(responses = NULL, estimate, model, alpha, beta, start_items, stop_test, estimator = NULL, information_summary, prior, guessing, eta)
+  error_message_information_summary <- shadowcat_roqua(responses = NULL, estimate, model, alpha, beta, start_items, stop_test, estimator, information_summary = NULL, prior, guessing, eta)
+  error_message_alpha_matrix <- shadowcat_roqua(responses = NULL, estimate, model, alpha = 1:10, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_alpha_rownames <- shadowcat_roqua(responses = NULL, estimate, model, alpha = matrix(1:10), beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_beta_matrix <- shadowcat_roqua(responses = NULL, estimate, model, alpha, beta = 1:10, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_beta_rownames <- shadowcat_roqua(responses = NULL, estimate, model, alpha, beta = matrix(1:10), start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_eta_matrix <- shadowcat_roqua(responses = NULL, estimate, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta = 1:10)
+  error_message_eta_rownames <- shadowcat_roqua(responses = NULL, estimate, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta = matrix(1:10))
+  error_message_guessing_matrix <- shadowcat_roqua(responses = NULL, estimate, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing = 1:10, eta)
+  error_message_guessing_rownames <- shadowcat_roqua(responses = NULL, estimate, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing = matrix(1:10), eta)
+  error_message_guessing_ncol <- shadowcat_roqua(responses = NULL, estimate, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing = matrix(1:10, ncol = 2, dimnames = list(c("a", "b", "c", "d", "e"), NULL)), eta)
+  error_message_unequal_rownames <- shadowcat_roqua(responses = NULL, estimate, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing = matrix(1:300, ncol = 1, dimnames = list(str_c("it", 1:300), NULL)), eta)
+  error_message_beta <- shadowcat_roqua(responses = NULL, estimate, model, alpha, beta = NULL, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_beta_theta <- shadowcat_roqua(responses = NULL, estimate, model = "GPCM", alpha, beta = NULL, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_beta_theta_mismatch <- shadowcat_roqua(responses = NULL, estimate, model = "GPCM", alpha, beta = cbind(beta, beta + .1), start_items, stop_test, estimator, information_summary, prior, guessing, eta = cbind(beta, beta + .1))
+  error_message_prior1 <- shadowcat_roqua(responses = NULL, estimate, model = "GPCM", alpha, beta, start_items, stop_test, estimator, information_summary = "determinant", prior = NULL, guessing, eta)
+  error_message_prior2 <- shadowcat_roqua(responses = NULL, estimate, model = "GPCM", alpha, beta, start_items, stop_test, estimator = "maximum_likelihood", information_summary = "posterior_trace", prior = NULL, guessing, eta)
+  error_message_max_n <- shadowcat_roqua(responses = NULL, estimate, model = "GPCM", alpha, beta, start_items, stop_test = list("variance" = .6), estimator, information_summary, prior, guessing, eta)
+  error_message_start_items_0 <- shadowcat_roqua(responses = NULL, estimate, model = "GPCM", alpha, beta, start_items = list(n = 0), stop_test, estimator, information_summary = "posterior_expected_kullback_leibler", prior, guessing, eta)
+  error_message_cutoffs <- shadowcat_roqua(responses = NULL, estimate, model = "GPCM", alpha, beta, start_items, stop_test = list(max_n = 70, cutoffs = 1:70), estimator, information_summary, prior, guessing, eta)
+  
+  expect_equal(error_message_estimate$errors$estimate, "is missing")
+  expect_equal(error_message_variance$errors$variance, "is missing as an attribute of estimate")
+  expect_equal(error_message_model$errors$model, "is missing")
+  expect_equal(error_message_alpha$errors$alpha, "is missing")
+  expect_equal(error_message_start_items$errors$start_items, "is missing")
+  expect_equal(error_message_stop_test$errors$stop_test, "is missing")
+  expect_equal(error_message_estimator$errors$estimator, "is missing")
+  expect_equal(error_message_information_summary$errors$information_summary, "is missing")
+  expect_equal(error_message_alpha_matrix$errors$alpha, "should be a matrix with item keys as row names")
+  expect_equal(error_message_alpha_rownames$errors$alpha, "should be a matrix with item keys as row names")
+  expect_equal(error_message_beta_matrix$errors$beta, "should be a matrix with item keys as row names")
+  expect_equal(error_message_beta_rownames$errors$beta, "should be a matrix with item keys as row names")
+  expect_equal(error_message_eta_matrix$errors$eta, "should be a matrix with item keys as row names")
+  expect_equal(error_message_eta_rownames$errors$eta, "should be a matrix with item keys as row names")
+  expect_equal(error_message_guessing_matrix$errors$guessing, "should be a single column matrix with item keys as row names")
+  expect_equal(error_message_guessing_rownames$errors$guessing, "should be a single column matrix with item keys as row names")
+  expect_equal(error_message_guessing_ncol$errors$guessing, "should be a single column matrix with item keys as row names")
+  expect_equal(error_message_unequal_rownames$errors$alpha_beta_eta_guessing, "should have equal row names, in same order")
+  expect_equal(error_message_beta$errors$beta, "is missing")
+  expect_equal(error_message_beta_theta$errors$beta_and_eta, "are both missing; define at least one of them")
+  expect_equal(error_message_beta_theta_mismatch$errors$beta_and_eta, "objects do not match")
+  expect_equal(error_message_prior1$errors$prior, "is missing")
+  expect_equal(error_message_prior2$errors$prior, "is missing")
+  expect_equal(error_message_max_n$errors$stop_test, "contains no max_n")
+  expect_equal(error_message_start_items_0$errors$start_items, "requires n > 0 for posterior expected kullback leibler information summary")
+  expect_equal(error_message_cutoffs$errors$stop_test, "contains cutoff values in non-matrix format")
+})
+
 
 # these simulations take a long time to run, if (FALSE) ensures that they are not each time the tests are run
-# For the GRM and SM models, the variance estimates differ from original estimates from Kroeze's code, due to 
-# bug in Kroeze's fisher information function
 if (FALSE) {
   context("simulations")
   
