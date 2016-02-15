@@ -3,7 +3,6 @@
 export("%not_in%")
 export(categorical_to_dummy)
 export(constraints_lp_format)
-export(createExposureConstraint)
 export(estimate_latent_trait)
 export(get_best_item)
 export(get_beta)

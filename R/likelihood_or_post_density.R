@@ -15,7 +15,6 @@
 #' @return the likelihood (estimator = maximum_likelihood) or posterior density (estimator = maximum_aposteriori or expected_aposteriori) of theta, with first and second derivatives as attributes
 #' @export
 likelihood_or_post_density <- function(theta, responses = NULL, model, items_to_include, number_dimensions, estimator, alpha, beta, guessing, prior = NULL, return_log_likelihood_or_post_density = TRUE, inverse_likelihood_or_post_density = FALSE) {
-  # TODO: Check input.
   # TODO priors: mean? 
   # priors: Alleen variabele deel van multivariaat normaal verdeling (exp).
   number_items <- length(items_to_include)

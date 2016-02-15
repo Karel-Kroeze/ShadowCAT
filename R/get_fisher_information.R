@@ -72,7 +72,6 @@ get_fisher_information <- function(estimate, model, number_dimensions, estimator
 
   get_second_derivatives_sm <- function() {
     # Sequential Model (Tutz, xxxx)
-    # TODO: triple check this.
     inner_product_alpha_theta <- as.vector(alpha %*% drop(estimate))
     sapply(1:number_items,
            function(item) {

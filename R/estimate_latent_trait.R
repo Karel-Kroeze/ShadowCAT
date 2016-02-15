@@ -102,14 +102,12 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
   }
   
   get_updated_estimate_and_variance_map <- function() {
-    # note that prior is applied in probabilities_and_likelihood (incorrectly it seems, but still).
     estimate <- tryCatch(nlm(f = likelihood_or_post_density, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihood_or_post_density = TRUE)$estimate,
                          error = function(e) { switch_to_eap_if_requested() },
                          warning = function(w) { switch_to_eap_if_requested() })
     fisher_information_items <- get_fisher_information(estimate, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
     fisher_information_test_so_far <- apply(fisher_information_items[,,administered, drop = FALSE], c(1, 2), sum) +
       solve(prior)
-    # inverse
     attr(estimate, "variance") <- solve(fisher_information_test_so_far)
     estimate
   }
@@ -134,8 +132,6 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
   }
   
   trim_estimate <- function(estimate) {
-    # TODO: make debug output toggleable
-    # if (any(person$estimate > test$upperBound | person$estimate < test$lowerBound)) cat("Estimate outside boundaries (k =", length(person$responses), "estimate =", paste0(round(person$estimate, 2), collapse = ", "), ").\n")
     estimate[which(estimate > upper_bound)] <- upper_bound[which(estimate > upper_bound)]
     estimate[which(estimate < lower_bound)] <- lower_bound[which(estimate < lower_bound)]
     estimate

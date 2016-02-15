@@ -62,11 +62,9 @@ get_next_item <- function(start_items, information_summary, lp_constraints, lp_c
   get_start_item_random_by_dimension <- function() {
     n_by_dimension_vector <- get_n_by_dimension_vector()
     design_matrix_item_loadings <- alpha > 0
-    
-    # if enough items from first dimension are drawn, items from next dimension are drawn, etc.
     dimension <- find_dimension_to_draw_from(n_by_dimension_vector)
      
-    # get items for this dimension, cull non-applicable, and select at random.
+    # get items for this dimension, cull administered items, and select at random.
     items_with_positive_loading_on_dimension <- (1:number_items)[design_matrix_item_loadings[,dimension]]
     positive_loading_and_available <- intersect(items_with_positive_loading_on_dimension, available)
     sample(positive_loading_and_available, 1)
@@ -79,6 +77,7 @@ get_next_item <- function(start_items, information_summary, lp_constraints, lp_c
       start_items$n_by_dimension
   }
   
+  # if enough items from first dimension are drawn, items from next dimension are drawn, etc.
   find_dimension_to_draw_from <- function(n_by_dimension_vector) {
     sum(length(responses) >= cumsum(n_by_dimension_vector)) + 1
   }

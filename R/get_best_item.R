@@ -37,13 +37,10 @@ get_best_item <- function(information_summary, lp_constraints, lp_characters, es
   }
   
   get_item_with_max_information <- function() {
-    # get the values of the objective function for this test/person combo
     item_information <- get_item_information(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE)
     item_with_max_information <- switch(item_selection_type(),
                                         "maximum_information_only" = get_item_index_max_information(available, item_information),
                                         "with_constraints" = get_item_index_max_information_constrained(number_items, administered, available, responses, lp_constraints, lp_characters, item_information))
-    
-    # if there's more than one, select one at random (edge case)
     if (length(item_with_max_information) > 1) 
       sample(item_with_max_information, 1)
     else
