@@ -20,7 +20,7 @@ get_item_index_max_information_constrained(number_items, administered,
 
 \item{lp_characters}{data frame with characteristics in lp format: the lp_chars from the list returned by constraints_lp_format()}
 
-\item{item_information}{vector with information of each yet available item, with zeros for administered items (returned by objective() with pad = TRUE)}
+\item{item_information}{vector with information of each yet available item, with zeros for administered items (returned by get_item_information() with pad = TRUE)}
 }
 \value{
 integer item index of item with maximum information within constraints

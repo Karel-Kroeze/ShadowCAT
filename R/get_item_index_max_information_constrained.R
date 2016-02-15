@@ -11,7 +11,7 @@
 #' @param responses vector with person responses
 #' @param lp_constraints data frame with constraints in lp format: the lp_constraints from the list returned by constraints_lp_format()
 #' @param lp_characters data frame with characteristics in lp format: the lp_chars from the list returned by constraints_lp_format()
-#' @param item_information vector with information of each yet available item, with zeros for administered items (returned by objective() with pad = TRUE)
+#' @param item_information vector with information of each yet available item, with zeros for administered items (returned by get_item_information() with pad = TRUE)
 #' @return integer item index of item with maximum information within constraints
 #' @importFrom lpSolve lp
 get_item_index_max_information_constrained <- function(number_items, administered, available, responses, lp_constraints, lp_characters, item_information) {

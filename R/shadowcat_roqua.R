@@ -45,7 +45,7 @@
 #' name: the column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as name/value.
 #' op: the logical operator to be used. Valid options are "<", "=", ">" and "><".
 #' target: the target value, numeric. If the operator is "><", this should be a length two vector in between which the target should fall.
-#' characteristics should be a data.frame with characteristics, one row per item, one column per characteristic. Row names should contain the item keys.
+#' characteristics should be a data.frame with characteristics, one row per item (rows in the same order as they are in alpha, beta, etc.), one column per characteristic.
 #' See constraints_lp_format() for details
 #' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values 
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
