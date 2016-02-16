@@ -56,9 +56,8 @@ get_next_item <- function(start_items, information_summary, lp_constraints, lp_c
     start_items$indeces[length(responses) + 1]
   }
   
-  # picks n_by_dimension starting items per dimension (or n_i if n_by_dimension is a length Q vector), assumes between models, 
-  # if any item has a non-zero loading on a dimension, it is considered to be part of that dimension. 
-  # they CAN overlap, which may cause unwanted side effects, and in within models the result is identical to 'normal' random starting.
+  # picks n_by_dimension starting items per dimension (or n_i if n_by_dimension is a length Q vector), assumes that items load on a single dimension, 
+  # if any item has a non-zero loading on a dimension, it is considered to be part of that dimension.
   get_start_item_random_by_dimension <- function() {
     n_by_dimension_vector <- get_n_by_dimension_vector()
     design_matrix_item_loadings <- alpha > 0
