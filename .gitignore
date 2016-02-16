@@ -1,5 +1,7 @@
 .Rproj.user
 .Rhistory
 .RData
-.pdf
-/simulations
+*.pdf
+*.o
+*.dll
+man/

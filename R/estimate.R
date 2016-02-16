@@ -62,12 +62,15 @@ estimate <- function(person, test, ...) {
   args <- list(...)
   
   if (test$estimator %in% c("ML", "MAP")){
-    # We want a maximum, but nlm produces minima -> reverse function call. 
     # LL is the target function, test, person and minimize need to be passed on. We also want the value of the hessian at the final estimate.
-    
-    # note that prior is applied in LL
+    # note that prior is applied in LL if posterior = true
     # suppress warnings and errors and do EAP instead.
-    person$estimate <- tryCatch( nlm(f = LL, p = person$estimate, test = test, person = person, minimize = TRUE)$estimate, # passed on to LL, reverses polarity.
+    person$estimate <- tryCatch( nlm(f = LL,
+                                     p = person$estimate,
+                                     test = test,
+                                     person = person,
+                                     minimize = TRUE, # We want a maximum, but nlm produces minima -> reverse function call. 
+                                     posterior = test$estimator == "MAP")$estimate,
                          error = function(e) {
                            #message(paste0(test$estimator, " failed, trying EAP estimate."))
                            test$estimator <- "EAP"
@@ -83,6 +86,8 @@ estimate <- function(person, test, ...) {
     # get FI
     # TODO: We should really store info somewhere so we don't have to redo this (when using FI based selection criteria).
     info <- FI(test, person)
+    
+    # information so far is simply the sum of individual item information
     so_far <- apply(info[,,person$administered, drop = FALSE], c(1,2), sum)
   
     #add prior
@@ -104,7 +109,7 @@ estimate <- function(person, test, ...) {
                     prior = list(mu = rep(0, test$items$Q), Sigma = person$prior),
                     adapt = adapt,
                     ip = switch(Q, 50, 15, 6, 4, 3))
-    person$estimate <- eval.quad(FUN = LL, X = QP, test = test, person = person, ...)
+    person$estimate <- eval.quad(FUN = LL, X = QP, test = test, person = person,  ...)
   }
   
   # enforce boundaries.

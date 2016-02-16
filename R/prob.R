@@ -9,7 +9,10 @@
 #' @param person Person object, will use current theta estimate of the person to obtain P values.
 #' @param theta Give a specific theta vector to use, overrides person if set.
 #' @param deriv Should we fetch derivatives and LL?
-#' @param prior If not NULL, prior to be applied to derivatives.
+#' @param prior If not NULL, prior to be applied to derivatives. 
+#' If NULL, prior from person object will be used. 
+#' If not set in the person object, a standard normal prior is used in tests with MAP and EAP estimators.
+#' Set to FALSE to force not use a prior
 #' @importFrom mvtnorm dmvnorm
 #' @importFrom Rcpp evalCpp
 #' @useDynLib ShadowCAT
@@ -91,8 +94,8 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
       d2 <- d2 + a[i,] %*% t(a[i,]) * res$D[i]
     }
     
-    # prior
-    if ( ! is.null(prior)) {
+    # prior not null, not false.
+    if ( ! is.null(prior) && prior ) {
       # TODO: mean? Prior currently only allows a variable covariance matrix, mean is fixed at 0 (vector)
       # Alleen variabele deel van multivariaat normaal verdeling (exp).
       LL <- LL - (t(theta) %*% solve(prior) %*% theta) / 2
@@ -116,14 +119,19 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
 #' @param test
 #' @param person
 #' @param should values be reversed (useful for minimization, reverses LL as well as derivatives)
+#' @param posterior If FALSE (default), the result is the Log-Likelihood. 
+#' If inclusion of a prior is desired (e.g. for MAP estimates), set to TRUE.
 #' @return Log-Likelihood, as well as gradient and hessian attributes.
 #' @importFrom stats nlm
-LL <- function(theta, test, person, minimize = FALSE, log = TRUE) {
+LL <- function(theta, test, person, minimize = FALSE, log = TRUE, posterior = FALSE ){
   # subset items that have a response
   test$items <- subset(test$items, person$administered)
   
   # get LL and derivatives.
-  PROB <- prob(test, person, theta, deriv = TRUE)
+  if (posterior)
+    PROB <- prob(test, person, theta, deriv = TRUE) # prior will be taken from person object if prior = NULL (default).
+  else
+    PROB <- prob(test, person, theta, deriv = TRUE, prior = FALSE)
   
   # prepare output
   out <- PROB$LL * (-1) ^ minimize
