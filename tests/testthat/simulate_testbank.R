@@ -2,7 +2,7 @@
 #' 
 #' Quick and simple itembanks for testing purposes.
 #' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
-#' @param number_items number of items
+#' @param number_items number of items. Can be increased if number_items / number_dimensions is not an integer
 #' @param number_dimensions number of dimensions
 #' @param number_itemsteps number of item steps (number of categories minus 1); forced to 1 if model is 3PLM
 #' @param items_load_one_dimension if TRUE, force items to load on one dimension each
