@@ -358,7 +358,7 @@ test_that("true theta is 1, 0, 2, estimator is expected_aposteriori", {
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
-  estimator <- 'maximum_aposteriori'
+  estimator <- 'expected_aposteriori'
   information_summary <- 'posterior_determinant'
   
   # define prior covariance matrix
@@ -366,8 +366,8 @@ test_that("true theta is 1, 0, 2, estimator is expected_aposteriori", {
   
   test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
-  expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.841, -.123, 1.947))
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.064, .000, .000))
+  expect_equal(as.vector(round(test_outcome$estimate, 3)), c(2.501, 1.136, 3.000))
+  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.000, .000, .000))
   expect_equal(length(test_outcome$responses), 300)
 })
 

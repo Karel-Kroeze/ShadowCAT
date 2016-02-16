@@ -4,8 +4,8 @@
 \alias{get_fisher_information}
 \title{Fisher Information}
 \usage{
-get_fisher_information(estimate, model, number_dimensions, estimator, alpha,
-  beta, guessing, number_itemsteps_per_item)
+get_fisher_information(estimate, model, number_dimensions, alpha, beta,
+  guessing, number_itemsteps_per_item)
 }
 \arguments{
 \item{estimate}{vector containing theta estimate}
@@ -13,8 +13,6 @@ get_fisher_information(estimate, model, number_dimensions, estimator, alpha,
 \item{model}{string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
 
 \item{number_dimensions}{number of dimensions}
-
-\item{estimator}{type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"}
 
 \item{alpha}{matrix containing the alpha parameters}
 

@@ -17,14 +17,13 @@
 #' @param estimate vector containing theta estimate
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param number_dimensions number of dimensions
-#' @param estimator type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"
 #' @param alpha matrix containing the alpha parameters
 #' @param beta matrix containing the beta parameters
 #' @param guessing matrix containing the quessing parameters
 #' @param number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix
 #' @return array with an information matrix for each item (QxQxK).
 #' @export
-get_fisher_information <- function(estimate, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item) {
+get_fisher_information <- function(estimate, model, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item) {
   # Fisher Information
   # minus the expectation of the second derivative of the log-likelihood
   # Expectation -> sum of derivatives for each category, 'weighted' by their probability.

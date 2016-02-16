@@ -94,7 +94,7 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
                          error = function(e) { switch_to_eap_if_requested() },
                          warning = function(w) { switch_to_eap_if_requested() })
     # TODO: We should really store info somewhere so we don't have to redo this (when using get_fisher_information based selection criteria).
-    fisher_information_items <- get_fisher_information(estimate, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
+    fisher_information_items <- get_fisher_information(estimate, model, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item)
     fisher_information_test_so_far <- apply(fisher_information_items[,,administered, drop = FALSE], c(1, 2), sum)
     
     attr(estimate, "variance") <- solve(fisher_information_test_so_far)
@@ -105,7 +105,7 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
     estimate <- tryCatch(nlm(f = likelihood_or_post_density, p = estimate, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihood_or_post_density = TRUE)$estimate,
                          error = function(e) { switch_to_eap_if_requested() },
                          warning = function(w) { switch_to_eap_if_requested() })
-    fisher_information_items <- get_fisher_information(estimate, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
+    fisher_information_items <- get_fisher_information(estimate, model, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item)
     fisher_information_test_so_far <- apply(fisher_information_items[,,administered, drop = FALSE], c(1, 2), sum) +
       solve(prior)
     attr(estimate, "variance") <- solve(fisher_information_test_so_far)

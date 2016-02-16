@@ -12,7 +12,7 @@
 #' right-padded with \code{NA}. \code{NA} values between response categories are not allowed, and will lead to errors.
 #' Beta matrix can be set to NULL if model is GPCM and eta is defined
 #' More flexibility in Beta parameters might be added in future versions.
-#' @param start_items items that are shown to the patient before adaptive proces starts; one of
+#' @param start_items items that are shown to the respondent before adaptive proces starts; one of
 #' list(type = 'random', n)
 #' list(type = 'fixed', indeces, n)
 #' list(type = 'random_by_dimension', n_by_dimension, n)
