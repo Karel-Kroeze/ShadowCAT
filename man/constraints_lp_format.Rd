@@ -17,7 +17,8 @@ constraints_lp_format(max_n, number_items, characteristics = NULL,
 \item{constraints}{\code{list} of constraints, see \code{details}.}
 }
 \value{
-list containing characteristics and constraints in lp format; see \code{details}.
+list containing characteristics and constraints in lp format; 
+the maximum test length is always included as an additional constraint; see \code{details}.
 }
 \description{
 Creates a list with characteristics and constraints which can be used in lp function from lpSolve package.
@@ -32,7 +33,8 @@ Creates a list with characteristics and constraints which can be used in lp func
 
 \section{Return object}{
 
-The constraints and characteristics in lp format will be stored within a list. 
+The constraints and characteristics in lp format will be stored within a list. Setting the constraints and characteristics
+arguments to NULL results in a list with only the test length constraint.
 Constraints in Shadow Tests are implemented through linear programming, for which the package lpSolve is used. 
 The returned constraints object is a list with two named elements; lp_constraints and lp_chars. The lp_constraints 
 and lp_chars are set up to work with lpSolve, and should not be manually edited.

@@ -7,7 +7,8 @@
 #' \code{target} the target value, numeric. If the operator is "><", this should be a length two vector in between which the target should fall. 
 #' 
 #' @section Return object:
-#' The constraints and characteristics in lp format will be stored within a list. 
+#' The constraints and characteristics in lp format will be stored within a list. Setting the constraints and characteristics
+#' arguments to NULL results in a list with only the test length constraint.
 #' Constraints in Shadow Tests are implemented through linear programming, for which the package lpSolve is used. 
 #' The returned constraints object is a list with two named elements; lp_constraints and lp_chars. The lp_constraints 
 #' and lp_chars are set up to work with lpSolve, and should not be manually edited.
@@ -50,7 +51,8 @@
 #' @param number_items number of items available in the item bank
 #' @param characteristics \code{data.frame} with characteristics, one row per item, one column per characteristic.
 #' @param constraints \code{list} of constraints, see \code{details}.
-#' @return list containing characteristics and constraints in lp format; see \code{details}.
+#' @return list containing characteristics and constraints in lp format; 
+#' the maximum test length is always included as an additional constraint; see \code{details}.
 #' @export
 constraints_lp_format <- function(max_n, number_items, characteristics = NULL, constraints = NULL) {
   result <- function() {
@@ -124,6 +126,10 @@ constraints_lp_format <- function(max_n, number_items, characteristics = NULL, c
   }
   
   validate <- function() {
+    if (is.null(characteristics) && !is.null(constraints))
+      return(add_error("characteristics", "is missing while constraints is defined"))
+    if (!is.null(characteristics) && is.null(constraints))
+      return(add_error("constraints", "is missing while characteristics is defined"))
     if (!is.null(characteristics) && (!is.data.frame(characteristics) || any(is.null(colnames(characteristics)))))
       return(add_error("characteristics", "should be a data.frame with unique column names."))
     if (!is.null(constraints) && any(sapply(constraints, FUN = function(constraint){ !is.list(constraint) || length(constraint) != 3 || names(constraint) != c("name", "op", "target") })))
