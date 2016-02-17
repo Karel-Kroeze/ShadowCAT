@@ -25,7 +25,7 @@ test_that("1 dimensions, 2 categories, estimator is maximum_likelihood", {
   posterior_expected_kl_information <- get_posterior_expected_kl_information(estimate, model, responses, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior, number_itemsteps_per_item, lower_bound, upper_bound)
   
   expect_equal(length(posterior_expected_kl_information), 16)
-  expect_equal(round(posterior_expected_kl_information[c(1, 3, 16)], 19), c(4.112e-13, 3.457e-13, 1.753e-12))
+  expect_equal(round(posterior_expected_kl_information[c(1, 3, 16)], 15), c(1.554e-12, 8.470e-13, 6.775e-12))
 })
 
 test_that("1 dimensions, 2 categories, estimator is expected_aposteriori", {

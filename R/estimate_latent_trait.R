@@ -117,11 +117,11 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
     # TODO: prior mean is currently fixed at zero, update when/if possible.
     # TODO: allow setting ip through internals argument(s)
     adapt <- if (length(responses) > 5 & !is.null(attr(estimate, 'variance'))) list(mu = estimate, Sigma = as.matrix(attr(estimate, "variance")))
-    Q_dim_grid_quad_points <- init.quad(Q = number_dimensions,
+    Q_dim_grid_quad_points <- init_quad(Q = number_dimensions,
                                         prior = list(mu = rep(0, number_dimensions), Sigma = prior),
                                         adapt = adapt,
                                         ip = switch(number_dimensions, 50, 15, 6, 4, 3))
-    eval.quad(FUN = likelihood_or_post_density, X = Q_dim_grid_quad_points, responses, model, administered, number_dimensions, estimator = "expected_aposteriori", alpha, beta, guessing, prior)
+    eval.quad(FUN = likelihood_or_post_density, X = Q_dim_grid_quad_points, responses, model, administered, number_dimensions, estimator = "maximum_likelihood", alpha, beta, guessing)
   }
   
   get_updated_estimate_and_variance_attribute <- function(estimator) {
@@ -144,4 +144,68 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
   }
   
   result()
+}
+
+#' Q-dimensional grid of quadrature points
+#' 
+#' Creates a flattened, rotated grid that incorporates correlation through an eigenvalue decomposition of the covariance matrix.
+#' Copied from MultiGHQuad package and bugs fixed. Should be moved back to MultiGHQuad package
+#' 
+#' @param Q Number of dimensions
+#' @param prior List of prior mean and covariance matrix
+#' @param adapt List of adaptive mean and covariance matrix; if NULL no adaptation is used
+#' @param ip Number of quadrature points per dimension. Defaults to 6. Note that the total number of quadrature points is ip^Q
+#' @return A list with a matrix X of ip^Q by Q quadrature points and a vector W of length ip^Q associated weights
+#' @examples grid_points_and_weights1 <- init_quad(Q = 1, prior = list(mu = rep(0, 1), Sigma = diag(1)*2), adapt = list(mu = rep(1, 1), Sigma = diag(1)*5), ip = 50)
+#' round(grid_points_and_weights1$X[c(2, 8, 50),], 3) == c(-25.951, -17.382,  30.037) || stop("wrong")
+#' round(grid_points_and_weights1$W[c(2, 8, 50)], 3) == c(-169.013, -76.610, -225.947) || stop("wrong")
+#' grid_points_and_weights2 <- init_quad(Q = 2, prior = list(mu = rep(0, 2), Sigma = diag(2)*2), adapt = list(mu = rep(1, 2), Sigma = (matrix(rep(2, 4), ncol = 2) + diag(2)*5)), ip = 20)
+#' round(grid_points_and_weights2$X[c(2, 8, 50),2], 3) == c(-24.858, -14.749 , -8.557) || stop("wrong")
+#' round(grid_points_and_weights2$W[c(2, 8, 50)], 3) == c(-155.016, -76.948, -40.058) || stop("wrong")
+#' @export
+init_quad <- function (Q, prior = list(mu = rep(0, Q), Sigma = diag(Q)), 
+                            adapt = NULL, ip = 6) { 
+  if (!is.null(adapt) && !is.null(attr(adapt, "variance"))) {
+    adapt <- list(mu = adapt, Sigma = attr(adapt, "variance"))
+  }
+  if (!is.null(adapt) && (!is.list(adapt) || length(adapt$mu) != Q || dim(adapt$Sigma) != c(Q, Q))) 
+    stop("Size or format of Adapt argument invalid.")
+  x <- fastGHQuad::gaussHermiteData(ip)
+  w <- x$w/sqrt(pi)
+  x <- x$x * sqrt(2)
+  X <- as.matrix(expand.grid(lapply(apply(replicate(Q, x), 
+                                          2, list), unlist)))
+  trans <- function(X, Sigma) {
+    lambda <- with(eigen(Sigma), {
+      if (any(values < 0)) 
+        warning("Matrix is not positive definite.")
+      if (length(values) > 1) 
+        vectors %*% diag(sqrt(values))
+      else vectors * sqrt(values)
+    })
+    t(lambda %*% t(X))
+  }
+  
+  g <- as.matrix(expand.grid(lapply(apply(replicate(Q, w), 
+                                          2, list), unlist)))
+  W <- apply(log(g), 1, sum)
+  
+  if (is.null(adapt)) {
+    X <- trans(X, prior$Sigma)
+    X <- t(t(X) + prior$mu)
+  }
+  else {
+    X <- trans(X, adapt$Sigma)
+    X <- t(t(X) + adapt$mu)
+    adapt$chol <- chol(adapt$Sigma)
+    adapt$det <- sum(log(diag(adapt$chol)))
+    adapt$aux <- diag((X -  rep(1, ip^Q) %*% t(adapt$mu)) %*% solve(adapt$Sigma) %*% t(X -  rep(1, ip^Q) %*% t(adapt$mu)))
+    prior$chol <- chol(prior$Sigma)
+    prior$det <- sum(log(diag(prior$chol)))
+    prior$aux <- diag((X -  rep(1, ip^Q) %*% t(prior$mu)) %*% solve(prior$Sigma) %*% t(X -  rep(1, ip^Q) %*% t(prior$mu)))
+    fact <- (adapt$aux - prior$aux) / 2 + adapt$det - prior$det
+    W <- W + fact
+  }
+  
+  list(X = X, W = W)
 }

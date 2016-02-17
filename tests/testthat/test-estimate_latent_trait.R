@@ -81,8 +81,8 @@ test_that("test safe_maximum_likelihood", {
   
   estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
   
-  expect_equal(round(as.vector(estimated_latent_trait), 3), c(-.636, .808, 2.586))  
-  expect_equal(round(as.vector(attr(estimated_latent_trait, 'variance')), 3)[1:3], c(6.870, -3.257, -5.352))
+  expect_equal(round(as.vector(estimated_latent_trait), 3), c(-.635, .808, 2.586))  
+  expect_equal(round(as.vector(attr(estimated_latent_trait, 'variance')), 3)[1:3], c(6.870, -3.257, -5.353))
 })
 
 context("estimator is maximum_aposteriori")
@@ -163,8 +163,8 @@ test_that("estimator is expected_aposteriori, 1 dimension, 2 categories", {
   
   estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL)
   
-  expect_equal(round(as.vector(estimated_latent_trait), 3), -.551)
-  expect_equal(round(attr(estimated_latent_trait, "variance"), 3), matrix(.164))
+  expect_equal(round(as.vector(estimated_latent_trait), 3), -.689)
+  expect_equal(round(attr(estimated_latent_trait, "variance"), 3), matrix(.205))
 })
 
 test_that("estimator is expected_aposteriori, 3 dimensions, varying number of categories", {
@@ -192,9 +192,9 @@ test_that("estimator is expected_aposteriori, 3 dimensions, varying number of ca
   
   estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL)
   
-  expect_equal(round(as.vector(estimated_latent_trait), 3), c(-.691, -1.143, -1.108))
-  expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[1,], c(.041, -.018, -.014))
-  expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[3,], c(-.014, -.509, .562))
+  expect_equal(round(as.vector(estimated_latent_trait), 3), c(-.861, -1.486, -.604))
+  expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[1,], c(.348, -.214, -.042))
+  expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[3,], c(-.042, -.189, .238))
 })
 
 test_that("estimator is expected_aposteriori, 3 dimensions, varying number of categories, 1 administered", {
@@ -222,9 +222,9 @@ test_that("estimator is expected_aposteriori, 3 dimensions, varying number of ca
   
   estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL)
   
-  expect_equal(round(as.vector(estimated_latent_trait), 3), c(-.197, -.152, -.205))
-  expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[1,], c(.494, -.011, -.015))
-  expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[3,], c(-.015, -.011, .492))
+  expect_equal(round(as.vector(estimated_latent_trait), 3), c(-.347, -.267, -.360))
+  expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[1,], c(.941, -.045, -.061))
+  expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[3,], c(-.061, -.047, .936))
 })
 
 test_that("estimates exceed boundaries", {

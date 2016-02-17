@@ -17,7 +17,8 @@ Imports:
     Rcpp,
     mvtnorm,
     MultiGHQuad,
-    lpSolve 
+    lpSolve,
+    fastGHQuad
 Suggests:
     testthat (>= 0.8.1),
     stringr

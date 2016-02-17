@@ -375,7 +375,7 @@ test_that("First 1 item administered, information_summary is PEKL, one dimension
   item_information <- get_item_information(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE)
   
   expect_equal(length(item_information), 50)
-  expect_equal(round(item_information[c(1:5, 35:38,47:50)], 3), c(.000, .049, .019, .010, .075, .025, .034, .023, .013, .063, .017, .026, .034))
+  expect_equal(round(item_information[c(1:5, 35:38,47:50)], 3), c(.000, .048, .019, .010, .074, .025, .033, .023, .013, .062, .017, .026, .034))
 })
 
 

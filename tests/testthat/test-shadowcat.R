@@ -256,8 +256,8 @@ test_that("true theta is 2, estimator is expected_aposteriori", {
   
   test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior = prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, initial_variance = diag(1))
   
-  expect_equal(as.vector(round(test_outcome$estimate, 3)), 2.913)
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), .002)
+  expect_equal(as.vector(round(test_outcome$estimate, 3)), 1.833)
+  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), .087)
   expect_equal(length(test_outcome$responses), 100)
 })
 
@@ -366,8 +366,8 @@ test_that("true theta is 1, 0, 2, estimator is expected_aposteriori", {
   
   test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
-  expect_equal(as.vector(round(test_outcome$estimate, 3)), c(2.501, 1.136, 3.000))
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.000, .000, .000))
+  expect_equal(as.vector(round(test_outcome$estimate, 3)), c(1.423, -.087, 1.849))
+  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.075, .000, .000))
   expect_equal(length(test_outcome$responses), 300)
 })
 
