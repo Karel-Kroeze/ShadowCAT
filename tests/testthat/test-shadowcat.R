@@ -846,6 +846,55 @@ test_that("invalid input", {
 if (FALSE) {
   context("simulations")
   
+  test_that("Simulations for context Jan Bebber", {
+    replications_per_unique_condition <- 50
+    true_theta_vec <- c(-2, 1, 3)
+    number_items_vec <- 100
+    number_answer_categories_vec <- 2
+    number_dimensions <- 1
+    lowerbound <- -3
+    upperbound <- 3
+    
+    start_items <- list(type = 'random', n = 0)
+    variance_target <- .45^2
+    model_vec <- "GPCM"
+    estimator_vec <- "expected_aposteriori"
+    information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace") 
+    prior <- diag(number_dimensions) * 100
+    
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound, prior = prior, max_n = 12)
+    
+    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
+    condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/replications_per_unique_condition), replications_per_unique_condition))
+    
+    estimates_and_conditions <- cbind(t(estimates_and_variance), conditions[, c("true_theta", "replication", "number_items", "number_answer_categories", "model", "estimator", "information_summary")], condition_vector)
+    
+    average_per_condition_true_minus2 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == -2), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == -2)]), "mean")
+    sd_per_condition_true_minus2 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == -2), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == -2)]), "sd")
+    
+    average_per_condition_true_1 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 1), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 1)]), "mean")
+    sd_per_condition_true_1 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 1), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 1)]), "sd") 
+    
+    average_per_condition_true_3 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 3)]), "mean")
+    sd_per_condition_true_3 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 3)]), "sd") 
+      
+    # Estimates are not so good due to large target variance
+    expect_equal(round(average_per_condition_true_minus2$x, 3), c(-2.317, -2.305, -2.285, -2.358))
+    expect_equal(round(average_per_condition_true_1$x, 3), c(1.552, 1.430, 1.579, 1.630))
+    expect_equal(round(average_per_condition_true_3$x, 3), c(2.763, 2.724, 2.748, 2.701))
+    
+    # Observed standard deviation of the estimates per condition
+    expect_equal(round(sd_per_condition_true_minus2$x, 3), c(.352, .459, .376, .445))
+    expect_equal(round(sd_per_condition_true_1$x, 3), c(1.094, 1.193, 1.051, .921))
+    expect_equal(round(sd_per_condition_true_3$x, 3), c(.301, .366, .346, .377))
+    
+    # Five number summary of reported SE
+    expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == -2), "variance_estimate"])), 3), c(.040, .245, .408, .717, 5.367))
+    expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 1), "variance_estimate"])), 3), c(.050, .256, .354, .480, .984))
+    expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3), "variance_estimate"])), 3), c(.049, .630, .848, 1.194, 5.426))
+  }
+  
+  
   test_that("one dimension, no constraints on item selection, one replication per condition, expected_aposteriori", {
     replications_per_unique_condition <- 1
     true_theta_vec <- c(-2, 1)
