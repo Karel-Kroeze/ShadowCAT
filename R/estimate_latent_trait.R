@@ -121,7 +121,7 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
                                         prior = list(mu = rep(0, number_dimensions), Sigma = prior),
                                         adapt = adapt,
                                         ip = switch(number_dimensions, 50, 15, 6, 4, 3))
-    eval.quad(FUN = likelihood_or_post_density, X = Q_dim_grid_quad_points, responses, model, administered, number_dimensions, estimator = "maximum_likelihood", alpha, beta, guessing)
+    eval_quad(FUN = likelihood_or_post_density, X = Q_dim_grid_quad_points, responses, model, administered, number_dimensions, estimator = "maximum_likelihood", alpha, beta, guessing)
   }
   
   get_updated_estimate_and_variance_attribute <- function(estimator) {
@@ -145,6 +145,9 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
   
   result()
 }
+
+# The init_quad() and eval_quad() functions defined below are from Kroeze's MultiGHQuad package, with bugs
+# fixed. When Kroeze has fixt his package, the functions below can be removed and we can use his package again.
 
 #' Q-dimensional grid of quadrature points
 #' 
@@ -170,7 +173,7 @@ init_quad <- function (Q, prior = list(mu = rep(0, Q), Sigma = diag(Q)), adapt =
   if (!is.null(adapt) && (!is.list(adapt) || length(adapt$mu) != Q || dim(adapt$Sigma) != c(Q, Q))) 
     stop("Size or format of Adapt argument invalid.")
   x <- fastGHQuad::gaussHermiteData(ip)
-  w <- x$w/sqrt(pi)
+  w <- x$w / sqrt(pi)
   x <- x$x * sqrt(2)
   X <- as.matrix(expand.grid(lapply(apply(replicate(Q, x), 
                                           2, list), unlist)))
@@ -207,4 +210,49 @@ init_quad <- function (Q, prior = list(mu = rep(0, Q), Sigma = diag(Q)), adapt =
   }
   
   list(X = X, W = W)
+}
+
+#' get expected aposteriori estmate and variance using Gauss-Hermite quadrature
+#' 
+#' @param FUN log likelihood function of the parameters to be estimated
+#' @param X matrix of quadrature points as returned by init_quad(), or list of 
+#' quadrature points and weights as returned by init_quad()
+#' @param ... Additional arguments passed on to FUN
+#' @param W vector of weights as returned by init_quad, or NULL if weights are included in X
+#' @return A vector with the evaluated integrals, with attribute variance containing the (co)variance (matrix) of the estimate(s)
+#' @examples grid_points_and_weights1 <- init_quad(Q = 1, prior = list(mu = rep(0, 1), Sigma = diag(1)*2), adapt = list(mu = rep(1, 1), Sigma = diag(1)*5), ip = 50)
+#' estimate1 <- eval_quad(FUN = dnorm, X = grid_points_and_weights1, mean = 1.5, sd = 3, log = TRUE)
+#' round(estimate1, 3) ==  .273 || stop("wrong")
+#' round(attr(estimate1, "variance"), 3) == 1.636 || stop("wrong")
+#' grid_points_and_weights2 <- init_quad(Q = 2, prior = list(mu = rep(0, 2), Sigma = diag(2)*2), adapt = list(mu = rep(1, 2), Sigma = (matrix(rep(2, 4), ncol = 2) + diag(2)*5)), ip = 20)
+#' estimate2 <- eval_quad(FUN = mvtnorm::dmvnorm, X = grid_points_and_weights2, mean = c(1.5, -1), sigma = matrix(c(2, .3, .3, 2), ncol = 2), log = TRUE)
+#' all(round(estimate2, 3) ==  c(.811, -.537)) || stop("wrong")
+#' all(round(attr(estimate2, "variance"), 3) ==  matrix(c(.926, .017, .017,.926), ncol = 2)) || stop("wrong")
+#' @export
+eval_quad <- function (FUN = function(x) 1, X = NULL, ..., W = NULL) {
+  if (is.list(X)) {
+    W <- X$W
+    X <- X$X
+  }
+  if (is.null(X) | is.null(W)) 
+    stop("Quadrature points and weights are required. See init.gauss.", call. = F)
+  FUN <- match.fun(FUN)
+  Q <- ncol(X)
+  ipq <- length(W)
+  f <- numeric(ipq)
+  for (i in 1:ipq) {
+    f[i] <- FUN(X[i, ], ...) + W[i]
+  }
+  m <- 700 - max(f)
+  f <- f + m
+  f <- exp(f)
+  p1 <- sum(f)
+  estimate <- colSums(f * X)/p1
+  variance <- matrix(0, Q, Q)
+  for (i in 1:ipq) {
+    deviation <- X[i, ] - estimate
+    variance <- variance + (deviation %*% t(deviation) * f[i]/p1)
+  }
+  attr(estimate, "variance") <- variance
+  estimate
 }
