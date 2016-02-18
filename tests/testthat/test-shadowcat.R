@@ -1199,22 +1199,15 @@ test_that("three dimensions, expected_aposteriori, no constraints on item select
   start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
   variance_target <- .1^2
   model_vec <- c("3PLM","GRM","GPCM","SM")
-  estimator_vec <- "AEP"
+  estimator_vec <- "expected_aposteriori"
   information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler")
   
   estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions)
-  estimates_and_variance_without_errors <- sapply(estimates_and_variance, 
-                                                  FUN = function(x) { 
-                                                    if (is.list(x)) 
-                                                      matrix(rep(NA, number_dimensions + number_dimensions^2), nrow = 1, dimnames = list(NULL, names(estimates_and_variance[[1]])))
-                                                    else 
-                                                      x } ) 
-  
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
   
-  condition_vector <- sort(rep(1:(ncol(estimates_and_variance_without_errors)/replications_per_unique_condition), replications_per_unique_condition))
+  condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/replications_per_unique_condition), replications_per_unique_condition))
   
-  estimates_and_conditions <- cbind(t(estimates_and_variance_without_errors)[, c("estimated_theta1", "estimated_theta2", "estimated_theta3", "variance_estimate1", "variance_estimate5", "variance_estimate9")], 
+  estimates_and_conditions <- cbind(t(estimates_and_variance)[, c("estimated_theta1", "estimated_theta2", "estimated_theta3", "variance_estimate1", "variance_estimate5", "variance_estimate9")], 
                                     conditions[, c("replication", "number_items", "number_answer_categories", "model", "estimator", "information_summary")], 
                                     condition_vector)
   
