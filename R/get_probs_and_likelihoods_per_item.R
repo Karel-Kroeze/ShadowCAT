@@ -21,6 +21,9 @@ get_probs_and_likelihoods_per_item <- function(theta, model, alpha, beta, guessi
                                   "SM" = PROB_SM(theta, alpha, beta, responses, with_likelihoods),
                                   "GPCM" = PROB_GPCM(theta, alpha, beta, responses, with_likelihoods))
   # likelihoods can never truly be zero, let alone negative
+  # As far as I have seen, only the GPCM model may return very small negative likelihoods, due to
+  # the code line remainder -= P(k, i+1), which sometimes is something like 1 - 2.092453e-17 - 1.243433e-08 - 1 = -2.220446e-16.
+  # Other models may return likelihoods equal to 0.000000e+00. It seems safe to set these to very small positive likelihoods.
   probs_and_likelihoods$P[which(probs_and_likelihoods$P <= 0)] <- 1e-10
   if (with_likelihoods)
     probs_and_likelihoods$l[which(probs_and_likelihoods$l <= 0)] <- 1e-10
