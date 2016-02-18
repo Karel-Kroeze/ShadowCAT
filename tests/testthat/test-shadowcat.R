@@ -847,7 +847,7 @@ if (FALSE) {
   context("simulations")
   
   test_that("Simulations for context Jan Bebber", {
-    replications_per_unique_condition <- 50
+    replications_per_unique_condition <- 50 # 100 gives similar results
     true_theta_vec <- c(-2, 1, 3)
     number_items_vec <- 100
     number_answer_categories_vec <- 2
