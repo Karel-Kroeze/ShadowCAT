@@ -157,14 +157,13 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
 #' @param ip Number of quadrature points per dimension. Defaults to 6. Note that the total number of quadrature points is ip^Q
 #' @return A list with a matrix X of ip^Q by Q quadrature points and a vector W of length ip^Q associated weights
 #' @examples grid_points_and_weights1 <- init_quad(Q = 1, prior = list(mu = rep(0, 1), Sigma = diag(1)*2), adapt = list(mu = rep(1, 1), Sigma = diag(1)*5), ip = 50)
-#' round(grid_points_and_weights1$X[c(2, 8, 50),], 3) == c(-25.951, -17.382,  30.037) || stop("wrong")
-#' round(grid_points_and_weights1$W[c(2, 8, 50)], 3) == c(-169.013, -76.610, -225.947) || stop("wrong")
+#' all(round(grid_points_and_weights1$X[c(2, 8, 50),], 3) == c(-25.951, -17.382,  30.037)) || stop("wrong")
+#' all(round(grid_points_and_weights1$W[c(2, 8, 50)], 3) == c(-169.013, -76.610, -225.947)) || stop("wrong")
 #' grid_points_and_weights2 <- init_quad(Q = 2, prior = list(mu = rep(0, 2), Sigma = diag(2)*2), adapt = list(mu = rep(1, 2), Sigma = (matrix(rep(2, 4), ncol = 2) + diag(2)*5)), ip = 20)
-#' round(grid_points_and_weights2$X[c(2, 8, 50),2], 3) == c(-24.858, -14.749 , -8.557) || stop("wrong")
-#' round(grid_points_and_weights2$W[c(2, 8, 50)], 3) == c(-155.016, -76.948, -40.058) || stop("wrong")
+#' all(round(grid_points_and_weights2$X[c(2, 8, 50),2], 3) == c(-24.858, -14.749 , -8.557)) || stop("wrong")
+#' all(round(grid_points_and_weights2$W[c(2, 8, 50)], 3) == c(-155.016, -76.948, -40.058)) || stop("wrong")
 #' @export
-init_quad <- function (Q, prior = list(mu = rep(0, Q), Sigma = diag(Q)), 
-                            adapt = NULL, ip = 6) { 
+init_quad <- function (Q, prior = list(mu = rep(0, Q), Sigma = diag(Q)), adapt = NULL, ip = 6) {  
   if (!is.null(adapt) && !is.null(attr(adapt, "variance"))) {
     adapt <- list(mu = adapt, Sigma = attr(adapt, "variance"))
   }
@@ -199,10 +198,10 @@ init_quad <- function (Q, prior = list(mu = rep(0, Q), Sigma = diag(Q)),
     X <- t(t(X) + adapt$mu)
     adapt$chol <- chol(adapt$Sigma)
     adapt$det <- sum(log(diag(adapt$chol)))
-    adapt$aux <- diag((X -  rep(1, ip^Q) %*% t(adapt$mu)) %*% solve(adapt$Sigma) %*% t(X -  rep(1, ip^Q) %*% t(adapt$mu)))
+    adapt$aux <- colSums(backsolve(adapt$chol, t(X) - adapt$mu, transpose = TRUE)^2)
     prior$chol <- chol(prior$Sigma)
     prior$det <- sum(log(diag(prior$chol)))
-    prior$aux <- diag((X -  rep(1, ip^Q) %*% t(prior$mu)) %*% solve(prior$Sigma) %*% t(X -  rep(1, ip^Q) %*% t(prior$mu)))
+    prior$aux <- colSums(backsolve(prior$chol, t(X) - prior$mu, transpose = TRUE)^2)
     fact <- (adapt$aux - prior$aux) / 2 + adapt$det - prior$det
     W <- W + fact
   }

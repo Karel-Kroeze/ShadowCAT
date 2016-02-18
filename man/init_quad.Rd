@@ -25,10 +25,10 @@ Copied from MultiGHQuad package and bugs fixed. Should be moved back to MultiGHQ
 }
 \examples{
 grid_points_and_weights1 <- init_quad(Q = 1, prior = list(mu = rep(0, 1), Sigma = diag(1)*2), adapt = list(mu = rep(1, 1), Sigma = diag(1)*5), ip = 50)
-round(grid_points_and_weights1$X[c(2, 8, 50),], 3) == c(-25.951, -17.382,  30.037) || stop("wrong")
-round(grid_points_and_weights1$W[c(2, 8, 50)], 3) == c(-169.013, -76.610, -225.947) || stop("wrong")
+all(round(grid_points_and_weights1$X[c(2, 8, 50),], 3) == c(-25.951, -17.382,  30.037)) || stop("wrong")
+all(round(grid_points_and_weights1$W[c(2, 8, 50)], 3) == c(-169.013, -76.610, -225.947)) || stop("wrong")
 grid_points_and_weights2 <- init_quad(Q = 2, prior = list(mu = rep(0, 2), Sigma = diag(2)*2), adapt = list(mu = rep(1, 2), Sigma = (matrix(rep(2, 4), ncol = 2) + diag(2)*5)), ip = 20)
-round(grid_points_and_weights2$X[c(2, 8, 50),2], 3) == c(-24.858, -14.749 , -8.557) || stop("wrong")
-round(grid_points_and_weights2$W[c(2, 8, 50)], 3) == c(-155.016, -76.948, -40.058) || stop("wrong")
+all(round(grid_points_and_weights2$X[c(2, 8, 50),2], 3) == c(-24.858, -14.749 , -8.557)) || stop("wrong")
+all(round(grid_points_and_weights2$W[c(2, 8, 50)], 3) == c(-155.016, -76.948, -40.058)) || stop("wrong")
 }
 
