@@ -881,19 +881,28 @@ if (FALSE) {
       
     # Estimates are not so good due to large target variance
     expect_equal(round(average_per_condition_true_minus2$x, 3), c(-2.317, -2.305, -2.285, -2.358))
+                                          # maximum aposteriori: -2.021   -2.197  -2.015  -2.043
     expect_equal(round(average_per_condition_true_1$x, 3), c(1.552, 1.430, 1.579, 1.630))
+                                      # maximum aposteriori: 1.089  1.026  1.068  1.005
     expect_equal(round(average_per_condition_true_3$x, 3), c(2.763, 2.724, 2.748, 2.701))
+                                      # maximum aposteriori: 2.707  2.689  2.794  2.748
     
     # Observed standard deviation of the estimates per condition
     expect_equal(round(sd_per_condition_true_minus2$x, 3), c(.352, .459, .376, .445))
+                                      # maximum aposteriori: .518  .524  .538  .645
     expect_equal(round(sd_per_condition_true_1$x, 3), c(1.094, 1.193, 1.051, .921))
+                                 # maximum aposteriori:  .543   .608   .565  .515
     expect_equal(round(sd_per_condition_true_3$x, 3), c(.301, .366, .346, .377))
+                                 # maximum aposteriori: .373  .397  .310  .361
     
     # Five number summary of reported SE
     expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == -2), "variance_estimate"])), 3), c(.040, .245, .408, .717, 5.367))
+                                                                                                                          # maximum aposteriori: .436  .536  .593  .695  3.961
     expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 1), "variance_estimate"])), 3), c(.050, .256, .354, .480, .984))
+                                                                                                                         # maximum aposteriori: .430  .450  .471  .510  .949
     expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3), "variance_estimate"])), 3), c(.049, .630, .848, 1.194, 5.426))
-  }
+                                                                                                                         # maximum aposteriori: .506  .684  .790  1.045  4.054
+  })
   
   
   test_that("one dimension, no constraints on item selection, one replication per condition, expected_aposteriori", {
