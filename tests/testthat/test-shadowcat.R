@@ -908,7 +908,7 @@ if (FALSE) {
   test_that("one dimension, no constraints on item selection, one replication per condition, expected_aposteriori", {
     replications_per_unique_condition <- 1
     true_theta_vec <- c(-2, 1)
-    number_items_vec <- 100
+    number_items_vec <- c(100, 300)
     number_answer_categories_vec <- c(2, 4)
     number_dimensions <- 1
     lowerbound <- -3
@@ -927,12 +927,12 @@ if (FALSE) {
     
     estimates_and_conditions <- cbind(t(estimates_and_variance), conditions[, c("true_theta", "number_items", "number_answer_categories", "model", "estimator", "information_summary")])
     
-    average_per_true_theta <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"]), "mean")
-    sd_per_true_theta <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"]), "sd") 
+    average_per_true_theta_and_number_items <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"], estimates_and_conditions[,"number_items"]), "mean")
+    sd_per_true_theta_and_number_items <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"], estimates_and_conditions[,"number_items"]), "sd") 
     
-    expect_equal(round(average_per_true_theta[,"x"], 3), c(-2.13, 1.35))
-    expect_equal(round(sd_per_true_theta[,"x"], 3), c(.273, .578))
-    expect_equal(round(fivenum(estimates_and_conditions[,"variance_estimate"]), 3), c(.000, .007, .065, .090, .212))    
+    expect_equal(round(average_per_true_theta_and_number_items[,"x"], 3), c(-2.121,  1.354, -2.087, 1.256)))
+    expect_equal(round(sd_per_true_theta_and_number_items[,"x"], 3), c(.271, .539, .197, .506))
+    expect_equal(round(fivenum(estimates_and_conditions[,"variance_estimate"]), 3), c(.000, .012, .033, .063, .204))    
   })
   
   test_that("one dimension, no constraints on item selection, one replication per condition, maximum_aposteriori", {
