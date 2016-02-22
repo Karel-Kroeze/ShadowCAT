@@ -847,20 +847,20 @@ if (FALSE) {
   context("simulations")
   
   test_that("Simulations for context Jan Bebber", {
-    replications_per_unique_condition <- 50 # 100 gives similar results
+    replications_per_unique_condition <- 100
     true_theta_vec <- c(-2, 1, 3)
     number_items_vec <- 100
     number_answer_categories_vec <- 2
     number_dimensions <- 1
-    lowerbound <- -3
-    upperbound <- 3
+    lowerbound <- -20
+    upperbound <- 20
     
     start_items <- list(type = 'random', n = 0)
     variance_target <- .45^2
     model_vec <- "GPCM"
     estimator_vec <- "expected_aposteriori"
-    information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace") 
-    prior <- diag(number_dimensions) * 100
+    information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace")
+    prior <- diag(number_dimensions)
     max_n = 12
     
     estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound, prior = prior, max_n = max_n)
@@ -880,28 +880,36 @@ if (FALSE) {
     sd_per_condition_true_3 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 3)]), "sd") 
       
     # Estimates are not so good due to large target variance
-    expect_equal(round(average_per_condition_true_minus2$x, 3), c(-2.317, -2.305, -2.285, -2.358))
-                                          # maximum aposteriori: -2.021   -2.197  -2.015  -2.043
-    expect_equal(round(average_per_condition_true_1$x, 3), c(1.552, 1.430, 1.579, 1.630))
-                                      # maximum aposteriori: 1.089  1.026  1.068  1.005
-    expect_equal(round(average_per_condition_true_3$x, 3), c(2.763, 2.724, 2.748, 2.701))
-                                      # maximum aposteriori: 2.707  2.689  2.794  2.748
+    expect_equal(round(average_per_condition_true_minus2$x, 3), c(-1.533, -1.574, -1.616, -1.573)) 
+    # prior sd = 3 and 1000 replications: -2.144 -2.176 -2.132 -2.143
+    # prior sd = 3 and item bank 500 and 1000 replications: -2.059 -2.077 -2.098 -2.079
+    # prior sd = 3 and map estimator: -1.957 -2.147 -2.090 -2.043
+    # prior sd = 3 and larger number of items: -2.067 -2.091 -2.085 -2.048
+    expect_equal(round(average_per_condition_true_1$x, 3), c(.803, .780, .892, .831))
+    # prior sd = 3: 0.941 1.082 1.010 1.043
+    # prior sd = 3 and item bank 500: 0.994 1.013 0.959 0.961
+    # prior sd = 3 and map estimator: 0.995 0.932 1.034 1.042
+    # prior sd = 3 and larger number of items: 0.996 0.973 1.024 0.985
+    expect_equal(round(average_per_condition_true_3$x, 3), c(2.109, 2.057, 2.133, 2.067))
+    # prior sd = 3: 3.105 3.188 3.270 3.061
+    # prior sd = 3 and item bank 500: 2.828 2.813 2.788 2.793
+    # prior sd = 3 and map estimator: 2.954 2.962 2.941 2.897
     
     # Observed standard deviation of the estimates per condition
-    expect_equal(round(sd_per_condition_true_minus2$x, 3), c(.352, .459, .376, .445))
-                                      # maximum aposteriori: .518  .524  .538  .645
-    expect_equal(round(sd_per_condition_true_1$x, 3), c(1.094, 1.193, 1.051, .921))
-                                 # maximum aposteriori:  .543   .608   .565  .515
-    expect_equal(round(sd_per_condition_true_3$x, 3), c(.301, .366, .346, .377))
-                                 # maximum aposteriori: .373  .397  .310  .361
+    expect_equal(round(sd_per_condition_true_minus2$x, 3), c(.357, .361, .348, .385))
+    # prior sd = 3: 0.668 0.602 0.615 0.754
+    expect_equal(round(sd_per_condition_true_1$x, 3), c(.401, .406, .394, .423))
+    # prior sd = 3: 0.463 0.561 0.539 0.521
+    expect_equal(round(sd_per_condition_true_3$x, 3), c(.326, .358, .289, .319))
+    # prior sd = 3: 0.985 0.852 0.815 0.780
     
-    # Five number summary of reported SE
-    expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == -2), "variance_estimate"])), 3), c(.040, .245, .408, .717, 5.367))
-                                                                                                                          # maximum aposteriori: .436  .536  .593  .695  3.961
-    expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 1), "variance_estimate"])), 3), c(.050, .256, .354, .480, .984))
-                                                                                                                         # maximum aposteriori: .430  .450  .471  .510  .949
-    expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3), "variance_estimate"])), 3), c(.049, .630, .848, 1.194, 5.426))
-                                                                                                                         # maximum aposteriori: .506  .684  .790  1.045  4.054
+    # Five number summary of reported posterior sd
+    expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == -2), "variance_estimate"])), 3), c(.424, .450, .470, .496, .578))
+    # prior sd = 3: 0.460 0.555 0.616 0.696 1.172
+    expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 1), "variance_estimate"])), 3), c(.426, .438, .443, .448, .513))
+    # prior sd = 3: 0.432 0.464 0.484 0.514 0.856
+    expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3), "variance_estimate"])), 3), c(.434, .497, .524, .553, .607))
+    # prior sd = 3: 0.472 0.700 0.807 0.977 1.660
   })
   
   
@@ -930,7 +938,7 @@ if (FALSE) {
     average_per_true_theta_and_number_items <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"], estimates_and_conditions[,"number_items"]), "mean")
     sd_per_true_theta_and_number_items <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"], estimates_and_conditions[,"number_items"]), "sd") 
     
-    expect_equal(round(average_per_true_theta_and_number_items[,"x"], 3), c(-2.121,  1.354, -2.087, 1.256)))
+    expect_equal(round(average_per_true_theta_and_number_items[,"x"], 3), c(-2.121,  1.354, -2.087, 1.256))
     expect_equal(round(sd_per_true_theta_and_number_items[,"x"], 3), c(.271, .539, .197, .506))
     expect_equal(round(fivenum(estimates_and_conditions[,"variance_estimate"]), 3), c(.000, .012, .033, .063, .204))    
   })
@@ -1096,7 +1104,7 @@ test_that("one dimension, estimator maximum_aposteriori, no constraints on item 
 test_that("one dimension, estimator expected_aposteriori, no constraints on item selection, 100 replications per condition", {
   replications_per_unique_condition <- 100
   true_theta_vec <- c(-2, 1)
-  number_items_vec <- c(50, 100)
+  number_items_vec <- c(100, 300)
   number_answer_categories_vec <- c(2, 4)
   number_dimensions <- 1
   

@@ -243,10 +243,10 @@ eval_quad <- function (FUN = function(x) 1, X = NULL, ..., W = NULL) {
   for (i in 1:ipq) {
     f[i] <- FUN(X[i, ], ...) + W[i]
   }
- if (min(f) < -700) {
-   m <- 700 - max(f)
-   f <- f + m
- }
+  #if (min(f) < -700) {
+    m <- 700 - max(f)
+    f <- f + m
+  #}
   f <- exp(f)
   p1 <- sum(f)
   estimate <- colSums(f * X)/p1
