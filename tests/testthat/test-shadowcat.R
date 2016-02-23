@@ -1031,12 +1031,12 @@ if (FALSE) {
   test_that("one dimension, no constraints on item selection, one replication per condition, maximum_likelihood", {
     # maximum_likelihood and PEKL do not go well together; makes sense to me, I think maximum_likelihood should be combined with D or A information summary
     replications_per_unique_condition <- 1
-    true_theta_vec <- c(-2, 1)
-    number_items_vec <- c(15, 50)
+    true_theta_vec <- c(-2, 1, 3)
+    number_items_vec <- c(50, 200)
     number_answer_categories_vec <- c(2, 4)
     number_dimensions <- 1
-    lowerbound <- -3
-    upperbound <- 3
+    lowerbound <- -6
+    upperbound <- 6
     
     start_items <- list(type = 'random', n = 3)
     variance_target <- .1^2
@@ -1053,9 +1053,9 @@ if (FALSE) {
     average_per_true_theta_and_number_items <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"], estimates_and_conditions[,"number_items"]), "mean")
     sd_per_true_theta_and_number_items <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"], estimates_and_conditions[,"number_items"]), "sd") 
     
-    expect_equal(round(average_per_true_theta_and_number_items[,"x"], 3), c(-1.920, 1.231, -2.074, 1.012))
-                 expect_equal(round(sd_per_true_theta_and_number_items[,"x"], 3), c(.606, .705, .404, .401))
-                 expect_equal(fivenum(round(estimates_and_conditions[,"variance_estimate"], 3)), c(4.9e-02, 1.24e-01, 2.085e-01, 3.915e-01, 111839145))
+    expect_equal(round(average_per_true_theta_and_number_items[,"x"], 3), c(-1.994, .989, 3.172, -1.984, 1.019, 3.124))
+    expect_equal(round(sd_per_true_theta_and_number_items[,"x"], 3), c(.456, .400, .737, .193, .165, .450))
+    expect_equal(round(sqrt(fivenum(estimates_and_conditions[,"variance_estimate"])), 3), c(.110, .183, .285, .394, 1.764))
                  # This extremely large variance corresponds to an estimated theta at the lowerbound of -3; setting the lowerbound to -5 does not help
   })
   
