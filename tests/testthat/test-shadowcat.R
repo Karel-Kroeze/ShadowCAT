@@ -955,6 +955,17 @@ if (FALSE) {
     # MAP: .836
     expect_equal(round(fivenum(estimated_theta), 3), c(-.191, .569, .866, 1.160, 1.820))
     expect_equal(round(fivenum(sd_estimate), 3), c(.416, .432, .436, .443, .449))
+    
+    # True theta 3
+    true_theta <- 3
+    for (s in 1:number_repliations) {
+      test_outcome <- with_random_seed(s, test_shadowcat)(true_theta, prior = prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, lowerbound = lowerbound, upperbound = upperbound)$estimate
+      estimated_theta[s] <- test_outcome
+      sd_estimate[s] <- sqrt(attr(test_outcome, "variance"))
+    }
+    expect_equal(round(mean(estimated_theta), 3), 2.343)  
+    expect_equal(round(fivenum(estimated_theta), 3), c(1.321, 2.045, 2.493, 2.614, 2.929))
+    expect_equal(round(fivenum(sd_estimate), 3), c(.418, .443, .448, .449, .491))
   })
   
   test_that("one dimension, no constraints on item selection, one replication per condition, expected_aposteriori", {
