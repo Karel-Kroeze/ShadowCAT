@@ -1056,7 +1056,6 @@ if (FALSE) {
     expect_equal(round(average_per_true_theta_and_number_items[,"x"], 3), c(-1.994, .989, 3.172, -1.984, 1.019, 3.124))
     expect_equal(round(sd_per_true_theta_and_number_items[,"x"], 3), c(.456, .400, .737, .193, .165, .450))
     expect_equal(round(sqrt(fivenum(estimates_and_conditions[,"variance_estimate"])), 3), c(.110, .183, .285, .394, 1.764))
-                 # This extremely large variance corresponds to an estimated theta at the lowerbound of -3; setting the lowerbound to -5 does not help
   })
   
   
