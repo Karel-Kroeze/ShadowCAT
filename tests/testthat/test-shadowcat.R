@@ -138,11 +138,12 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
 #' @param prior covariance matrix of the (multi variate) normal prior for theta; mean vector is fixed at zero; not used for maximum_likelihood estimator
 #' @param prior_var_safe_ml if not NULL, expected_aposteriori estimate with prior variance equal to prior_var_safe_ml (scalar or vector) is computed instead of maximum_likelihood/maximum_aposteriori, if maximum_likelihood/maximum_aposteriori estimate fails.
 #' @param return_administered_item_indeces if TRUE, indeces of administered items are added to the output
+#' @param min_n value equal to the minimum number of items to administer
 #' @param max_n value equal to the maximum number of items to administer (test stops at this number, even if variance target has not been reached). NULL means max_n is equal to number of items in test bank
 #' @param varying_number_item_steps if TRUE, the simulated number of item steps differs over items. In that case, number_answer_categories_vec (number of itemsteps + 1)
 #' is considered the maxixmum number of categories
 #' @return matrix with in each row (= one condition): named vector containing estimated theta, variance of the estimate, and if return_administered_item_indeces is TRUE, the indeces of the administered items
-run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, constraints_and_characts = NULL, guessing = NULL, items_load_one_dimension = TRUE, lowerbound = rep(-3, number_dimensions), upperbound = rep(3, number_dimensions), prior = diag(number_dimensions) * 20, prior_var_safe_ml = NULL, return_administered_item_indeces = FALSE, max_n = NULL, varying_number_item_steps = FALSE) {                   
+run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, constraints_and_characts = NULL, guessing = NULL, items_load_one_dimension = TRUE, lowerbound = rep(-3, number_dimensions), upperbound = rep(3, number_dimensions), prior = diag(number_dimensions) * 20, prior_var_safe_ml = NULL, return_administered_item_indeces = FALSE, min_n = NULL, max_n = NULL, varying_number_item_steps = FALSE) {                   
   if (number_dimensions > 1 && number_dimensions != length(true_theta_vec))
     stop("number_dimensions is larger than 1 but not equal to the length of true_theta_vec")
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
@@ -151,7 +152,7 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
                     FUN = function(condition) {
                       if (is.null(max_n))
                         max_n <- conditions[condition, "number_items"] 
-                      stop_test <- list(target = variance_target, max_n = max_n)
+                      stop_test <- list(target = variance_target, max_n = max_n, min_n = min_n)
                       true_theta <- ( if (number_dimensions == 1) 
                                         conditions[condition, "true_theta"]
                                       else
@@ -861,9 +862,10 @@ if (FALSE) {
     estimator_vec <- "expected_aposteriori"
     information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace")
     prior <- diag(number_dimensions)
-    max_n = 12
+    min_n <- 4
+    max_n <- 12
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound, prior = prior, max_n = max_n)
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound, prior = prior, min_n = min_n, max_n = max_n)
     
     conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
     condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/replications_per_unique_condition), replications_per_unique_condition))
@@ -879,7 +881,6 @@ if (FALSE) {
     average_per_condition_true_3 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 3)]), "mean")
     sd_per_condition_true_3 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 3)]), "sd") 
       
-    # Estimates are not so good due to large target variance
     expect_equal(round(average_per_condition_true_minus2$x, 3), c(-1.533, -1.574, -1.616, -1.573)) 
     # prior sd = 3 and 1000 replications: -2.144 -2.176 -2.132 -2.143
     # prior sd = 3 and item bank 500 and 1000 replications: -2.059 -2.077 -2.098 -2.079
