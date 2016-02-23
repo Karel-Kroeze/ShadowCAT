@@ -164,7 +164,7 @@ test_that("estimator is expected_aposteriori, 1 dimension, 2 categories", {
   estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL)
   
   expect_equal(round(as.vector(estimated_latent_trait), 3), -.689)
-  expect_equal(round(attr(estimated_latent_trait, "variance"), 3), matrix(.205))
+  expect_equal(as.vector(round(attr(estimated_latent_trait, "variance"), 3)), .205)
 })
 
 test_that("estimator is expected_aposteriori, 3 dimensions, varying number of categories", {
