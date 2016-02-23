@@ -843,7 +843,7 @@ test_that("invalid input", {
 })
 
 
-# these simulations take a long time to run, if (FALSE) ensures that they are not each time the tests are run
+# these simulations take a long time to run, if (FALSE) ensures that they are not run each time the tests are run
 if (FALSE) {
   context("simulations")
   
@@ -882,7 +882,7 @@ if (FALSE) {
     sd_per_condition_true_3 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 3)]), "sd") 
       
     expect_equal(round(average_per_condition_true_minus2$x, 3), c(-1.533, -1.574, -1.616, -1.573)) 
-    # prior sd = 3 and 1000 replications: -2.144 -2.176 -2.132 -2.143
+    # prior sd = 3 and 1000 replications: -2.144 -2.176 -2.132 -2.143; small bias is due to left skewed posterior
     # prior sd = 3 and item bank 500 and 1000 replications: -2.059 -2.077 -2.098 -2.079
     # prior sd = 3 and map estimator: -1.957 -2.147 -2.090 -2.043
     # prior sd = 3 and larger number of items: -2.067 -2.091 -2.085 -2.048
@@ -913,6 +913,49 @@ if (FALSE) {
     # prior sd = 3: 0.472 0.700 0.807 0.977 1.660
   })
   
+  test_that("simulations with empirical itembank", {
+    load(system.file("tests", "testthat", "empirical_itembanks", "itembank.RData", package = "ShadowCAT"))
+    prior <- diag(1)
+    model <- "GPCM"
+    alpha <- itembank$alpha
+    beta <- itembank$beta
+    guessing <- NULL
+    eta <- NULL
+    start_items <- list(type = 'random', n = 0)
+    stop_test <- list(target = .45^2, min_n = 4, max_n = 12)
+    estimator <- "expected_aposteriori"
+    information_summary <- "posterior_determinant"
+    lowerbound <- -20
+    upperbound <- 20
+    
+    number_repliations <- 100
+    estimated_theta <- numeric(number_repliations)
+    sd_estimate <- numeric(number_repliations)
+    
+    # True theta -2
+    true_theta <- -2
+    for (s in 1:number_repliations) {
+      test_outcome <- with_random_seed(s, test_shadowcat)(true_theta, prior = prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, lowerbound = lowerbound, upperbound = upperbound)$estimate
+      estimated_theta[s] <- test_outcome
+      sd_estimate[s] <- sqrt(attr(test_outcome, "variance"))
+    }
+    expect_equal(round(mean(estimated_theta), 3), -1.393)  
+    # MAP: -1.314
+    expect_equal(round(fivenum(estimated_theta), 3), c(-1.835, -1.835, -1.411, -1.090, -.476))
+    expect_equal(round(fivenum(sd_estimate), 3), c(.448, .503, .545, .609, .609))
+    
+    # True theta 1
+    true_theta <- 1
+    for (s in 1:number_repliations) {
+      test_outcome <- with_random_seed(s, test_shadowcat)(true_theta, prior = prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, lowerbound = lowerbound, upperbound = upperbound)$estimate
+      estimated_theta[s] <- test_outcome
+      sd_estimate[s] <- sqrt(attr(test_outcome, "variance"))
+    }
+    expect_equal(round(mean(estimated_theta), 3), .828)  
+    # MAP: .836
+    expect_equal(round(fivenum(estimated_theta), 3), c(-.191, .569, .866, 1.160, 1.820))
+    expect_equal(round(fivenum(sd_estimate), 3), c(.416, .432, .436, .443, .449))
+  })
   
   test_that("one dimension, no constraints on item selection, one replication per condition, expected_aposteriori", {
     replications_per_unique_condition <- 1
