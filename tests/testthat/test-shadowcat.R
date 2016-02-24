@@ -914,7 +914,7 @@ if (FALSE) {
   })
   
   test_that("simulations with empirical itembank", {
-    load(system.file("tests", "testthat", "empirical_itembanks", "itembank.RData", package = "ShadowCAT"))
+    # itembank.RData is private, these simulations cannot be replicated without itembank.Rdata
     prior <- diag(1)
     model <- "GPCM"
     alpha <- itembank$alpha
