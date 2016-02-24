@@ -968,7 +968,7 @@ if (FALSE) {
     expect_equal(round(fivenum(sd_estimate), 3), c(.418, .443, .448, .449, .491))
   })
   
-  test_that("one dimension, no constraints on item selection, one replication per condition, expected_aposteriori", {
+  test_that("one dimension, one replication per condition, expected_aposteriori", {
     replications_per_unique_condition <- 1
     true_theta_vec <- c(-2, 1, 3)
     number_items_vec <- c(50, 200)
@@ -998,7 +998,7 @@ if (FALSE) {
     expect_equal(round(sqrt(fivenum(estimates_and_conditions[,"variance_estimate"])), 3), c(.109, .184, .285, .379, 1.220))    
   })
   
-  test_that("one dimension, no constraints on item selection, one replication per condition, maximum_aposteriori", {
+  test_that("one dimension, one replication per condition, maximum_aposteriori", {
     replications_per_unique_condition <- 1
     true_theta_vec <- c(-2, 1, 3)
     number_items_vec <- c(50, 200)
@@ -1028,7 +1028,7 @@ if (FALSE) {
     expect_equal(round(sqrt(fivenum(estimates_and_conditions[,"variance_estimate"])), 3), c(.109, .184, .288, .392, 1.232))
   })
   
-  test_that("one dimension, no constraints on item selection, one replication per condition, maximum_likelihood", {
+  test_that("one dimension, one replication per condition, maximum_likelihood", {
     # maximum_likelihood and PEKL do not go well together; makes sense to me, I think maximum_likelihood should be combined with D or A information summary
     replications_per_unique_condition <- 1
     true_theta_vec <- c(-2, 1, 3)
@@ -1059,13 +1059,14 @@ if (FALSE) {
   })
   
   
-  test_that("one dimension, estimator maximum_likelihood, information summary D, PD, A, and PA, no constraints on item selection, 100 replications per condition", {
-    # run one more time to check
+  test_that("one dimension, estimator maximum_likelihood, 100 replications per condition", {
     replications_per_unique_condition <- 100
-    true_theta_vec <- c(-2, 1)
-    number_items_vec <- c(50, 100)
+    true_theta_vec <- c(-2, 1, 3)
+    number_items_vec <- c(50, 200)
     number_answer_categories_vec <- c(2, 4)
     number_dimensions <- 1
+    lowerbound <- -6
+    upperbound <- 6
     
     start_items <- list(type = 'random', n = 3)
     variance_target <- .1^2
@@ -1073,19 +1074,13 @@ if (FALSE) {
     estimator_vec <- "maximum_likelihood"
     information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace")  # "posterior_expected_kullback_leibler" 
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions)
-    estimates_and_variance_without_errors <- sapply(estimates_and_variance, 
-                                                    FUN = function(x) { 
-                                                      if (is.null(x)) 
-                                                        matrix(rep(NA, 2), nrow = 1, dimnames = list(NULL, names(estimates_and_variance[[1]])))
-                                                      else 
-                                                        x } ) 
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions)    
     
     conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
     
-    condition_vector <- sort(rep(1:(ncol(estimates_and_variance_without_errors)/replications_per_unique_condition), replications_per_unique_condition))
+    condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/replications_per_unique_condition), replications_per_unique_condition))
     
-    estimates_and_conditions <- cbind(t(estimates_and_variance_without_errors)[, c("estimated_theta", "variance_estimate")], 
+    estimates_and_conditions <- cbind(t(estimates_and_variance)[, c("estimated_theta", "variance_estimate")], 
                                       conditions[, c("true_theta", "replication", "number_items", "number_answer_categories", "model", "estimator", "information_summary")], 
                                       condition_vector)
     
@@ -1095,24 +1090,26 @@ if (FALSE) {
     average_per_condition_true_1 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 1), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 1)]), "mean")
     sd_per_condition_true_1 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 1), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 1)]), "sd") 
     
-    number_na_per_condition <- aggregate(estimates_and_conditions[, "estimated_theta"], list(condition_vector), FUN = function(x) { sum(is.na(x)) })
-
+    average_per_condition_true_3 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 3)]), "mean")
+    sd_per_condition_true_3 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 3)]), "sd") 
     
     # five number summary of average theta estimate per condition, with true theta is -2
-    expect_equal(round(fivenum(average_per_condition_true_minus2[,"x"]), 3), c(-2.140, -2.056, -2.025, -2.001, -1.937))
+    expect_equal(round(fivenum(average_per_condition_true_minus2[,"x"]), 3), c(-2.146, -2.049, -2.023, -2.008, -1.963))
     # five number summary of average theta estimate per condition, with true theta is 1
-    expect_equal(round(fivenum(average_per_condition_true_1[,"x"]), 3), c(.939, .989, 1.004, 1.022, 1.078))
+    expect_equal(round(fivenum(average_per_condition_true_1[,"x"]), 3), c(.970, .994, 1.009, 1.031, 1.090))
+    # five number summary of average theta estimate per condition, with true theta is 3
+    expect_equal(round(fivenum(average_per_condition_true_3[,"x"]), 3), c(2.738, 2.819, 2.878, 2.900, 2.953))
     
     # five number summary of observed sd of the theta estimates within each condition, with true theta is -2
-    expect_equal(round(fivenum(sd_per_condition_true_minus2[,"x"]), 3), c(.173, .289, .321, .440, .548))  
+    expect_equal(round(fivenum(sd_per_condition_true_minus2[,"x"]), 3), c(.120, .215, .255, .430, .519))  
     # five number summary of observed sd of the theta estimates within each condition, with true theta is 1
-    expect_equal(round(fivenum(sd_per_condition_true_1[,"x"]), 3), c(.162, .228, .259, .352, .455))  
+    expect_equal(round(fivenum(sd_per_condition_true_1[,"x"]), 3), c(.106, .168, .212, .344, .453))  
+    # five number summary of observed sd of the theta estimates within each condition, with true theta is 3
+    expect_equal(round(fivenum(sd_per_condition_true_3[,"x"]), 3), c(.076, .147, .174, .271, .355))  
     
     # five number summary of reported sd of the theta estimate within each condition where max number of items is 50 and 100, respectively
-    expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 50), "variance_estimate"])), 3), c(.188, .284, .352, .420, 1.585))
-    expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 100), "variance_estimate"])), 3), c(.142, .200, .249, .299, .569))
-
-    expect_equal(number_na_per_condition[ ,"x"], c(rep(0, 126), 1, 0))
+    expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 50), "variance_estimate"])), 3), c(.198, .312, .376, .504, 18023.042))
+    expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 200), "variance_estimate"])), 3), c(.105, .156, .184, .246, .529))
   })
   
 test_that("one dimension, estimator maximum_aposteriori, no constraints on item selection, 100 replications per condition", {
