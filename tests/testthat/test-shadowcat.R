@@ -1074,7 +1074,7 @@ if (FALSE) {
     estimator_vec <- "maximum_likelihood"
     information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace")  # "posterior_expected_kullback_leibler" 
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions)    
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound)    
     
     conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
     
@@ -1101,33 +1101,33 @@ if (FALSE) {
     sd_theta3_nitems200 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3 & estimates_and_conditions[,"number_items"] == 200), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 3 & estimates_and_conditions[,"number_items"] == 200)]), "sd")
        
     # five number summary of average theta estimate per condition, with true theta is -2 and 50 items
-    expect_equal(round(fivenum(average_thetaminus2_nitems50[,"x"]), 3), c(-2.146, -2.070, -2.042, -2.015, -1.976))
+    expect_equal(round(fivenum(average_thetaminus2_nitems50[,"x"]), 3), c(-2.159, -2.095, -2.048, -2.020, -1.979))
     # five number summary of average theta estimate per condition, with true theta is 1 and 50 items
-    expect_equal(round(fivenum(average_theta1_nitems50[,"x"]), 3), c(.970, .995, 1.031, 1.057, 1.090))
+    expect_equal(round(fivenum(average_theta1_nitems50[,"x"]), 3), c(.969, .995, 1.028, 1.063, 1.108))
     # five number summary of average theta estimate per condition, with true theta is 3 and 50 items
-    expect_equal(round(fivenum(average_theta3_nitems50[,"x"]), 3), c(2.738, 2.793, 2.819, 2.870, 2.894))
+    expect_equal(round(fivenum(average_theta3_nitems50[,"x"]), 3), c(2.984, 3.032, 3.102, 3.203, 3.340))
     # five number summary of average theta estimate per condition, with true theta is -2 and 200 items
-    expect_equal(round(fivenum(average_thetaminus2_nitems200[,"x"]), 3), c(-2.056, -2.032, -2.011, -1.996, -1.963))
+    expect_equal(round(fivenum(average_thetaminus2_nitems200[,"x"]), 3), c(-2.059, -2.031, -2.010, -2.001, -1.975))
     # five number summary of average theta estimate per condition, with true theta is 1 and 200 items
-    expect_equal(round(fivenum(average_theta1_nitems200[,"x"]), 3), c(.971, .991, 1.004, 1.014, 1.030))
+    expect_equal(round(fivenum(average_theta1_nitems200[,"x"]), 3), c(.958, .991, 1.003, 1.015, 1.037))
     # five number summary of average theta estimate per condition, with true theta is 3 and 200 items
-    expect_equal(round(fivenum(average_theta3_nitems200[,"x"]), 3), c(2.849, 2.882, 2.900, 2.935, 2.953))
+    expect_equal(round(fivenum(average_theta3_nitems200[,"x"]), 3), c(2.980, 3.004, 3.019, 3.031, 3.094))
     
     # five number summary of observed sd of the theta estimates within each condition, with true theta is -2 en 50 items
-    expect_equal(round(fivenum(sd_thetaminus2_nitems50[,"x"]), 3), c(.235, .298, .430, .470, .519))
+    expect_equal(round(fivenum(sd_thetaminus2_nitems50[,"x"]), 3), c(.238, .291, .454, .512, .617))
     # five number summary of observed sd of the theta estimates within each condition, with true theta is 1 en 50 items
-    expect_equal(round(fivenum(sd_theta1_nitems50[,"x"]), 3), c(.228, .262, .344, .380, .453))
+    expect_equal(round(fivenum(sd_theta1_nitems50[,"x"]), 3), c(.228, .258, .350, .381, .452))
     # five number summary of observed sd of the theta estimates within each condition, with true theta is 3 en 50 items
-    expect_equal(round(fivenum(sd_theta3_nitems50[,"x"]), 3), c(.158, .193, .271, .301, .355))
+    expect_equal(round(fivenum(sd_theta3_nitems50[,"x"]), 3), c(.304, .367, .694, .777, .901))
     # five number summary of observed sd of the theta estimates within each condition, with true theta is -2 en 200 items
-    expect_equal(round(fivenum(sd_thetaminus2_nitems200[,"x"]), 3), c(.120, .140, .215, .236, .260))
+    expect_equal(round(fivenum(sd_thetaminus2_nitems200[,"x"]), 3), c(.118, .145, .221, .239, .271))
     # five number summary of observed sd of the theta estimates within each condition, with true theta is 1 en 200 items
-    expect_equal(round(fivenum(sd_theta1_nitems200[,"x"]), 3), c(.106, .122, .168, .183, .197))
+    expect_equal(round(fivenum(sd_theta1_nitems200[,"x"]), 3), c(.106, .121, .169, .183, .201))
     # five number summary of observed sd of the theta estimates within each condition, with true theta is 3 en 200 items
-    expect_equal(round(fivenum(sd_theta3_nitems200[,"x"]), 3), c(.076, .098, .147, .171, .191))
+    expect_equal(round(fivenum(sd_theta3_nitems200[,"x"]), 3), c(.136, .173, .311, .339, .369))
         
     # five number summary of reported sd of the theta estimate within each condition where number of items is 50 and 200, respectively
-    expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 50), "variance_estimate"])), 3), c(.198, .312, .376, .504, 18023.042))
+    expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 50), "variance_estimate"])), 3), c(.198, .312, .376, .506, 18991.320))
     expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 200), "variance_estimate"])), 3), c(.105, .156, .184, .246, .529))
   })
   
