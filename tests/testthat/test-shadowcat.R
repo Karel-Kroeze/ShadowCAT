@@ -1133,8 +1133,8 @@ if (FALSE) {
   
 test_that("one dimension, estimator maximum_aposteriori, no constraints on item selection, 100 replications per condition", {
   replications_per_unique_condition <- 100
-  true_theta_vec <- c(-2, 1)
-  number_items_vec <- c(50, 100)
+  true_theta_vec <- c(-2, 1, 3)
+  number_items_vec <- c(50, 200)
   number_answer_categories_vec <- c(2, 4)
   number_dimensions <- 1
   
@@ -1143,8 +1143,11 @@ test_that("one dimension, estimator maximum_aposteriori, no constraints on item 
   model_vec <- c("3PLM","GRM","GPCM","SM")
   estimator_vec <- "maximum_aposteriori"
   information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler")
+  lowerbound <- -20
+  upperbound <- 20
+  prior <- diag(1) * 9
   
-  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions)
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound, prior = prior)
   
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
   condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/replications_per_unique_condition), replications_per_unique_condition))
