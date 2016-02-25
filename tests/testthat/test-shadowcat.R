@@ -1128,7 +1128,7 @@ if (FALSE) {
         
     # five number summary of reported sd of the theta estimate within each condition where number of items is 50 and 200, respectively
     expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 50), "variance_estimate"])), 3), c(.198, .312, .376, .506, 18991.320))
-    expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 200), "variance_estimate"])), 3), c(.105, .156, .184, .246, .529))
+    expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 200), "variance_estimate"])), 3), c(.105, .156, .183, .246, .571))
   })
   
 test_that("one dimension, estimator maximum_aposteriori, no constraints on item selection, 100 replications per condition", {
