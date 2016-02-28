@@ -1131,7 +1131,7 @@ if (FALSE) {
     expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 200), "variance_estimate"])), 3), c(.105, .156, .183, .246, .571))
   })
   
-test_that("one dimension, estimator maximum_aposteriori, no constraints on item selection, 100 replications per condition", {
+test_that("one dimension, estimator maximum_aposteriori, 100 replications per condition", {
   replications_per_unique_condition <- 100
   true_theta_vec <- c(-2, 1, 3)
   number_items_vec <- c(50, 200)
@@ -1205,10 +1205,10 @@ test_that("one dimension, estimator maximum_aposteriori, no constraints on item 
   expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 200), "variance_estimate"])), 3), c(.105, .156, .183, .243, .531))
 })
 
-test_that("one dimension, estimator expected_aposteriori, no constraints on item selection, 100 replications per condition", {
+test_that("one dimension, estimator expected_aposteriori, 100 replications per condition", {
   replications_per_unique_condition <- 100
-  true_theta_vec <- c(-2, 1)
-  number_items_vec <- c(100, 300)
+  true_theta_vec <- c(-2, 1, 3)
+  number_items_vec <- c(50, 200)
   number_answer_categories_vec <- c(2, 4)
   number_dimensions <- 1
   
@@ -1217,33 +1217,64 @@ test_that("one dimension, estimator expected_aposteriori, no constraints on item
   model_vec <- c("3PLM","GRM","GPCM","SM")
   estimator_vec <- "expected_aposteriori"
   information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler")
-  
-  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions)
+  lowerbound <- -20
+  upperbound <- 20
+  prior <- diag(1) * 9  
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound, prior = prior)
   
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
+  
   condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/replications_per_unique_condition), replications_per_unique_condition))
   
-  estimates_and_conditions <- cbind(t(estimates_and_variance), conditions[, c("true_theta", "replication", "number_items", "number_answer_categories", "model", "estimator", "information_summary")], condition_vector)
+  estimates_and_conditions <- cbind(t(estimates_and_variance)[, c("estimated_theta", "variance_estimate")], 
+                                    conditions[, c("true_theta", "replication", "number_items", "number_answer_categories", "model", "estimator", "information_summary")], 
+                                    condition_vector)
   
-  average_per_condition_true_minus2 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == -2), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == -2)]), "mean")
-  sd_per_condition_true_minus2 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == -2), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == -2)]), "sd")
+  average_thetaminus2_nitems50 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == -2 & estimates_and_conditions[,"number_items"] == 50), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == -2 & estimates_and_conditions[,"number_items"] == 50)]), "mean")
+  average_theta1_nitems50 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 1 & estimates_and_conditions[,"number_items"] == 50), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 1 & estimates_and_conditions[,"number_items"] == 50)]), "mean")
+  average_theta3_nitems50 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3 & estimates_and_conditions[,"number_items"] == 50), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 3 & estimates_and_conditions[,"number_items"] == 50)]), "mean")
   
-  average_per_condition_true_1 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 1), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 1)]), "mean")
-  sd_per_condition_true_1 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 1), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 1)]), "sd") 
+  sd_thetaminus2_nitems50 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == -2 & estimates_and_conditions[,"number_items"] == 50), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == -2 & estimates_and_conditions[,"number_items"] == 50)]), "sd")
+  sd_theta1_nitems50 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 1 & estimates_and_conditions[,"number_items"] == 50), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 1 & estimates_and_conditions[,"number_items"] == 50)]), "sd")
+  sd_theta3_nitems50 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3 & estimates_and_conditions[,"number_items"] == 50), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 3 & estimates_and_conditions[,"number_items"] == 50)]), "sd")
   
-  # five number summary of average theta estimate per condition, with true theta is -2
-  expect_equal(round(fivenum(average_per_condition_true_minus2[,"x"]), 3), c(-1.669, -1.537, -1.363, -1.265, -1.170))
-  # five number summary of average theta estimate per condition, with true theta is 1
-  expect_equal(round(fivenum(average_per_condition_true_1[,"x"]), 3), c(1.286, 1.388, 1.537, 1.666, 1.757))
+  average_thetaminus2_nitems200 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == -2 & estimates_and_conditions[,"number_items"] == 200), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == -2 & estimates_and_conditions[,"number_items"] == 200)]), "mean")
+  average_theta1_nitems200 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 1 & estimates_and_conditions[,"number_items"] == 200), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 1 & estimates_and_conditions[,"number_items"] == 200)]), "mean")
+  average_theta3_nitems200 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3 & estimates_and_conditions[,"number_items"] == 200), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 3 & estimates_and_conditions[,"number_items"] == 200)]), "mean")
   
-  # five number summary of observed sd of the theta estimates within each condition, with true theta is -2
-  expect_equal(round(fivenum(sd_per_condition_true_minus2[,"x"]), 3), c(.305, .355, .385, .407, .452))  
-  # five number summary of observed sd of the theta estimates within each condition, with true theta is 1
-  expect_equal(round(fivenum(sd_per_condition_true_1[,"x"]), 3), c(.262, .349, .425, .486, .551))  
+  sd_thetaminus2_nitems200 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == -2 & estimates_and_conditions[,"number_items"] == 200), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == -2 & estimates_and_conditions[,"number_items"] == 200)]), "sd")
+  sd_theta1_nitems200 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 1 & estimates_and_conditions[,"number_items"] == 200), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 1 & estimates_and_conditions[,"number_items"] == 200)]), "sd")
+  sd_theta3_nitems200 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3 & estimates_and_conditions[,"number_items"] == 200), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 3 & estimates_and_conditions[,"number_items"] == 200)]), "sd")
   
-  # five number summary of reported sd of the theta estimate within each condition where max number of items is 50 and 100, respectively
-  expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 50), "variance_estimate"])), 3), c(.044, .098, .098, .099, .129))
-  expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 100), "variance_estimate"])), 3), c(.054, .097, .098, .099, .100))  
+  # five number summary of average theta estimate per condition, with true theta is -2 and 50 items
+  expect_equal(round(fivenum(average_thetaminus2_nitems50[,"x"]), 3), c(-2.168, -2.096, -2.049, -2.008, -1.947))
+  # five number summary of average theta estimate per condition, with true theta is 1 and 50 items
+  expect_equal(round(fivenum(average_theta1_nitems50[,"x"]), 3), c(.960, .994, 1.029, 1.059, 1.127))
+  # five number summary of average theta estimate per condition, with true theta is 3 and 50 items
+  expect_equal(round(fivenum(average_theta3_nitems50[,"x"]), 3), c(2.959, 3.013, 3.086, 3.148, 3.247))
+  # five number summary of average theta estimate per condition, with true theta is -2 and 200 items
+  expect_equal(round(fivenum(average_thetaminus2_nitems200[,"x"]), 3), c(-2.059, -2.030, -2.004, -1.992, -1.976))
+  # five number summary of average theta estimate per condition, with true theta is 1 and 200 items
+  expect_equal(round(fivenum(average_theta1_nitems200[,"x"]), 3), c(.972, .990, 1.002, 1.016, 1.039))
+  # five number summary of average theta estimate per condition, with true theta is 3 and 200 items
+  expect_equal(round(fivenum(average_theta3_nitems200[,"x"]), 3), c(2.976, 2.998, 3.019, 3.038, 3.122))
+  
+  # five number summary of observed sd of the theta estimates within each condition, with true theta is -2 en 50 items
+  expect_equal(round(fivenum(sd_thetaminus2_nitems50[,"x"]), 3), c(.242, .304, .427, .507, .569))
+  # five number summary of observed sd of the theta estimates within each condition, with true theta is 1 en 50 items
+  expect_equal(round(fivenum(sd_theta1_nitems50[,"x"]), 3), c(.228, .256, .357, .371, .460))
+  # five number summary of observed sd of the theta estimates within each condition, with true theta is 3 en 50 items
+  expect_equal(round(fivenum(sd_theta3_nitems50[,"x"]), 3), c(.301, .358, .629, .683, .800))
+  # five number summary of observed sd of the theta estimates within each condition, with true theta is -2 en 200 items
+  expect_equal(round(fivenum(sd_thetaminus2_nitems200[,"x"]), 3), c(.121, .142, .220, .239, .274))
+  # five number summary of observed sd of the theta estimates within each condition, with true theta is 1 en 200 items
+  expect_equal(round(fivenum(sd_theta1_nitems200[,"x"]), 3), c(.105, .132, .170, .178, .199))
+  # five number summary of observed sd of the theta estimates within each condition, with true theta is 3 en 200 items
+  expect_equal(round(fivenum(sd_theta3_nitems200[,"x"]), 3), c(.138, .171, .301, .330, .359))
+  
+  # five number summary of reported sd of the theta estimate within each condition where number of items is 50 and 200, respectively
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 50), "variance_estimate"])), 3), c(.198, .311, .376, .500, 1.557))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 200), "variance_estimate"])), 3), c(.105, .156, .183, .246, .543))
 })
 
 test_that("three dimensions, maximum_likelihood, information summary D, PD, A, and PA, no constraints on item selection, 100 replications per condition", {
