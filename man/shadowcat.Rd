@@ -3,17 +3,19 @@
 \name{shadowcat}
 \alias{shadowcat}
 \title{Returns a list with the key of the next item to be administered given a new response,
-an updated estimate of theta, and the responses to the administered items}
+an updated estimate of theta, updated covariance matrix of theta converted to a vector, and the responses to the administered items}
 \usage{
-shadowcat(responses, estimate, model, alpha, beta, start_items, stop_test,
-  estimator, information_summary, prior = NULL, guessing = NULL,
+shadowcat(responses, estimate, variance, model, alpha, beta, start_items,
+  stop_test, estimator, information_summary, prior = NULL, guessing = NULL,
   eta = NULL, constraints_and_characts = NULL, lower_bound = rep(-3,
   ncol(alpha)), upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL)
 }
 \arguments{
 \item{responses}{named list of previous responses and new response, with names being the item keys; should be initialized with NULL}
 
-\item{estimate}{estimate of latent trait theta, with covariance matrix as its attribute}
+\item{estimate}{vector with estimate of latent trait theta}
+
+\item{variance}{(co)variance matrix of the estimate, as vector}
 
 \item{model}{String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
 
@@ -77,10 +79,10 @@ See constraints_lp_format() for details}
 }
 \value{
 a list containing the key of the next item to be administered given a new response (or "stop_test"), 
-updated estimate of theta, and the responses to the administered items (named list)
+updated estimate of theta, updated covariance matrix of theta converted to a vector, and the responses to the administered items (named list)
 }
 \description{
 Returns a list with the key of the next item to be administered given a new response,
-an updated estimate of theta, and the responses to the administered items
+an updated estimate of theta, updated covariance matrix of theta converted to a vector, and the responses to the administered items
 }
 

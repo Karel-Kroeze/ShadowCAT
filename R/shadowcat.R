@@ -1,8 +1,9 @@
 #' Returns a list with the key of the next item to be administered given a new response,
-#' an updated estimate of theta, and the responses to the administered items
+#' an updated estimate of theta, updated covariance matrix of theta converted to a vector, and the responses to the administered items
 #'
 #' @param responses named list of previous responses and new response, with names being the item keys; should be initialized with NULL
-#' @param estimate estimate of latent trait theta, with covariance matrix as its attribute
+#' @param estimate vector with estimate of latent trait theta
+#' @param variance (co)variance matrix of the estimate, as vector
 #' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param alpha Matrix of alpha parameters, one column per dimension, one row per item. Row names should contain the item keys. Note that so called within-dimensional models still use an alpha matrix, they simply 
 #' have only one non-zero loading per item.
@@ -50,9 +51,9 @@
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
 #' @param prior_var_safe_ml if not NULL, expected a posteriori estimate with prior variance equal to prior_var_safe_ml (scalar or vector) is computed instead of maximum likelihood/maximum a posteriori, if maximum likelihood/maximum a posteriori estimate fails
 #' @return a list containing the key of the next item to be administered given a new response (or "stop_test"), 
-#' updated estimate of theta, and the responses to the administered items (named list)
+#' updated estimate of theta, updated covariance matrix of theta converted to a vector, and the responses to the administered items (named list)
 #' @export
-shadowcat <- function(responses, estimate, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior = NULL, guessing = NULL, eta = NULL, constraints_and_characts = NULL, lower_bound = rep(-3, ncol(alpha)), upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL) {      
+shadowcat <- function(responses, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior = NULL, guessing = NULL, eta = NULL, constraints_and_characts = NULL, lower_bound = rep(-3, ncol(alpha)), upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL) {      
   result <- function() {
     beta <- get_beta(model, beta, eta)
     guessing <- get_guessing(guessing, beta) 
@@ -63,6 +64,7 @@ shadowcat <- function(responses, estimate, model, alpha, beta, start_items, stop
     item_keys <- rownames(alpha)
     item_keys_administered <- names(responses)
     item_keys_available <- get_item_keys_available(item_keys_administered, item_keys)
+    attr(estimate, "variance") <- matrix(variance, ncol = number_dimensions)
     
     estimate <- update_person_estimate(estimate, unlist(responses), match(item_keys_administered, item_keys), number_dimensions, alpha, beta, guessing, number_itemsteps_per_item)
     continue_test <- !test_must_stop(length(responses), estimate, stop_test$min_n, stop_test$max_n, stop_test$target, stop_test$cutoffs)
@@ -74,8 +76,9 @@ shadowcat <- function(responses, estimate, model, alpha, beta, start_items, stop
       key_new_item <- "stop_test"
     }
     
-    list(key_new_item = key_new_item,
-         estimate = estimate,
+    list(key_new_item = as.scalar2(key_new_item),
+         estimate = as.vector(estimate),
+         variance = as.vector(attr(estimate, "variance")),
          responses = responses)
   }
   
@@ -97,8 +100,8 @@ shadowcat <- function(responses, estimate, model, alpha, beta, start_items, stop
   validate <- function() {
     if (is.null(estimate))
       return(add_error("estimate", "is missing"))
-    if (is.null(attr(estimate, "variance")))
-      return(add_error("variance", "is missing as an attribute of estimate"))
+    if (is.null(variance))
+      return(add_error("variance", "is missing"))
     if (is.null(model))
       return(add_error("model", "is missing"))
     if (is.null(alpha))
@@ -171,3 +174,4 @@ get_guessing <- function(guessing, beta) {
   else
     guessing
 }
+

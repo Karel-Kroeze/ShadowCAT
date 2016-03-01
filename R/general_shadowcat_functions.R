@@ -1,3 +1,14 @@
+#' Return as a scalar
+#' NULL -> NA
+#'
+#' @param obj Any object
+#' @return NA (if NULL) or obj as a scalar
+#' @export
+as.scalar2 <- function(obj){
+  if (is.null(obj)) obj <- NA
+  return(structure(obj, class=c("scalar",class(obj))))
+}
+
 #' transform categorical vector into dummy variables
 #' 
 #' @param unique_values a vector containing the unique values of the categorical vector

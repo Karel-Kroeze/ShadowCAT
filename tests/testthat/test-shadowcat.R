@@ -59,16 +59,16 @@ make_random_seed_exist <- rnorm(1)
 test_shadowcat <- function(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints_and_characts = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL, initital_estimate = rep(0, ncol(alpha)), initial_variance = prior) {
   item_keys <- rownames(alpha)
   responses <- NULL
-  attr(initital_estimate, 'variance') <- initial_variance
-  next_item_and_test_outcome <- shadowcat(responses, estimate = initital_estimate, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta, constraints_and_characts, lowerbound, upperbound, prior_var_safe_ml)
+  next_item_and_test_outcome <- shadowcat(responses, estimate = initital_estimate, variance = as.vector(initial_variance), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta, constraints_and_characts, lowerbound, upperbound, prior_var_safe_ml)
 
   while (next_item_and_test_outcome$key_new_item != "stop_test") {
     new_response <- simulate_answer(true_theta, model, ncol(alpha), estimator, alpha, beta, guessing, ncol(beta), match(next_item_and_test_outcome$key_new_item, item_keys))
     next_item_and_test_outcome$responses[[next_item_and_test_outcome$key_new_item]] <- new_response
     next_item_and_test_outcome$responses <- as.list(next_item_and_test_outcome$responses)
-    next_item_and_test_outcome <- shadowcat(next_item_and_test_outcome$responses, next_item_and_test_outcome$estimate, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior,  guessing, eta, constraints_and_characts, lowerbound, upperbound, prior_var_safe_ml)  
+    next_item_and_test_outcome <- shadowcat(next_item_and_test_outcome$responses, next_item_and_test_outcome$estimate, next_item_and_test_outcome$variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior,  guessing, eta, constraints_and_characts, lowerbound, upperbound, prior_var_safe_ml)  
   }
   
+  attr(next_item_and_test_outcome$estimate, "variance") <- matrix(next_item_and_test_outcome$variance, ncol = ncol(alpha))
   next_item_and_test_outcome
 }
 
@@ -784,38 +784,37 @@ test_that("invalid input", {
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
   estimate <- .3
-  attr(estimate, "variance") <- .5
-  estimate_without_attr <- .3
+  variance <- .5
   
-  error_message_estimate <- shadowcat(responses = NULL, estimate = NULL, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
-  error_message_variance <- shadowcat(responses = NULL, estimate_without_attr, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
-  error_message_model <- shadowcat(responses = NULL, estimate, model = NULL, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
-  error_message_alpha <- shadowcat(responses = NULL, estimate, model, alpha = NULL, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
-  error_message_start_items <- shadowcat(responses = NULL, estimate, model, alpha, beta, start_items = NULL, stop_test, estimator, information_summary, prior, guessing, eta)
-  error_message_stop_test <- shadowcat(responses = NULL, estimate, model, alpha, beta, start_items, stop_test = NULL, estimator, information_summary, prior, guessing, eta)
-  error_message_estimator <- shadowcat(responses = NULL, estimate, model, alpha, beta, start_items, stop_test, estimator = NULL, information_summary, prior, guessing, eta)
-  error_message_information_summary <- shadowcat(responses = NULL, estimate, model, alpha, beta, start_items, stop_test, estimator, information_summary = NULL, prior, guessing, eta)
-  error_message_alpha_matrix <- shadowcat(responses = NULL, estimate, model, alpha = 1:10, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
-  error_message_alpha_rownames <- shadowcat(responses = NULL, estimate, model, alpha = matrix(1:10), beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
-  error_message_beta_matrix <- shadowcat(responses = NULL, estimate, model, alpha, beta = 1:10, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
-  error_message_beta_rownames <- shadowcat(responses = NULL, estimate, model, alpha, beta = matrix(1:10), start_items, stop_test, estimator, information_summary, prior, guessing, eta)
-  error_message_eta_matrix <- shadowcat(responses = NULL, estimate, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta = 1:10)
-  error_message_eta_rownames <- shadowcat(responses = NULL, estimate, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta = matrix(1:10))
-  error_message_guessing_matrix <- shadowcat(responses = NULL, estimate, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing = 1:10, eta)
-  error_message_guessing_rownames <- shadowcat(responses = NULL, estimate, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing = matrix(1:10), eta)
-  error_message_guessing_ncol <- shadowcat(responses = NULL, estimate, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing = matrix(1:10, ncol = 2, dimnames = list(c("a", "b", "c", "d", "e"), NULL)), eta)
-  error_message_unequal_rownames <- shadowcat(responses = NULL, estimate, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing = matrix(1:300, ncol = 1, dimnames = list(str_c("it", 1:300), NULL)), eta)
-  error_message_beta <- shadowcat(responses = NULL, estimate, model, alpha, beta = NULL, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
-  error_message_beta_theta <- shadowcat(responses = NULL, estimate, model = "GPCM", alpha, beta = NULL, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
-  error_message_beta_theta_mismatch <- shadowcat(responses = NULL, estimate, model = "GPCM", alpha, beta = cbind(beta, beta + .1), start_items, stop_test, estimator, information_summary, prior, guessing, eta = cbind(beta, beta + .1))
-  error_message_prior1 <- shadowcat(responses = NULL, estimate, model = "GPCM", alpha, beta, start_items, stop_test, estimator, information_summary = "determinant", prior = NULL, guessing, eta)
-  error_message_prior2 <- shadowcat(responses = NULL, estimate, model = "GPCM", alpha, beta, start_items, stop_test, estimator = "maximum_likelihood", information_summary = "posterior_trace", prior = NULL, guessing, eta)
-  error_message_max_n <- shadowcat(responses = NULL, estimate, model = "GPCM", alpha, beta, start_items, stop_test = list("variance" = .6), estimator, information_summary, prior, guessing, eta)
-  error_message_start_items_0 <- shadowcat(responses = NULL, estimate, model = "GPCM", alpha, beta, start_items = list(n = 0), stop_test, estimator, information_summary = "posterior_expected_kullback_leibler", prior, guessing, eta)
-  error_message_cutoffs <- shadowcat(responses = NULL, estimate, model = "GPCM", alpha, beta, start_items, stop_test = list(max_n = 70, cutoffs = 1:70), estimator, information_summary, prior, guessing, eta)
+  error_message_estimate <- shadowcat(responses = NULL, estimate = NULL, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_variance <- shadowcat(responses = NULL, estimate, variance = NULL, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_model <- shadowcat(responses = NULL, estimate, variance, model = NULL, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_alpha <- shadowcat(responses = NULL, estimate, variance, model, alpha = NULL, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_start_items <- shadowcat(responses = NULL, estimate, variance, model, alpha, beta, start_items = NULL, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_stop_test <- shadowcat(responses = NULL, estimate, variance, model, alpha, beta, start_items, stop_test = NULL, estimator, information_summary, prior, guessing, eta)
+  error_message_estimator <- shadowcat(responses = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator = NULL, information_summary, prior, guessing, eta)
+  error_message_information_summary <- shadowcat(responses = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary = NULL, prior, guessing, eta)
+  error_message_alpha_matrix <- shadowcat(responses = NULL, estimate, variance, model, alpha = 1:10, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_alpha_rownames <- shadowcat(responses = NULL, estimate, variance, model, alpha = matrix(1:10), beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_beta_matrix <- shadowcat(responses = NULL, estimate, variance, model, alpha, beta = 1:10, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_beta_rownames <- shadowcat(responses = NULL, estimate, variance, model, alpha, beta = matrix(1:10), start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_eta_matrix <- shadowcat(responses = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta = 1:10)
+  error_message_eta_rownames <- shadowcat(responses = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta = matrix(1:10))
+  error_message_guessing_matrix <- shadowcat(responses = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing = 1:10, eta)
+  error_message_guessing_rownames <- shadowcat(responses = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing = matrix(1:10), eta)
+  error_message_guessing_ncol <- shadowcat(responses = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing = matrix(1:10, ncol = 2, dimnames = list(c("a", "b", "c", "d", "e"), NULL)), eta)
+  error_message_unequal_rownames <- shadowcat(responses = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing = matrix(1:300, ncol = 1, dimnames = list(str_c("it", 1:300), NULL)), eta)
+  error_message_beta <- shadowcat(responses = NULL, estimate, variance, model, alpha, beta = NULL, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_beta_theta <- shadowcat(responses = NULL, estimate, variance, model = "GPCM", alpha, beta = NULL, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_beta_theta_mismatch <- shadowcat(responses = NULL, estimate, variance, model = "GPCM", alpha, beta = cbind(beta, beta + .1), start_items, stop_test, estimator, information_summary, prior, guessing, eta = cbind(beta, beta + .1))
+  error_message_prior1 <- shadowcat(responses = NULL, estimate, variance, model = "GPCM", alpha, beta, start_items, stop_test, estimator, information_summary = "determinant", prior = NULL, guessing, eta)
+  error_message_prior2 <- shadowcat(responses = NULL, estimate, variance, model = "GPCM", alpha, beta, start_items, stop_test, estimator = "maximum_likelihood", information_summary = "posterior_trace", prior = NULL, guessing, eta)
+  error_message_max_n <- shadowcat(responses = NULL, estimate, variance, model = "GPCM", alpha, beta, start_items, stop_test = list("variance" = .6), estimator, information_summary, prior, guessing, eta)
+  error_message_start_items_0 <- shadowcat(responses = NULL, estimate, variance, model = "GPCM", alpha, beta, start_items = list(n = 0), stop_test, estimator, information_summary = "posterior_expected_kullback_leibler", prior, guessing, eta)
+  error_message_cutoffs <- shadowcat(responses = NULL, estimate, variance, model = "GPCM", alpha, beta, start_items, stop_test = list(max_n = 70, cutoffs = 1:70), estimator, information_summary, prior, guessing, eta)
   
   expect_equal(error_message_estimate$errors$estimate, "is missing")
-  expect_equal(error_message_variance$errors$variance, "is missing as an attribute of estimate")
+  expect_equal(error_message_variance$errors$variance, "is missing")
   expect_equal(error_message_model$errors$model, "is missing")
   expect_equal(error_message_alpha$errors$alpha, "is missing")
   expect_equal(error_message_start_items$errors$start_items, "is missing")
