@@ -1389,11 +1389,10 @@ test_that("three dimensions, maximum_aposteriori, no constraints on item selecti
   expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.161, .213, .288, .314, .760)) 
 })
 
-test_that("three dimensions, expected_aposteriori, no constraints on item selection, 100 replications per condition", {
-  # To be run yet
+test_that("three dimensions, expected_aposteriori, 100 replications per condition", {
   replications_per_unique_condition <- 100 
-  true_theta_vec <- c(-2, 1, 2)
-  number_items_vec <- c(300)
+  true_theta_vec <- c(-2, 1, 3)
+  number_items_vec <- 300
   number_answer_categories_vec <- c(2, 4)
   number_dimensions <- 3
   
@@ -1402,8 +1401,11 @@ test_that("three dimensions, expected_aposteriori, no constraints on item select
   model_vec <- c("3PLM","GRM","GPCM","SM")
   estimator_vec <- "expected_aposteriori"
   information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler")
+  lowerbound <- -20
+  upperbound <- 20
+  prior <- diag(number_dimensions) * 9 
   
-  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions)
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound, prior = prior)
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
   
   condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/replications_per_unique_condition), replications_per_unique_condition))
@@ -1420,24 +1422,22 @@ test_that("three dimensions, expected_aposteriori, no constraints on item select
   sd_per_condition_dim2 <- aggregate(estimates_and_conditions[, "estimated_theta2"], list(condition_vector), "sd", na.rm = TRUE)
   sd_per_condition_dim3 <- aggregate(estimates_and_conditions[, "estimated_theta3"], list(condition_vector), "sd", na.rm = TRUE)
   
-  number_na_per_condition <- aggregate(estimates_and_conditions[, "estimated_theta1"], list(condition_vector), FUN = function(x) { sum(is.na(x)) })
-  
   # five number summary of average theta estimate per condition, dimension 1 (true theta is -2)
-  expect_equal(round(fivenum(average_per_condition_dim1[,"x"]), 3), )
+  expect_equal(round(fivenum(average_per_condition_dim1[,"x"]), 3), c(-2.113, -2.043, -2.023, -2.002, -1.961))
   # five number summary of average theta estimate per condition, dimension 2 (true theta is 1)
-  expect_equal(round(fivenum(average_per_condition_dim2[,"x"]), 3), )
+  expect_equal(round(fivenum(average_per_condition_dim2[,"x"]), 3), c(.963, .995, 1.005, 1.026, 1.057))
   # five number summary of average theta estimate per condition, dimension 3 (true theta is 2)
-  expect_equal(round(fivenum(average_per_condition_dim3[,"x"]), 3), )
+  expect_equal(round(fivenum(average_per_condition_dim3[,"x"]), 3), c(2.957, 2.996, 3.027, 3.068, 3.197))
   
   # five number summary of observed sd of the theta estimates within each condition, for dimension 1, 2, and 3, respectively
-  expect_equal(round(fivenum(sd_per_condition_dim1[,"x"]), 3), )
-  expect_equal(round(fivenum(sd_per_condition_dim2[,"x"]), 3), )
-  expect_equal(round(fivenum(sd_per_condition_dim3[,"x"]), 3), )
+  expect_equal(round(fivenum(sd_per_condition_dim1[,"x"]), 3), c(.179, .207, .325, .339, .444))
+  expect_equal(round(fivenum(sd_per_condition_dim2[,"x"]), 3), c(.145, .184, .239, .272, .339))
+  expect_equal(round(fivenum(sd_per_condition_dim3[,"x"]), 3), c(.228, .268, .432, .481, .661))
   
   # five number summary of reported sd of the theta estimate within each condition, for dimension 1, 2, and 3, respectively
-  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate1"])), 3), )
-  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), )
-  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), )
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate1"])), 3), c(.007, .209, .298, .334, .677))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), c(.012, .186, .242, .258, .343))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.055, .251, .399, .467, 1.025))
 })
 
   test_that("test prior_var_safe_ml is 100", {
