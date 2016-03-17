@@ -74,10 +74,11 @@ shadowcat <- function(responses, estimate, variance, model, alpha, beta, start_i
       key_new_item <- item_keys[index_new_item]
     }
     else {
-      key_new_item <- "stop_test"
+      key_new_item <- NULL
     }
     
     list(key_new_item = as.scalar2(key_new_item),
+         continue_test = as.scalar2(continue_test),
          estimate = as.vector(estimate),
          variance = as.vector(attr(estimate, "variance")),
          responses = responses)

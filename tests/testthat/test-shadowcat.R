@@ -61,7 +61,7 @@ test_shadowcat <- function(true_theta, prior, model, alpha, beta, guessing, eta,
   item_keys <- rownames(alpha)
   responses <- NULL
   next_item_and_test_outcome <- shadowcat(responses, estimate = initital_estimate, variance = as.vector(initial_variance), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta, constraints_and_characts, lowerbound, upperbound, prior_var_safe_ml)
-  while (next_item_and_test_outcome$key_new_item != "stop_test") {
+  while (next_item_and_test_outcome$continue_test) {
     new_response <- simulate_answer(true_theta, model, ncol(alpha), estimator, alpha, beta, guessing, ncol(beta), match(next_item_and_test_outcome$key_new_item, item_keys))
     next_item_and_test_outcome$responses[[next_item_and_test_outcome$key_new_item]] <- new_response
     next_item_and_test_outcome$responses <- as.list(next_item_and_test_outcome$responses)
