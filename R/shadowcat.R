@@ -52,6 +52,7 @@
 #' @param prior_var_safe_ml if not NULL, expected a posteriori estimate with prior variance equal to prior_var_safe_ml (scalar or vector) is computed instead of maximum likelihood/maximum a posteriori, if maximum likelihood/maximum a posteriori estimate fails
 #' @return a list containing the key of the next item to be administered given a new response (or "stop_test"), 
 #' updated estimate of theta, updated covariance matrix of theta converted to a vector, and the responses to the administered items (named list)
+#' @importFrom matrixcalc is.positive.definite
 #' @export
 shadowcat <- function(responses, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior = NULL, guessing = NULL, eta = NULL, constraints_and_characts = NULL, lower_bound = rep(-3, ncol(alpha)), upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL) {      
   result <- function() {
@@ -102,6 +103,10 @@ shadowcat <- function(responses, estimate, variance, model, alpha, beta, start_i
       return(add_error("estimate", "is missing"))
     if (is.null(variance))
       return(add_error("variance", "is missing"))
+    if (!is.vector(variance))
+      return(add_error("variance", "should be entered as vector"))
+    if (sqrt(length(variance)) != round(sqrt(length(variance))))
+      return(add_error("variance", "should be a covariance matrix turned into a vector"))
     if (is.null(model))
       return(add_error("model", "is missing"))
     if (is.null(alpha))
@@ -124,6 +129,12 @@ shadowcat <- function(responses, estimate, variance, model, alpha, beta, start_i
       return(add_error("guessing", "should be a single column matrix with item keys as row names"))
     if (!row_names_are_equal(rownames(alpha), list(alpha, beta, eta, guessing)))
       add_error("alpha_beta_eta_guessing", "should have equal row names, in same order")
+    if (length(estimate) != ncol(alpha))
+      add_error("estimate", "length should be equal to the number of columns of the alpha matrix")
+    if (length(estimate)^2 != length(variance))
+      add_error("variance", "should have a length equal to the length of estimate squared")
+    if (is.null(responses) && !is.positive.definite(matrix(variance, ncol = sqrt(length(variance)))))
+      add_error("variance", "matrix is not positive definite")
     if (model != "GPCM" && is.null(beta))
       add_error("beta", "is missing")
     if (model == "GPCM" && is.null(beta) && is.null(eta))
@@ -138,6 +149,8 @@ shadowcat <- function(responses, estimate, variance, model, alpha, beta, start_i
       add_error("start_items", "requires n > 0 for posterior expected kullback leibler information summary")
     if (!is.null(stop_test$cutoffs) && !is.matrix(stop_test$cutoffs))
       add_error("stop_test", "contains cutoff values in non-matrix format")
+    if (!all(names(responses) %in% rownames(alpha)))
+      add_error("responses", "contains non-existing key")
   }
   
   invalid_result <- function() {

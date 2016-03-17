@@ -17,8 +17,9 @@ Imports:
     Rcpp,
     mvtnorm,
     MultiGHQuad,
-    lpSolve
+    lpSolve,
+    matrixcalc
 Suggests:
     testthat (>= 0.8.1),
     stringr
-RoxygenNote: 5.0.0
+RoxygenNote: 5.0.1

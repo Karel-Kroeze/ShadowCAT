@@ -3,6 +3,7 @@
 library(testthat)
 library(pbapply)
 library(stringr)
+library(matrixcalc)
 '
 
 make_random_seed_exist <- rnorm(1)
@@ -56,11 +57,10 @@ make_random_seed_exist <- rnorm(1)
 #' @param initital_estimate vector containing the initial theta estimates (starting values)
 #' @param initial_variance matrix containing the initial covariance matrix (staring values)
 #' @return
-test_shadowcat <- function(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints_and_characts = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL, initital_estimate = rep(0, ncol(alpha)), initial_variance = prior) {
+test_shadowcat <- function(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints_and_characts = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL, initital_estimate = rep(0, ncol(alpha)), initial_variance = diag(ncol(alpha)) * 25) {
   item_keys <- rownames(alpha)
   responses <- NULL
   next_item_and_test_outcome <- shadowcat(responses, estimate = initital_estimate, variance = as.vector(initial_variance), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta, constraints_and_characts, lowerbound, upperbound, prior_var_safe_ml)
-
   while (next_item_and_test_outcome$key_new_item != "stop_test") {
     new_response <- simulate_answer(true_theta, model, ncol(alpha), estimator, alpha, beta, guessing, ncol(beta), match(next_item_and_test_outcome$key_new_item, item_keys))
     next_item_and_test_outcome$responses[[next_item_and_test_outcome$key_new_item]] <- new_response
@@ -225,7 +225,7 @@ test_that("true theta is 2, estimator is maximum_likelihood", {
   estimator <- 'maximum_likelihood'
   information_summary <- 'determinant'
   
-  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior = NULL, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, initial_variance = diag(1))
+  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior = NULL, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), 2.169)
   expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), .129)
@@ -255,7 +255,7 @@ test_that("true theta is 2, estimator is expected_aposteriori", {
   
   prior <- diag(number_dimensions) * 5
   
-  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior = prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, initial_variance = diag(1))
+  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior = prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), 1.833)
   expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), .087)
@@ -323,14 +323,14 @@ test_that("true theta is 1, 0, 2, estimator is maximum_likelihood", {
   estimator <- 'maximum_likelihood'
   information_summary <- 'determinant'
   
-  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior = NULL, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, initial_variance = diag(1))
+  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior = NULL, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.755, -.070, 2.221))
   expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.063, .000, .000))
   expect_equal(length(test_outcome$responses), 300)
   
   # defining prior has no effect on outcome
-  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior = diag(number_dimensions) * 2, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, initial_variance = diag(1))
+  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior = diag(number_dimensions) * 2, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.755, -.070, 2.221))
   expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.063, .000, .000))
@@ -783,11 +783,13 @@ test_that("invalid input", {
   
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
-  estimate <- .3
-  variance <- .5
+  estimate <- rep(.5, number_dimensions)
+  variance <- as.vector(diag(number_dimensions) * 2)
   
   error_message_estimate <- shadowcat(responses = NULL, estimate = NULL, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
   error_message_variance <- shadowcat(responses = NULL, estimate, variance = NULL, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_variance_class <- shadowcat(responses = NULL, estimate, variance = diag(3), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_variance_length <- shadowcat(responses = NULL, estimate, variance = c(2, 2, 2), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta) 
   error_message_model <- shadowcat(responses = NULL, estimate, variance, model = NULL, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
   error_message_alpha <- shadowcat(responses = NULL, estimate, variance, model, alpha = NULL, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
   error_message_start_items <- shadowcat(responses = NULL, estimate, variance, model, alpha, beta, start_items = NULL, stop_test, estimator, information_summary, prior, guessing, eta)
@@ -804,6 +806,9 @@ test_that("invalid input", {
   error_message_guessing_rownames <- shadowcat(responses = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing = matrix(1:10), eta)
   error_message_guessing_ncol <- shadowcat(responses = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing = matrix(1:10, ncol = 2, dimnames = list(c("a", "b", "c", "d", "e"), NULL)), eta)
   error_message_unequal_rownames <- shadowcat(responses = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing = matrix(1:300, ncol = 1, dimnames = list(str_c("it", 1:300), NULL)), eta)
+  error_message_incorrect_dim_estimate <- shadowcat(responses = NULL, estimate = c(.5, .5), variance = as.vector(diag(2)), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_incorrect_dim_variance <- shadowcat(responses = NULL, estimate, variance = as.vector(diag(2)), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
+  error_message_variance_not_positive_definite <- shadowcat(responses = NULL, estimate, variance = as.vector(diag(3)) * -1, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
   error_message_beta <- shadowcat(responses = NULL, estimate, variance, model, alpha, beta = NULL, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
   error_message_beta_theta <- shadowcat(responses = NULL, estimate, variance, model = "GPCM", alpha, beta = NULL, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
   error_message_beta_theta_mismatch <- shadowcat(responses = NULL, estimate, variance, model = "GPCM", alpha, beta = cbind(beta, beta + .1), start_items, stop_test, estimator, information_summary, prior, guessing, eta = cbind(beta, beta + .1))
@@ -812,9 +817,12 @@ test_that("invalid input", {
   error_message_max_n <- shadowcat(responses = NULL, estimate, variance, model = "GPCM", alpha, beta, start_items, stop_test = list("variance" = .6), estimator, information_summary, prior, guessing, eta)
   error_message_start_items_0 <- shadowcat(responses = NULL, estimate, variance, model = "GPCM", alpha, beta, start_items = list(n = 0), stop_test, estimator, information_summary = "posterior_expected_kullback_leibler", prior, guessing, eta)
   error_message_cutoffs <- shadowcat(responses = NULL, estimate, variance, model = "GPCM", alpha, beta, start_items, stop_test = list(max_n = 70, cutoffs = 1:70), estimator, information_summary, prior, guessing, eta)
+  error_message_responses <- shadowcat(responses = list(item1 = 0, item22 = 1, item301 = 0), estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
   
   expect_equal(error_message_estimate$errors$estimate, "is missing")
   expect_equal(error_message_variance$errors$variance, "is missing")
+  expect_equal(error_message_variance_class$errors$variance, "should be entered as vector")
+  expect_equal(error_message_variance_length$errors$variance, "should be a covariance matrix turned into a vector")
   expect_equal(error_message_model$errors$model, "is missing")
   expect_equal(error_message_alpha$errors$alpha, "is missing")
   expect_equal(error_message_start_items$errors$start_items, "is missing")
@@ -831,6 +839,9 @@ test_that("invalid input", {
   expect_equal(error_message_guessing_rownames$errors$guessing, "should be a single column matrix with item keys as row names")
   expect_equal(error_message_guessing_ncol$errors$guessing, "should be a single column matrix with item keys as row names")
   expect_equal(error_message_unequal_rownames$errors$alpha_beta_eta_guessing, "should have equal row names, in same order")
+  expect_equal(error_message_incorrect_dim_estimate$errors$estimate, "length should be equal to the number of columns of the alpha matrix")
+  expect_equal(error_message_incorrect_dim_variance$errors$variance, "should have a length equal to the length of estimate squared")
+  expect_equal(error_message_variance_not_positive_definite$errors$variance, "matrix is not positive definite") 
   expect_equal(error_message_beta$errors$beta, "is missing")
   expect_equal(error_message_beta_theta$errors$beta_and_eta, "are both missing; define at least one of them")
   expect_equal(error_message_beta_theta_mismatch$errors$beta_and_eta, "objects do not match")
@@ -839,6 +850,7 @@ test_that("invalid input", {
   expect_equal(error_message_max_n$errors$stop_test, "contains no max_n")
   expect_equal(error_message_start_items_0$errors$start_items, "requires n > 0 for posterior expected kullback leibler information summary")
   expect_equal(error_message_cutoffs$errors$stop_test, "contains cutoff values in non-matrix format")
+  expect_equal(error_message_responses$errors$responses, "contains non-existing key")
 })
 
 
