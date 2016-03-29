@@ -115,12 +115,11 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
   get_updated_estimate_and_variance_eap <- function(prior) {
     # Multidimensional Gauss-Hermite Quadrature
     # TODO: prior mean is currently fixed at zero, update when/if possible.
-    # TODO: allow setting ip through internals argument(s)
     adapt <- if (length(responses) > 5 & !is.null(attr(estimate, 'variance'))) list(mu = estimate, Sigma = as.matrix(attr(estimate, "variance")))
     Q_dim_grid_quad_points <- init.quad(Q = number_dimensions,
                                         prior = list(mu = rep(0, number_dimensions), Sigma = prior),
                                         adapt = adapt,
-                                        ip = switch(number_dimensions, 50, 15, 6, 4, 3))
+                                        ip = number_gridpoints())
     eval.quad(FUN = likelihood_or_post_density, X = Q_dim_grid_quad_points, responses, model, administered, number_dimensions, estimator = "maximum_likelihood", alpha, beta, guessing)
   }
   
@@ -141,6 +140,13 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
     if (is.null(prior_var_safe_nlm))
       stop("something went wrong with nlm maximization and prior_var_safe_ml was set to NULL")
     get_updated_estimate_and_variance_eap(prior = diag(number_dimensions) * prior_var_safe_nlm)
+  }
+  
+  number_gridpoints <- function() {
+    if (number_dimensions < 5) 
+      switch(number_dimensions, 50, 15, 6, 4)
+    else
+      3
   }
   
   result()
