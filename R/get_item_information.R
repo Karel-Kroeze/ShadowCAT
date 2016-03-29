@@ -1,4 +1,7 @@
-#' Obtain a vector with information for each available item (values of the objective function). 
+#' Obtain a vector with information, summarized into one value, for each available item (values of the objective function).
+#' 
+#' Information of the test so far (including all administered items) is added to the information of the available
+#' item before the summary is computed 
 #'
 #' @param information_summary called "objective" by Kroeze; how to summarize information; one of
 #' "determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k

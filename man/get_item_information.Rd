@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_item_information.R
 \name{get_item_information}
 \alias{get_item_information}
-\title{Obtain a vector with information for each available item (values of the objective function).}
+\title{Obtain a vector with information, summarized into one value, for each available item (values of the objective function).}
 \usage{
 get_item_information(information_summary, estimate, model, responses, prior,
   available, administered, number_items, number_dimensions, estimator, alpha,
@@ -53,6 +53,7 @@ get_item_information(information_summary, estimate, model, responses, prior,
 vector with information for each available item
 }
 \description{
-Obtain a vector with information for each available item (values of the objective function).
+Information of the test so far (including all administered items) is added to the information of the available
+item before the summary is computed
 }
 

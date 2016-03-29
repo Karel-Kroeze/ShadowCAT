@@ -30,7 +30,7 @@
 #' administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at certain iteration, test stops; 
 #' NULL means no cut off values
 #' @param estimator type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"
-#' @param information_summary called "objective" by Kroeze; how to summarize information; one of
+#' @param information_summary called "objective" by Kroeze; how to summarize information for finding the best next item; one of
 #' "determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
 #' "posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
 #' "trace": compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
