@@ -24,7 +24,7 @@ test_that("with padding in objective function", {
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
   number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   
-  item_information <- get_item_information(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
+  item_information <- get_summarized_information(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
   item_index_max_information <- get_item_index_max_information(available, item_information)
   
   expect_equal(item_index_max_information, 6)
