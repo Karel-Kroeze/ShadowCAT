@@ -124,7 +124,7 @@ row_or_vector_sums <- function(x) {
     sum(x)  
 }
 
-#' Check whether all matrices have equal row names, in same order
+#' Check whether all matrices have equal row names, in same order.
 #' 
 #' @param row_names the correct character vector of row names
 #' @param list_of_matrices_to_check list containing the matrices for which the row names should be checked. NULL elements in the list are ignored.
@@ -134,15 +134,19 @@ row_or_vector_sums <- function(x) {
 #'                                                      "matrix3" = matrix(3:5, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
 #'                                                      "matrix4" = NULL)) == TRUE || stop("wrong")
 #' row_names_are_equal(c("a", "b", "c"), list("matrix1" = matrix(1:3, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
+#'                                                      "matrix2" = matrix(2:4, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
+#'                                                      "matrix3" = matrix(3:4, ncol = 1, dimnames = list(c("a", "b"), NULL)),
+#'                                                      "matrix4" = NULL)) == FALSE || stop("wrong")
+#' row_names_are_equal(c("a", "b", "c"), list("matrix1" = matrix(1:3, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
 #'                                            "matrix2" = matrix(2:4, ncol = 1, dimnames = list(c("a", "c", "b"), NULL)),
 #'                                            "matrix3" = matrix(3:5, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)))) == FALSE || stop("wrong")
 #' @export
 row_names_are_equal <- function(row_names, list_of_matrices_to_check) {
-  row_names_are_equal_per_matrix <- sapply(1:length(list_of_matrices_to_check), 
-                                           function(x) { 
-                                             if (is.null(x))
+  row_names_are_equal_per_matrix <- sapply(list_of_matrices_to_check, 
+                                           function(matrix_to_check) { 
+                                             if (is.null(matrix_to_check))
                                                return(TRUE)
-                                             all(rownames(list_of_matrices_to_check[[x]]) == row_names) })
+                                             nrow(matrix_to_check) == length(row_names) && all(rownames(matrix_to_check) == row_names) })
   all(row_names_are_equal_per_matrix)
 }
 

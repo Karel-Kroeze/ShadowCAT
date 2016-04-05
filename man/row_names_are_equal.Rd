@@ -2,7 +2,7 @@
 % Please edit documentation in R/general_shadowcat_functions.R
 \name{row_names_are_equal}
 \alias{row_names_are_equal}
-\title{Check whether all matrices have equal row names, in same order}
+\title{Check whether all matrices have equal row names, in same order.}
 \usage{
 row_names_are_equal(row_names, list_of_matrices_to_check)
 }
@@ -15,13 +15,17 @@ row_names_are_equal(row_names, list_of_matrices_to_check)
 TRUE if the row names of all the matrices are equal to row_names, including the order; FALSE otherwise
 }
 \description{
-Check whether all matrices have equal row names, in same order
+Check whether all matrices have equal row names, in same order.
 }
 \examples{
 row_names_are_equal(c("a", "b", "c"), list("matrix1" = matrix(1:3, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
                                                      "matrix2" = matrix(2:4, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
                                                      "matrix3" = matrix(3:5, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
                                                      "matrix4" = NULL)) == TRUE || stop("wrong")
+row_names_are_equal(c("a", "b", "c"), list("matrix1" = matrix(1:3, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
+                                                     "matrix2" = matrix(2:4, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
+                                                     "matrix3" = matrix(3:4, ncol = 1, dimnames = list(c("a", "b"), NULL)),
+                                                     "matrix4" = NULL)) == FALSE || stop("wrong")
 row_names_are_equal(c("a", "b", "c"), list("matrix1" = matrix(1:3, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
                                            "matrix2" = matrix(2:4, ncol = 1, dimnames = list(c("a", "c", "b"), NULL)),
                                            "matrix3" = matrix(3:5, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)))) == FALSE || stop("wrong")
