@@ -63,25 +63,27 @@
 #' estimator <- "expected_aposteriori"
 #' system.time(estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound))
 #' 
-#' @param estimate vector containing theta estimate, with covariance matrix as an attribute
-#' @param responses vector with person responses
-#' @param prior prior covariance matrix for theta
-#' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively
-#' @param administered vector with indeces of administered items
-#' @param number_dimensions number of dimensions
-#' @param estimator type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"
-#' @param alpha matrix of alpha paramteres
-#' @param beta matrix of beta paramteres
-#' @param guessing matrix of guessing parameters
-#' @param number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix
-#' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values
-#' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
-#' @param prior_var_safe_nlm if not NULL, expected a posteriori estimate with prior variance(s) equal to prior_var_safe_ml is computed instead of maximum_likelihood/maximum_aposteriori, if maximum_likelihood/maximum_aposteriori estimate fails. Can be a scalar 
+#' @param estimate Vector containing theta estimate, with covariance matrix as an attribute
+#' @param responses Vector with person responses
+#' @param prior Prior covariance matrix for theta
+#' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively
+#' @param administered Vector with indeces of administered items
+#' @param number_dimensions Number of dimensions
+#' @param estimator Type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"
+#' @param alpha Matrix of alpha paramteres
+#' @param beta Matrix of beta paramteres
+#' @param guessing Matrix of guessing parameters
+#' @param number_itemsteps_per_item Vector containing the number of non missing cells per row of the beta matrix
+#' @param lower_bound Vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values
+#' @param upper_bound Vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
+#' @param prior_var_safe_nlm If not NULL, expected a posteriori estimate with prior variance(s) equal to prior_var_safe_ml is computed instead of maximum_likelihood/maximum_aposteriori, if maximum_likelihood/maximum_aposteriori estimate fails. Can be a scalar 
 #' (if variance for each dimension is equal) or vector
+#' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori. One of "riemannsum" for integration via Riemannsum or
+#' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
 #' @return vector containing the updated estimate with the covariance matrix as attribute
 #' @importFrom MultiGHQuad init.quad eval.quad
 #' @export
-estimate_latent_trait <- function(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL) {
+estimate_latent_trait <- function(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL, eap_estimation_procedure = "riemannsum") {
   result <- function() {
     updated_estimate <- get_updated_estimate_and_variance_attribute(estimator)
     trim_estimate(updated_estimate)
@@ -113,7 +115,12 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
   }
   
   get_updated_estimate_and_variance_eap <- function(prior) {
-    # Multidimensional Gauss-Hermite Quadrature
+    switch(eap_estimation_procedure,
+           gauss_hermite_quad = get_updated_estimate_and_variance_eap_gauss_hermite_quad(prior),
+           riemannsum = get_updated_estimate_and_variance_eap_riemannsum(prior))
+  }
+  
+  get_updated_estimate_and_variance_eap_gauss_hermite_quad <- function(prior) {
     # TODO: prior mean is currently fixed at zero, update when/if possible.
     adapt <- if (length(responses) > 5 & !is.null(attr(estimate, 'variance'))) list(mu = estimate, Sigma = as.matrix(attr(estimate, "variance")))
     Q_dim_grid_quad_points <- init.quad(Q = number_dimensions,
@@ -121,6 +128,18 @@ estimate_latent_trait <- function(estimate, responses, prior, model, administere
                                         adapt = adapt,
                                         ip = number_gridpoints())
     eval.quad(FUN = likelihood_or_post_density, X = Q_dim_grid_quad_points, responses, model, administered, number_dimensions, estimator = "maximum_likelihood", alpha, beta, guessing)
+  }
+  
+  get_updated_estimate_and_variance_eap_riemannsum <- function(prior) {
+    # TODO: prior mean is currently fixed at zero, update when/if possible.
+    adapt <- if (length(responses) > 5 & !is.null(attr(estimate, 'variance'))) list(mu = estimate, Sigma = as.matrix(attr(estimate, "variance")))
+    get_eap_estimate_riemannsum(dimension = number_dimensions, 
+               likelihood = likelihood_or_post_density, 
+               prior_form = "normal",
+               prior_parameters = list(mu = rep(0, number_dimensions), Sigma = prior) ,
+               adapt = adapt,
+               number_gridpoints = number_gridpoints(),
+               responses = responses, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing, return_log_likelihood_or_post_density = FALSE)
   }
   
   get_updated_estimate_and_variance_attribute <- function(estimator) {

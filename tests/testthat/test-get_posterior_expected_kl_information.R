@@ -14,7 +14,7 @@ test_that("1 dimensions, 2 categories, estimator is maximum_likelihood", {
   responses <- rep(c(1, 0), 17)
   administered <- c(6:20, 31:49)
   available <- c(1:5, 21:30, 50)
-  prior <- .4
+  prior <- diag(1) * .4
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
@@ -37,7 +37,7 @@ test_that("1 dimensions, 2 categories, estimator is expected_aposteriori", {
   responses <- rep(c(1, 0), 17)
   administered <- c(6:20, 31:49)
   available <- c(1:5, 21:30, 50)
-  prior <- .4
+  prior <- diag(1) * .4
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)

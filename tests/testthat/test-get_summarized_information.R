@@ -18,7 +18,7 @@ test_that("First 1 item administered, information_summary is D (determinant), on
   responses <- 1
   available <- 2:50
   administered <- 1
-  prior <- .4
+  prior <- diag(1) * .4
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
@@ -92,7 +92,7 @@ test_that("First 1 item administered, objective is PD (posterior determinant), o
   responses <- 1
   available <- 2:50
   administered <- 1
-  prior <- .4
+  prior <- diag(1) * .4
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
@@ -164,7 +164,7 @@ test_that("10 scattered items administered, information_summary is PD (posterior
   responses <- rep(c(1, 0), 5)
   available <- c(1, 3, 4, 6, 7, 9, 10, 12:18, 20:24, 31:50)
   administered <- c(2, 5, 8, 11, 19, 25:30)
-  prior <- .4
+  prior <- diag(1) * .4
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
@@ -216,7 +216,7 @@ test_that("First 1 item administered, objective is A (trace), one dimension, wit
   responses <- 1
   available <- 2:50
   administered <- 1
-  prior <- .4
+  prior <- diag(1) * .4
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
@@ -289,7 +289,7 @@ test_that("First 1 item administered, information_summary is PA (posterior trace
   responses <- 1
   available <- 2:50
   administered <- 1
-  prior <- .4
+  prior <- diag(1) * .4
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
@@ -364,7 +364,7 @@ test_that("First 1 item administered, information_summary is PEKL, one dimension
   responses <- 1
   available <- 2:50
   administered <- 1
-  prior <- .4
+  prior <- diag(1) * .4
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
@@ -391,7 +391,7 @@ test_that("information_summary is PD", {
   responses <- c(1, 0)
   available <- 3:50
   administered <- 1:2
-  prior <- .4
+  prior <- diag(1) * .4
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
   alpha <- matrix(rep(1, number_items * number_dimensions), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(rep(1, number_items), nrow = number_items, ncol = 1)
@@ -417,7 +417,7 @@ test_that("information_summary is PEKL", {
   responses <- c(1, 0)
   available <- 3:50
   administered <- 1:2
-  prior <- .4
+  prior <- diag(1) * .4
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
   alpha <- matrix(rep(1, number_items * number_dimensions), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(rep(1, number_items), nrow = number_items, ncol = 1)
@@ -444,7 +444,7 @@ test_that("information_summary is of unknown type", {
   responses <- c(1, 0)
   available <- 3:50
   administered <- 1:2
-  prior <- .4
+  prior <- diag(1) * .4
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
   alpha <- matrix(rep(1, number_items * number_dimensions), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(rep(1, number_items), nrow = number_items, ncol = 1)

@@ -50,11 +50,13 @@
 #' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values 
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
 #' @param prior_var_safe_ml if not NULL, expected a posteriori estimate with prior variance equal to prior_var_safe_ml (scalar or vector) is computed instead of maximum likelihood/maximum a posteriori, if maximum likelihood/maximum a posteriori estimate fails
+#' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori. One of "riemannsum" for integration via Riemannsum or
+#' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
 #' @return a list containing the key of the next item to be administered given a new response (or "stop_test"), 
 #' updated estimate of theta, updated covariance matrix of theta converted to a vector, and the responses to the administered items (named list)
 #' @importFrom matrixcalc is.positive.definite
 #' @export
-shadowcat <- function(responses, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior = NULL, guessing = NULL, eta = NULL, constraints_and_characts = NULL, lower_bound = rep(-3, ncol(alpha)), upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL) {      
+shadowcat <- function(responses, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior = NULL, guessing = NULL, eta = NULL, constraints_and_characts = NULL, lower_bound = rep(-3, ncol(alpha)), upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL, eap_estimation_procedure = "riemannsum") {      
   result <- function() {
     beta <- get_beta(model, beta, eta)
     guessing <- get_guessing(guessing, beta) 
@@ -87,7 +89,7 @@ shadowcat <- function(responses, estimate, variance, model, alpha, beta, start_i
   # if inititial items have been administered (so we are in the CAT phase), update person estimate after each newly answered item
   update_person_estimate <- function(estimate, responses_vector, item_indeces_administered, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item) { 
     if (length(responses) > start_items$n)
-      estimate_latent_trait(estimate, responses_vector, prior, model, item_indeces_administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml)
+      estimate_latent_trait(estimate, responses_vector, prior, model, item_indeces_administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml, eap_estimation_procedure)
     else
       estimate
   }

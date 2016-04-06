@@ -7,37 +7,40 @@
 estimate_latent_trait(estimate, responses, prior, model, administered,
   number_dimensions, estimator, alpha, beta, guessing,
   number_itemsteps_per_item, lower_bound, upper_bound,
-  prior_var_safe_nlm = NULL)
+  prior_var_safe_nlm = NULL, eap_estimation_procedure = "riemannsum")
 }
 \arguments{
-\item{estimate}{vector containing theta estimate, with covariance matrix as an attribute}
+\item{estimate}{Vector containing theta estimate, with covariance matrix as an attribute}
 
-\item{responses}{vector with person responses}
+\item{responses}{Vector with person responses}
 
-\item{prior}{prior covariance matrix for theta}
+\item{prior}{Prior covariance matrix for theta}
 
-\item{model}{string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively}
+\item{model}{String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively}
 
-\item{administered}{vector with indeces of administered items}
+\item{administered}{Vector with indeces of administered items}
 
-\item{number_dimensions}{number of dimensions}
+\item{number_dimensions}{Number of dimensions}
 
-\item{estimator}{type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"}
+\item{estimator}{Type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"}
 
-\item{alpha}{matrix of alpha paramteres}
+\item{alpha}{Matrix of alpha paramteres}
 
-\item{beta}{matrix of beta paramteres}
+\item{beta}{Matrix of beta paramteres}
 
-\item{guessing}{matrix of guessing parameters}
+\item{guessing}{Matrix of guessing parameters}
 
-\item{number_itemsteps_per_item}{vector containing the number of non missing cells per row of the beta matrix}
+\item{number_itemsteps_per_item}{Vector containing the number of non missing cells per row of the beta matrix}
 
-\item{lower_bound}{vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values}
+\item{lower_bound}{Vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values}
 
-\item{upper_bound}{vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values}
+\item{upper_bound}{Vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values}
 
-\item{prior_var_safe_nlm}{if not NULL, expected a posteriori estimate with prior variance(s) equal to prior_var_safe_ml is computed instead of maximum_likelihood/maximum_aposteriori, if maximum_likelihood/maximum_aposteriori estimate fails. Can be a scalar 
+\item{prior_var_safe_nlm}{If not NULL, expected a posteriori estimate with prior variance(s) equal to prior_var_safe_ml is computed instead of maximum_likelihood/maximum_aposteriori, if maximum_likelihood/maximum_aposteriori estimate fails. Can be a scalar 
 (if variance for each dimension is equal) or vector}
+
+\item{eap_estimation_procedure}{String indicating the estimation procedure if estimator is expected aposteriori. One of "riemannsum" for integration via Riemannsum or
+"gauss_hermite_quad" for integration via Gaussian Hermite Quadrature.}
 }
 \value{
 vector containing the updated estimate with the covariance matrix as attribute

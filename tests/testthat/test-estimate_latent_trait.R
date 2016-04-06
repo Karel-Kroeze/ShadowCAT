@@ -81,8 +81,8 @@ test_that("test safe_maximum_likelihood", {
   
   estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
   
-  expect_equal(round(as.vector(estimated_latent_trait), 3), c(-.635, .808, 2.586))  
-  expect_equal(round(as.vector(attr(estimated_latent_trait, 'variance')), 3)[1:3], c(6.870, -3.257, -5.353))
+  expect_equal(round(as.vector(estimated_latent_trait), 3), c(-1.293, 1.326, 3.000))  
+  expect_equal(round(as.vector(attr(estimated_latent_trait, 'variance')), 3)[1:3], c(12.191, -4.961, -13.335))
 })
 
 context("estimator is maximum_aposteriori")
@@ -161,10 +161,13 @@ test_that("estimator is expected_aposteriori, 1 dimension, 2 categories", {
   prior <- diag(number_dimensions)
   prior_var_safe_nlm <- NULL
   
-  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL)
+  estimated_latent_trait_gauss_hermite <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL, eap_estimation_procedure = "gauss_hermite_quad")
+  estimated_latent_trait_riemann <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL, eap_estimation_procedure = "riemannsum")
   
-  expect_equal(round(as.vector(estimated_latent_trait), 3), -.689)
-  expect_equal(as.vector(round(attr(estimated_latent_trait, "variance"), 3)), .205)
+  expect_equal(round(as.vector(estimated_latent_trait_gauss_hermite), 3), -.689)
+  expect_equal(round(as.vector(estimated_latent_trait_riemann), 3), -.689)
+  expect_equal(as.vector(round(attr(estimated_latent_trait_gauss_hermite, "variance"), 3)), .205)
+  expect_equal(as.vector(round(attr(estimated_latent_trait_riemann, "variance"), 3)), .205)
 })
 
 test_that("estimator is expected_aposteriori, 3 dimensions, varying number of categories", {
@@ -190,11 +193,15 @@ test_that("estimator is expected_aposteriori, 3 dimensions, varying number of ca
   prior <- diag(c(1, 1.3, 1))
   prior_var_safe_nlm <- NULL
   
-  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL)
+  estimated_latent_trait_gauss_hermite <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL, eap_estimation_procedure = "gauss_hermite_quad")
+  estimated_latent_trait_riemann <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL, eap_estimation_procedure = "riemannsum")
   
-  expect_equal(round(as.vector(estimated_latent_trait), 3), c(-.861, -1.486, -.604))
-  expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[1,], c(.348, -.214, -.042))
-  expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[3,], c(-.042, -.189, .238))
+  expect_equal(round(as.vector(estimated_latent_trait_gauss_hermite), 3), c(-.861, -1.486, -.604))
+  expect_equal(round(as.vector(estimated_latent_trait_riemann), 3), c(-1.536, -0.611, -0.182))
+  expect_equal(round(attr(estimated_latent_trait_gauss_hermite, "variance"), 3)[1,], c(.348, -.214, -.042))
+  expect_equal(round(attr(estimated_latent_trait_gauss_hermite, "variance"), 3)[3,], c(-.042, -.189, .238))
+  expect_equal(round(attr(estimated_latent_trait_riemann, "variance"), 3)[1,], c(.002, -.002, .000))
+  expect_equal(round(attr(estimated_latent_trait_riemann, "variance"), 3)[3,], c(-.000, -.005, .006))
 })
 
 test_that("estimator is expected_aposteriori, 3 dimensions, varying number of categories, 1 administered", {
@@ -220,11 +227,16 @@ test_that("estimator is expected_aposteriori, 3 dimensions, varying number of ca
   prior <- diag(c(1, 1.3, 1))
   prior_var_safe_nlm <- NULL
   
-  estimated_latent_trait <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL)
+  estimated_latent_trait_gauss_hermite <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL, eap_estimation_procedure = "gauss_hermite_quad")
+  estimated_latent_trait_riemann <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL, eap_estimation_procedure = "riemannsum")
   
-  expect_equal(round(as.vector(estimated_latent_trait), 3), c(-.347, -.267, -.360))
-  expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[1,], c(.941, -.045, -.061))
-  expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[3,], c(-.061, -.047, .936))
+  expect_equal(round(as.vector(estimated_latent_trait_gauss_hermite), 3), c(-.347, -.267, -.360))
+  expect_equal(round(as.vector(estimated_latent_trait_riemann), 3), c(-.355, -.273, -.368))
+  
+  expect_equal(round(attr(estimated_latent_trait_gauss_hermite, "variance"), 3)[1,], c(.941, -.045, -.061))
+  expect_equal(round(attr(estimated_latent_trait_gauss_hermite, "variance"), 3)[3,], c(-.061, -.047, .936))
+  expect_equal(round(attr(estimated_latent_trait_riemann, "variance"), 3)[1,], c(.946, -.046, -.060))
+  expect_equal(round(attr(estimated_latent_trait_riemann, "variance"), 3)[3,], c(-.060, -.047, .940))
 })
 
 test_that("estimates exceed boundaries", {

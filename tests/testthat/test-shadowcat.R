@@ -56,16 +56,18 @@ make_random_seed_exist <- rnorm(1)
 #' @param prior_var_safe_ml if not NULL, expected_aposteriori estimate with prior variance equal to prior_var_safe_ml (scalar or vector) is computed instead of maximum_likelihood/maximum_aposteriori, if maximum_likelihood/maximum_aposteriori estimate fails.
 #' @param initital_estimate vector containing the initial theta estimates (starting values)
 #' @param initial_variance matrix containing the initial covariance matrix (staring values)
+#' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori. One of "riemannsum" for integration via Riemannsum or
+#' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
 #' @return
-test_shadowcat <- function(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints_and_characts = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL, initital_estimate = rep(0, ncol(alpha)), initial_variance = diag(ncol(alpha)) * 25) {
+test_shadowcat <- function(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints_and_characts = NULL, lowerbound = rep(-3, ncol(alpha)), upperbound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL, initital_estimate = rep(0, ncol(alpha)), initial_variance = diag(ncol(alpha)) * 25, eap_estimation_procedure = "riemannsum") {
   item_keys <- rownames(alpha)
   responses <- NULL
-  next_item_and_test_outcome <- shadowcat(responses, estimate = initital_estimate, variance = as.vector(initial_variance), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta, constraints_and_characts, lowerbound, upperbound, prior_var_safe_ml)
+  next_item_and_test_outcome <- shadowcat(responses, estimate = initital_estimate, variance = as.vector(initial_variance), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta, constraints_and_characts, lowerbound, upperbound, prior_var_safe_ml, eap_estimation_procedure)
   while (next_item_and_test_outcome$continue_test) {
     new_response <- simulate_answer(true_theta, model, ncol(alpha), estimator, alpha, beta, guessing, ncol(beta), match(next_item_and_test_outcome$key_new_item, item_keys))
     next_item_and_test_outcome$responses[[next_item_and_test_outcome$key_new_item]] <- new_response
     next_item_and_test_outcome$responses <- as.list(next_item_and_test_outcome$responses)
-    next_item_and_test_outcome <- shadowcat(next_item_and_test_outcome$responses, next_item_and_test_outcome$estimate, next_item_and_test_outcome$variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior,  guessing, eta, constraints_and_characts, lowerbound, upperbound, prior_var_safe_ml)  
+    next_item_and_test_outcome <- shadowcat(next_item_and_test_outcome$responses, next_item_and_test_outcome$estimate, next_item_and_test_outcome$variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior,  guessing, eta, constraints_and_characts, lowerbound, upperbound, prior_var_safe_ml, eap_estimation_procedure)  
   }
   
   attr(next_item_and_test_outcome$estimate, "variance") <- matrix(next_item_and_test_outcome$variance, ncol = ncol(alpha))
@@ -142,8 +144,10 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
 #' @param max_n value equal to the maximum number of items to administer (test stops at this number, even if variance target has not been reached). NULL means max_n is equal to number of items in test bank
 #' @param varying_number_item_steps if TRUE, the simulated number of item steps differs over items. In that case, number_answer_categories_vec (number of itemsteps + 1)
 #' is considered the maxixmum number of categories
+#' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori. One of "riemannsum" for integration via Riemannsum or
+#' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
 #' @return matrix with in each row (= one condition): named vector containing estimated theta, variance of the estimate, and if return_administered_item_indeces is TRUE, the indeces of the administered items
-run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, constraints_and_characts = NULL, guessing = NULL, items_load_one_dimension = TRUE, lowerbound = rep(-3, number_dimensions), upperbound = rep(3, number_dimensions), prior = diag(number_dimensions) * 20, prior_var_safe_ml = NULL, return_administered_item_indeces = FALSE, min_n = NULL, max_n = NULL, varying_number_item_steps = FALSE) {                   
+run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, constraints_and_characts = NULL, guessing = NULL, items_load_one_dimension = TRUE, lowerbound = rep(-3, number_dimensions), upperbound = rep(3, number_dimensions), prior = diag(number_dimensions) * 20, prior_var_safe_ml = NULL, return_administered_item_indeces = FALSE, min_n = NULL, max_n = NULL, varying_number_item_steps = FALSE, eap_estimation_procedure = "riemannsum") {                   
   if (number_dimensions > 1 && number_dimensions != length(true_theta_vec))
     stop("number_dimensions is larger than 1 but not equal to the length of true_theta_vec")
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
@@ -158,7 +162,7 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
                                       else
                                         true_theta_vec )
                       alpha_beta <- simulate_testbank(model = as.character(conditions[condition, "model"]), number_items = conditions[condition, "number_items"], number_dimensions = number_dimensions, number_itemsteps = conditions[condition, "number_answer_categories"] - 1, items_load_one_dimension = items_load_one_dimension, varying_number_item_steps = varying_number_item_steps)
-                      estimate_theta <- tryCatch(test_shadowcat(true_theta, prior, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), constraints_and_characts, lowerbound, upperbound, prior_var_safe_ml),
+                      estimate_theta <- tryCatch(test_shadowcat(true_theta, prior, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), constraints_and_characts, lowerbound, upperbound, prior_var_safe_ml, eap_estimation_procedure = eap_estimation_procedure),
                                                  error = function(e) e)
 
                       if (return_administered_item_indeces)
@@ -255,11 +259,18 @@ test_that("true theta is 2, estimator is expected_aposteriori", {
   
   prior <- diag(number_dimensions) * 5
   
-  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior = prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  test_outcome_gauss_hermite <- with_random_seed(2, test_shadowcat)(true_theta, prior = prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, eap_estimation_procedure = "gauss_hermite_quad")
+  test_outcome_riemann <- with_random_seed(2, test_shadowcat)(true_theta, prior = prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
-  expect_equal(as.vector(round(test_outcome$estimate, 3)), 1.833)
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), .087)
-  expect_equal(length(test_outcome$responses), 100)
+  # gauss hermite
+  expect_equal(as.vector(round(test_outcome_gauss_hermite$estimate, 3)), 1.833)
+  expect_equal(as.vector(round(attr(test_outcome_gauss_hermite$estimate, "variance"), 3)), .087)
+  expect_equal(length(test_outcome_gauss_hermite$responses), 100)
+  
+  # riemann
+  expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), 1.833)
+  expect_equal(as.vector(round(attr(test_outcome_riemann$estimate, "variance"), 3)), .087)
+  expect_equal(length(test_outcome_riemann$responses), 100)
 })
 
 
@@ -365,11 +376,18 @@ test_that("true theta is 1, 0, 2, estimator is expected_aposteriori", {
   # define prior covariance matrix
   prior <- diag(number_dimensions) * 20
   
-  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  test_outcome_gauss_hermite <- with_random_seed(3, test_shadowcat)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, eap_estimation_procedure = "gauss_hermite_quad")
+  test_outcome_riemann <- with_random_seed(3, test_shadowcat)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, eap_estimation_procedure = "riemannsum")
   
-  expect_equal(as.vector(round(test_outcome$estimate, 3)), c(1.423, -.087, 1.849))
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.075, .000, .000))
-  expect_equal(length(test_outcome$responses), 300)
+  # gauss hermite
+  expect_equal(as.vector(round(test_outcome_gauss_hermite$estimate, 3)), c(1.423, -.087, 1.849))
+  expect_equal(as.vector(round(attr(test_outcome_gauss_hermite$estimate, "variance"), 3))[1:3],c(.075, .000, .000))
+  expect_equal(length(test_outcome_gauss_hermite$responses), 300)
+  
+  # riemann
+  expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), c(.940, -.174, 2.092))
+  expect_equal(as.vector(round(attr(test_outcome_riemann$estimate, "variance"), 3))[1:3],c(.068, .000, .000))
+  expect_equal(length(test_outcome_riemann$responses), 300)
 })
 
 
@@ -980,7 +998,7 @@ if (FALSE) {
     # True theta -2
     true_theta <- -2
     for (s in 1:number_repliations) {
-      test_outcome <- with_random_seed(s, test_shadowcat)(true_theta, prior = prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, lowerbound = lowerbound, upperbound = upperbound)$estimate
+      test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior = prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, lowerbound = lowerbound, upperbound = upperbound)$estimate
       estimated_theta[s] <- test_outcome
       sd_estimate[s] <- sqrt(attr(test_outcome, "variance"))
     }
@@ -1013,7 +1031,7 @@ if (FALSE) {
     expect_equal(round(fivenum(sd_estimate), 3), c(.418, .443, .448, .449, .491))
   })
   
-  test_that("one dimension, one replication per condition, expected_aposteriori", {
+  test_that("one dimension, one replication per condition, expected_aposteriori, estimation procedure is gauss hermite quadrature", {
     replications_per_unique_condition <- 1
     true_theta_vec <- c(-2, 1, 3)
     number_items_vec <- c(50, 200)
@@ -1029,7 +1047,7 @@ if (FALSE) {
     information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler") 
     prior <- diag(number_dimensions) * 9
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound, prior = prior)
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound, prior = prior, eap_estimation_procedure = "gauss_hermite_quad")
     
     conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
     
@@ -1041,6 +1059,36 @@ if (FALSE) {
     expect_equal(round(average_per_true_theta_and_number_items[,"x"], 3), c(-2.004, .990, 3.171, -1.964, 1.034, 3.078))
     expect_equal(round(sd_per_true_theta_and_number_items[,"x"], 3), c(.533, .386, .633, .200, .179, .375))
     expect_equal(round(sqrt(fivenum(estimates_and_conditions[,"variance_estimate"])), 3), c(.109, .184, .285, .379, 1.220))    
+  })
+  
+  test_that("one dimension, one replication per condition, expected_aposteriori, estimation procedure is riemansumm", {
+    replications_per_unique_condition <- 1
+    true_theta_vec <- c(-2, 1, 3)
+    number_items_vec <- c(50, 200)
+    number_answer_categories_vec <- c(2, 4)
+    number_dimensions <- 1
+    lowerbound <- -20
+    upperbound <- 20
+    
+    start_items <- list(type = 'random', n = 3)
+    variance_target <- .1^2
+    model_vec <- c("3PLM", "GRM", "GPCM", "SM")
+    estimator_vec <- "expected_aposteriori"
+    information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler") 
+    prior <- diag(number_dimensions) * 9
+    
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound, prior = prior, eap_estimation_procedure = "riemannsum")
+    
+    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
+    
+    estimates_and_conditions <- cbind(t(estimates_and_variance), conditions[, c("true_theta", "number_items", "number_answer_categories", "model", "estimator", "information_summary")])
+    
+    average_per_true_theta_and_number_items <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"], estimates_and_conditions[,"number_items"]), "mean")
+    sd_per_true_theta_and_number_items <- aggregate(estimates_and_conditions[,"estimated_theta"], list(estimates_and_conditions[,"true_theta"], estimates_and_conditions[,"number_items"]), "sd") 
+    
+    expect_equal(round(average_per_true_theta_and_number_items[,"x"], 3), c(-2.004, .990, 3.155, -1.964, 1.034, 3.078))
+    expect_equal(round(sd_per_true_theta_and_number_items[,"x"], 3), c(.533, .386, .644, .200, .179, .375))
+    expect_equal(round(sqrt(fivenum(estimates_and_conditions[,"variance_estimate"])), 3), c(.109, .184, .285, .379, 1.219))    
   })
   
   test_that("one dimension, one replication per condition, maximum_aposteriori", {
@@ -1250,7 +1298,7 @@ test_that("one dimension, estimator maximum_aposteriori, 100 replications per co
   expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 200), "variance_estimate"])), 3), c(.105, .156, .183, .243, .531))
 })
 
-test_that("one dimension, estimator expected_aposteriori, 100 replications per condition", {
+test_that("one dimension, estimator expected_aposteriori, 100 replications per condition, estimation procedure is gauss hermite quadrature", {
   replications_per_unique_condition <- 100
   true_theta_vec <- c(-2, 1, 3)
   number_items_vec <- c(50, 200)
@@ -1265,7 +1313,7 @@ test_that("one dimension, estimator expected_aposteriori, 100 replications per c
   lowerbound <- -20
   upperbound <- 20
   prior <- diag(1) * 9  
-  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound, prior = prior)
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound, prior = prior, eap_estimation_procedure = "gauss_hermite_quad")
   
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
   
@@ -1322,7 +1370,80 @@ test_that("one dimension, estimator expected_aposteriori, 100 replications per c
   expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 200), "variance_estimate"])), 3), c(.105, .156, .183, .246, .543))
 })
 
+test_that("one dimension, estimator expected_aposteriori, 100 replications per condition, estimation procedure is riemannsum", {
+  replications_per_unique_condition <- 100
+  true_theta_vec <- c(-2, 1, 3)
+  number_items_vec <- c(50, 200)
+  number_answer_categories_vec <- c(2, 4)
+  number_dimensions <- 1
+  
+  start_items <- list(type = 'random', n = 3)
+  variance_target <- .1^2
+  model_vec <- c("3PLM","GRM","GPCM","SM")
+  estimator_vec <- "expected_aposteriori"
+  information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler")
+  lowerbound <- -20
+  upperbound <- 20
+  prior <- diag(1) * 9  
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound, prior = prior, eap_estimation_procedure = "riemannsum")
+  
+  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
+  
+  condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/replications_per_unique_condition), replications_per_unique_condition))
+  
+  estimates_and_conditions <- cbind(t(estimates_and_variance)[, c("estimated_theta", "variance_estimate")], 
+                                    conditions[, c("true_theta", "replication", "number_items", "number_answer_categories", "model", "estimator", "information_summary")], 
+                                    condition_vector)
+  
+  average_thetaminus2_nitems50 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == -2 & estimates_and_conditions[,"number_items"] == 50), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == -2 & estimates_and_conditions[,"number_items"] == 50)]), "mean")
+  average_theta1_nitems50 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 1 & estimates_and_conditions[,"number_items"] == 50), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 1 & estimates_and_conditions[,"number_items"] == 50)]), "mean")
+  average_theta3_nitems50 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3 & estimates_and_conditions[,"number_items"] == 50), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 3 & estimates_and_conditions[,"number_items"] == 50)]), "mean")
+  
+  sd_thetaminus2_nitems50 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == -2 & estimates_and_conditions[,"number_items"] == 50), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == -2 & estimates_and_conditions[,"number_items"] == 50)]), "sd")
+  sd_theta1_nitems50 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 1 & estimates_and_conditions[,"number_items"] == 50), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 1 & estimates_and_conditions[,"number_items"] == 50)]), "sd")
+  sd_theta3_nitems50 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3 & estimates_and_conditions[,"number_items"] == 50), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 3 & estimates_and_conditions[,"number_items"] == 50)]), "sd")
+  
+  average_thetaminus2_nitems200 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == -2 & estimates_and_conditions[,"number_items"] == 200), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == -2 & estimates_and_conditions[,"number_items"] == 200)]), "mean")
+  average_theta1_nitems200 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 1 & estimates_and_conditions[,"number_items"] == 200), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 1 & estimates_and_conditions[,"number_items"] == 200)]), "mean")
+  average_theta3_nitems200 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3 & estimates_and_conditions[,"number_items"] == 200), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 3 & estimates_and_conditions[,"number_items"] == 200)]), "mean")
+  
+  sd_thetaminus2_nitems200 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == -2 & estimates_and_conditions[,"number_items"] == 200), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == -2 & estimates_and_conditions[,"number_items"] == 200)]), "sd")
+  sd_theta1_nitems200 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 1 & estimates_and_conditions[,"number_items"] == 200), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 1 & estimates_and_conditions[,"number_items"] == 200)]), "sd")
+  sd_theta3_nitems200 <- aggregate(estimates_and_conditions[which(estimates_and_conditions[,"true_theta"] == 3 & estimates_and_conditions[,"number_items"] == 200), "estimated_theta"], list(condition_vector[which(estimates_and_conditions[,"true_theta"] == 3 & estimates_and_conditions[,"number_items"] == 200)]), "sd")
+  
+  # five number summary of average theta estimate per condition, with true theta is -2 and 50 items
+  expect_equal(round(fivenum(average_thetaminus2_nitems50[,"x"]), 3), c(-2.170, -2.095, -2.048, -2.008, -1.947))
+  # five number summary of average theta estimate per condition, with true theta is 1 and 50 items
+  expect_equal(round(fivenum(average_theta1_nitems50[,"x"]), 3), c(.958, .993, 1.029, 1.059, 1.127))
+  # five number summary of average theta estimate per condition, with true theta is 3 and 50 items
+  expect_equal(round(fivenum(average_theta3_nitems50[,"x"]), 3), c(2.959, 3.013, 3.085, 3.148, 3.241))
+  # five number summary of average theta estimate per condition, with true theta is -2 and 200 items
+  expect_equal(round(fivenum(average_thetaminus2_nitems200[,"x"]), 3), c(-2.057, -2.030, -2.004, -1.992, -1.975))
+  # five number summary of average theta estimate per condition, with true theta is 1 and 200 items
+  expect_equal(round(fivenum(average_theta1_nitems200[,"x"]), 3), c(.972, .990, 1.003, 1.015, 1.039))
+  # five number summary of average theta estimate per condition, with true theta is 3 and 200 items
+  expect_equal(round(fivenum(average_theta3_nitems200[,"x"]), 3), c(2.969, 2.998, 3.019, 3.036, 3.119))
+  
+  # five number summary of observed sd of the theta estimates within each condition, with true theta is -2 en 50 items
+  expect_equal(round(fivenum(sd_thetaminus2_nitems50[,"x"]), 3), c(.242, .305, .426, .506, .567))
+  # five number summary of observed sd of the theta estimates within each condition, with true theta is 1 en 50 items
+  expect_equal(round(fivenum(sd_theta1_nitems50[,"x"]), 3), c(.227, .256, .357, .371, .464))
+  # five number summary of observed sd of the theta estimates within each condition, with true theta is 3 en 50 items
+  expect_equal(round(fivenum(sd_theta3_nitems50[,"x"]), 3), c(.301, .358, .629, .687, .800))
+  # five number summary of observed sd of the theta estimates within each condition, with true theta is -2 en 200 items
+  expect_equal(round(fivenum(sd_thetaminus2_nitems200[,"x"]), 3), c(.121, .143, .219, .239, .272))
+  # five number summary of observed sd of the theta estimates within each condition, with true theta is 1 en 200 items
+  expect_equal(round(fivenum(sd_theta1_nitems200[,"x"]), 3), c(.105, .132, .170, .178, .199))
+  # five number summary of observed sd of the theta estimates within each condition, with true theta is 3 en 200 items
+  expect_equal(round(fivenum(sd_theta3_nitems200[,"x"]), 3), c(.138, .171, .298, .331, .359))
+  
+  # five number summary of reported sd of the theta estimate within each condition where number of items is 50 and 200, respectively
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 50), "variance_estimate"])), 3), c(.198, .311, .376, .500, 1.555))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[which(estimates_and_conditions[,"number_items"] == 200), "variance_estimate"])), 3), c(.105, .156, .183, .246, .543))
+})
+
 test_that("three dimensions, maximum_likelihood, information summary D, PD, A, and PA, no constraints on item selection, 100 replications per condition", {
+  # To be run yet
   replications_per_unique_condition <- 100 
   true_theta_vec <- c(-2, 1, 2)
   number_items_vec <- c(300)
@@ -1435,7 +1556,7 @@ test_that("three dimensions, maximum_aposteriori, no constraints on item selecti
   expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.161, .213, .288, .314, .760)) 
 })
 
-test_that("three dimensions, expected_aposteriori, 100 replications per condition", {
+test_that("three dimensions, expected_aposteriori, 100 replications per condition, estimation procedure is gauss hermite quadrature", {
   replications_per_unique_condition <- 100 
   true_theta_vec <- c(-2, 1, 3)
   number_items_vec <- 300
@@ -1451,7 +1572,7 @@ test_that("three dimensions, expected_aposteriori, 100 replications per conditio
   upperbound <- 20
   prior <- diag(number_dimensions) * 9 
   
-  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound, prior = prior)
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound, prior = prior, eap_estimation_procedure = "gauss_hermite_quad")
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
   
   condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/replications_per_unique_condition), replications_per_unique_condition))
@@ -1484,6 +1605,57 @@ test_that("three dimensions, expected_aposteriori, 100 replications per conditio
   expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate1"])), 3), c(.007, .209, .298, .334, .677))
   expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), c(.012, .186, .242, .258, .343))
   expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.055, .251, .399, .467, 1.025))
+})
+
+test_that("three dimensions, expected_aposteriori, 100 replications per condition, estimation procedure is riemannsum", {
+  replications_per_unique_condition <- 100 
+  true_theta_vec <- c(-2, 1, 3)
+  number_items_vec <- 300
+  number_answer_categories_vec <- c(2, 4)
+  number_dimensions <- 3
+  
+  start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
+  variance_target <- .1^2
+  model_vec <- c("3PLM","GRM","GPCM","SM")
+  estimator_vec <- "expected_aposteriori"
+  information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler")
+  lowerbound <- -20
+  upperbound <- 20
+  prior <- diag(number_dimensions) * 9 
+  
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, lowerbound = lowerbound, upperbound = upperbound, prior = prior, eap_estimation_procedure = "riemannsum")
+  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
+  
+  condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/replications_per_unique_condition), replications_per_unique_condition))
+  
+  estimates_and_conditions <- cbind(t(estimates_and_variance)[, c("estimated_theta1", "estimated_theta2", "estimated_theta3", "variance_estimate1", "variance_estimate5", "variance_estimate9")], 
+                                    conditions[, c("replication", "number_items", "number_answer_categories", "model", "estimator", "information_summary")], 
+                                    condition_vector)
+  
+  average_per_condition_dim1 <- aggregate(estimates_and_conditions[, "estimated_theta1"], list(condition_vector), "mean", na.rm = TRUE)
+  average_per_condition_dim2 <- aggregate(estimates_and_conditions[, "estimated_theta2"], list(condition_vector), "mean", na.rm = TRUE)
+  average_per_condition_dim3 <- aggregate(estimates_and_conditions[, "estimated_theta3"], list(condition_vector), "mean", na.rm = TRUE)
+  
+  sd_per_condition_dim1 <- aggregate(estimates_and_conditions[, "estimated_theta1"], list(condition_vector), "sd", na.rm = TRUE)
+  sd_per_condition_dim2 <- aggregate(estimates_and_conditions[, "estimated_theta2"], list(condition_vector), "sd", na.rm = TRUE)
+  sd_per_condition_dim3 <- aggregate(estimates_and_conditions[, "estimated_theta3"], list(condition_vector), "sd", na.rm = TRUE)
+  
+  # five number summary of average theta estimate per condition, dimension 1 (true theta is -2)
+  expect_equal(round(fivenum(average_per_condition_dim1[,"x"]), 3), c(-2.129, -2.061, -2.036, -2.019, -1.954))
+  # five number summary of average theta estimate per condition, dimension 2 (true theta is 1)
+  expect_equal(round(fivenum(average_per_condition_dim2[,"x"]), 3), c(.976, .999, 1.027, 1.041, 1.112))
+  # five number summary of average theta estimate per condition, dimension 3 (true theta is 2)
+  expect_equal(round(fivenum(average_per_condition_dim3[,"x"]), 3), c(2.942, 2.998, 3.037, 3.068, 3.150))
+  
+  # five number summary of observed sd of the theta estimates within each condition, for dimension 1, 2, and 3, respectively
+  expect_equal(round(fivenum(sd_per_condition_dim1[,"x"]), 3), c(.185, .214, .315, .341, .358))
+  expect_equal(round(fivenum(sd_per_condition_dim2[,"x"]), 3), c(.167, .244, .260, .284, .410))
+  expect_equal(round(fivenum(sd_per_condition_dim3[,"x"]), 3), c(.218, .262, .440, .480, .584))
+  
+  # five number summary of reported sd of the theta estimate within each condition, for dimension 1, 2, and 3, respectively
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate1"])), 3), c(.000, .212, .304, .340, .531))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), c(.001, .189, .246, .262, .356))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.001, .254, .405, .477, 1.060))
 })
 
   test_that("test prior_var_safe_ml is 100", {
