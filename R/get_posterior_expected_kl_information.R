@@ -25,9 +25,12 @@
 #' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values
 #' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
 #' @param theta_range Vector of theta values to be evaluated in the numerical integration. Using a sparser range may alleviate stress in higher dimensional tests.
+#' @param eap_estimation_procedure String indicating the estimation procedure for the expected aposteriori estimate, which is computed
+#' here if it is not the requested estimator in shadowcat(). One of "riemannsum" for integration via Riemannsum or
+#' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
 #' @return Vector with PEKL information for each yet available item.
 #' @export
-get_posterior_expected_kl_information <- function(estimate, model, responses, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior, number_itemsteps_per_item, lower_bound, upper_bound, theta_range = -3:3) {
+get_posterior_expected_kl_information <- function(estimate, model, responses, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior, number_itemsteps_per_item, lower_bound, upper_bound, theta_range = -3:3, eap_estimation_procedure = "riemannsum") {
   result <- function() {
     # we'll perform a very basic integration over the theta range
     # expand the grid for multidimensional models (number of calculations will be length(theta_range)**Q, which can still get quite high for high dimensionalities.)
@@ -41,7 +44,7 @@ get_posterior_expected_kl_information <- function(estimate, model, responses, ad
     if (estimator == "expected_aposteriori")
       estimate
     else
-      estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator = "expected_aposteriori", alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound)
+      estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator = "expected_aposteriori", alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure = eap_estimation_procedure)
   }
   
   #' Kullback Leibler Divergence for given items and pairs of thetas x posterior density.

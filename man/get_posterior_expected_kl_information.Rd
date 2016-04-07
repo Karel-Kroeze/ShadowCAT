@@ -6,7 +6,8 @@
 \usage{
 get_posterior_expected_kl_information(estimate, model, responses, administered,
   available, number_dimensions, estimator, alpha, beta, guessing, prior,
-  number_itemsteps_per_item, lower_bound, upper_bound, theta_range = -3:3)
+  number_itemsteps_per_item, lower_bound, upper_bound, theta_range = -3:3,
+  eap_estimation_procedure = "riemannsum")
 }
 \arguments{
 \item{estimate}{vector with current theta estimate}
@@ -38,6 +39,10 @@ get_posterior_expected_kl_information(estimate, model, responses, administered,
 \item{upper_bound}{vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values}
 
 \item{theta_range}{Vector of theta values to be evaluated in the numerical integration. Using a sparser range may alleviate stress in higher dimensional tests.}
+
+\item{eap_estimation_procedure}{String indicating the estimation procedure for the expected aposteriori estimate, which is computed
+here if it is not the requested estimator in shadowcat(). One of "riemannsum" for integration via Riemannsum or
+"gauss_hermite_quad" for integration via Gaussian Hermite Quadrature.}
 }
 \value{
 Vector with PEKL information for each yet available item.

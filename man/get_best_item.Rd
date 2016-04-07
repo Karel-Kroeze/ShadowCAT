@@ -7,7 +7,8 @@
 get_best_item(information_summary, lp_constraints, lp_characters, estimate,
   model, responses, prior, available, administered, number_items,
   number_dimensions, estimator, alpha, beta, guessing,
-  number_itemsteps_per_item, lower_bound, upper_bound)
+  number_itemsteps_per_item, lower_bound, upper_bound,
+  eap_estimation_procedure = "riemannsum")
 }
 \arguments{
 \item{information_summary}{called "objective" by Kroeze; how to summarize information; one of
@@ -50,6 +51,10 @@ get_best_item(information_summary, lp_constraints, lp_characters, estimate,
 \item{lower_bound}{vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values}
 
 \item{upper_bound}{vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values}
+
+\item{eap_estimation_procedure}{String indicating the estimation procedure for the expected aposteriori estimate, which is computed
+in get_posterior_expected_kl_information() if it is not the requested estimator in shadowcat(). One of "riemannsum" for integration via Riemannsum or
+"gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. Only important here if information_summary is posterior_expected_kl_information.}
 }
 \value{
 integer item index of best item

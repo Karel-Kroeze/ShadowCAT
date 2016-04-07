@@ -74,6 +74,36 @@ test_that("normal prior, 3 dimensions, with adapt", {
 
 context("uniform prior")
 
+test_that("uniform prior, 1 dimension, without adapt", {
+  number_dimensions <- 1
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  eap <- get_eap_estimate_riemannsum(dimension = number_dimensions, 
+                                     likelihood = likelihood_or_post_density, 
+                                     prior_form = "uniform", 
+                                     prior_parameters = list(lower_bound = -3, upper_bound = 3), 
+                                     adapt = NULL, 
+                                     number_gridpoints = 50,
+                                     responses = responses, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing, return_log_likelihood_or_post_density = FALSE)
+  expect_equal(as.vector(round(eap, 3)), -.934)
+  expect_equal(round(attr(eap, "variance"), 3), matrix(.564))
+})
+
+test_that("uniform prior, 3 dimensions, without adapt", {
+  number_dimensions <- 3
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  eap <- get_eap_estimate_riemannsum(dimension = number_dimensions, 
+                                     likelihood = likelihood_or_post_density, 
+                                     prior_form = "uniform", 
+                                     prior_parameters = list(lower_bound = rep(-3, 3), upper_bound = rep(3, 3)), 
+                                     adapt = NULL, 
+                                     number_gridpoints = 6,
+                                     responses = responses, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing, return_log_likelihood_or_post_density = FALSE)
+  expect_equal(as.vector(round(eap, 3)), c(-1.329, -2.037, -2.271))
+  expect_equal(round(attr(eap, "variance"), 3)[1,], c(1.930, -.193, -.120))
+  expect_equal(round(attr(eap, "variance"), 3)[2,], c(-.193, .493, -.043))
+  expect_equal(round(attr(eap, "variance"), 3)[3,], c(-.120, -.043, .235))
+})
+
 test_that("uniform prior, 1 dimension, with adapt", {
   number_dimensions <- 1
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)

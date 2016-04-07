@@ -1,6 +1,6 @@
 #' Compute the expected aposteriori estimate of the latent trait theta, with the posterior covariance matrix as an attribute
 #' 
-#' Integration approximation occurs via a Riemannsumm, with grid points adapted to the location of the
+#' Integration approximation occurs via a Riemannsumm, where grid points can be adapted to the location of the
 #' posterior distribution
 #' 
 #' @param dimension Number of dimensions
@@ -82,9 +82,14 @@ get_eap_estimate_riemannsum <- function(dimension, likelihood, prior_form, prior
   }
   
   transform_grid_points <- function(grid_points_untransformed) {
-    mu_sigma <- get_mu_sigma_for_transformation()
-    mid_grid_points_trans <- trans(grid_points_untransformed, mu_sigma$sigma)
-    t(t(mid_grid_points_trans) + mu_sigma$mu)
+    if (is.null(adapt) && prior_form == "uniform") {
+      unname(as.matrix(grid_points_untransformed))
+    }
+    else {
+      mu_sigma <- get_mu_sigma_for_transformation()
+      mid_grid_points_trans <- trans(grid_points_untransformed, mu_sigma$sigma)
+      t(t(mid_grid_points_trans) + mu_sigma$mu)
+    }
   }
   
   get_mid_grid_points <- function() {
