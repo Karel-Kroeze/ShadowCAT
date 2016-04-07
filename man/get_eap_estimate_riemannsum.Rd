@@ -19,14 +19,14 @@ the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bo
 be in matrix form.}
 
 \item{adapt}{List containing mu and Sigma for the adaptation of the grid points: list(mu = ..., Sigma = ...).
-Can be NULL if prior form is normal, in which case the mu and Sigma of the normal prior are used}
+If NULL, adaptation with normal prior is based on the prior parameters, and no adaptation is made with uniform prior.}
 
 \item{number_gridpoints}{Value indicating the number of grid points to use for the Riemannsum}
 
 \item{...}{Any additional arguments to likelihood}
 }
 \description{
-Integration approximation occurs via a Riemannsumm, with grid points adapted to the location of the
+Integration approximation occurs via a Riemannsumm, where grid points can be adapted to the location of the
 posterior distribution
 }
 
