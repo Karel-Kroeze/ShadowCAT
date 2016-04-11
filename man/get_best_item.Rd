@@ -5,7 +5,7 @@
 \title{Best item in an adaptive test.}
 \usage{
 get_best_item(information_summary, lp_constraints, lp_characters, estimate,
-  model, responses, prior, available, administered, number_items,
+  model, answers, prior, available, administered, number_items,
   number_dimensions, estimator, alpha, beta, guessing,
   number_itemsteps_per_item, lower_bound, upper_bound,
   eap_estimation_procedure = "riemannsum")
@@ -26,7 +26,7 @@ get_best_item(information_summary, lp_constraints, lp_characters, estimate,
 
 \item{model}{string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
 
-\item{responses}{vector with person responses}
+\item{answers}{vector with person answers}
 
 \item{prior}{prior covariance matrix for theta}
 

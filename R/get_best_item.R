@@ -12,7 +12,7 @@
 #' @param lp_characters data frame with constraint characters in lp format: the lp_chars from the list returned by constraints_lp_format(); NULL means no constraints
 #' @param estimate vector containing current theta estimate
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
-#' @param responses vector with person responses
+#' @param answers vector with person answers
 #' @param prior prior covariance matrix for theta
 #' @param available vector with indeces of yet available items
 #' @param administered vector with indeces of administered items
@@ -30,8 +30,8 @@
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. Only important here if information_summary is posterior_expected_kl_information.
 #' @return integer item index of best item
 #' @export
-get_best_item <- function(information_summary, lp_constraints, lp_characters, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure = "riemannsum") {
-  # TODO: make selection with 0 responses work as expected
+get_best_item <- function(information_summary, lp_constraints, lp_characters, estimate, model, answers, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure = "riemannsum") {
+  # TODO: make selection with 0 answers work as expected
   result <- function() {
     item_with_max_information <- get_item_with_max_information()
     if (is.na(item_with_max_information) || length(item_with_max_information) == 0) 
@@ -40,10 +40,10 @@ get_best_item <- function(information_summary, lp_constraints, lp_characters, es
   }
   
   get_item_with_max_information <- function() {
-    item_information <- get_summarized_information(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE, eap_estimation_procedure = eap_estimation_procedure)
+    item_information <- get_summarized_information(information_summary, estimate, model, answers, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE, eap_estimation_procedure = eap_estimation_procedure)
     item_with_max_information <- switch(item_selection_type(),
                                         "maximum_information_only" = get_item_index_max_information(available, item_information),
-                                        "with_constraints" = get_item_index_max_information_constrained(number_items, administered, available, responses, lp_constraints, lp_characters, item_information))
+                                        "with_constraints" = get_item_index_max_information_constrained(number_items, administered, available, answers, lp_constraints, lp_characters, item_information))
     if (length(item_with_max_information) > 1) 
       sample(item_with_max_information, 1)
     else

@@ -16,9 +16,9 @@ test_that("model is 3PLM, 1 dimension, 2 categories", {
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
-  responses <- rep(c(1, 0), 25)
+  answers <- rep(c(1, 0), 25)
   
-  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, responses, with_likelihoods = TRUE)
+  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, answers, with_likelihoods = TRUE)
     
   expect_equal(round(probs_and_likelihoods_per_item$P[1,], 3), c(.293, .707))
   expect_equal(round(probs_and_likelihoods_per_item$P[50,], 3), c(.083, .917))
@@ -40,9 +40,9 @@ test_that("model is 3PLM, 2 dimensions, 2 categories", {
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
-  responses <- rep(c(1, 0), 25)
+  answers <- rep(c(1, 0), 25)
   
-  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, responses, with_likelihoods = TRUE)
+  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, answers, with_likelihoods = TRUE)
   
   expect_equal(round(probs_and_likelihoods_per_item$P[1,], 3), c(.232, .768))
   expect_equal(round(probs_and_likelihoods_per_item$P[50,], 3), c(.028, .972))
@@ -67,9 +67,9 @@ test_that("model is GPCM, 1 dimensions, 2 categories", {
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
-  responses <- rep(c(1, 0), 25)
+  answers <- rep(c(1, 0), 25)
   
-  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, responses, with_likelihoods = TRUE)
+  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, answers, with_likelihoods = TRUE)
   
   expect_equal(round(probs_and_likelihoods_per_item$P[1,], 3), c(.23, .77))
   expect_equal(round(probs_and_likelihoods_per_item$P[50,], 3), c(.123, .877))
@@ -94,9 +94,9 @@ test_that("model is GPCM, 3 dimensions, 4 categories", {
   eta <- t(apply(temp_vector, 1, function(x) x + seq(-2, 2, length.out = (number_answer_categories - 1))))
   beta <- t(apply(eta, 1, cumsum))
   guessing <- NULL
-  responses <- c(rep(c(0, 1, 2), 16), 3, 3)
+  answers <- c(rep(c(0, 1, 2), 16), 3, 3)
   
-  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, responses, with_likelihoods = TRUE)
+  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, answers, with_likelihoods = TRUE)
   
   expect_equal(round(probs_and_likelihoods_per_item$P[1,], 3), c(.033, .352, .514, .102))
   expect_equal(round(probs_and_likelihoods_per_item$P[50,], 3), c(.086, .493, .381, .040))
@@ -124,9 +124,9 @@ test_that("model is GPCM, 3 dimensions, varying number of categories", {
   eta[c(40:45), 4] <- NA
   beta <- row_cumsum(eta)
   guessing <- NULL
-  responses <- c(rep(0,5), rep(1,5), rep(c(1:3),9), rep(c(0:2), 4), 3)
+  answers <- c(rep(0,5), rep(1,5), rep(c(1:3),9), rep(c(0:2), 4), 3)
   
-  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, responses, with_likelihoods = TRUE)
+  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, answers, with_likelihoods = TRUE)
   
   expect_equal(round(probs_and_likelihoods_per_item$P[1,], 3), c(.001, .066, .932, NA, NA))
   expect_equal(round(probs_and_likelihoods_per_item$P[50,], 3), c(.000, .003, .066, .374, .556))
@@ -150,9 +150,9 @@ test_that("model is GRM, 1 dimensions, 2 categories", {
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
-  responses <- rep(c(1, 0), 25)
+  answers <- rep(c(1, 0), 25)
   
-  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, responses, with_likelihoods = TRUE)
+  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, answers, with_likelihoods = TRUE)
   
   expect_equal(round(probs_and_likelihoods_per_item$P[1,], 3), c(.239, .761))
   expect_equal(round(probs_and_likelihoods_per_item$P[50,], 3), c(.138, .862))
@@ -176,9 +176,9 @@ test_that("model is GRM, 3 dimensions, 4 categories", {
   temp_vector <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
   beta <- t(apply(temp_vector, 1, function(x) x + seq(-2, 2, length.out = (number_answer_categories - 1))))
   guessing <- NULL
-  responses <- c(rep(c(0, 1, 2), 16), 3, 3)
+  answers <- c(rep(c(0, 1, 2), 16), 3, 3)
   
-  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, responses, with_likelihoods = TRUE)
+  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, answers, with_likelihoods = TRUE)
   
   expect_equal(round(probs_and_likelihoods_per_item$P[1,], 3), c(.007, .042, .226, .725))
   expect_equal(round(probs_and_likelihoods_per_item$P[50,], 3), c(.001, .008, .052, .939))
@@ -205,9 +205,9 @@ test_that("model is GRM, 3 dimensions, varying number of categories", {
   eta[c(40:45), 4] <- NA
   beta <- row_cumsum(eta)
   guessing <- NULL
-  responses <- c(rep(0,5), rep(1,5), rep(c(1:3),9), rep(c(0:2), 4), 3)
+  answers <- c(rep(0,5), rep(1,5), rep(c(1:3),9), rep(c(0:2), 4), 3)
   
-  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, responses, with_likelihoods = TRUE)
+  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, answers, with_likelihoods = TRUE)
   
   expect_equal(round(probs_and_likelihoods_per_item$P[1,], 3), c(.069, .000, .985, NA, NA))
   expect_equal(round(probs_and_likelihoods_per_item$P[50,], 3), c(.261, .000, .000, .036, .933))
@@ -233,9 +233,9 @@ test_that("model is SM, 1 dimension, 2 categories", {
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
-  responses <- rep(c(1, 0), 25)
+  answers <- rep(c(1, 0), 25)
   
-  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, responses, with_likelihoods = TRUE)
+  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, answers, with_likelihoods = TRUE)
   
   expect_equal(round(probs_and_likelihoods_per_item$P[1,], 3), c(.575, .425))
   expect_equal(round(probs_and_likelihoods_per_item$P[50,], 3), c(.849, .151))
@@ -260,9 +260,9 @@ test_that("model is SM, 3 dimensions, 4 categories", {
   beta <- t(apply(temp_vector, 1, function(x) x + seq(-2, 2, length.out = (number_answer_categories - 1))))
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
   
-  responses <- c(rep(c(0, 1, 2), 16), 3, 3)
+  answers <- c(rep(c(0, 1, 2), 16), 3, 3)
   
-  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, responses, with_likelihoods = TRUE)
+  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, answers, with_likelihoods = TRUE)
   
   expect_equal(round(probs_and_likelihoods_per_item$P[1,], 3), c(.045, .245, .510, .201))
   expect_equal(round(probs_and_likelihoods_per_item$P[50,], 3), c(.005, .037, .214, .743))
@@ -289,9 +289,9 @@ test_that("model is SM, 3 dimensions, varying number of categories, estimator is
   eta[c(40:45), 4] <- NA
   beta <- row_cumsum(eta)
   guessing <- NULL
-  responses <- c(rep(0,5), rep(1,5), rep(c(1:3),9), rep(c(0:2), 4), 3)
+  answers <- c(rep(0,5), rep(1,5), rep(c(1:3),9), rep(c(0:2), 4), 3)
   
-  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, responses, with_likelihoods = TRUE)
+  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, answers, with_likelihoods = TRUE)
   
   expect_equal(round(probs_and_likelihoods_per_item$P[1,], 3), c(.009, .002, .990, NA, NA))
   expect_equal(round(probs_and_likelihoods_per_item$P[50,], 3), c(.003, .000, .000, .001, .996))

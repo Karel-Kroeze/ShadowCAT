@@ -1,9 +1,9 @@
 #' Get Likelihood or posterior density over all included items, and derivatives, based on a a given set of items
 #' 
 #' @param theta vector with true or estimated theta
-#' @param responses vector with person responses to the administered items
+#' @param answers vector with person answers to the administered items
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
-#' @param items_to_include vector with indeces of items to which responses have been given
+#' @param items_to_include vector with indeces of items to which answers have been given
 #' @param number_dimensions number of dimensions
 #' @param estimator type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"
 #' @param alpha matrix containing the alpha parameters (for complete test bank)
@@ -14,7 +14,7 @@
 #' @param inverse_likelihood_or_post_density should likelihood or posterior density values be reversed (useful for minimization, also reverses derivatives)
 #' @return the likelihood (estimator = maximum_likelihood) or posterior density (estimator = maximum_aposteriori or expected_aposteriori) of theta, with first and second derivatives as attributes
 #' @export
-likelihood_or_post_density <- function(theta, responses = NULL, model, items_to_include, number_dimensions, estimator, alpha, beta, guessing, prior = NULL, return_log_likelihood_or_post_density = TRUE, inverse_likelihood_or_post_density = FALSE) {
+likelihood_or_post_density <- function(theta, answers = NULL, model, items_to_include, number_dimensions, estimator, alpha, beta, guessing, prior = NULL, return_log_likelihood_or_post_density = TRUE, inverse_likelihood_or_post_density = FALSE) {
   # TODO priors: mean? 
   # priors: Alleen variabele deel van multivariaat normaal verdeling (exp).
   number_items <- length(items_to_include)
@@ -23,7 +23,7 @@ likelihood_or_post_density <- function(theta, responses = NULL, model, items_to_
   guessing <- get_subset(guessing, items_to_include)
   
   result <- function() {
-    probs_and_likelihoods <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, responses, TRUE) 
+    probs_and_likelihoods <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, answers, TRUE) 
     log_likelihood_or_post_density <- get_log_likelihood_or_post_density(probs_and_likelihoods) * (-1) ^ inverse_likelihood_or_post_density
     attr(log_likelihood_or_post_density, "gradient") <- get_first_derivative(probs_and_likelihoods) * (-1) ^ inverse_likelihood_or_post_density
     attr(log_likelihood_or_post_density, "hessian") <- get_second_derivative(probs_and_likelihoods) * (-1) ^ inverse_likelihood_or_post_density

@@ -4,7 +4,7 @@
 \alias{estimate_latent_trait}
 \title{Latent trait estimation}
 \usage{
-estimate_latent_trait(estimate, responses, prior, model, administered,
+estimate_latent_trait(estimate, answers, prior, model, administered,
   number_dimensions, estimator, alpha, beta, guessing,
   number_itemsteps_per_item, lower_bound, upper_bound,
   prior_var_safe_nlm = NULL, eap_estimation_procedure = "riemannsum")
@@ -12,7 +12,7 @@ estimate_latent_trait(estimate, responses, prior, model, administered,
 \arguments{
 \item{estimate}{Vector containing theta estimate, with covariance matrix as an attribute}
 
-\item{responses}{Vector with person responses}
+\item{answers}{Vector with person answers}
 
 \item{prior}{Prior covariance matrix for theta}
 
@@ -81,7 +81,7 @@ number_dimensions <- 1
 estimate <- rep(.3, number_dimensions)
 model <- "3PLM"
 number_items <- 50
-responses <- rep(c(1, 0), 17)
+answers <- rep(c(1, 0), 17)
 administered <- c(6:20, 31:49)
 alpha <- matrix(runif(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
 beta <- matrix(rnorm(number_items), nrow = number_items, ncol = 1)
@@ -94,11 +94,11 @@ prior_var_safe_nlm <- diag(number_dimensions)
 
 # obtain estimates
 estimator <- "maximum_likelihood"
-ML <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
+ML <- estimate_latent_trait(estimate, answers, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
 estimator <- "maximum_aposteriori"
-MAP <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
+MAP <- estimate_latent_trait(estimate, answers, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
 estimator <- "expected_aposteriori"
-EAP <- estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
+EAP <- estimate_latent_trait(estimate, answers, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
 ML; MAP; EAP
 
 # access variance
@@ -113,9 +113,9 @@ upper_bound <- rep(3, number_dimensions)
 prior <- diag(number_dimensions) 
 
 estimator <- "maximum_aposteriori"
-system.time(estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = diag(number_dimensions)))
+system.time(estimate_latent_trait(estimate, answers, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = diag(number_dimensions)))
 estimator <- "expected_aposteriori"
-system.time(estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound))
+system.time(estimate_latent_trait(estimate, answers, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound))
 
 }
 

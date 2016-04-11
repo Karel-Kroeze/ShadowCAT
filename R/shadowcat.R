@@ -1,16 +1,16 @@
-#' Returns a list with the key of the next item to be administered given a new response,
-#' an updated estimate of theta, updated covariance matrix of theta converted to a vector, and the responses to the administered items
+#' Returns a list with the key of the next item to be administered given a new answer,
+#' an updated estimate of theta, updated covariance matrix of theta converted to a vector, and the answers to the administered items
 #'
-#' @param responses named list of previous responses and new response, with names being the item keys; should be initialized with NULL
+#' @param answers named list of previous answers and new answer, with names being the item keys; should be initialized with NULL
 #' @param estimate vector with estimate of latent trait theta
 #' @param variance (co)variance matrix of the estimate, as vector
 #' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param alpha Matrix of alpha parameters, one column per dimension, one row per item. Row names should contain the item keys. Note that so called within-dimensional models still use an alpha matrix, they simply 
 #' have only one non-zero loading per item.
-#' @param beta Matrix of beta parameters, one column per item step, one row per item. Row names should contain the item keys. Note that ShadowCAT expects response categories to be sequential,
+#' @param beta Matrix of beta parameters, one column per item step, one row per item. Row names should contain the item keys. Note that ShadowCAT expects answer categories to be sequential,
 #' and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, and equal to the position of the 'location' of the beta parameter in the Beta matrix.
-#' The matrix will have a number of columns equal to the largest number of response categories, items with fewer response categories should be 
-#' right-padded with \code{NA}. \code{NA} values between response categories are not allowed, and will lead to errors.
+#' The matrix will have a number of columns equal to the largest number of answer categories, items with fewer answer categories should be 
+#' right-padded with \code{NA}. \code{NA} values between answer categories are not allowed, and will lead to errors.
 #' Beta matrix can be set to NULL if model is GPCM and eta is defined
 #' More flexibility in Beta parameters might be added in future versions.
 #' @param start_items items that are shown to the respondent before adaptive proces starts; one of
@@ -52,11 +52,11 @@
 #' @param prior_var_safe_ml if not NULL, expected a posteriori estimate with prior variance equal to prior_var_safe_ml (scalar or vector) is computed instead of maximum likelihood/maximum a posteriori, if maximum likelihood/maximum a posteriori estimate fails
 #' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori. One of "riemannsum" for integration via Riemannsum or
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
-#' @return a list containing the key of the next item to be administered given a new response (or "stop_test"), 
-#' updated estimate of theta, updated covariance matrix of theta converted to a vector, and the responses to the administered items (named list)
+#' @return a list containing the key of the next item to be administered given a new answer (or "stop_test"), 
+#' updated estimate of theta, updated covariance matrix of theta converted to a vector, and the answers to the administered items (named list)
 #' @importFrom matrixcalc is.positive.definite
 #' @export
-shadowcat <- function(responses, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior = NULL, guessing = NULL, eta = NULL, constraints_and_characts = NULL, lower_bound = rep(-3, ncol(alpha)), upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL, eap_estimation_procedure = "riemannsum") {      
+shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior = NULL, guessing = NULL, eta = NULL, constraints_and_characts = NULL, lower_bound = rep(-3, ncol(alpha)), upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL, eap_estimation_procedure = "riemannsum") {      
   result <- function() {
     beta <- get_beta(model, beta, eta)
     guessing <- get_guessing(guessing, beta) 
@@ -65,14 +65,14 @@ shadowcat <- function(responses, estimate, variance, model, alpha, beta, start_i
     number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
     lp_constraints_and_characts <- constraints_lp_format(stop_test$max_n, number_items, constraints_and_characts$characteristics, constraints_and_characts$constraints)
     item_keys <- rownames(alpha)
-    item_keys_administered <- names(responses)
+    item_keys_administered <- names(answers)
     item_keys_available <- get_item_keys_available(item_keys_administered, item_keys)
     attr(estimate, "variance") <- matrix(variance, ncol = number_dimensions)
     
-    estimate <- update_person_estimate(estimate, unlist(responses), match(item_keys_administered, item_keys), number_dimensions, alpha, beta, guessing, number_itemsteps_per_item)
-    continue_test <- !test_must_stop(length(responses), estimate, stop_test$min_n, stop_test$max_n, stop_test$target, stop_test$cutoffs)
+    estimate <- update_person_estimate(estimate, unlist(answers), match(item_keys_administered, item_keys), number_dimensions, alpha, beta, guessing, number_itemsteps_per_item)
+    continue_test <- !test_must_stop(length(answers), estimate, stop_test$min_n, stop_test$max_n, stop_test$target, stop_test$cutoffs)
     if (continue_test) {
-      index_new_item <- get_next_item(start_items, information_summary, lp_constraints_and_characts$lp_constraints, lp_constraints_and_characts$lp_chars, estimate, model, unlist(responses), prior, match(item_keys_available, item_keys), match(item_keys_administered, item_keys), number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure)
+      index_new_item <- get_next_item(start_items, information_summary, lp_constraints_and_characts$lp_constraints, lp_constraints_and_characts$lp_chars, estimate, model, unlist(answers), prior, match(item_keys_available, item_keys), match(item_keys_administered, item_keys), number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure)
       key_new_item <- item_keys[index_new_item]
     }
     else {
@@ -83,13 +83,13 @@ shadowcat <- function(responses, estimate, variance, model, alpha, beta, start_i
          continue_test = as.scalar2(continue_test),
          estimate = as.vector(estimate),
          variance = as.vector(attr(estimate, "variance")),
-         responses = responses)
+         answers = answers)
   }
   
   # if inititial items have been administered (so we are in the CAT phase), update person estimate after each newly answered item
-  update_person_estimate <- function(estimate, responses_vector, item_indeces_administered, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item) { 
-    if (length(responses) > start_items$n)
-      estimate_latent_trait(estimate, responses_vector, prior, model, item_indeces_administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml, eap_estimation_procedure)
+  update_person_estimate <- function(estimate, answers_vector, item_indeces_administered, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item) { 
+    if (length(answers) > start_items$n)
+      estimate_latent_trait(estimate, answers_vector, prior, model, item_indeces_administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml, eap_estimation_procedure)
     else
       estimate
   }
@@ -140,7 +140,7 @@ shadowcat <- function(responses, estimate, variance, model, alpha, beta, start_i
       add_error("estimate", "length should be equal to the number of columns of the alpha matrix")
     if (length(estimate)^2 != length(variance))
       add_error("variance", "should have a length equal to the length of estimate squared")
-    if (is.null(responses) && !is.positive.definite(matrix(variance, ncol = sqrt(length(variance)))))
+    if (is.null(answers) && !is.positive.definite(matrix(variance, ncol = sqrt(length(variance)))))
       add_error("variance", "matrix is not positive definite")
     if (model %not_in% c("3PLM", "GPCM", "SM", "GRM"))
       add_error("model", "of unknown type")
@@ -166,8 +166,8 @@ shadowcat <- function(responses, estimate, variance, model, alpha, beta, start_i
       add_error("start_items_n", "contains inconsistent information. Total length of start phase and sum of length per dimension do not match")
     if (!is.null(stop_test$cutoffs) && !is.matrix(stop_test$cutoffs))
       add_error("stop_test", "contains cutoff values in non-matrix format")
-    if (!all(names(responses) %in% rownames(alpha)))
-      add_error("responses", "contains non-existing key")
+    if (!all(names(answers) %in% rownames(alpha)))
+      add_error("answers", "contains non-existing key")
     if (estimator %not_in% c("maximum_likelihood", "maximum_aposteriori", "expected_aposteriori"))
       add_error("estimator", "of unknown type")
     if (information_summary %not_in% c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler"))

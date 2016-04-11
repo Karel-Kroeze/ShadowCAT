@@ -11,7 +11,7 @@ test_that("1 dimensions, 2 categories, estimator is maximum_likelihood", {
   number_dimensions <- 1
   estimator <- "maximum_likelihood"
   estimate <- 0
-  responses <- rep(c(1, 0), 17)
+  answers <- rep(c(1, 0), 17)
   administered <- c(6:20, 31:49)
   available <- c(1:5, 21:30, 50)
   prior <- diag(1) * .4
@@ -22,8 +22,8 @@ test_that("1 dimensions, 2 categories, estimator is maximum_likelihood", {
   upper_bound <- 3
   number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   
-  posterior_expected_kl_information_gauss_hermite_quad <- get_posterior_expected_kl_information(estimate, model, responses, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure = "gauss_hermite_quad")
-  posterior_expected_kl_information_riemannsum <- get_posterior_expected_kl_information(estimate, model, responses, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure = "riemannsum")
+  posterior_expected_kl_information_gauss_hermite_quad <- get_posterior_expected_kl_information(estimate, model, answers, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure = "gauss_hermite_quad")
+  posterior_expected_kl_information_riemannsum <- get_posterior_expected_kl_information(estimate, model, answers, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure = "riemannsum")
   
   expect_equal(length(posterior_expected_kl_information_gauss_hermite_quad), 16)
   expect_equal(round(posterior_expected_kl_information_gauss_hermite_quad[c(1, 3, 16)], 15), c(1.554e-12, 8.470e-13, 6.775e-12))
@@ -37,7 +37,7 @@ test_that("1 dimensions, 2 categories, estimator is expected_aposteriori", {
   number_dimensions <- 1
   estimator <- "expected_aposteriori"
   estimate <- 0
-  responses <- rep(c(1, 0), 17)
+  answers <- rep(c(1, 0), 17)
   administered <- c(6:20, 31:49)
   available <- c(1:5, 21:30, 50)
   prior <- diag(1) * .4
@@ -48,7 +48,7 @@ test_that("1 dimensions, 2 categories, estimator is expected_aposteriori", {
   upper_bound <- 3
   number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   
-  posterior_expected_kl_information <- get_posterior_expected_kl_information(estimate, model, responses, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior, number_itemsteps_per_item, lower_bound, upper_bound)
+  posterior_expected_kl_information <- get_posterior_expected_kl_information(estimate, model, answers, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior, number_itemsteps_per_item, lower_bound, upper_bound)
   
   expect_equal(length(posterior_expected_kl_information), 16)
   expect_equal(round(posterior_expected_kl_information[c(1, 3, 16)], 19), c(4.112e-13, 3.457e-13, 1.753e-12))
@@ -61,7 +61,7 @@ test_that("model is GPCM, 3 dimensions, varying numbers of categories", {
   number_dimensions <- 3
   estimator <- "expected_aposteriori"
   estimate <- 0
-  responses <- rep(c(1, 0), 17)
+  answers <- rep(c(1, 0), 17)
   administered <-  c(6:20, 31:49)
   available <-  c(1:5, 21:30, 50)
   prior <- diag(number_dimensions)
@@ -77,7 +77,7 @@ test_that("model is GPCM, 3 dimensions, varying numbers of categories", {
   upper_bound <- 3
   number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   
-  posterior_expected_kl_information <- get_posterior_expected_kl_information(estimate, model, responses, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior, number_itemsteps_per_item, lower_bound, upper_bound)
+  posterior_expected_kl_information <- get_posterior_expected_kl_information(estimate, model, answers, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior, number_itemsteps_per_item, lower_bound, upper_bound)
   
   expect_equal(length(posterior_expected_kl_information), 16)
   expect_equal(round(posterior_expected_kl_information[c(1, 3, 16)], 19), c(8.690e-17, 5.240e-17, 5.737e-16))

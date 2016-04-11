@@ -2,17 +2,17 @@
 % Please edit documentation in R/shadowcat.R
 \name{shadowcat}
 \alias{shadowcat}
-\title{Returns a list with the key of the next item to be administered given a new response,
-an updated estimate of theta, updated covariance matrix of theta converted to a vector, and the responses to the administered items}
+\title{Returns a list with the key of the next item to be administered given a new answer,
+an updated estimate of theta, updated covariance matrix of theta converted to a vector, and the answers to the administered items}
 \usage{
-shadowcat(responses, estimate, variance, model, alpha, beta, start_items,
+shadowcat(answers, estimate, variance, model, alpha, beta, start_items,
   stop_test, estimator, information_summary, prior = NULL, guessing = NULL,
   eta = NULL, constraints_and_characts = NULL, lower_bound = rep(-3,
   ncol(alpha)), upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL,
   eap_estimation_procedure = "riemannsum")
 }
 \arguments{
-\item{responses}{named list of previous responses and new response, with names being the item keys; should be initialized with NULL}
+\item{answers}{named list of previous answers and new answer, with names being the item keys; should be initialized with NULL}
 
 \item{estimate}{vector with estimate of latent trait theta}
 
@@ -23,10 +23,10 @@ shadowcat(responses, estimate, variance, model, alpha, beta, start_items,
 \item{alpha}{Matrix of alpha parameters, one column per dimension, one row per item. Row names should contain the item keys. Note that so called within-dimensional models still use an alpha matrix, they simply 
 have only one non-zero loading per item.}
 
-\item{beta}{Matrix of beta parameters, one column per item step, one row per item. Row names should contain the item keys. Note that ShadowCAT expects response categories to be sequential,
+\item{beta}{Matrix of beta parameters, one column per item step, one row per item. Row names should contain the item keys. Note that ShadowCAT expects answer categories to be sequential,
 and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, and equal to the position of the 'location' of the beta parameter in the Beta matrix.
-The matrix will have a number of columns equal to the largest number of response categories, items with fewer response categories should be 
-right-padded with \code{NA}. \code{NA} values between response categories are not allowed, and will lead to errors.
+The matrix will have a number of columns equal to the largest number of answer categories, items with fewer answer categories should be 
+right-padded with \code{NA}. \code{NA} values between answer categories are not allowed, and will lead to errors.
 Beta matrix can be set to NULL if model is GPCM and eta is defined
 More flexibility in Beta parameters might be added in future versions.}
 
@@ -82,11 +82,11 @@ See constraints_lp_format() for details}
 "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature.}
 }
 \value{
-a list containing the key of the next item to be administered given a new response (or "stop_test"), 
-updated estimate of theta, updated covariance matrix of theta converted to a vector, and the responses to the administered items (named list)
+a list containing the key of the next item to be administered given a new answer (or "stop_test"), 
+updated estimate of theta, updated covariance matrix of theta converted to a vector, and the answers to the administered items (named list)
 }
 \description{
-Returns a list with the key of the next item to be administered given a new response,
-an updated estimate of theta, updated covariance matrix of theta converted to a vector, and the responses to the administered items
+Returns a list with the key of the next item to be administered given a new answer,
+an updated estimate of theta, updated covariance matrix of theta converted to a vector, and the answers to the administered items
 }
 

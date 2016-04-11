@@ -11,7 +11,7 @@
 #' "posterior_expected_kullback_leibler" = compute Posterior expected Kullback-Leibler Information
 #' @param estimate vector with current theta estimate
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
-#' @param responses vector with person responses
+#' @param answers vector with person answers
 #' @param prior prior covariance matrix for theta
 #' @param available vector with indeces of yet available items
 #' @param administered vector with indeces of administered items
@@ -30,7 +30,7 @@
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. Only important here if information_summary is posterior_expected_kl_information.
 #' @return vector with information for each available item
 #' @export
-get_summarized_information <- function(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE, eap_estimation_procedure = "riemannsum") {
+get_summarized_information <- function(information_summary, estimate, model, answers, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE, eap_estimation_procedure = "riemannsum") {
   fisher_information <- get_fisher_information(estimate, model, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item)
   result <- function() {
     item_information <- get_item_information_switch()
@@ -81,7 +81,7 @@ get_summarized_information <- function(information_summary, estimate, model, res
   }
 
   item_information_pekl <- function() {
-    get_posterior_expected_kl_information(estimate, model, responses, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure = eap_estimation_procedure)
+    get_posterior_expected_kl_information(estimate, model, answers, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure = eap_estimation_procedure)
   }
   
   validate <- function() {

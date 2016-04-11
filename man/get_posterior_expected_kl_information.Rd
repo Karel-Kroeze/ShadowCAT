@@ -4,7 +4,7 @@
 \alias{get_posterior_expected_kl_information}
 \title{Posterior expected Kullback-Leibler Information}
 \usage{
-get_posterior_expected_kl_information(estimate, model, responses, administered,
+get_posterior_expected_kl_information(estimate, model, answers, administered,
   available, number_dimensions, estimator, alpha, beta, guessing, prior,
   number_itemsteps_per_item, lower_bound, upper_bound, theta_range = -3:3,
   eap_estimation_procedure = "riemannsum")
@@ -14,7 +14,7 @@ get_posterior_expected_kl_information(estimate, model, responses, administered,
 
 \item{model}{string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
 
-\item{responses}{vector with person responses}
+\item{answers}{vector with person answers}
 
 \item{administered}{vector with indeces of administered items}
 

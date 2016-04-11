@@ -4,7 +4,7 @@
 \alias{likelihood_or_post_density}
 \title{Get Likelihood or posterior density over all included items, and derivatives, based on a a given set of items}
 \usage{
-likelihood_or_post_density(theta, responses = NULL, model, items_to_include,
+likelihood_or_post_density(theta, answers = NULL, model, items_to_include,
   number_dimensions, estimator, alpha, beta, guessing, prior = NULL,
   return_log_likelihood_or_post_density = TRUE,
   inverse_likelihood_or_post_density = FALSE)
@@ -12,11 +12,11 @@ likelihood_or_post_density(theta, responses = NULL, model, items_to_include,
 \arguments{
 \item{theta}{vector with true or estimated theta}
 
-\item{responses}{vector with person responses to the administered items}
+\item{answers}{vector with person answers to the administered items}
 
 \item{model}{string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
 
-\item{items_to_include}{vector with indeces of items to which responses have been given}
+\item{items_to_include}{vector with indeces of items to which answers have been given}
 
 \item{number_dimensions}{number of dimensions}
 

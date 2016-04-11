@@ -18,7 +18,7 @@
 #' @param lp_characters data frame with constraint characters in lp format: the lp_chars from the list returned by constraints_lp_format(); NULL means no constraints
 #' @param estimate vector with current theta estimate
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
-#' @param responses vector with person responses
+#' @param answers vector with person answers
 #' @param prior covariance matrix of the (multi variate) normal prior for theta
 #' @param available vector with indeces of yet available items
 #' @param administered vector with indeces of administered items
@@ -36,12 +36,12 @@
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. Only important here if information_summary is posterior_expected_kl_information.
 #' @return integer item index next item
 #' @export
-get_next_item <- function(start_items, information_summary, lp_constraints, lp_characters, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure = "riemannsum") {
+get_next_item <- function(start_items, information_summary, lp_constraints, lp_characters, estimate, model, answers, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure = "riemannsum") {
   result <- function() {
-    if (length(responses) < start_items$n)
+    if (length(answers) < start_items$n)
       get_start_item(start_items$type)
     else
-      get_best_item(information_summary, lp_constraints, lp_characters, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure = eap_estimation_procedure)
+      get_best_item(information_summary, lp_constraints, lp_characters, estimate, model, answers, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure = eap_estimation_procedure)
   }
   
   get_start_item <- function(start_type) {
@@ -56,7 +56,7 @@ get_next_item <- function(start_items, information_summary, lp_constraints, lp_c
   }
   
   get_start_item_fixed <- function() {
-    start_items$indeces[length(responses) + 1]
+    start_items$indeces[length(answers) + 1]
   }
   
   # picks n_by_dimension starting items per dimension (or n_i if n_by_dimension is a length Q vector), assumes that items load on a single dimension, 
@@ -81,7 +81,7 @@ get_next_item <- function(start_items, information_summary, lp_constraints, lp_c
   
   # if enough items from first dimension are drawn, items from next dimension are drawn, etc.
   find_dimension_to_draw_from <- function(n_by_dimension_vector) {
-    sum(length(responses) >= cumsum(n_by_dimension_vector)) + 1
+    sum(length(answers) >= cumsum(n_by_dimension_vector)) + 1
   }
   
   validate <- function() {

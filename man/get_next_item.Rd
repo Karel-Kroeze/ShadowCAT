@@ -5,7 +5,7 @@
 \title{Next item}
 \usage{
 get_next_item(start_items, information_summary, lp_constraints, lp_characters,
-  estimate, model, responses, prior, available, administered, number_items,
+  estimate, model, answers, prior, available, administered, number_items,
   number_dimensions, estimator, alpha, beta, guessing,
   number_itemsteps_per_item, lower_bound, upper_bound,
   eap_estimation_procedure = "riemannsum")
@@ -33,7 +33,7 @@ n_by_dimension = scalar of number of initial items per dimension, or vector with
 
 \item{model}{string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
 
-\item{responses}{vector with person responses}
+\item{answers}{vector with person answers}
 
 \item{prior}{covariance matrix of the (multi variate) normal prior for theta}
 

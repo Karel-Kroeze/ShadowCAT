@@ -12,7 +12,7 @@
 #' 
 #' @param estimate vector with current theta estimate
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
-#' @param responses vector with person responses
+#' @param answers vector with person answers
 #' @param administered vector with indeces of administered items
 #' @param available vector with indeces of available items
 #' @param number_dimensions number of dimensions
@@ -30,7 +30,7 @@
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
 #' @return Vector with PEKL information for each yet available item.
 #' @export
-get_posterior_expected_kl_information <- function(estimate, model, responses, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior, number_itemsteps_per_item, lower_bound, upper_bound, theta_range = -3:3, eap_estimation_procedure = "riemannsum") {
+get_posterior_expected_kl_information <- function(estimate, model, answers, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior, number_itemsteps_per_item, lower_bound, upper_bound, theta_range = -3:3, eap_estimation_procedure = "riemannsum") {
   result <- function() {
     # we'll perform a very basic integration over the theta range
     # expand the grid for multidimensional models (number of calculations will be length(theta_range)**Q, which can still get quite high for high dimensionalities.)
@@ -44,14 +44,14 @@ get_posterior_expected_kl_information <- function(estimate, model, responses, ad
     if (estimator == "expected_aposteriori")
       estimate
     else
-      estimate_latent_trait(estimate, responses, prior, model, administered, number_dimensions, estimator = "expected_aposteriori", alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure = eap_estimation_procedure)
+      estimate_latent_trait(estimate, answers, prior, model, administered, number_dimensions, estimator = "expected_aposteriori", alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure = eap_estimation_procedure)
   }
   
   #' Kullback Leibler Divergence for given items and pairs of thetas x posterior density.
   #' returns vector containing information for each yet available item
   kullback_leibler_divergence <- function(theta, probabilities_given_eap_estimate, log_probabilities_given_eap_estimate) {
     probabilities_given_theta <- get_probs_and_likelihoods_per_item(theta, model, get_subset(alpha, available), get_subset(beta, available), get_subset(guessing, available), with_likelihoods = FALSE)$P
-    likelihood_or_post_density_theta <- likelihood_or_post_density(theta, responses, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, return_log_likelihood_or_post_density = FALSE)
+    likelihood_or_post_density_theta <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, return_log_likelihood_or_post_density = FALSE)
     rowSums(probabilities_given_eap_estimate * (log_probabilities_given_eap_estimate - log(probabilities_given_theta)), na.rm = TRUE) * likelihood_or_post_density_theta
   }
   

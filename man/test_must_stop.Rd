@@ -4,11 +4,11 @@
 \alias{test_must_stop}
 \title{Done}
 \usage{
-test_must_stop(number_responses, estimate, min_n, max_n,
+test_must_stop(number_answers, estimate, min_n, max_n,
   stop_variance_target = NULL, cutoffs = NULL)
 }
 \arguments{
-\item{number_responses}{number of responses given}
+\item{number_answers}{number of answers given}
 
 \item{estimate}{vector with current theta estimate, with covariance matrix as its attribute}
 

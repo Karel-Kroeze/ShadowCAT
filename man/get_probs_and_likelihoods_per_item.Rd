@@ -6,7 +6,7 @@
 likelihood with derivative per item}
 \usage{
 get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing,
-  responses = numeric(0), with_likelihoods)
+  answers = numeric(0), with_likelihoods)
 }
 \arguments{
 \item{theta}{vector with true or estimated theta}
@@ -19,7 +19,7 @@ get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing,
 
 \item{guessing}{matrix containing the quessing parameters of administered items (if with_likelihoods, only of administered items)}
 
-\item{responses}{if with_likelihoods = TRUE, vector with person responses to the administered items; else, numeric(0)}
+\item{answers}{if with_likelihoods = TRUE, vector with person answers to the administered items; else, numeric(0)}
 
 \item{with_likelihoods}{if FALSE, only the probability matrix is returned, if TRUE, the likelihoods and derivatives are also returned}
 }
