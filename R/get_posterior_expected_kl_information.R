@@ -51,7 +51,7 @@ get_posterior_expected_kl_information <- function(estimate, model, answers, admi
   #' returns vector containing information for each yet available item
   kullback_leibler_divergence <- function(theta, probabilities_given_eap_estimate, log_probabilities_given_eap_estimate) {
     probabilities_given_theta <- get_probs_and_likelihoods_per_item(theta, model, get_subset(alpha, available), get_subset(beta, available), get_subset(guessing, available), with_likelihoods = FALSE)$P
-    likelihood_or_post_density_theta <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior = prior, return_log_likelihood_or_post_density = FALSE)
+    likelihood_or_post_density_theta <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator = "expected_aposteriori", alpha, beta, guessing, prior = prior, return_log_likelihood_or_post_density = FALSE)
     rowSums(probabilities_given_eap_estimate * (log_probabilities_given_eap_estimate - log(probabilities_given_theta)), na.rm = TRUE) * likelihood_or_post_density_theta
   }
   
