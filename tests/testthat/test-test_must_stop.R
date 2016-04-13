@@ -106,7 +106,7 @@ test_that("stop rule is cut off, far enough below cut off, three dimensions, but
 test_that("stop rule is cut off, not far enough below cut off, three dimensions, but max number of items reached", {
   estimate <- c(.7, 1.1, -2.5)
   attr(estimate, "variance") <- diag(c(.4, .1, .2)^2)
-  should_stop <- test_must_stop(number_answers = 15, estimate, min_n = NULL, max_n = 15, stop_variance_target = .1, cutoffs = cutoffs)
+  should_stop <- test_must_stop(number_answers = 75, estimate, min_n = NULL, max_n = 75, stop_variance_target = .1, cutoffs = cutoffs)
   expect_equal(should_stop, TRUE)
 })
 
