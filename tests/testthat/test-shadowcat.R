@@ -768,7 +768,7 @@ test_that("stop rule is cutoff", {
   
   model <- '3PLM'
   start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
-  stop_test <- list(max_n = 300, cutoffs = with_random_seed(2, matrix)(runif(903, 1, 2), ncol = 3))
+  stop_test <- list(max_n = 300, cutoffs = with_random_seed(2, matrix)(runif(900, 1, 2), ncol = 3))
   estimator <- 'maximum_aposteriori'
   information_summary <- 'posterior_determinant'
   
@@ -778,7 +778,7 @@ test_that("stop rule is cutoff", {
   test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.105, -.110, -1.794))
-  expect_equal(diag(round(attr(test_outcome$estimate, "variance"), 3)),c(.234, .233, .351))
+  expect_equal(diag(round(attr(test_outcome$estimate, "variance"), 3)), c(.234, .233, .351))
   expect_equal(length(test_outcome$answers), 32)
 })
 
@@ -816,8 +816,6 @@ test_that("invalid input", {
   error_message_information_summary <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary = NULL, prior, guessing, eta)
   error_message_lower_bound_missing <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta, lower_bound = NULL)
   error_message_n_by_dimension <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items = list(type = "random_by_dimension", n_by_dimension = c(2, 3)), stop_test, estimator, information_summary, prior, guessing, eta)
-  
-  
   error_message_alpha_matrix <- shadowcat(answers = NULL, estimate, variance, model, alpha = 1:10, beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
   error_message_alpha_rownames <- shadowcat(answers = NULL, estimate, variance, model, alpha = matrix(1:10), beta, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
   error_message_beta_matrix <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta = 1:10, start_items, stop_test, estimator, information_summary, prior, guessing, eta)
@@ -842,6 +840,7 @@ test_that("invalid input", {
   error_message_prior_incorrect_form3 <- shadowcat(answers = NULL, estimate, variance, model = "GPCM", alpha, beta, start_items, stop_test, estimator = "maximum_likelihood", information_summary = "posterior_trace", prior = diag(c(-.1, .1, .5)), guessing, eta)
   error_message_max_n <- shadowcat(answers = NULL, estimate, variance, model = "GPCM", alpha, beta, start_items, stop_test = list("variance" = .6), estimator, information_summary, prior, guessing, eta)
   error_message_max_n_too_large <- shadowcat(answers = NULL, estimate, variance, model = "GPCM", alpha, beta, start_items, stop_test = list(max_n = 500), estimator, information_summary, prior, guessing, eta)
+  error_message_invalid_cutoffs <- shadowcat(answers = NULL, estimate, variance, model = "GPCM", alpha, beta, start_items, stop_test = list(max_n = 300, cutoffs = matrix(c(NA, .3, .5, .9), ncol = 1)), estimator, information_summary, prior, guessing, eta)
   error_message_start_items_0 <- shadowcat(answers = NULL, estimate, variance, model = "GPCM", alpha, beta, start_items = list(n = 0), stop_test, estimator, information_summary = "posterior_expected_kullback_leibler", prior, guessing, eta)
   error_message_start_items_random_by_dim_scalar <- shadowcat(answers = NULL, estimate, variance, model = "GPCM", alpha, beta, start_items = list(type = "random_by_dimension", n_by_dimension = 2, n = 2), stop_test, estimator, information_summary, prior, guessing, eta)
   error_message_start_items_random_by_dim_vector <- shadowcat(answers = NULL, estimate, variance, model = "GPCM", alpha, beta, start_items = list(type = "random_by_dimension", n_by_dimension = c(2, 3, 2), n = 9), stop_test, estimator, information_summary, prior, guessing, eta)
@@ -891,6 +890,7 @@ test_that("invalid input", {
   expect_equal(error_message_prior_incorrect_form3$errors$prior, "should be a square positive definite matrix, with dimensions equal to the length of estimate")
   expect_equal(error_message_max_n$errors$stop_test, "contains no max_n")
   expect_equal(error_message_max_n_too_large$errors$stop_test_max_n, "is larger than the number of items in the item bank")
+  expect_equal(error_message_invalid_cutoffs$errors$stop_test_cutoffs, "should be a matrix without missing values, and number of rows equal to max_n and number of columns equal to the number of dimensions")
   expect_equal(error_message_start_items_0$errors$start_items, "requires n > 0 for posterior expected kullback leibler information summary")
   expect_equal(error_message_start_items_random_by_dim_scalar$errors$start_items_n, "contains inconsistent information. Total length of start phase and sum of length per dimension do not match")
   expect_equal(error_message_start_items_random_by_dim_vector$errors$start_items_n, "contains inconsistent information. Total length of start phase and sum of length per dimension do not match (n != sum(n_by_dimension)")

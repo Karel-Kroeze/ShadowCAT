@@ -158,6 +158,8 @@ shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_ite
       add_error("stop_test", "contains no max_n")
     if (!is.null(stop_test$max_n) && stop_test$max_n > nrow(alpha))
       add_error("stop_test_max_n", "is larger than the number of items in the item bank")
+    if (!is.null(stop_test$max_n) && !is.null(stop_test$cutoffs) && (!is.matrix(stop_test$cutoffs) || nrow(stop_test$cutoffs) < stop_test$max_n || ncol(stop_test$cutoffs) != length(estimate) || any(is.na(stop_test$cutoffs))))
+      add_error("stop_test_cutoffs", "should be a matrix without missing values, and number of rows equal to max_n and number of columns equal to the number of dimensions")
     if (start_items$n == 0 && information_summary == "posterior_expected_kullback_leibler")
       add_error("start_items", "requires n > 0 for posterior expected kullback leibler information summary")
     if (!is.null(start_items$type) && start_items$type == "random_by_dimension" && length(start_items$n_by_dimension) == length(estimate) && start_items$n != sum(start_items$n_by_dimension))

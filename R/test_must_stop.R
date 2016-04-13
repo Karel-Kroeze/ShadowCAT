@@ -15,7 +15,7 @@ test_must_stop <- function(number_answers, estimate, min_n, max_n, stop_variance
   min_number_items_reached <- is.null(min_n) || number_answers >= min_n
   max_number_items_reached <- number_answers >= max_n
   variance_target_reached <- !is.null(stop_variance_target) && all(diag(attr(estimate, "variance")) < stop_variance_target)
-  estimate_far_enough_below_cutoff <- !is.null(cutoffs) && all(estimate + 3 * sqrt(diag(attr(estimate, "variance"))) < cutoffs[number_answers + 1, ])
+  estimate_far_enough_below_cutoff <- !is.null(cutoffs) && number_answers < max_n && all(estimate + 3 * sqrt(diag(attr(estimate, "variance"))) < cutoffs[number_answers + 1, ])
   if ((max_number_items_reached || variance_target_reached || estimate_far_enough_below_cutoff) && min_number_items_reached)
     TRUE
   else
