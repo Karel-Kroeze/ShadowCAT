@@ -90,6 +90,24 @@ number_non_missing_cells_per_row <- function(x) {
   apply(x, 1, function(x_row) sum(!is.na(x_row)))
 }
 
+#' remove rows of a matrix that contain one or more values outside specified bounds
+#' 
+#' @param matrix_to_evaluate Matrix for which the rows with values outside the bounds should be removed
+#' @param lower_bound Vector with lower bounds; length should be equal to the number of columns of matrix_to_evaluate
+#' @param upper_bound Vector with upper bounds; length should be equal to the number of columns of matrix_to_evaluate
+#' @return matrix_to_evaluate without the rows that contain values outside the specified bounds
+#' @examples should_be_equal1 <- remove_rows_outside_bounds(matrix(-3:3), lower_bound = -2, upper_bound = 2) == matrix(-2:2);
+#' sum(should_be_equal1) == 5 || stop("wrong")
+#' matrix_to_evaluate <- expand.grid(list(-3:3, -2:2));
+#' should_be_equal2 <- remove_rows_outside_bounds(matrix_to_evaluate, lower_bound = c(-2, -3), upper_bound = c(2, 1)) == matrix_to_evaluate[c(2:6, 9:13, 16:20, 23:27), ];
+#' sum(should_be_equal2) == 40 || stop("wrong")
+#' @export
+remove_rows_outside_bounds <- function(matrix_to_evaluate, lower_bound, upper_bound) {
+  matrix_to_evaluate_transformed <- t(matrix_to_evaluate)
+  inside_bounds <- colSums(matrix_to_evaluate_transformed <= upper_bound & matrix_to_evaluate_transformed >= lower_bound) == ncol(matrix_to_evaluate)
+  matrix_to_evaluate[inside_bounds, , drop = FALSE]
+}
+
 #' compute cumulative sums for each row of a matrix
 #' 
 #' @param x a vector or matrix; if vector, the vector will be converted to a matrix with one column

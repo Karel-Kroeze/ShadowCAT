@@ -2,11 +2,11 @@
 % Please edit documentation in R/likelihood_or_post_density.R
 \name{likelihood_or_post_density}
 \alias{likelihood_or_post_density}
-\title{Get Likelihood or posterior density over all included items, and derivatives, based on a a given set of items}
+\title{Get Likelihood or posterior density (with normal prior) over all included items, and derivatives, based on a a given set of items}
 \usage{
 likelihood_or_post_density(theta, answers = NULL, model, items_to_include,
-  number_dimensions, estimator, alpha, beta, guessing, prior = NULL,
-  return_log_likelihood_or_post_density = TRUE,
+  number_dimensions, estimator, alpha, beta, guessing,
+  prior_parameters = NULL, return_log_likelihood_or_post_density = TRUE,
   inverse_likelihood_or_post_density = FALSE)
 }
 \arguments{
@@ -28,16 +28,17 @@ likelihood_or_post_density(theta, answers = NULL, model, items_to_include,
 
 \item{guessing}{matrix containing the quessing parameters (for complete test bank)}
 
-\item{prior}{prior covariance matrix for theta; only required if estimator is "maximum_aposteriori" or "expected_aposteriori" and output is "likelihood" or "both"}
+\item{prior_parameters}{List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...).
+Sigma should always be in matrix form.}
 
 \item{return_log_likelihood_or_post_density}{if TRUE, log of likelihood or posterior density is returned, else likelihood or posterior density on original scale}
 
 \item{inverse_likelihood_or_post_density}{should likelihood or posterior density values be reversed (useful for minimization, also reverses derivatives)}
 }
 \value{
-the likelihood (estimator = maximum_likelihood) or posterior density (estimator = maximum_aposteriori or expected_aposteriori) of theta, with first and second derivatives as attributes
+the likelihood (estimator is maximum_likelihood) or posterior density with normal prior (estimator is not maximum_likelihood) of theta, with first and second derivatives as attributes
 }
 \description{
-Get Likelihood or posterior density over all included items, and derivatives, based on a a given set of items
+Get Likelihood or posterior density (with normal prior) over all included items, and derivatives, based on a a given set of items
 }
 

@@ -30,15 +30,17 @@
 #' administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at certain iteration, test stops; 
 #' NULL means no cut off values
 #' @param estimator type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"
-#' @param information_summary called "objective" by Kroeze; how to summarize information for finding the best next item; one of
+#' @param information_summary called "objective" by Kroeze; how to summarize information; one of
 #' "determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
-#' "posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+#' "posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior_information + info_QxQ_k) for each yet available item k
 #' "trace": compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
-#' "posterior_trace": compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+#' "posterior_trace": compute trace(info_sofar_QxQ_plus_prior_information + info_QxQ_k) for each yet available item k
 #' "posterior_expected_kullback_leibler" = compute Posterior expected Kullback-Leibler Information
-#' @param prior covariance matrix of the (multi variate) normal prior for theta; mean vector is fixed at zero; not used for maximum likelihood estimator
-#' #' note that this prior should be a square matrix with number of rows and columns equal to the number of dimensions; values on the diagonal should be larger than 0
-#' @param guessing matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.
+#' @param prior_form String indicating the form of the prior; one of "normal" or "uniform"
+#' @param prior_parameters List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...), or 
+#' the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
+#' be in matrix form. The length of lower_bound and upper_bound should be equal to the number of dimensions
+#' @param guessing Matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.
 #' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others. Row names should contain the item keys.
 #' @param constraints_and_characts list with constraints and characteristics; NULL means no constraints
 #' constraints should be specified as a list of constraints, each constraint is a list with three named values;
@@ -47,19 +49,31 @@
 #' target: the target value, numeric. If the operator is "><", this should be a length two vector in between which the target should fall.
 #' characteristics should be a data.frame with characteristics, one row per item (rows in the same order as they are in alpha, beta, etc.), one column per characteristic.
 #' See constraints_lp_format() for details
-#' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values 
-#' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
-#' @param prior_var_safe_ml if not NULL, expected a posteriori estimate with prior variance equal to prior_var_safe_ml (scalar or vector) is computed instead of maximum likelihood/maximum a posteriori, if maximum likelihood/maximum a posteriori estimate fails
+#' @param lower_bound Vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values.
+#' Can only be defined when estimator is maximum_likelihood. Setting bounds with maximum likelihood estimation is equivalent to
+#' using maximum aposteriori estimation with a uniform prior. 
+#' @param upper_bound Vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
+#' Can only be defined when estimator is maximum_likelihood. Setting bounds with maximum likelihood estimation is equivalent to
+#' using maximum aposteriori estimation with a uniform prior.
+#' @param safe_maximum Only relevant if estimator is maximum likelihood or maximum aposteriori. 
+#' TRUE if estimator should switch to expected aposteriori if the maximization algorithm results in an error or warning.
+#' A normal prior with mean zero and variance equal to prior_var_safe_ml is used if estimator is maximum likelihood. The 
+#' already defined prior settings are used otherwise.
+#' @param prior_var_safe_ml Scalar or vector containing the prior variance for theta if safe_ml is TRUE and estimator is maximum likehood. 
 #' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori. One of "riemannsum" for integration via Riemannsum or
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
 #' @return a list containing the key of the next item to be administered given a new answer (or "stop_test"), 
 #' updated estimate of theta, updated covariance matrix of theta converted to a vector, and the answers to the administered items (named list)
 #' @importFrom matrixcalc is.positive.definite
 #' @export
-shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior = NULL, guessing = NULL, eta = NULL, constraints_and_characts = NULL, lower_bound = rep(-3, ncol(alpha)), upper_bound = rep(3, ncol(alpha)), prior_var_safe_ml = NULL, eap_estimation_procedure = "riemannsum") {      
+shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form = NULL, prior_parameters = NULL, guessing = NULL, eta = NULL, constraints_and_characts = NULL, lower_bound = NULL, upper_bound = NULL, safe_maximum = FALSE, prior_var_safe_ml = NULL, eap_estimation_procedure = "riemannsum") {      
   result <- function() {
-    beta <- get_beta(model, beta, eta)
-    guessing <- get_guessing(guessing, beta) 
+    switch_to_maximum_aposteriori <- estimator == "maximum_likelihood" && !is.null(lower_bound) && !is.null(upper_bound)
+    estimator <- get_estimator(switch_to_maximum_aposteriori)
+    prior_form <- get_prior_form(switch_to_maximum_aposteriori)
+    prior_parameters <- get_prior_parameters(switch_to_maximum_aposteriori)
+    beta <- get_beta()
+    guessing <- get_guessing(beta) 
     number_items <- nrow(beta)
     number_dimensions <- ncol(alpha)
     number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
@@ -69,10 +83,10 @@ shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_ite
     item_keys_available <- get_item_keys_available(item_keys_administered, item_keys)
     attr(estimate, "variance") <- matrix(variance, ncol = number_dimensions)
     
-    estimate <- update_person_estimate(estimate, unlist(answers), match(item_keys_administered, item_keys), number_dimensions, alpha, beta, guessing, number_itemsteps_per_item)
+    estimate <- update_person_estimate(estimate, unlist(answers), match(item_keys_administered, item_keys), number_dimensions, alpha, beta, guessing, number_itemsteps_per_item, estimator, prior_form, prior_parameters)
     continue_test <- !test_must_stop(length(answers), estimate, stop_test$min_n, stop_test$max_n, stop_test$target, stop_test$cutoffs)
     if (continue_test) {
-      index_new_item <- get_next_item(start_items, information_summary, lp_constraints_and_characts$lp_constraints, lp_constraints_and_characts$lp_chars, estimate, model, unlist(answers), prior, match(item_keys_available, item_keys), match(item_keys_administered, item_keys), number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure)
+      index_new_item <- get_next_item(start_items, information_summary, lp_constraints_and_characts$lp_constraints, lp_constraints_and_characts$lp_chars, estimate, model, unlist(answers), prior_form, prior_parameters, match(item_keys_available, item_keys), match(item_keys_administered, item_keys), number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, eap_estimation_procedure)
       key_new_item <- item_keys[index_new_item]
     }
     else {
@@ -87,9 +101,9 @@ shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_ite
   }
   
   # if inititial items have been administered (so we are in the CAT phase), update person estimate after each newly answered item
-  update_person_estimate <- function(estimate, answers_vector, item_indeces_administered, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item) { 
+  update_person_estimate <- function(estimate, answers_vector, item_indeces_administered, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item, estimator, prior_form, prior_parameters) { 
     if (length(answers) > start_items$n)
-      estimate_latent_trait(estimate, answers_vector, prior, model, item_indeces_administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_ml, eap_estimation_procedure)
+      estimate_latent_trait(estimate, answers_vector, prior_form, prior_parameters, model, item_indeces_administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, safe_maximum, prior_var_safe_ml, eap_estimation_procedure)
     else
       estimate
   }
@@ -99,6 +113,42 @@ shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_ite
       item_keys
     else
       item_keys[-which(item_keys %in% item_keys_administered)]
+  }
+  
+  get_beta <- function() {
+    # allow calculating beta from eta.
+    if (model == "GPCM" && is.null(beta) && !is.null(eta))
+      row_cumsum(eta)
+    else
+      beta
+  }
+  
+  get_guessing <- function(beta) {
+    if (is.null(guessing))
+      matrix(0, nrow(as.matrix(beta)), 1, dimnames = list(rownames(beta), NULL))
+    else
+      guessing
+  }
+  
+  get_estimator <- function(switch_to_maximum_aposteriori) {
+    if (switch_to_maximum_aposteriori)
+      "maximum_aposteriori"
+    else
+      estimator
+  }
+  
+  get_prior_form <- function(switch_to_maximum_aposteriori) {
+    if (switch_to_maximum_aposteriori)
+      "uniform"
+    else
+      prior_form
+  }
+  
+  get_prior_parameters <- function(switch_to_maximum_aposteriori) {
+    if (switch_to_maximum_aposteriori)
+      list(lower_bound = lower_bound, upper_bound = upper_bound)
+    else
+      prior_parameters
   }
   
   validate <- function() {
@@ -130,8 +180,6 @@ shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_ite
       return(add_error("eta", "should be a matrix with item keys as row names"))
     if (!is.null(guessing) && (!is.matrix(guessing) || ncol(guessing) != 1 || is.null(rownames(guessing))))
       return(add_error("guessing", "should be a single column matrix with item keys as row names"))
-    if (is.null(lower_bound) || is.null(upper_bound))
-      return(add_error("lower_or_upper_bound", "is missing"))
     if (!is.null(start_items$type) && start_items$type == "random_by_dimension" && length(start_items$n_by_dimension) %not_in% c(1, length(estimate)))
       return(add_error("start_items", "length of n_by_dimension should be a scalar or vector of the length of estimate"))
     if (!row_names_are_equal(rownames(alpha), list(alpha, beta, eta, guessing)))
@@ -150,10 +198,22 @@ shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_ite
       add_error("beta_and_eta", "are both missing; define at least one of them")
     if (model == "GPCM" && !is.null(beta) && !is.null(eta) && !all(row_cumsum(eta) == beta))
       add_error("beta_and_eta", "objects do not match")
-    if ((estimator != "maximum_likelihood" || information_summary %in% c("posterior_determinant", "posterior_trace")) && is.null(prior))
-      add_error("prior", "is missing")
-    if (!is.null(prior) && (!is.matrix(prior) || !all(dim(prior) == c(length(estimate), length(estimate))) || !is.positive.definite(prior)))
-        add_error("prior", "should be a square positive definite matrix, with dimensions equal to the length of estimate")
+    if (estimator != "maximum_likelihood" && is.null(prior_form))
+      add_error("prior_form", "is missing")
+    if (estimator != "maximum_likelihood" && is.null(prior_parameters))
+      add_error("prior_parameters", "is missing")
+    if (!is.null(prior_form) && prior_form %not_in% c("normal", "uniform"))
+      add_error("prior_form", "of unknown type")
+    if (!is.null(prior_form) && !is.null(prior_parameters) && prior_form == "uniform" && (is.null(prior_parameters$lower_bound) || is.null(prior_parameters$upper_bound)))
+      add_error("prior_form_is_uniform", "so prior_parameters should contain lower_bound and upper_bound")
+    if (!is.null(prior_form) && !is.null(prior_parameters) && prior_form == "normal" && (is.null(prior_parameters$mu) || is.null(prior_parameters$Sigma)))
+      add_error("prior_form_is_normal", "so prior_parameters should contain mu and Sigma")
+    if (!is.null(prior_parameters$mu) && length(prior_parameters$mu) != length(estimate))
+      add_error("prior_parameters_mu", "should have same length as estimate")    
+    if (!is.null(prior_parameters$Sigma) && (!is.matrix(prior_parameters$Sigma) || !all(dim(prior_parameters$Sigma) == c(length(estimate), length(estimate))) || !is.positive.definite(prior_parameters$Sigma)))
+        add_error("prior_parameters_sigma", "should be a square positive definite matrix, with dimensions equal to the length of estimate")
+    if (!is.null(prior_parameters$lower_bound) && !is.null(prior_parameters$upper_bound) && (length(prior_parameters$lower_bound) != length(estimate) || length(prior_parameters$upper_bound) != length(estimate)))
+      add_error("prior_parameters_bounds", "should contain lower and upper bound of the same length as estimate")
     if (is.null(stop_test$max_n))
       add_error("stop_test", "contains no max_n")
     if (!is.null(stop_test$max_n) && stop_test$max_n > nrow(alpha))
@@ -176,10 +236,14 @@ shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_ite
       add_error("information_summary", "of unknown type")
     if (!is.null(prior_var_safe_ml) && (!is.vector(prior_var_safe_ml) || length(prior_var_safe_ml) %not_in% c(1, length(estimate)) || prior_var_safe_ml <= 0))
       add_error("prior_var_safe_ml", "should be a scalar or vector of the length of estimate, with values larger than zero")
-    if (length(lower_bound) %not_in% c(1, length(estimate)))
+    if (estimator == "maximum_likelihood" && information_summary %in% c("posterior_determinant", "posterior_trace", "posterior_expected_kullback_leibler"))
+      add_error("estimator_is_maximum_likelihood", "so using a posterior information summary makes no sense")
+    if (estimator != "maximum_likelihood" && (!is.null(lower_bound) || !is.null(upper_bound)))
+      add_error("bounds", "can only be defined if estimator is maximum likelihood")
+    if (!is.null(lower_bound) && length(lower_bound) %not_in% c(1, length(estimate)))
       add_error("lower_bound", "length of lower bound should be a scalar or vector of the length of estimate")
-    if (length(upper_bound) %not_in% c(1, length(estimate)))
-      add_error("upper_bound", "length of upper bound should be a scalar or vector of the length of estimate")
+    if (!is.null(upper_bound) && length(upper_bound) %not_in% c(1, length(estimate)))
+      add_error("upper_bound", "length of upper bound should be a scalar or vector of the length of estimate") 
   }
   
   invalid_result <- function() {
@@ -187,33 +251,5 @@ shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_ite
   }
   
   validate_and_run()
-}
-
-#' get beta matrix from beta or eta
-#' 
-#' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
-#' @param beta matrix containing beta parameters, may be NULL if model is GPCM and eta is defined
-#' @param eta matrix containing eta parameters, may be NULL if beta is defined
-#' @return beta matrix obtained from beta or eta
-#' @export
-get_beta <- function(model, beta, eta) {
-  # allow calculating beta from eta.
-  if (model == "GPCM" && is.null(beta) && !is.null(eta))
-    row_cumsum(eta)
-  else
-    beta
-}
-
-#' get guessing matrix
-#' 
-#' @param guessing vector containing guessing parameters; may be NULL in case of zero guessing parameters
-#' @param beta matrix containing beta parameters
-#' @return matrix containing guessing parameters
-#' @export
-get_guessing <- function(guessing, beta) {
-  if (is.null(guessing))
-    matrix(0, nrow(as.matrix(beta)), 1, dimnames = list(rownames(beta), NULL))
-  else
-    guessing
 }
 

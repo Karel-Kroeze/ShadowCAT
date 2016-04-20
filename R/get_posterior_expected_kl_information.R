@@ -20,39 +20,63 @@
 #' @param alpha matrix containing the alpha parameters
 #' @param beta matrix containing the beta parameters
 #' @param guessing matrix containing the quessing parameters
-#' @param prior prior covariance matrix for theta
+#' @param prior_form String indicating the form of the prior; one of "normal" or "uniform"
+#' @param prior_parameters List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...), or 
+#' the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
+#' be in matrix form.
 #' @param number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix
-#' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values
-#' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
-#' @param theta_range Vector of theta values to be evaluated in the numerical integration. Using a sparser range may alleviate stress in higher dimensional tests.
+#' @param theta_bounds Vector of left and right bound of theta values to be evaluated in the numerical integration. Using a sparser range may alleviate stress in higher dimensional tests.
 #' @param eap_estimation_procedure String indicating the estimation procedure for the expected aposteriori estimate, which is computed
 #' here if it is not the requested estimator in shadowcat(). One of "riemannsum" for integration via Riemannsum or
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
 #' @return Vector with PEKL information for each yet available item.
 #' @export
-get_posterior_expected_kl_information <- function(estimate, model, answers, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior, number_itemsteps_per_item, lower_bound, upper_bound, theta_range = -3:3, eap_estimation_procedure = "riemannsum") {
+get_posterior_expected_kl_information <- function(estimate, model, answers, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior_form, prior_parameters, number_itemsteps_per_item, theta_bounds = c(-4, 4), eap_estimation_procedure = "riemannsum") {
   result <- function() {
     # we'll perform a very basic integration over the theta range
-    # expand the grid for multidimensional models (number of calculations will be length(theta_range)**Q, which can still get quite high for high dimensionalities.)
+    # expand the grid for multidimensional models (number of calculations will be length(theta_values)**Q, which can still get quite high for high dimensionalities.)
     probabilities_given_eap_estimate <- get_probs_and_likelihoods_per_item(get_theta_estimate(), model, get_subset(alpha, available), get_subset(beta, available), get_subset(guessing, available), with_likelihoods = FALSE)$P
     log_probabilities_given_eap_estimate <- log(probabilities_given_eap_estimate)
-    grid <- expand.grid(rep(list(theta_range), number_dimensions))
-    row_or_vector_sums(apply(grid, 1, kullback_leibler_divergence, probabilities_given_eap_estimate = probabilities_given_eap_estimate, log_probabilities_given_eap_estimate = log_probabilities_given_eap_estimate))
+    theta_grid <- get_theta_grid()
+    row_or_vector_sums(apply(theta_grid, 1, kullback_leibler_divergence, probabilities_given_eap_estimate = probabilities_given_eap_estimate, log_probabilities_given_eap_estimate = log_probabilities_given_eap_estimate))
   }
   
   get_theta_estimate <- function() {
     if (estimator == "expected_aposteriori")
       estimate
     else
-      estimate_latent_trait(estimate, answers, prior, model, administered, number_dimensions, estimator = "expected_aposteriori", alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure = eap_estimation_procedure)
+      estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator = "expected_aposteriori", alpha, beta, guessing, number_itemsteps_per_item, eap_estimation_procedure = eap_estimation_procedure)
   }
   
   #' Kullback Leibler Divergence for given items and pairs of thetas x posterior density.
   #' returns vector containing information for each yet available item
   kullback_leibler_divergence <- function(theta, probabilities_given_eap_estimate, log_probabilities_given_eap_estimate) {
     probabilities_given_theta <- get_probs_and_likelihoods_per_item(theta, model, get_subset(alpha, available), get_subset(beta, available), get_subset(guessing, available), with_likelihoods = FALSE)$P
-    likelihood_or_post_density_theta <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator = "expected_aposteriori", alpha, beta, guessing, prior = prior, return_log_likelihood_or_post_density = FALSE)
+    likelihood_or_post_density_theta <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator = estimator_likelihood_or_post_density(), alpha, beta, guessing, prior_parameters = prior_parameters, return_log_likelihood_or_post_density = FALSE)
     rowSums(probabilities_given_eap_estimate * (log_probabilities_given_eap_estimate - log(probabilities_given_theta)), na.rm = TRUE) * likelihood_or_post_density_theta
+  }
+  
+  estimator_likelihood_or_post_density <- function() {
+    if (prior_form == "uniform")
+      "maximum_likelihood"
+    else
+      "expected_aposteriori"
+  }
+  
+  get_theta_grid <- function() {
+    theta_values <- get_theta_values()
+    grid <- expand.grid(rep(list(theta_values), number_dimensions))
+    if (prior_form == "uniform")
+      remove_rows_outside_bounds(grid, prior_parameters$lower_bound, prior_parameters$upper_bound)
+    else
+      grid
+  }
+  
+  get_theta_values <- function() {
+    if (number_dimensions == 1)
+      seq(theta_bounds[1], theta_bounds[2], (theta_bounds[2] - theta_bounds[1]) / 20)
+    else
+      theta_bounds[1]:theta_bounds[2]
   }
   
   result()

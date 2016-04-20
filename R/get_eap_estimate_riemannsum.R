@@ -45,12 +45,6 @@ get_eap_estimate_riemannsum <- function(dimension, likelihood, prior_form, prior
     t(lambda %*% t(grid_points))
   }
   
-  remove_rows_outside_bounds <- function(mid_gridpoints) {
-    mid_gridpoints_transpose <- t(mid_gridpoints)
-    inside_bounds <- colSums(mid_gridpoints_transpose <= prior_parameters$upper_bound & mid_gridpoints_transpose >= prior_parameters$lower_bound) == dimension
-    mid_gridpoints[inside_bounds, , drop = FALSE]
-  } 
-  
   get_list_gridpoints_uniform <- function() {
     lapply(1:dimension,
            function(dim) {
@@ -96,7 +90,7 @@ get_eap_estimate_riemannsum <- function(dimension, likelihood, prior_form, prior
     grid_points_untransformed <- expand.grid(get_list_gridpoints())
     grid_points_transformed <- transform_grid_points(grid_points_untransformed)
     if (prior_form == "uniform")
-      remove_rows_outside_bounds(grid_points_transformed)
+      remove_rows_outside_bounds(matrix_to_evaluate = grid_points_transformed, lower_bound = prior_parameters$lower_bound, upper_bound = prior_parameters$upper_bound)
     else
       grid_points_transformed
   }

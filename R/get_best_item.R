@@ -4,16 +4,19 @@
 #' 
 #' @param information_summary called "objective" by Kroeze; how to summarize information; one of
 #' "determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
-#' "posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+#' "posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior_information + info_QxQ_k) for each yet available item k
 #' "trace": compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
-#' "posterior_trace": compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+#' "posterior_trace": compute trace(info_sofar_QxQ_plus_prior_information + info_QxQ_k) for each yet available item k
 #' "posterior_expected_kullback_leibler" = compute Posterior expected Kullback-Leibler Information
 #' @param lp_constraints data frame with constraints in lp format: the lp_constraints from the list returned by constraints_lp_format(); NULL means no constraints
 #' @param lp_characters data frame with constraint characters in lp format: the lp_chars from the list returned by constraints_lp_format(); NULL means no constraints
 #' @param estimate vector containing current theta estimate
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param answers vector with person answers
-#' @param prior prior covariance matrix for theta
+#' @param prior_form String indicating the form of the prior; one of "normal" or "uniform"
+#' @param prior_parameters List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...), or 
+#' the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
+#' be in matrix form.
 #' @param available vector with indeces of yet available items
 #' @param administered vector with indeces of administered items
 #' @param number_items number of items in the test bank
@@ -23,24 +26,22 @@
 #' @param beta matrix containing the beta parameters
 #' @param guessing matrix containing the quessing parameters
 #' @param number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix
-#' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values
-#' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
 #' @param eap_estimation_procedure String indicating the estimation procedure for the expected aposteriori estimate, which is computed
 #' in get_posterior_expected_kl_information() if it is not the requested estimator in shadowcat(). One of "riemannsum" for integration via Riemannsum or
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. Only important here if information_summary is posterior_expected_kl_information.
 #' @return integer item index of best item
 #' @export
-get_best_item <- function(information_summary, lp_constraints, lp_characters, estimate, model, answers, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure = "riemannsum") {
+get_best_item <- function(information_summary, lp_constraints, lp_characters, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, eap_estimation_procedure = "riemannsum") {
   # TODO: make selection with 0 answers work as expected
   result <- function() {
     item_with_max_information <- get_item_with_max_information()
     if (is.na(item_with_max_information) || length(item_with_max_information) == 0) 
-      stop("item with maximum information could not be found") #used to be sample(available, 1)
+      stop("item with maximum information could not be found")
     item_with_max_information
   }
   
   get_item_with_max_information <- function() {
-    item_information <- get_summarized_information(information_summary, estimate, model, answers, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE, eap_estimation_procedure = eap_estimation_procedure)
+    item_information <- get_summarized_information(information_summary, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, pad = TRUE, eap_estimation_procedure = eap_estimation_procedure)
     item_with_max_information <- switch(item_selection_type(),
                                         "maximum_information_only" = get_item_index_max_information(available, item_information),
                                         "with_constraints" = get_item_index_max_information_constrained(number_items, administered, available, answers, lp_constraints, lp_characters, item_information))

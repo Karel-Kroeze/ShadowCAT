@@ -5,9 +5,9 @@
 \title{Next item}
 \usage{
 get_next_item(start_items, information_summary, lp_constraints, lp_characters,
-  estimate, model, answers, prior, available, administered, number_items,
-  number_dimensions, estimator, alpha, beta, guessing,
-  number_itemsteps_per_item, lower_bound, upper_bound,
+  estimate, model, answers, prior_form, prior_parameters, available,
+  administered, number_items, number_dimensions, estimator, alpha, beta,
+  guessing, number_itemsteps_per_item,
   eap_estimation_procedure = "riemannsum")
 }
 \arguments{
@@ -20,9 +20,9 @@ n_by_dimension = scalar of number of initial items per dimension, or vector with
 
 \item{information_summary}{called "objective" by Kroeze; how to summarize information; one of
 "determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
-"posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+"posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior_information + info_QxQ_k) for each yet available item k
 "trace": compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
-"posterior_trace": compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+"posterior_trace": compute trace(info_sofar_QxQ_plus_prior_information + info_QxQ_k) for each yet available item k
 "posterior_expected_kullback_leibler" = compute Posterior expected Kullback-Leibler Information}
 
 \item{lp_constraints}{data frame with constraints in lp format: the lp_constraints from the list returned by constraints_lp_format(); NULL means no constraints}
@@ -35,7 +35,11 @@ n_by_dimension = scalar of number of initial items per dimension, or vector with
 
 \item{answers}{vector with person answers}
 
-\item{prior}{covariance matrix of the (multi variate) normal prior for theta}
+\item{prior_form}{String indicating the form of the prior; one of "normal" or "uniform"}
+
+\item{prior_parameters}{List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...), or 
+the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
+be in matrix form.}
 
 \item{available}{vector with indeces of yet available items}
 
@@ -45,7 +49,7 @@ n_by_dimension = scalar of number of initial items per dimension, or vector with
 
 \item{number_dimensions}{number of dimensions}
 
-\item{estimator}{type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "EAP" (Expected A Posteriori Estimation), or "ML" (maximum likelihood)}
+\item{estimator}{type of estimator to be used, one of "maximum_aposteriori", "expected_aposteriori", or "maximum_likelihood"}
 
 \item{alpha}{matrix containing the alpha parameters}
 
@@ -54,10 +58,6 @@ n_by_dimension = scalar of number of initial items per dimension, or vector with
 \item{guessing}{matrix containing the quessing parameters}
 
 \item{number_itemsteps_per_item}{vector containing the number of non missing cells per row of the beta matrix}
-
-\item{lower_bound}{vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values}
-
-\item{upper_bound}{vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values}
 
 \item{eap_estimation_procedure}{String indicating the estimation procedure for the expected aposteriori estimate, which is computed
 in get_posterior_expected_kl_information() if it is not the requested estimator in shadowcat(). One of "riemannsum" for integration via Riemannsum or

@@ -14,9 +14,8 @@ max_n <- 20
 estimator <- "maximum_aposteriori"
 information_summary <- "posterior_determinant"
 estimate <- 0
-prior <- .4
-lower_bound <- -3
-upper_bound <- 3
+prior_form <- "normal"
+prior_parameters <- list(mu = 0, Sigma = matrix(.4))
 
 guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
 alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
@@ -47,7 +46,7 @@ test_that("First 4 items administered", {
   available <- c(5:50)
   administered <- c(1:4)
 
-  item_information <- get_summarized_information(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE) 
+  item_information <- get_summarized_information(information_summary, estimate, model, responses, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, pad = TRUE) 
   best_item <- get_item_index_max_information_constrained(number_items, administered, available, responses, chars_constraints_lp$lp_constraints, chars_constraints_lp$lp_chars, item_information)
 
   expect_equal(best_item, 5)
@@ -58,7 +57,7 @@ test_that("7 items administered", {
   available <- c(2, 4, 6, 8, 10, 12, 14:50)
   administered <- c(1, 3, 5, 7, 9, 11, 13)
   
-  item_information <- get_summarized_information(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE) 
+  item_information <- get_summarized_information(information_summary, estimate, model, responses, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, pad = TRUE) 
   best_item <- get_item_index_max_information_constrained(number_items, administered, available, responses, chars_constraints_lp$lp_constraints, chars_constraints_lp$lp_chars, item_information)
   
   expect_equal(best_item, 6)
@@ -69,7 +68,7 @@ test_that("First 10 items administered", {
   available <- c(11:50)
   administered <- c(1:10)
   
-  item_information <- get_summarized_information(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE) 
+  item_information <- get_summarized_information(information_summary, estimate, model, responses, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, pad = TRUE) 
   best_item <- get_item_index_max_information_constrained(number_items, administered, available, responses, chars_constraints_lp$lp_constraints, chars_constraints_lp$lp_chars, item_information)
   
   expect_equal(best_item, 47)
@@ -80,7 +79,7 @@ test_that("None administered", {
   available <- 1:50
   administered <- numeric(0)
   
-  item_information <- get_summarized_information(information_summary, estimate, model, responses, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, pad = TRUE) 
+  item_information <- get_summarized_information(information_summary, estimate, model, responses, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, pad = TRUE) 
   best_item <- get_item_index_max_information_constrained(number_items, administered, available, responses, chars_constraints_lp$lp_constraints, chars_constraints_lp$lp_chars, item_information)
   
   expect_equal(best_item, 5)

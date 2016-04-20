@@ -10,38 +10,39 @@
 #' n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
 #' @param information_summary called "objective" by Kroeze; how to summarize information; one of
 #' "determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
-#' "posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+#' "posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior_information + info_QxQ_k) for each yet available item k
 #' "trace": compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
-#' "posterior_trace": compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+#' "posterior_trace": compute trace(info_sofar_QxQ_plus_prior_information + info_QxQ_k) for each yet available item k
 #' "posterior_expected_kullback_leibler" = compute Posterior expected Kullback-Leibler Information
 #' @param lp_constraints data frame with constraints in lp format: the lp_constraints from the list returned by constraints_lp_format(); NULL means no constraints
 #' @param lp_characters data frame with constraint characters in lp format: the lp_chars from the list returned by constraints_lp_format(); NULL means no constraints
 #' @param estimate vector with current theta estimate
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param answers vector with person answers
-#' @param prior covariance matrix of the (multi variate) normal prior for theta
+#' @param prior_form String indicating the form of the prior; one of "normal" or "uniform"
+#' @param prior_parameters List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...), or 
+#' the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
+#' be in matrix form.
 #' @param available vector with indeces of yet available items
 #' @param administered vector with indeces of administered items
 #' @param number_items number of items in test bank
 #' @param number_dimensions number of dimensions
-#' @param estimator type of estimator to be used, one of "MAP" (Maximum a posteriori estimation), "EAP" (Expected A Posteriori Estimation), or "ML" (maximum likelihood)
+#' @param estimator type of estimator to be used, one of "maximum_aposteriori", "expected_aposteriori", or "maximum_likelihood"
 #' @param alpha matrix containing the alpha parameters
 #' @param beta matrix containing the beta parameters
 #' @param guessing matrix containing the quessing parameters
 #' @param number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix
-#' @param lower_bound vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values
-#' @param upper_bound vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
 #' @param eap_estimation_procedure String indicating the estimation procedure for the expected aposteriori estimate, which is computed
 #' in get_posterior_expected_kl_information() if it is not the requested estimator in shadowcat(). One of "riemannsum" for integration via Riemannsum or
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. Only important here if information_summary is posterior_expected_kl_information.
 #' @return integer item index next item
 #' @export
-get_next_item <- function(start_items, information_summary, lp_constraints, lp_characters, estimate, model, answers, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure = "riemannsum") {
+get_next_item <- function(start_items, information_summary, lp_constraints, lp_characters, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, eap_estimation_procedure = "riemannsum") {
   result <- function() {
     if (length(answers) < start_items$n)
       get_start_item(start_items$type)
     else
-      get_best_item(information_summary, lp_constraints, lp_characters, estimate, model, answers, prior, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, eap_estimation_procedure = eap_estimation_procedure)
+      get_best_item(information_summary, lp_constraints, lp_characters, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, eap_estimation_procedure = eap_estimation_procedure)
   }
   
   get_start_item <- function(start_type) {

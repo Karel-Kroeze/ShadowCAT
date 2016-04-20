@@ -1,4 +1,4 @@
-#' Get Likelihood or posterior density over all included items, and derivatives, based on a a given set of items
+#' Get Likelihood or posterior density (with normal prior) over all included items, and derivatives, based on a a given set of items
 #' 
 #' @param theta vector with true or estimated theta
 #' @param answers vector with person answers to the administered items
@@ -9,14 +9,13 @@
 #' @param alpha matrix containing the alpha parameters (for complete test bank)
 #' @param beta matrix containing the beta parameters (for complete test bank)
 #' @param guessing matrix containing the quessing parameters (for complete test bank)
-#' @param prior prior covariance matrix for theta; only required if estimator is "maximum_aposteriori" or "expected_aposteriori" and output is "likelihood" or "both"
+#' @param prior_parameters List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...).
+#' Sigma should always be in matrix form.
 #' @param return_log_likelihood_or_post_density if TRUE, log of likelihood or posterior density is returned, else likelihood or posterior density on original scale
 #' @param inverse_likelihood_or_post_density should likelihood or posterior density values be reversed (useful for minimization, also reverses derivatives)
-#' @return the likelihood (estimator = maximum_likelihood) or posterior density (estimator = maximum_aposteriori or expected_aposteriori) of theta, with first and second derivatives as attributes
+#' @return the likelihood (estimator is maximum_likelihood) or posterior density with normal prior (estimator is not maximum_likelihood) of theta, with first and second derivatives as attributes
 #' @export
-likelihood_or_post_density <- function(theta, answers = NULL, model, items_to_include, number_dimensions, estimator, alpha, beta, guessing, prior = NULL, return_log_likelihood_or_post_density = TRUE, inverse_likelihood_or_post_density = FALSE) {
-  # TODO priors: mean? 
-  # priors: Alleen variabele deel van multivariaat normaal verdeling (exp).
+likelihood_or_post_density <- function(theta, answers = NULL, model, items_to_include, number_dimensions, estimator, alpha, beta, guessing, prior_parameters = NULL, return_log_likelihood_or_post_density = TRUE, inverse_likelihood_or_post_density = FALSE) {
   number_items <- length(items_to_include)
   alpha <- get_subset(alpha, items_to_include)
   beta <- get_subset(beta, items_to_include)
@@ -34,8 +33,8 @@ likelihood_or_post_density <- function(theta, answers = NULL, model, items_to_in
   }
   
   validate <- function() {
-    if (is.null(prior) && estimator %in% c("maximum_aposteriori", "expected_aposteriori"))
-      add_error("prior", "is missing")
+    if (is.null(prior_parameters) && estimator %in% c("maximum_aposteriori", "expected_aposteriori"))
+      add_error("prior_parameters", "is missing")
   }
   
   invalid_result <- function() {
@@ -47,16 +46,15 @@ likelihood_or_post_density <- function(theta, answers = NULL, model, items_to_in
     if (estimator == "maximum_likelihood")
       log_likelihood
     else
-      log_likelihood - (t(theta) %*% solve(prior) %*% theta) / 2    
+      log_likelihood - (t(theta - prior_parameters$mu) %*% solve(prior_parameters$Sigma) %*% (theta - prior_parameters$mu)) / 2    
   }
   
-  # TODO: derivatives are correct for a single item, but not for K > 1?
   get_first_derivative <- function(probs_and_likelihoods) {
     derivative1 <- matrix(probs_and_likelihoods$d, nrow = 1) %*% alpha
     if (estimator == "maximum_likelihood")
       derivative1
     else
-      derivative1 - t(solve(prior) %*% theta)  
+      derivative1 - t(theta) %*% solve(prior_parameters$Sigma) + t(prior_parameters$mu) %*% solve(prior_parameters$Sigma)  
   }
   
   get_second_derivative <- function(probs_and_likelihoods) {
@@ -68,7 +66,7 @@ likelihood_or_post_density <- function(theta, answers = NULL, model, items_to_in
     if (estimator == "maximum_likelihood")
       derivative2
     else
-      derivative2 - solve(prior)  
+      derivative2 - solve(prior_parameters$Sigma)  
   }
   
   validate_and_run()

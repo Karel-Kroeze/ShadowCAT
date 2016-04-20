@@ -4,17 +4,18 @@
 \alias{get_summarized_information}
 \title{Obtain a vector with information, summarized into one value, for each available item (values of the objective function).}
 \usage{
-get_summarized_information(information_summary, estimate, model, answers, prior,
-  available, administered, number_items, number_dimensions, estimator, alpha,
-  beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound,
-  pad = TRUE, eap_estimation_procedure = "riemannsum")
+get_summarized_information(information_summary, estimate, model, answers,
+  prior_form, prior_parameters, available, administered, number_items,
+  number_dimensions, estimator, alpha, beta, guessing,
+  number_itemsteps_per_item, pad = TRUE,
+  eap_estimation_procedure = "riemannsum")
 }
 \arguments{
 \item{information_summary}{called "objective" by Kroeze; how to summarize information; one of
 "determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
-"posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+"posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior_information + info_QxQ_k) for each yet available item k
 "trace": compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
-"posterior_trace": compute trace(info_sofar_QxQ_plus_prior + info_QxQ_k) for each yet available item k
+"posterior_trace": compute trace(info_sofar_QxQ_plus_prior_information + info_QxQ_k) for each yet available item k
 "posterior_expected_kullback_leibler" = compute Posterior expected Kullback-Leibler Information}
 
 \item{estimate}{vector with current theta estimate}
@@ -23,7 +24,11 @@ get_summarized_information(information_summary, estimate, model, answers, prior,
 
 \item{answers}{vector with person answers}
 
-\item{prior}{prior covariance matrix for theta}
+\item{prior_form}{String indicating the form of the prior; one of "normal" or "uniform"}
+
+\item{prior_parameters}{List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...), or 
+the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
+be in matrix form.}
 
 \item{available}{vector with indeces of yet available items}
 
@@ -42,10 +47,6 @@ get_summarized_information(information_summary, estimate, model, answers, prior,
 \item{guessing}{matrix containing the quessing parameters}
 
 \item{number_itemsteps_per_item}{vector containing the number of non missing cells per row of the beta matrix}
-
-\item{lower_bound}{vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values}
-
-\item{upper_bound}{vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values}
 
 \item{pad}{Should the return vector be padded with zeros for items that have already been administered?}
 

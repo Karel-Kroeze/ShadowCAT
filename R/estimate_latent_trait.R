@@ -10,7 +10,7 @@
 #'  
 #' @section Expected A Posteriori:
 #' Expected A-Posteriori estimates require the repeated evaluation of Q nested integrals, where Q is the dimensionality of the test.
-#' This is performed with adaptive multidimensional Gauss-Hermite quadrature, and handled by package MultiGHQuad, see the documentation there for further details.
+#' This is performed with an adaptive Riemannsum or multidimensional Gauss-Hermite quadrature, the latter handled by package MultiGHQuad, see the documentation there for further details.
 #' Note that the number of quadrature points used rises exponentially with the dimensionality of the test - use of EAP estimates with 
 #' a 3+ dimensional test may not be a good idea.
 #' 
@@ -33,18 +33,16 @@
 #' beta <- matrix(rnorm(number_items), nrow = number_items, ncol = 1)
 #' guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
 #' number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
-#' lower_bound <- rep(-3, number_dimensions)
-#' upper_bound <- rep(3, number_dimensions)
-#' prior <- diag(1)
-#' prior_var_safe_nlm <- diag(number_dimensions)
+#' prior_form <- "normal"
+#' prior_parameters <- list(mu = 0, Sigma = diag(1))
 #'
 #' # obtain estimates
 #' estimator <- "maximum_likelihood"
-#' ML <- estimate_latent_trait(estimate, answers, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
+#' ML <- estimate_latent_trait(estimate, answers, prior_form = "uniform", prior_parameters = list(lower_bound = -4, upper_bound = 4), model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
 #' estimator <- "maximum_aposteriori"
-#' MAP <- estimate_latent_trait(estimate, answers, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
+#' MAP <- estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
 #' estimator <- "expected_aposteriori"
-#' EAP <- estimate_latent_trait(estimate, answers, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm)
+#' EAP <- estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
 #' ML; MAP; EAP
 #' 
 #' # access variance
@@ -54,18 +52,20 @@
 #' number_dimensions <- 5
 #' estimate <- rep(.3, number_dimensions)
 #' alpha <- matrix(runif(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
-#' lower_bound <- rep(-3, number_dimensions)
-#' upper_bound <- rep(3, number_dimensions)
-#' prior <- diag(number_dimensions) 
+#' prior_form <- "normal"
+#' prior_parameters <- list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions))
 #' 
 #' estimator <- "maximum_aposteriori"
-#' system.time(estimate_latent_trait(estimate, answers, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = diag(number_dimensions)))
+#' system.time(estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item))
 #' estimator <- "expected_aposteriori"
-#' system.time(estimate_latent_trait(estimate, answers, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound))
+#' system.time(estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item))
 #' 
 #' @param estimate Vector containing theta estimate, with covariance matrix as an attribute
 #' @param answers Vector with person answers
-#' @param prior Prior covariance matrix for theta
+#' @param prior_form String indicating the form of the prior; one of "normal" or "uniform"
+#' @param prior_parameters List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...), or 
+#' the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
+#' be in matrix form.
 #' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively
 #' @param administered Vector with indeces of administered items
 #' @param number_dimensions Number of dimensions
@@ -74,91 +74,107 @@
 #' @param beta Matrix of beta paramteres
 #' @param guessing Matrix of guessing parameters
 #' @param number_itemsteps_per_item Vector containing the number of non missing cells per row of the beta matrix
-#' @param lower_bound Vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values
-#' @param upper_bound Vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
-#' @param prior_var_safe_nlm If not NULL, expected a posteriori estimate with prior variance(s) equal to prior_var_safe_ml is computed instead of maximum_likelihood/maximum_aposteriori, if maximum_likelihood/maximum_aposteriori estimate fails. Can be a scalar 
-#' (if variance for each dimension is equal) or vector
+#' @param safe_maximum Only relevant if estimator is maximum likelihood or maximum aposteriori. 
+#' TRUE if estimator should switch to expected aposteriori if the maximization algorithm results in an error or warning.
+#' A normal prior with mean zero and variance equal to prior_var_safe_ml is used if estimator is maximum likelihood. The 
+#' already defined prior settings are used otherwise.
+#' @param prior_var_safe_ml Scalar or vector containing the prior variance for theta if safe_ml is TRUE and estimator is maximum likehood. 
 #' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori. One of "riemannsum" for integration via Riemannsum or
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
 #' @return vector containing the updated estimate with the covariance matrix as attribute
 #' @importFrom MultiGHQuad init.quad eval.quad
 #' @export
-estimate_latent_trait <- function(estimate, answers, prior, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, lower_bound, upper_bound, prior_var_safe_nlm = NULL, eap_estimation_procedure = "riemannsum") {
+estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, safe_maximum = FALSE, prior_var_safe_ml = NULL, eap_estimation_procedure = "riemannsum") {
   result <- function() {
-    updated_estimate <- get_updated_estimate_and_variance_attribute(estimator)
-    trim_estimate(updated_estimate)
+    get_updated_estimate_and_variance_attribute()
+  }
+  
+  get_updated_estimate_and_variance_attribute <- function() {
+    switch(estimator,
+           maximum_likelihood = tryCatch(get_updated_estimate_and_variance_ml(),
+                                         error = function(e) { switch_to_eap_if_requested() },
+                                         warning = function(w) { switch_to_eap_if_requested() }),
+           maximum_aposteriori = tryCatch(get_updated_estimate_and_variance_map(),
+                                          error = function(e) { switch_to_eap_if_requested() },
+                                          warning = function(w) { switch_to_eap_if_requested() }),
+           expected_aposteriori = get_updated_estimate_and_variance_eap(prior_form, prior_parameters))
   }
   
   get_updated_estimate_and_variance_ml <- function() {
     # for now, simple nlm (TODO: look at optim, and possible reintroducing pure N-R).
     # We want a maximum, but nlm produces minima -> reverse function call.
-    estimate <- tryCatch(nlm(f = likelihood_or_post_density, p = estimate, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihood_or_post_density = TRUE)$estimate,
-                         error = function(e) { switch_to_eap_if_requested() },
-                         warning = function(w) { switch_to_eap_if_requested() })
-    # TODO: We should really store info somewhere so we don't have to redo this (when using get_fisher_information based selection criteria).
+    estimate <- nlm(f = likelihood_or_post_density, p = estimate, answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = estimator, alpha = alpha, beta = beta, guessing = guessing, prior_parameters = prior_parameters, inverse_likelihood_or_post_density = TRUE)$estimate
     fisher_information_items <- get_fisher_information(estimate, model, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item)
     fisher_information_test_so_far <- apply(fisher_information_items[,,administered, drop = FALSE], c(1, 2), sum)
-    
     attr(estimate, "variance") <- solve(fisher_information_test_so_far)
     estimate
   }
   
   get_updated_estimate_and_variance_map <- function() {
-    estimate <- tryCatch(nlm(f = likelihood_or_post_density, p = estimate, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior, inverse_likelihood_or_post_density = TRUE)$estimate,
-                         error = function(e) { switch_to_eap_if_requested() },
-                         warning = function(w) { switch_to_eap_if_requested() })
+    switch(prior_form,
+           normal = get_updated_estimate_and_variance_map_normal_prior(),
+           uniform = get_updated_estimate_and_variance_map_uniform_prior())
+  }
+  
+  get_updated_estimate_and_variance_eap <- function(prior_form, prior_parameters) {
+    switch(eap_estimation_procedure,
+           gauss_hermite_quad = get_updated_estimate_and_variance_eap_gauss_hermite_quad(prior_parameters),
+           riemannsum = get_updated_estimate_and_variance_eap_riemannsum(prior_form, prior_parameters))
+  }
+  
+  get_updated_estimate_and_variance_map_normal_prior <- function() {
+    estimate <- nlm(f = likelihood_or_post_density, p = estimate, 
+                    answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = estimator, alpha = alpha, beta = beta, guessing = guessing, prior_parameters = prior_parameters, inverse_likelihood_or_post_density = TRUE)$estimate
     fisher_information_items <- get_fisher_information(estimate, model, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item)
-    fisher_information_test_so_far <- apply(fisher_information_items[,,administered, drop = FALSE], c(1, 2), sum) +
-      solve(prior)
+    fisher_information_test_so_far <- apply(fisher_information_items[,,administered, drop = FALSE], c(1, 2), sum) + solve(prior_parameters$Sigma)
     attr(estimate, "variance") <- solve(fisher_information_test_so_far)
     estimate
   }
   
-  get_updated_estimate_and_variance_eap <- function(prior) {
-    switch(eap_estimation_procedure,
-           gauss_hermite_quad = get_updated_estimate_and_variance_eap_gauss_hermite_quad(prior),
-           riemannsum = get_updated_estimate_and_variance_eap_riemannsum(prior))
+  get_updated_estimate_and_variance_map_uniform_prior <- function() {
+    estimate <- constrOptim(theta = estimate, 
+                            f = likelihood_or_post_density,
+                            grad = function(theta, answers, model, items_to_include, number_dimensions, estimator, alpha, beta, guessing, prior_parameters, return_log_likelihood_or_post_density = TRUE, inverse_likelihood_or_post_density) {
+                              likelihood <- likelihood_or_post_density(theta, answers, model, items_to_include, number_dimensions, estimator, alpha, beta, guessing, prior_parameters, return_log_likelihood_or_post_density, inverse_likelihood_or_post_density)
+                              attr(likelihood, "gradient")
+                            },
+                            ui = rbind(diag(number_dimensions), -diag(number_dimensions)), 
+                            ci = c(prior_parameters$lower_bound, -prior_parameters$upper_bound),
+                            answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing, prior_parameters = NULL, inverse_likelihood_or_post_density = TRUE)$par
+    fisher_information_items <- get_fisher_information(estimate, model, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item)
+    fisher_information_test_so_far <- apply(fisher_information_items[,,administered, drop = FALSE], c(1, 2), sum)
+    attr(estimate, "variance") <- solve(fisher_information_test_so_far)
+    estimate
   }
   
-  get_updated_estimate_and_variance_eap_gauss_hermite_quad <- function(prior) {
-    # TODO: prior mean is currently fixed at zero, update when/if possible.
+  get_updated_estimate_and_variance_eap_gauss_hermite_quad <- function(prior_parameters) {
     adapt <- if (length(answers) > 5 & !is.null(attr(estimate, 'variance'))) list(mu = estimate, Sigma = as.matrix(attr(estimate, "variance")))
     Q_dim_grid_quad_points <- init.quad(Q = number_dimensions,
-                                        prior = list(mu = rep(0, number_dimensions), Sigma = prior),
+                                        prior = prior_parameters,
                                         adapt = adapt,
                                         ip = number_gridpoints())
-    eval.quad(FUN = likelihood_or_post_density, X = Q_dim_grid_quad_points, answers, model, administered, number_dimensions, estimator = "maximum_likelihood", alpha, beta, guessing)
+    eval.quad(FUN = likelihood_or_post_density, X = Q_dim_grid_quad_points, 
+              answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing)
   }
   
-  get_updated_estimate_and_variance_eap_riemannsum <- function(prior) {
-    # TODO: prior mean is currently fixed at zero, update when/if possible.
+  get_updated_estimate_and_variance_eap_riemannsum <- function(prior_form, prior_parameters) {
     adapt <- if (length(answers) > 5 & !is.null(attr(estimate, 'variance'))) list(mu = estimate, Sigma = as.matrix(attr(estimate, "variance")))
     get_eap_estimate_riemannsum(dimension = number_dimensions, 
                likelihood = likelihood_or_post_density, 
-               prior_form = "normal",
-               prior_parameters = list(mu = rep(0, number_dimensions), Sigma = prior) ,
+               prior_form = prior_form,
+               prior_parameters = prior_parameters,
                adapt = adapt,
                number_gridpoints = number_gridpoints(),
                answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing, return_log_likelihood_or_post_density = FALSE)
   }
-  
-  get_updated_estimate_and_variance_attribute <- function(estimator) {
-    switch(estimator,
-           maximum_likelihood = get_updated_estimate_and_variance_ml(),
-           maximum_aposteriori = get_updated_estimate_and_variance_map(),
-           expected_aposteriori = get_updated_estimate_and_variance_eap(prior))
-  }
-  
-  trim_estimate <- function(estimate) {
-    estimate[which(estimate > upper_bound)] <- upper_bound[which(estimate > upper_bound)]
-    estimate[which(estimate < lower_bound)] <- lower_bound[which(estimate < lower_bound)]
-    estimate
-  }
-  
+    
   switch_to_eap_if_requested <- function() {
-    if (is.null(prior_var_safe_nlm))
-      stop("something went wrong with nlm maximization and prior_var_safe_ml was set to NULL")
-    get_updated_estimate_and_variance_eap(prior = diag(number_dimensions) * prior_var_safe_nlm)
+    if (!safe_maximum)
+      stop("something went wrong with maximization and safe_maximum was FALSE")
+    if (estimator == "maximum_likelihood")
+      get_updated_estimate_and_variance_eap(prior_form = "normal", prior_parameters = list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions) * prior_var_safe_ml))
+    else
+      get_updated_estimate_and_variance_eap(prior_form = prior_form, prior_parameters = prior_parameters)
   }
   
   number_gridpoints <- function() {
