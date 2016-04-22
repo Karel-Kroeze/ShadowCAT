@@ -14,6 +14,7 @@
 #' @param number_gridpoints Value indicating the number of grid points to use for the Riemannsum
 #' @param ... Any additional arguments to likelihood
 #' @importFrom mvtnorm dmvnorm
+#' @importFrom Matrix nearPD
 #' @export
 get_eap_estimate_riemannsum <- function(dimension, likelihood, prior_form, prior_parameters, adapt = NULL, number_gridpoints = 50, ...) {
   result <- function() {
@@ -34,15 +35,12 @@ get_eap_estimate_riemannsum <- function(dimension, likelihood, prior_form, prior
   }
   
   trans <- function(grid_points, Sigma) {
-    lambda <- with(eigen(Sigma), {
-      if (any(values < 0))
-        warning("Matrix is not positive definite.")
-      if (length(values) > 1)
-        vectors %*% diag(sqrt(values))
-      else 
-        vectors * sqrt(values)
-    })
-    t(lambda %*% t(grid_points))
+    sigma_positive_definite <- nearPD(Sigma)$mat
+    eigen_sigma <- eigen(sigma_positive_definite) 
+    if (length(eigen_sigma$values) > 1)
+      t((eigen_sigma$vectors %*% diag(sqrt(eigen_sigma$values))) %*% t(grid_points))
+    else
+      t((eigen_sigma$vectors * sqrt(eigen_sigma$values)) %*% t(grid_points))
   }
   
   get_list_gridpoints_uniform <- function() {

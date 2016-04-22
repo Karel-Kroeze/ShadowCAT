@@ -18,7 +18,8 @@ Imports:
     mvtnorm,
     MultiGHQuad,
     lpSolve,
-    matrixcalc
+    matrixcalc,
+    Matrix
 Suggests:
     testthat (>= 0.8.1),
     stringr

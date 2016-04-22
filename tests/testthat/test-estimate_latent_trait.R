@@ -57,30 +57,6 @@ test_that("estimator is maximum_likelihood, 3 dimensions, varying number of cate
   expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[3,], c(-.181, -.281, .484))
 })
 
-test_that("test safe_maximum_likelihood", {
-  number_dimensions <- 3
-  estimate <- c(0, 0, 0)
-  attr(estimate, "variance") <- diag(3) * 20
-  model <- "SM"
-  number_items <- 300
-  answers <- c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
-  administered <- c(38, 27, 4, 182, 187, 200, 241, 274, 227, 298)
-  estimator <- "maximum_likelihood"
-  alpha <- matrix(with_random_seed(107, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
-  beta <- matrix(with_random_seed(107, rnorm)(number_items), nrow = number_items, ncol = 1)
-  guessing <- NULL
-  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
-  prior_form <- NULL
-  prior_parameters <- NULL
-  safe_maximum = TRUE
-  prior_var_safe_ml = 1
-  
-  estimated_latent_trait <- estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, safe_maximum = safe_maximum, prior_var_safe_ml = prior_var_safe_ml)
-  
-  expect_equal(round(as.vector(estimated_latent_trait), 3), c(3.669, 3.434, 1.565))  
-  expect_equal(round(as.vector(attr(estimated_latent_trait, 'variance')), 3)[1:3], c(.427, -.017, -.125))
-})
-
 context("estimator is maximum_aposteriori")
 
 test_that("estimator is maximum_aposteriori, 1 dimension, 2 categories, prior is normal", { 
@@ -174,7 +150,7 @@ test_that("estimator is maximum_aposteriori, 3 dimensions, varying number of cat
   
   estimated_latent_trait <- estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
   
-  expect_equal(round(as.vector(estimated_latent_trait), 3), c(-2.000, -.428, -.456))
+  expect_equal(round(as.vector(estimated_latent_trait), 3), c(-2.000, -.428, -.457))
   expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[1,], c(.747, -.494, -.182))
   expect_equal(round(attr(estimated_latent_trait, "variance"), 3)[3,], c(-.182, -.280, .484))
 })
@@ -321,5 +297,34 @@ test_that("estimator is expected_aposteriori, 3 dimensions, varying number of ca
   expect_equal(round(attr(estimated_latent_trait_gauss_hermite, "variance"), 3)[3,], c(-.061, -.047, .936))
   expect_equal(round(attr(estimated_latent_trait_riemann, "variance"), 3)[1,], c(.946, -.046, -.060))
   expect_equal(round(attr(estimated_latent_trait_riemann, "variance"), 3)[3,], c(-.060, -.047, .940))
+})
+
+test_that("test safe_eap", {
+  number_dimensions <- 3
+  estimate <- c(0, 0, 0)
+  attr(estimate, "variance") <- diag(c(0, 0, 0))
+  model <- "GPCM"
+  number_items <- 300
+  answers <- rep(1, 300)
+  administered <- 1:300
+  estimator <- "expected_aposteriori"
+  max_number_answer_categories <- 5
+  guessing <- NULL
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  temp_vector <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  eta <- t(apply(temp_vector, 1, function(x) x + seq(-2, 2, length.out = (max_number_answer_categories - 1))))
+  eta[c(1, 5:10), 3:4] <- NA
+  eta[c(40:45), 4] <- NA
+  beta <- row_cumsum(eta)
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
+  prior_form = "uniform"
+  prior_parameters = list(lower_bound = rep(-1, 3), upper_bound = rep(1, 3))
+  safe_eap = TRUE
+  
+  estimated_latent_trait_riemann <- estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, safe_eap = safe_eap, eap_estimation_procedure = "riemannsum")
+  
+  expect_equal(round(as.vector(estimated_latent_trait_riemann), 3), c(-.540, -0.368, -0.748))
+  expect_equal(round(attr(estimated_latent_trait_riemann, "variance"), 3)[1,], c(.034, -.016, -.015))
+  expect_equal(round(attr(estimated_latent_trait_riemann, "variance"), 3)[3,], c(-.015, -.017, .034))
 })
 

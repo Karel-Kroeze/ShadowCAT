@@ -6,7 +6,7 @@
 \usage{
 estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model,
   administered, number_dimensions, estimator, alpha, beta, guessing,
-  number_itemsteps_per_item, safe_maximum = FALSE, prior_var_safe_ml = NULL,
+  number_itemsteps_per_item, safe_eap = FALSE,
   eap_estimation_procedure = "riemannsum")
 }
 \arguments{
@@ -36,12 +36,8 @@ be in matrix form.}
 
 \item{number_itemsteps_per_item}{Vector containing the number of non missing cells per row of the beta matrix}
 
-\item{safe_maximum}{Only relevant if estimator is maximum likelihood or maximum aposteriori. 
-TRUE if estimator should switch to expected aposteriori if the maximization algorithm results in an error or warning.
-A normal prior with mean zero and variance equal to prior_var_safe_ml is used if estimator is maximum likelihood. The 
-already defined prior settings are used otherwise.}
-
-\item{prior_var_safe_ml}{Scalar or vector containing the prior variance for theta if safe_ml is TRUE and estimator is maximum likehood.}
+\item{safe_eap}{Only relevant if estimator is espected_aposteriori. 
+TRUE if estimator should switch to maximum aposteriori if the integration algorithm results in an error.}
 
 \item{eap_estimation_procedure}{String indicating the estimation procedure if estimator is expected aposteriori. One of "riemannsum" for integration via Riemannsum or
 "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature.}

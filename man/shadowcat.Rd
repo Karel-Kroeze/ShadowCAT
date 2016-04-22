@@ -9,8 +9,7 @@ shadowcat(answers, estimate, variance, model, alpha, beta, start_items,
   stop_test, estimator, information_summary, prior_form = NULL,
   prior_parameters = NULL, guessing = NULL, eta = NULL,
   constraints_and_characts = NULL, lower_bound = NULL, upper_bound = NULL,
-  safe_maximum = FALSE, prior_var_safe_ml = NULL,
-  eap_estimation_procedure = "riemannsum")
+  safe_eap = FALSE, eap_estimation_procedure = "riemannsum")
 }
 \arguments{
 \item{answers}{named list of previous answers and new answer, with names being the item keys; should be initialized with NULL}
@@ -62,7 +61,10 @@ NULL means no cut off values}
 
 \item{prior_parameters}{List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...), or 
 the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
-be in matrix form. The length of lower_bound and upper_bound should be equal to the number of dimensions}
+be in matrix form. The length of lower_bound and upper_bound should be equal to the number of dimensions.
+For uniform prior in combination with expected eposteriori estimation, true theta should fall within 
+lower_bound and upper_bound and be not too close to one of these bounds. Setting the function argument safe_eap to TRUE
+ensures that the estimation switches to MAP if the expected aposteriori estimate fails.}
 
 \item{guessing}{Matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.}
 
@@ -84,12 +86,9 @@ using maximum aposteriori estimation with a uniform prior.}
 Can only be defined when estimator is maximum_likelihood. Setting bounds with maximum likelihood estimation is equivalent to
 using maximum aposteriori estimation with a uniform prior.}
 
-\item{safe_maximum}{Only relevant if estimator is maximum likelihood or maximum aposteriori. 
-TRUE if estimator should switch to expected aposteriori if the maximization algorithm results in an error or warning.
-A normal prior with mean zero and variance equal to prior_var_safe_ml is used if estimator is maximum likelihood. The 
-already defined prior settings are used otherwise.}
-
-\item{prior_var_safe_ml}{Scalar or vector containing the prior variance for theta if safe_ml is TRUE and estimator is maximum likehood.}
+\item{safe_eap}{Only relevant if estimator is espected_aposteriori. 
+TRUE if estimator should switch to maximum aposteriori if the integration algorithm results in an error.
+An error may occur if the prior is uniform, estimator is expected aposteriori, and the bounds do not exceed the true theta value, or are too close to it.}
 
 \item{eap_estimation_procedure}{String indicating the estimation procedure if estimator is expected aposteriori. One of "riemannsum" for integration via Riemannsum or
 "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature.}

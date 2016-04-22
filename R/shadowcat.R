@@ -39,7 +39,10 @@
 #' @param prior_form String indicating the form of the prior; one of "normal" or "uniform"
 #' @param prior_parameters List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...), or 
 #' the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
-#' be in matrix form. The length of lower_bound and upper_bound should be equal to the number of dimensions
+#' be in matrix form. The length of lower_bound and upper_bound should be equal to the number of dimensions.
+#' For uniform prior in combination with expected eposteriori estimation, true theta should fall within 
+#' lower_bound and upper_bound and be not too close to one of these bounds. Setting the function argument safe_eap to TRUE
+#' ensures that the estimation switches to MAP if the expected aposteriori estimate fails. 
 #' @param guessing Matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.
 #' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others. Row names should contain the item keys.
 #' @param constraints_and_characts list with constraints and characteristics; NULL means no constraints
@@ -55,18 +58,16 @@
 #' @param upper_bound Vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
 #' Can only be defined when estimator is maximum_likelihood. Setting bounds with maximum likelihood estimation is equivalent to
 #' using maximum aposteriori estimation with a uniform prior.
-#' @param safe_maximum Only relevant if estimator is maximum likelihood or maximum aposteriori. 
-#' TRUE if estimator should switch to expected aposteriori if the maximization algorithm results in an error or warning.
-#' A normal prior with mean zero and variance equal to prior_var_safe_ml is used if estimator is maximum likelihood. The 
-#' already defined prior settings are used otherwise.
-#' @param prior_var_safe_ml Scalar or vector containing the prior variance for theta if safe_ml is TRUE and estimator is maximum likehood. 
+#' @param safe_eap Only relevant if estimator is espected_aposteriori. 
+#' TRUE if estimator should switch to maximum aposteriori if the integration algorithm results in an error.
+#' An error may occur if the prior is uniform, estimator is expected aposteriori, and the bounds do not exceed the true theta value, or are too close to it.
 #' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori. One of "riemannsum" for integration via Riemannsum or
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
 #' @return a list containing the key of the next item to be administered given a new answer (or "stop_test"), 
 #' updated estimate of theta, updated covariance matrix of theta converted to a vector, and the answers to the administered items (named list)
 #' @importFrom matrixcalc is.positive.definite
 #' @export
-shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form = NULL, prior_parameters = NULL, guessing = NULL, eta = NULL, constraints_and_characts = NULL, lower_bound = NULL, upper_bound = NULL, safe_maximum = FALSE, prior_var_safe_ml = NULL, eap_estimation_procedure = "riemannsum") {      
+shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form = NULL, prior_parameters = NULL, guessing = NULL, eta = NULL, constraints_and_characts = NULL, lower_bound = NULL, upper_bound = NULL, safe_eap = FALSE, eap_estimation_procedure = "riemannsum") {      
   result <- function() {
     switch_to_maximum_aposteriori <- estimator == "maximum_likelihood" && !is.null(lower_bound) && !is.null(upper_bound)
     estimator <- get_estimator(switch_to_maximum_aposteriori)
@@ -103,7 +104,7 @@ shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_ite
   # if inititial items have been administered (so we are in the CAT phase), update person estimate after each newly answered item
   update_person_estimate <- function(estimate, answers_vector, item_indeces_administered, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item, estimator, prior_form, prior_parameters) { 
     if (length(answers) > start_items$n)
-      estimate_latent_trait(estimate, answers_vector, prior_form, prior_parameters, model, item_indeces_administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, safe_maximum, prior_var_safe_ml, eap_estimation_procedure)
+      estimate_latent_trait(estimate, answers_vector, prior_form, prior_parameters, model, item_indeces_administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, safe_eap, eap_estimation_procedure)
     else
       estimate
   }
@@ -234,8 +235,6 @@ shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_ite
       add_error("estimator", "of unknown type")
     if (information_summary %not_in% c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler"))
       add_error("information_summary", "of unknown type")
-    if (!is.null(prior_var_safe_ml) && (!is.vector(prior_var_safe_ml) || length(prior_var_safe_ml) %not_in% c(1, length(estimate)) || prior_var_safe_ml <= 0))
-      add_error("prior_var_safe_ml", "should be a scalar or vector of the length of estimate, with values larger than zero")
     if (estimator == "maximum_likelihood" && information_summary %in% c("posterior_determinant", "posterior_trace", "posterior_expected_kullback_leibler"))
       add_error("estimator_is_maximum_likelihood", "so using a posterior information summary makes no sense")
     if (estimator != "maximum_likelihood" && (!is.null(lower_bound) || !is.null(upper_bound)))

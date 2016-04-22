@@ -60,26 +60,23 @@ make_random_seed_exist <- rnorm(1)
 #' @param upper_bound Vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
 #' Can only be defined when estimator is maximum_likelihood. Setting bounds with maximum likelihood estimation is equivalent to
 #' using maximum aposteriori estimation with a uniform prior.
-#' @param safe_maximum Only relevant if estimator is maximum likelihood or maximum aposteriori. 
-#' TRUE if estimator should switch to expected aposteriori if the maximization algorithm results in an error or warning.
-#' A normal prior with mean zero and variance equal to prior_var_safe_ml is used if estimator is maximum likelihood. The 
-#' already defined prior settings are used otherwise.
-#' @param prior_var_safe_ml Scalar or vector containing the prior variance for theta if safe_ml is TRUE and estimator is maximum likehood. 
+#' @param safe_eap Only relevant if estimator is espected_aposteriori. 
+#' TRUE if estimator should switch to maximum aposteriori if the integration algorithm results in an error.
 #' @param initital_estimate vector containing the initial theta estimates (starting values)
 #' @param initial_variance matrix containing the initial covariance matrix (staring values)
 #' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori. One of "riemannsum" for integration via Riemannsum or
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
 #' @return
-test_shadowcat <- function(true_theta, prior_form, prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints_and_characts = NULL, lower_bound = NULL, upper_bound = NULL, safe_maximum = FALSE, prior_var_safe_ml = NULL, initital_estimate = rep(0, ncol(alpha)), initial_variance = diag(ncol(alpha)) * 25, eap_estimation_procedure = "riemannsum") {
+test_shadowcat <- function(true_theta, prior_form, prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints_and_characts = NULL, lower_bound = NULL, upper_bound = NULL, safe_eap = FALSE, initital_estimate = rep(0, ncol(alpha)), initial_variance = diag(ncol(alpha)) * 25, eap_estimation_procedure = "riemannsum") {
   item_keys <- rownames(alpha)
   answers <- NULL
-  next_item_and_test_outcome <- shadowcat(answers, estimate = initital_estimate, variance = as.vector(initial_variance), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta, constraints_and_characts, lower_bound, upper_bound, safe_maximum, prior_var_safe_ml, eap_estimation_procedure)
+  next_item_and_test_outcome <- shadowcat(answers, estimate = initital_estimate, variance = as.vector(initial_variance), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta, constraints_and_characts, lower_bound, upper_bound, safe_eap, eap_estimation_procedure)
 
   while (next_item_and_test_outcome$continue_test) {
     new_answer <- simulate_answer(true_theta, model, ncol(alpha), estimator, alpha, beta, guessing, ncol(beta), match(next_item_and_test_outcome$key_new_item, item_keys))
     next_item_and_test_outcome$answers[[next_item_and_test_outcome$key_new_item]] <- new_answer
     next_item_and_test_outcome$answers <- as.list(next_item_and_test_outcome$answers)
-    next_item_and_test_outcome <- shadowcat(next_item_and_test_outcome$answers, next_item_and_test_outcome$estimate, next_item_and_test_outcome$variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta, constraints_and_characts, lower_bound, upper_bound, safe_maximum, prior_var_safe_ml, eap_estimation_procedure)  
+    next_item_and_test_outcome <- shadowcat(next_item_and_test_outcome$answers, next_item_and_test_outcome$estimate, next_item_and_test_outcome$variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta, constraints_and_characts, lower_bound, upper_bound, safe_eap, eap_estimation_procedure)  
   }
   
   attr(next_item_and_test_outcome$estimate, "variance") <- matrix(next_item_and_test_outcome$variance, ncol = ncol(alpha))
@@ -157,11 +154,8 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
 #' @param upper_bound Vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
 #' Is only used when estimator is maximum_likelihood. Setting bounds with maximum likelihood estimation is equivalent to
 #' using maximum aposteriori estimation with a uniform prior.
-#' @param safe_maximum Only relevant if estimator is maximum likelihood or maximum aposteriori. 
-#' TRUE if estimator should switch to expected aposteriori if the maximization algorithm results in an error or warning.
-#' A normal prior with mean zero and variance equal to prior_var_safe_ml is used if estimator is maximum likelihood. The 
-#' already defined prior settings are used otherwise.
-#' @param prior_var_safe_ml Scalar or vector containing the prior variance for theta if safe_ml is TRUE and estimator is maximum likehood. 
+#' @param safe_eap Only relevant if estimator is espected_aposteriori. 
+#' TRUE if estimator should switch to maximum aposteriori if the integration algorithm results in an error.
 #' @param return_administered_item_indeces if TRUE, indeces of administered items are added to the output
 #' @param min_n value equal to the minimum number of items to administer
 #' @param max_n value equal to the maximum number of items to administer (test stops at this number, even if variance target has not been reached). NULL means max_n is equal to number of items in test bank
@@ -170,7 +164,7 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
 #' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori. One of "riemannsum" for integration via Riemannsum or
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
 #' @return matrix with in each row (= one condition): named vector containing estimated theta, variance of the estimate, and if return_administered_item_indeces is TRUE, the indeces of the administered items
-run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, constraints_and_characts = NULL, guessing = NULL, items_load_one_dimension = TRUE, prior_form = "normal", prior_parameters = list(mu = rep(0, length(number_dimensions)), Sigma = diag(number_dimensions) * 20), lower_bound = NULL, upper_bound = NULL, safe_maximum = FALSE, prior_var_safe_ml = NULL, return_administered_item_indeces = FALSE, min_n = NULL, max_n = NULL, varying_number_item_steps = FALSE, eap_estimation_procedure = "riemannsum") {                   
+run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, constraints_and_characts = NULL, guessing = NULL, items_load_one_dimension = TRUE, prior_form = "normal", prior_parameters = list(mu = rep(0, length(number_dimensions)), Sigma = diag(number_dimensions) * 20), lower_bound = NULL, upper_bound = NULL, safe_eap = FALSE, return_administered_item_indeces = FALSE, min_n = NULL, max_n = NULL, varying_number_item_steps = FALSE, eap_estimation_procedure = "riemannsum") {                   
   if (number_dimensions > 1 && number_dimensions != length(true_theta_vec))
     stop("number_dimensions is larger than 1 but not equal to the length of true_theta_vec")
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
@@ -185,7 +179,7 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
                                       else
                                         true_theta_vec )
                       alpha_beta <- simulate_testbank(model = as.character(conditions[condition, "model"]), number_items = conditions[condition, "number_items"], number_dimensions = number_dimensions, number_itemsteps = conditions[condition, "number_answer_categories"] - 1, items_load_one_dimension = items_load_one_dimension, varying_number_item_steps = varying_number_item_steps)
-                      estimate_theta <- tryCatch(test_shadowcat(true_theta, prior_form, prior_parameters, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), constraints_and_characts, lower_bound, upper_bound, safe_maximum, prior_var_safe_ml, eap_estimation_procedure = eap_estimation_procedure),
+                      estimate_theta <- tryCatch(test_shadowcat(true_theta, prior_form, prior_parameters, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), constraints_and_characts, lower_bound, upper_bound, safe_eap, eap_estimation_procedure = eap_estimation_procedure),
                                                  error = function(e) e)
 
                       if (return_administered_item_indeces)
@@ -200,7 +194,7 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
 
 context("validate shadowcat single conditions")
 
-test_that("true theta is 2, estimator is maximum_aposteriori", {
+test_that("true theta is 2, estimator is maximum_aposteriori, N(0, 5) prior", {
   # define true theta for simulation of answers
   true_theta <- 2
   
@@ -231,7 +225,69 @@ test_that("true theta is 2, estimator is maximum_aposteriori", {
   expect_equal(length(test_outcome$answers), 100)
 })
 
-test_that("true theta is 2, estimator is maximum_likelihood no safe_maximum", {
+test_that("true theta is 2, estimator is maximum_aposteriori, N(-1, 1) prior", {
+  # define true theta for simulation of answers
+  true_theta <- 2
+  
+  # define item characteristics
+  number_items <- 100
+  number_dimensions <- 1
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  item_keys <- str_c("item", 1:number_items)
+  
+  guessing <- matrix(c(rep(.1, number_items / 2), rep(.2, number_items / 2)), ncol = 1, dimnames = list(item_keys, NULL))
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'random', n = 3)
+  stop_test <- list(max_n = 100)
+  estimator <- 'maximum_aposteriori'
+  information_summary <- 'posterior_determinant'
+  
+  prior_form <- "normal"  
+  prior_parameters <- list(mu = -1, Sigma = matrix(1))
+  
+  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form, prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  
+  expect_equal(as.vector(round(test_outcome$estimate, 3)), 1.494)
+  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), .089)
+  expect_equal(length(test_outcome$answers), 100)
+})
+
+test_that("true theta is 2, estimator is maximum_aposteriori, U(-1, 1) prior", {
+  # define true theta for simulation of answers
+  true_theta <- 2
+  
+  # define item characteristics
+  number_items <- 100
+  number_dimensions <- 1
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  item_keys <- str_c("item", 1:number_items)
+  
+  guessing <- matrix(c(rep(.1, number_items / 2), rep(.2, number_items / 2)), ncol = 1, dimnames = list(item_keys, NULL))
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'random', n = 3)
+  stop_test <- list(max_n = 100)
+  estimator <- 'maximum_aposteriori'
+  information_summary <- 'posterior_determinant'
+  
+  prior_form <- "uniform"  
+  prior_parameters <- list(lower_bound = -1, upper_bound = 1)
+  
+  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form, prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  
+  expect_equal(as.vector(round(test_outcome$estimate, 3)), 1)
+  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), .087)
+  expect_equal(length(test_outcome$answers), 100)
+})
+
+test_that("true theta is 2, estimator is maximum_likelihood", {
   # define true theta for simulation of answers
   true_theta <- 2
   
@@ -262,7 +318,7 @@ test_that("true theta is 2, estimator is maximum_likelihood no safe_maximum", {
 })
 
 
-test_that("true theta is 2, estimator is expected_aposteriori", {
+test_that("true theta is 2, estimator is expected_aposteriori, N(0, 5) prior", {
   # define true theta for simulation of answers
   true_theta <- 2
   
@@ -300,8 +356,109 @@ test_that("true theta is 2, estimator is expected_aposteriori", {
   expect_equal(length(test_outcome_riemann$answers), 100)
 })
 
+test_that("true theta is 2, estimator is expected_aposteriori, N(-1, 1) prior", {
+  # define true theta for simulation of answers
+  true_theta <- 2
+  
+  # define item characteristics
+  number_items <- 100
+  number_dimensions <- 1
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  item_keys <- str_c("item", 1:number_items)
+  
+  guessing <- NULL
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'random', n = 3)
+  stop_test <- list(max_n = 100)
+  estimator <- 'expected_aposteriori'
+  information_summary <- 'posterior_determinant'
+  
+  prior_form <- "normal"  
+  prior_parameters <- list(mu = -1, Sigma = matrix(1))
+  
+  test_outcome_gauss_hermite <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, eap_estimation_procedure = "gauss_hermite_quad")
+  test_outcome_riemann <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  
+  # gauss hermite
+  expect_equal(as.vector(round(test_outcome_gauss_hermite$estimate, 3)), 1.522)
+  expect_equal(as.vector(round(attr(test_outcome_gauss_hermite$estimate, "variance"), 3)), .072)
+  expect_equal(length(test_outcome_gauss_hermite$answers), 100)
+  
+  # riemann
+  expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), 1.522)
+  expect_equal(as.vector(round(attr(test_outcome_riemann$estimate, "variance"), 3)), .072)
+  expect_equal(length(test_outcome_riemann$answers), 100)
+})
 
-test_that("true theta is 1, 0, 2, estimator is maximum_aposteriori", {  
+test_that("true theta is 2, estimator is expected_aposteriori, U(-4, 4) prior", {
+  # define true theta for simulation of answers
+  true_theta <- 2
+  
+  # define item characteristics
+  number_items <- 100
+  number_dimensions <- 1
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  item_keys <- str_c("item", 1:number_items)
+  
+  guessing <- NULL
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'random', n = 3)
+  stop_test <- list(max_n = 100)
+  estimator <- 'expected_aposteriori'
+  information_summary <- 'posterior_determinant'
+  
+  prior_form <- "uniform"  
+  prior_parameters <- list(lower_bound = -4, upper_bound = 4)
+  
+  test_outcome_riemann <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  
+  # riemann
+  expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), 2.283)
+  expect_equal(as.vector(round(attr(test_outcome_riemann$estimate, "variance"), 3)), .112)
+  expect_equal(length(test_outcome_riemann$answers), 100)
+})
+
+test_that("true theta is 2, estimator is expected_aposteriori, U(-1, 1) prior, with safe_eap", {
+  # define true theta for simulation of answers
+  true_theta <- 2
+  
+  # define item characteristics
+  number_items <- 100
+  number_dimensions <- 1
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  item_keys <- str_c("item", 1:number_items)
+  
+  guessing <- NULL
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'random', n = 3)
+  stop_test <- list(max_n = 100)
+  estimator <- 'expected_aposteriori'
+  information_summary <- 'posterior_determinant'
+  
+  prior_form <- "uniform"  
+  prior_parameters <- list(lower_bound = -1, upper_bound = 1)
+  
+  test_outcome_riemann <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, safe_eap = TRUE)
+  
+  # riemann
+  expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), .963)
+  expect_equal(as.vector(round(attr(test_outcome_riemann$estimate, "variance"), 3)), 0)
+  expect_equal(length(test_outcome_riemann$answers), 100)
+})
+
+test_that("true theta is 1, 0, 2, estimator is maximum_aposteriori, N(c(0,0,0), diag(3) * 20) prior", {  
   # define true theta for simulation of answers
   true_theta <- c(1, 0, 2)
   
@@ -336,6 +493,80 @@ test_that("true theta is 1, 0, 2, estimator is maximum_aposteriori", {
   expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.064, .000, .000))
   expect_equal(length(test_outcome$answers), 300)
 })
+
+test_that("true theta is 1, 0, 2, estimator is maximum_aposteriori, N(c(-1,2,-2), diag(3)) prior", {  
+  # define true theta for simulation of answers
+  true_theta <- c(1, 0, 2)
+  
+  # define item characteristics
+  number_items <- 300
+  number_dimensions <- 3
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  item_keys <- str_c("item", 1:number_items)
+  
+  guessing <- NULL
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
+  alpha[1:100,2:3] <- 0
+  alpha[101:200,c(1,3)] <- 0
+  alpha[201:300,1:2] <- 0
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
+  
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'random', n = 3)
+  stop_test <- list(max_n = 300)
+  estimator <- 'maximum_aposteriori'
+  information_summary <- 'posterior_determinant'
+  
+  # define prior covariance matrix
+  prior_form <- "normal"  
+  prior_parameters <- list(mu = c(-1, 2, -2), Sigma = diag(number_dimensions))
+  
+  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  
+  expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.672, .219, 1.682))
+  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.059, .000, .000))
+  expect_equal(length(test_outcome$answers), 300)
+})
+
+test_that("true theta is 1, 0, 2, estimator is maximum_aposteriori, U(c(-1, -1, -1), c(1, 1, 1)) prior", {  
+  # define true theta for simulation of answers
+  true_theta <- c(1, 0, 2)
+  
+  # define item characteristics
+  number_items <- 300
+  number_dimensions <- 3
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  item_keys <- str_c("item", 1:number_items)
+  
+  guessing <- NULL
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
+  alpha[1:100,2:3] <- 0
+  alpha[101:200,c(1,3)] <- 0
+  alpha[201:300,1:2] <- 0
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
+  
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'random', n = 3)
+  stop_test <- list(max_n = 300)
+  estimator <- 'maximum_aposteriori'
+  information_summary <- 'posterior_determinant'
+  
+  # define prior covariance matrix
+  prior_form <- "uniform"  
+  prior_parameters <- list(lower_bound = c(-1, -1, -1), upper_bound = c(1, 1, 1))
+  
+  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  
+  expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.677, .059, 1.000))
+  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.063, .000, .000))
+  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[7:9],c(.000, .000, .068))
+  expect_equal(length(test_outcome$answers), 300)
+})
+
 
 test_that("true theta is 1, 0, 2, estimator is maximum_likelihood", {  
   # define true theta for simulation of answers
@@ -376,7 +607,7 @@ test_that("true theta is 1, 0, 2, estimator is maximum_likelihood", {
   expect_equal(length(test_outcome$answers), 300)  
 })
 
-test_that("true theta is 1, 0, 2, estimator is expected_aposteriori", {  
+test_that("true theta is 1, 0, 2, estimator is expected_aposteriori, N(c(0, 0, 0), diag(3) * 20) prior", {  
   # define true theta for simulation of answers
   true_theta <- c(1, 0, 2)
   
@@ -401,7 +632,6 @@ test_that("true theta is 1, 0, 2, estimator is expected_aposteriori", {
   estimator <- 'expected_aposteriori'
   information_summary <- 'posterior_determinant'
   
-  # define prior covariance matrix
   prior_form <- "normal"  
   prior_parameters <- list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions) * 20)
   
@@ -416,6 +646,121 @@ test_that("true theta is 1, 0, 2, estimator is expected_aposteriori", {
   # riemann
   expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), c(.649, .073, 1.660))
   expect_equal(as.vector(round(attr(test_outcome_riemann$estimate, "variance"), 3))[1:3],c(.064, .000, .000))
+  expect_equal(length(test_outcome_riemann$answers), 300)
+})
+
+test_that("true theta is 1, 0, 2, estimator is expected_aposteriori, N(c(-1, 1, -2), diag(3)) prior", {  
+  # define true theta for simulation of answers
+  true_theta <- c(1, 0, 2)
+  
+  # define item characteristics
+  number_items <- 300
+  number_dimensions <- 3
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  item_keys <- str_c("item", 1:number_items)
+  
+  guessing <- NULL
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
+  alpha[1:100,2:3] <- 0
+  alpha[101:200,c(1,3)] <- 0
+  alpha[201:300,1:2] <- 0
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
+  
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'random', n = 3)
+  stop_test <- list(max_n = 300)
+  estimator <- 'expected_aposteriori'
+  information_summary <- 'posterior_determinant'
+  
+  prior_form <- "normal"  
+  prior_parameters <- list(mu = c(-1, 1, -2), Sigma = diag(number_dimensions))
+  
+  test_outcome_gauss_hermite <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, eap_estimation_procedure = "gauss_hermite_quad")
+  test_outcome_riemann <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, eap_estimation_procedure = "riemannsum")
+  
+  # gauss hermite
+  expect_equal(as.vector(round(test_outcome_gauss_hermite$estimate, 3)), c(.583, .131, 1.609))
+  expect_equal(as.vector(round(attr(test_outcome_gauss_hermite$estimate, "variance"), 3))[1:3],c(.059, .000, .000))
+  expect_equal(length(test_outcome_gauss_hermite$answers), 300)
+  
+  # riemann
+  expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), c(.627, .206, 1.697))
+  expect_equal(as.vector(round(attr(test_outcome_riemann$estimate, "variance"), 3))[1:3],c(.061, .000, .000))
+  expect_equal(length(test_outcome_riemann$answers), 300)
+})
+
+test_that("true theta is 1, 0, 2, estimator is expected_aposteriori, U(c(-4, -4, -4), c(4, 4, 4)) prior", {  
+  # define true theta for simulation of answers
+  true_theta <- c(1, 0, 2)
+  
+  # define item characteristics
+  number_items <- 300
+  number_dimensions <- 3
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  item_keys <- str_c("item", 1:number_items)
+  
+  guessing <- NULL
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
+  alpha[1:100,2:3] <- 0
+  alpha[101:200,c(1,3)] <- 0
+  alpha[201:300,1:2] <- 0
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
+  
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'random', n = 3)
+  stop_test <- list(max_n = 300)
+  estimator <- 'expected_aposteriori'
+  information_summary <- 'posterior_determinant'
+  
+  prior_form <- "uniform"  
+  prior_parameters <- list(lower_bound = c(-4, -4, -4), upper_bound = c(4, 4, 4))
+  
+  test_outcome_riemann <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, eap_estimation_procedure = "riemannsum")
+  
+  # riemann
+  expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), c(1.067, .196, 1.987))
+  expect_equal(as.vector(round(attr(test_outcome_riemann$estimate, "variance"), 3))[1:3],c(.068, .000, .000))
+  expect_equal(length(test_outcome_riemann$answers), 300)
+})
+
+test_that("true theta is 1, 0, 2, estimator is expected_aposteriori, U(c(-1, -1, -1), c(1, 1, 1)) prior, with safe_eap", {  
+  # define true theta for simulation of answers
+  true_theta <- c(1, 0, 2)
+  
+  # define item characteristics
+  number_items <- 300
+  number_dimensions <- 3
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  item_keys <- str_c("item", 1:number_items)
+  
+  guessing <- NULL
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
+  alpha[1:100,2:3] <- 0
+  alpha[101:200,c(1,3)] <- 0
+  alpha[201:300,1:2] <- 0
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
+  
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'random', n = 3)
+  stop_test <- list(max_n = 300)
+  estimator <- 'expected_aposteriori'
+  information_summary <- 'posterior_determinant'
+  
+  prior_form <- "uniform"  
+  prior_parameters <- list(lower_bound = c(-1, -1, -1), upper_bound = c(1, 1, 1))
+  
+  test_outcome_riemann <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, eap_estimation_procedure = "riemannsum", safe_eap = TRUE)
+  
+  # riemann
+  expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), c(.876, -.349, .939))
+  expect_equal(as.vector(round(attr(test_outcome_riemann$estimate, "variance"), 3))[1:3],c(.000, .000, .000))
+  expect_equal(as.vector(round(attr(test_outcome_riemann$estimate, "variance"), 3))[7:9],c(.000, .000, .000))
   expect_equal(length(test_outcome_riemann$answers), 300)
 })
 
@@ -884,9 +1229,6 @@ test_that("invalid input", {
   error_message_answers <- shadowcat(answers = list(item1 = 0, item22 = 1, item301 = 0), estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta)
   error_message_estimator_unknown <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator = "ML", information_summary, prior_form, prior_parameters, guessing, eta)
   error_message_information_summary_unknown <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary = "PT", prior_form, prior_parameters, guessing, eta)
-  error_message_prior_var_safe_ml1 <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta, prior_var_safe_ml = diag(3))
-  error_message_prior_var_safe_ml2 <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta, prior_var_safe_ml = rep(.5, 2))
-  error_message_prior_var_safe_ml3 <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta, prior_var_safe_ml = -1)
   error_message_estimator_ml_posterior_mixed <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator = "maximum_likelihood", information_summary = "posterior_determinant", prior_form, prior_parameters, guessing, eta)
   error_message_bounds_should_be_null <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta, lower_bound = rep(-3, 3), upper_bound = rep(3, 3))
   error_message_lower_bound <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta, lower_bound = c(-2,-3))
@@ -940,9 +1282,6 @@ test_that("invalid input", {
   expect_equal(error_message_answers$errors$answers, "contains non-existing key")
   expect_equal(error_message_estimator_unknown$errors$estimator, "of unknown type")
   expect_equal(error_message_information_summary_unknown$errors$information_summary, "of unknown type")
-  expect_equal(error_message_prior_var_safe_ml1$errors$prior_var_safe_ml, "should be a scalar or vector of the length of estimate, with values larger than zero")
-  expect_equal(error_message_prior_var_safe_ml2$errors$prior_var_safe_ml, "should be a scalar or vector of the length of estimate, with values larger than zero")
-  expect_equal(error_message_prior_var_safe_ml3$errors$prior_var_safe_ml, "should be a scalar or vector of the length of estimate, with values larger than zero")
   expect_equal(error_message_estimator_ml_posterior_mixed$errors$estimator_is_maximum_likelihood, "so using a posterior information summary makes no sense")
   expect_equal(error_message_bounds_should_be_null$errors$bounds, "can only be defined if estimator is maximum likelihood")
   
@@ -1701,64 +2040,6 @@ test_that("three dimensions, expected_aposteriori, 100 replications per conditio
   expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), c(.001, .189, .246, .262, .356))
   expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.001, .254, .405, .477, 1.060))
 })
-
-  test_that("test prior_var_safe_ml is 100", {
-    # run again with new safe_ml code in estimate_latent_trait()
-    # run maximum_likelihood only
-    replications_per_unique_condition <- 100
-    true_theta_vec <- c(-2, 1, 2)
-    number_items_vec <- c(300)
-    number_answer_categories_vec <- c(2, 4)
-    number_dimensions <- 3
-    
-    start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
-    variance_target <- .1^2
-    model_vec <- c("3PLM","GRM","GPCM","SM")
-    estimator_vec <- c("maximum_likelihood", "maximum_aposteriori")
-    information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace")
-    
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, prior_var_safe_ml = 100)
-    
-    conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
-    
-    condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/replications_per_unique_condition), replications_per_unique_condition))
-    
-    estimates_and_conditions <- cbind(t(estimates_and_variance)[, c("estimated_theta1", "estimated_theta2", "estimated_theta3", "variance_estimate1", "variance_estimate5", "variance_estimate9")], 
-                                      conditions[, c("replication", "number_items", "number_answer_categories", "model", "estimator", "information_summary")], 
-                                      condition_vector)
-    
-    average_per_condition_dim1 <- aggregate(estimates_and_conditions[, "estimated_theta1"], list(condition_vector), "mean", na.rm = TRUE)
-    average_per_condition_dim2 <- aggregate(estimates_and_conditions[, "estimated_theta2"], list(condition_vector), "mean", na.rm = TRUE)
-    average_per_condition_dim3 <- aggregate(estimates_and_conditions[, "estimated_theta3"], list(condition_vector), "mean", na.rm = TRUE)
-    
-    sd_per_condition_dim1 <- aggregate(estimates_and_conditions[, "estimated_theta1"], list(condition_vector), "sd", na.rm = TRUE)
-    sd_per_condition_dim2 <- aggregate(estimates_and_conditions[, "estimated_theta2"], list(condition_vector), "sd", na.rm = TRUE)
-    sd_per_condition_dim3 <- aggregate(estimates_and_conditions[, "estimated_theta3"], list(condition_vector), "sd", na.rm = TRUE)
-    
-    number_na_per_condition <- aggregate(estimates_and_conditions[, "estimated_theta1"], list(condition_vector), FUN = function(x) { sum(is.na(x)) })
-    
-    # five number summary of average theta estimate per condition, dimension 1 (true theta is -2)
-    expect_equal(round(fivenum(average_per_condition_dim1[,"x"]), 3), c(-2.108, -2.045, -2.017, -1.992, -1.950))
-    # five number summary of average theta estimate per condition, dimension 2 (true theta is 1)
-    expect_equal(round(fivenum(average_per_condition_dim2[,"x"]), 3), c(.954, .990, 1.011, 1.020, 1.077))
-    # five number summary of average theta estimate per condition, dimension 3 (true theta is 2)
-    expect_equal(round(fivenum(average_per_condition_dim3[,"x"]), 3), c(1.967, 1.999, 2.016, 2.044, 2.123))
-    
-    # five number summary of observed sd of the theta estimates within each condition, for dimension 1, 2, and 3, respectively
-    expect_equal(round(fivenum(sd_per_condition_dim1[,"x"]), 3), c(.176, .213, .304, .340, .392))
-    expect_equal(round(fivenum(sd_per_condition_dim2[,"x"]), 3), c(.157, .195, .244, .264, .332))
-    expect_equal(round(fivenum(sd_per_condition_dim3[,"x"]), 3), c(.171, .206, .314, .340, .395))
-    
-    # five number summary of reported sd of the theta estimate within each condition, for dimension 1, 2, and 3, respectively
-    expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate1"])), 3), c(.100, .262, .289, .316, .525))
-    expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), c(.100, .206, .248, .277, .382))
-    expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.100, .210, .289, .316, .522))
-    
-    # no errors/missings for maximum_aposteriori estimator
-    expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "maximum_aposteriori"), "x"], rep(0, 32))
-    # no errors/missings for maximum_likelihood estimator
-    expect_equal(number_na_per_condition[which(conditions[seq(1, 6400, 100), "estimator"] == "maximum_likelihood"), "x"], rep(0, 32))
-  })
   
   test_that("items load on all dimensions prior_var_safe_ml is 100", {
     # run again with new safe_ml code in estimate_latent_trait()

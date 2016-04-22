@@ -69,6 +69,29 @@ matrix_apply <- function(x, margin, FUN, ...) {
   as.matrix(apply(as.matrix(x), margin, FUN, ...))
 }
 
+#' Move a vector of values in the direction of a vector of means
+#' 
+#' @param values The vector with values to move to the mean
+#' @param means The vector with means to which values should be moved
+#' @param amount_change Vector with the amounts by which each value should be moved to its corresponding mean
+#' @return values plus or minus amount_change, or values if values is equal to the means
+#' @examples move_values_to_means(values = 1, means = 2, amount_change = .1) == 1.1 || stop("wrong") 
+#' move_values_to_means(values = 3, means = 2, amount_change = .1) == 2.9 || stop("wrong")
+#' move_values_to_means(values = 2, means = 2, amount_change = .1) == 2 || stop("wrong")
+#' should_be_equal <- move_values_to_means(values = c(1, 2, 3), means = c(1, 5, -1), amount_change = rep(.1, 3)) == c(1, 2.1, 2.9)
+#' sum(should_be_equal) == 3 || stop("wrong")
+#' @export
+move_values_to_means <- function(values, means, amount_change) {
+  sapply(1:length(values), function(i) {
+    if (values[i] == means[i])
+      return(values[i])
+    if (values[i] < means[i])
+      values[i] + amount_change[i]
+    else
+      values[i] - amount_change[i]
+  } )
+}
+
 #' not in
 #'
 #'@param x vector or value for which it is too be checked if its elements are in vector y

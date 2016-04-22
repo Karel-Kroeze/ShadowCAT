@@ -74,30 +74,27 @@
 #' @param beta Matrix of beta paramteres
 #' @param guessing Matrix of guessing parameters
 #' @param number_itemsteps_per_item Vector containing the number of non missing cells per row of the beta matrix
-#' @param safe_maximum Only relevant if estimator is maximum likelihood or maximum aposteriori. 
-#' TRUE if estimator should switch to expected aposteriori if the maximization algorithm results in an error or warning.
-#' A normal prior with mean zero and variance equal to prior_var_safe_ml is used if estimator is maximum likelihood. The 
-#' already defined prior settings are used otherwise.
-#' @param prior_var_safe_ml Scalar or vector containing the prior variance for theta if safe_ml is TRUE and estimator is maximum likehood. 
+#' @param safe_eap Only relevant if estimator is espected_aposteriori. 
+#' TRUE if estimator should switch to maximum aposteriori if the integration algorithm results in an error.
 #' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori. One of "riemannsum" for integration via Riemannsum or
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
 #' @return vector containing the updated estimate with the covariance matrix as attribute
 #' @importFrom MultiGHQuad init.quad eval.quad
 #' @export
-estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, safe_maximum = FALSE, prior_var_safe_ml = NULL, eap_estimation_procedure = "riemannsum") {
+estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, safe_eap = FALSE, eap_estimation_procedure = "riemannsum") {
   result <- function() {
     get_updated_estimate_and_variance_attribute()
   }
   
   get_updated_estimate_and_variance_attribute <- function() {
     switch(estimator,
-           maximum_likelihood = tryCatch(get_updated_estimate_and_variance_ml(),
-                                         error = function(e) { switch_to_eap_if_requested() },
-                                         warning = function(w) { switch_to_eap_if_requested() }),
-           maximum_aposteriori = tryCatch(get_updated_estimate_and_variance_map(),
-                                          error = function(e) { switch_to_eap_if_requested() },
-                                          warning = function(w) { switch_to_eap_if_requested() }),
-           expected_aposteriori = get_updated_estimate_and_variance_eap(prior_form, prior_parameters))
+           maximum_likelihood = get_updated_estimate_and_variance_ml(),
+           maximum_aposteriori = get_updated_estimate_and_variance_map(),
+           expected_aposteriori = tryCatch(get_updated_estimate_and_variance_eap(),
+                                           error = function(e) { if (safe_eap)
+                                                                   get_updated_estimate_and_variance_map()
+                                                                 else
+                                                                   stop(e) }))
   }
   
   get_updated_estimate_and_variance_ml <- function() {
@@ -116,10 +113,10 @@ estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameter
            uniform = get_updated_estimate_and_variance_map_uniform_prior())
   }
   
-  get_updated_estimate_and_variance_eap <- function(prior_form, prior_parameters) {
+  get_updated_estimate_and_variance_eap <- function() {
     switch(eap_estimation_procedure,
-           gauss_hermite_quad = get_updated_estimate_and_variance_eap_gauss_hermite_quad(prior_parameters),
-           riemannsum = get_updated_estimate_and_variance_eap_riemannsum(prior_form, prior_parameters))
+           gauss_hermite_quad = get_updated_estimate_and_variance_eap_gauss_hermite_quad(),
+           riemannsum = get_updated_estimate_and_variance_eap_riemannsum())
   }
   
   get_updated_estimate_and_variance_map_normal_prior <- function() {
@@ -132,7 +129,7 @@ estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameter
   }
   
   get_updated_estimate_and_variance_map_uniform_prior <- function() {
-    estimate <- constrOptim(theta = estimate, 
+    estimate <- constrOptim(theta = move_values_to_means(values = estimate, means = rowMeans(matrix(c(prior_parameters$lower_bound, prior_parameters$upper_bound), ncol = 2)), amount_change = rep(.001, number_dimensions)), 
                             f = likelihood_or_post_density,
                             grad = function(theta, answers, model, items_to_include, number_dimensions, estimator, alpha, beta, guessing, prior_parameters, return_log_likelihood_or_post_density = TRUE, inverse_likelihood_or_post_density) {
                               likelihood <- likelihood_or_post_density(theta, answers, model, items_to_include, number_dimensions, estimator, alpha, beta, guessing, prior_parameters, return_log_likelihood_or_post_density, inverse_likelihood_or_post_density)
@@ -147,17 +144,18 @@ estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameter
     estimate
   }
   
-  get_updated_estimate_and_variance_eap_gauss_hermite_quad <- function(prior_parameters) {
+  get_updated_estimate_and_variance_eap_gauss_hermite_quad <- function() {
     adapt <- if (length(answers) > 5 & !is.null(attr(estimate, 'variance'))) list(mu = estimate, Sigma = as.matrix(attr(estimate, "variance")))
     Q_dim_grid_quad_points <- init.quad(Q = number_dimensions,
                                         prior = prior_parameters,
                                         adapt = adapt,
-                                        ip = number_gridpoints())
+                                        ip = number_gridpoints(),
+                                        forcePD = FALSE)
     eval.quad(FUN = likelihood_or_post_density, X = Q_dim_grid_quad_points, 
               answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing)
   }
   
-  get_updated_estimate_and_variance_eap_riemannsum <- function(prior_form, prior_parameters) {
+  get_updated_estimate_and_variance_eap_riemannsum <- function() {
     adapt <- if (length(answers) > 5 & !is.null(attr(estimate, 'variance'))) list(mu = estimate, Sigma = as.matrix(attr(estimate, "variance")))
     get_eap_estimate_riemannsum(dimension = number_dimensions, 
                likelihood = likelihood_or_post_density, 
@@ -166,15 +164,6 @@ estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameter
                adapt = adapt,
                number_gridpoints = number_gridpoints(),
                answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing, return_log_likelihood_or_post_density = FALSE)
-  }
-    
-  switch_to_eap_if_requested <- function() {
-    if (!safe_maximum)
-      stop("something went wrong with maximization and safe_maximum was FALSE")
-    if (estimator == "maximum_likelihood")
-      get_updated_estimate_and_variance_eap(prior_form = "normal", prior_parameters = list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions) * prior_var_safe_ml))
-    else
-      get_updated_estimate_and_variance_eap(prior_form = prior_form, prior_parameters = prior_parameters)
   }
   
   number_gridpoints <- function() {
