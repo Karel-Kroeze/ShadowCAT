@@ -1505,7 +1505,6 @@ if (FALSE) {
   })
   
   test_that("one dimension, one replication per condition, maximum_likelihood", {
-    # maximum_likelihood and PEKL do not go well together; makes sense to me, I think maximum_likelihood should be combined with D or A information summary
     replications_per_unique_condition <- 1
     true_theta_vec <- c(-2, 1, 3)
     number_items_vec <- c(50, 200)

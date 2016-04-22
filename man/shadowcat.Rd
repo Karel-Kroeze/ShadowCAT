@@ -64,7 +64,7 @@ the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bo
 be in matrix form. The length of lower_bound and upper_bound should be equal to the number of dimensions.
 For uniform prior in combination with expected eposteriori estimation, true theta should fall within 
 lower_bound and upper_bound and be not too close to one of these bounds. Setting the function argument safe_eap to TRUE
-ensures that the estimation switches to MAP if the expected aposteriori estimate fails.}
+ensures that the estimation switches to maximum aposteriori if the expected aposteriori estimate fails.}
 
 \item{guessing}{Matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.}
 
