@@ -24,7 +24,7 @@
 #' @param stop_test rule for when to stop providing new items to patient; should be a list of the form
 #' list(target = ..., max_n = ..., min_n = ..., cutoffs = ...), 
 #' where max_n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule), 
-#' target = vector of maximum acceptable variances per dimension; if target = NULL, only max_n is taken into account,
+#' target = vector of maximum acceptable variances per dimension; NULL means no variance target,
 #' min_n = minimum test length; NULL means no mimimum test length,
 #' cutoffs = matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
 #' administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at certain iteration, test stops; 
@@ -78,16 +78,16 @@ shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_ite
     number_items <- nrow(beta)
     number_dimensions <- ncol(alpha)
     number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
-    lp_constraints_and_characts <- constraints_lp_format(stop_test$max_n, number_items, constraints_and_characts$characteristics, constraints_and_characts$constraints)
+    lp_constraints_and_characts <- get_lp_constraints_and_characts(number_items)
     item_keys <- rownames(alpha)
     item_keys_administered <- names(answers)
     item_keys_available <- get_item_keys_available(item_keys_administered, item_keys)
-    attr(estimate, "variance") <- matrix(variance, ncol = number_dimensions)
+    attr(estimate, "variance") <- matrix(variance, ncol = number_dimensions)    
     
     estimate <- update_person_estimate(estimate, unlist(answers), match(item_keys_administered, item_keys), number_dimensions, alpha, beta, guessing, number_itemsteps_per_item, estimator, prior_form, prior_parameters)
     continue_test <- !test_must_stop(length(answers), estimate, stop_test$min_n, stop_test$max_n, stop_test$target, stop_test$cutoffs)
     if (continue_test) {
-      index_new_item <- get_next_item(start_items, information_summary, lp_constraints_and_characts$lp_constraints, lp_constraints_and_characts$lp_chars, estimate, model, unlist(answers), prior_form, prior_parameters, match(item_keys_available, item_keys), match(item_keys_administered, item_keys), number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, eap_estimation_procedure)
+      index_new_item <- get_next_item(start_items, information_summary, lp_constraints_and_characts$lp_constraints, lp_constraints_and_characts$lp_chars, estimate, model, unlist(answers), prior_form, prior_parameters, match(item_keys_available, item_keys), match(item_keys_administered, item_keys), number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, stop_test, eap_estimation_procedure)
       key_new_item <- item_keys[index_new_item]
     }
     else {
@@ -152,6 +152,15 @@ shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_ite
       prior_parameters
   }
   
+  get_lp_constraints_and_characts <- function(number_items) {
+    if (is.null(constraints_and_characts))
+      NULL
+    else
+      constraints_lp_format(stop_test$max_n, number_items, constraints_and_characts$characteristics, constraints_and_characts$constraints) 
+  }
+  
+  
+    
   validate <- function() {
     if (is.null(estimate))
       return(add_error("estimate", "is missing"))

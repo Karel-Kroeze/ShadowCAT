@@ -32,17 +32,25 @@
 #' @param beta matrix containing the beta parameters
 #' @param guessing matrix containing the quessing parameters
 #' @param number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix
+#' @param stop_test rule for when to stop providing new items to patient; should be a list of the form
+#' list(target = ..., max_n = ..., min_n = ..., cutoffs = ...), 
+#' where max_n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule), 
+#' target = vector of maximum acceptable variances per dimension; NULL means no variance target,
+#' min_n = minimum test length; NULL means no mimimum test length,
+#' cutoffs = matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
+#' administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at certain iteration, test stops; 
+#' NULL means no cut off values
 #' @param eap_estimation_procedure String indicating the estimation procedure for the expected aposteriori estimate, which is computed
 #' in get_posterior_expected_kl_information() if it is not the requested estimator in shadowcat(). One of "riemannsum" for integration via Riemannsum or
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. Only important here if information_summary is posterior_expected_kl_information.
 #' @return integer item index next item
 #' @export
-get_next_item <- function(start_items, information_summary, lp_constraints, lp_characters, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, eap_estimation_procedure = "riemannsum") {
+get_next_item <- function(start_items, information_summary, lp_constraints, lp_characters, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, stop_test, eap_estimation_procedure = "riemannsum") {
   result <- function() {
     if (length(answers) < start_items$n)
       get_start_item(start_items$type)
     else
-      get_best_item(information_summary, lp_constraints, lp_characters, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, eap_estimation_procedure = eap_estimation_procedure)
+      get_best_item(information_summary, lp_constraints, lp_characters, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, stop_test, eap_estimation_procedure = eap_estimation_procedure)
   }
   
   get_start_item <- function(start_type) {

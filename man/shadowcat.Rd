@@ -42,7 +42,7 @@ If n is 0, only n needs to be defined
 \item{stop_test}{rule for when to stop providing new items to patient; should be a list of the form
 list(target = ..., max_n = ..., min_n = ..., cutoffs = ...), 
 where max_n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule), 
-target = vector of maximum acceptable variances per dimension; if target = NULL, only max_n is taken into account,
+target = vector of maximum acceptable variances per dimension; NULL means no variance target,
 min_n = minimum test length; NULL means no mimimum test length,
 cutoffs = matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
 administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at certain iteration, test stops; 

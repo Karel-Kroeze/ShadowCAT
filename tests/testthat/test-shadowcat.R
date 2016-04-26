@@ -1090,6 +1090,42 @@ test_that("stop rule is variance", {
   expect_equal(unname(unlist(test_outcome$answers)), c(1, 0, 1, 1, 0, 1, 0))
 })
 
+test_that("items that load on finished dimensions are not administered", {
+  # define true theta for simulation of answers
+  true_theta <- c(0, 0, 0)
+  
+  # define item characteristics
+  number_items <- 300
+  number_dimensions <- 3
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  item_keys <- str_c("item", 1:number_items)
+  
+  guessing <- matrix(c(rep(.1, number_items / 2), rep(.2, number_items / 2)), ncol = 1, dimnames = list(item_keys, NULL))
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
+  alpha[1:100, 1:2] <- 0
+  alpha[101:300, 3] <- 0
+  
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = 'random_by_dimension', n_by_dimension = 2, n = 6)
+  stop_test <- list(target = c(.1, .1, 2), max_n = 100)
+  estimator <- 'maximum_aposteriori'
+  information_summary <- 'posterior_determinant'
+  
+  prior_form = "normal"
+  prior_parameters = list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions) * 20)
+  
+  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  item_numbers <- sapply(names(test_outcome$answers), function(item) { as.numeric(substr(x = item, start = 5, stop = nchar(item))) })
+  
+  expect_equal(as.vector(round(test_outcome$estimate, 3)), c(-.635, .487, .482))
+  expect_equal(diag(round(attr(test_outcome$estimate, "variance"), 3)), c(.250, .221, 1.754))
+  expect_equal(all(item_numbers[9:100] > 100), TRUE)
+})
+
+
 test_that("stop rule is variance and minimum number of items is taken into account", {
   # define true theta for simulation of answers
   true_theta <- 0
@@ -1284,7 +1320,6 @@ test_that("invalid input", {
   expect_equal(error_message_information_summary_unknown$errors$information_summary, "of unknown type")
   expect_equal(error_message_estimator_ml_posterior_mixed$errors$estimator_is_maximum_likelihood, "so using a posterior information summary makes no sense")
   expect_equal(error_message_bounds_should_be_null$errors$bounds, "can only be defined if estimator is maximum likelihood")
-  
  })
 
 

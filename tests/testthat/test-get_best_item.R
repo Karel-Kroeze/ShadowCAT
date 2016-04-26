@@ -10,9 +10,11 @@ model <- "3PLM"
 information_summary <- "posterior_determinant"
 estimator <- "maximum_aposteriori"
 max_n <- 20
+stop_test <- list(max_n = max_n)
 number_items <- 50
 number_dimensions <- 1
 estimate <- 0
+attr(estimate, "variance") <- diag(1)
 prior_form = "normal"
 prior_parameters = list(mu = 0, Sigma = diag(1) * .4)
 guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
@@ -44,7 +46,7 @@ test_that("First 4 items administered, MI", {
   administered <- c(1:4)
   constraints_formatted <- NULL
   
-  best_item <- get_best_item(information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
+  best_item <- get_best_item(information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, stop_test)
 
   expect_equal(best_item, 5)
 })
@@ -54,7 +56,7 @@ test_that("First 4 items administered, Shadow", {
   available <- c(5:50)
   administered <- c(1:4)
   
-  best_item <- get_best_item(information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
+  best_item <- get_best_item(information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, stop_test)
   
   expect_equal(best_item, 5)
 })
@@ -65,7 +67,7 @@ test_that("7 items administered, MI", {
   administered <- c(1, 3, 5, 7, 9, 11, 13)
   constraints_formatted <- NULL
   
-  best_item <- get_best_item(information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
+  best_item <- get_best_item(information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, stop_test)
   
   expect_equal(best_item, 6)
 })
@@ -75,7 +77,7 @@ test_that("7 items administered, Shadow", {
   available <- c(2, 4, 6, 8, 10, 12, 14:50)
   administered <- c(1, 3, 5, 7, 9, 11, 13)
   
-  best_item <- get_best_item(information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
+  best_item <- get_best_item(information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, stop_test)
   
   expect_equal(best_item, 6)
 })
@@ -85,7 +87,7 @@ test_that("First 10 items administered, MI", {
   available <- c(11:50)
   administered <- c(1:10)
   
-  best_item <- get_best_item(information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
+  best_item <- get_best_item(information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, stop_test)
   
   expect_equal(best_item, 47)
 })
@@ -95,7 +97,7 @@ test_that("First 10 items administered, Shadow", {
   available <- c(11:50)
   administered <- c(1:10)
   
-  best_item <- get_best_item(information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
+  best_item <- get_best_item(information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, stop_test)
   
   expect_equal(best_item, 47)
 })
@@ -106,9 +108,11 @@ model <- "3PLM"
 information_summary <- "posterior_determinant"
 estimator <- "maximum_aposteriori"
 max_n <- 20
+stop_test <- list(max_n = max_n)
 number_items <- 50
 number_dimensions <- 1
 estimate <- 0
+attr(estimate, "variance") <- diag(1)
 prior_form = "normal"
 prior_parameters <- list(mu = 0, Sigma = diag(1) * .4)
 guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
@@ -140,7 +144,7 @@ test_that("First 10 items administered, MI", {
   administered <- c(1:10)
   constraints_formatted <- NULL
   
-  best_item <- with_random_seed(2, get_best_item)(information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
+  best_item <- with_random_seed(2, get_best_item)(information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, stop_test)
   
   expect_equal(best_item, 13)
 })
@@ -150,7 +154,7 @@ test_that("First 10 items administered, Shadow", {
   available <- c(11:50)
   administered <- c(1:10)
   
-  best_item <- with_random_seed(2, get_best_item)(information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
+  best_item <- with_random_seed(2, get_best_item)(information_summary, constraints_formatted$lp_constraints, constraints_formatted$lp_chars, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, stop_test)
   
   expect_equal(best_item, 13)
 })

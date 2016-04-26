@@ -7,7 +7,7 @@
 get_next_item(start_items, information_summary, lp_constraints, lp_characters,
   estimate, model, answers, prior_form, prior_parameters, available,
   administered, number_items, number_dimensions, estimator, alpha, beta,
-  guessing, number_itemsteps_per_item,
+  guessing, number_itemsteps_per_item, stop_test,
   eap_estimation_procedure = "riemannsum")
 }
 \arguments{
@@ -58,6 +58,15 @@ be in matrix form.}
 \item{guessing}{matrix containing the quessing parameters}
 
 \item{number_itemsteps_per_item}{vector containing the number of non missing cells per row of the beta matrix}
+
+\item{stop_test}{rule for when to stop providing new items to patient; should be a list of the form
+list(target = ..., max_n = ..., min_n = ..., cutoffs = ...), 
+where max_n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule), 
+target = vector of maximum acceptable variances per dimension; NULL means no variance target,
+min_n = minimum test length; NULL means no mimimum test length,
+cutoffs = matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
+administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at certain iteration, test stops; 
+NULL means no cut off values}
 
 \item{eap_estimation_procedure}{String indicating the estimation procedure for the expected aposteriori estimate, which is computed
 in get_posterior_expected_kl_information() if it is not the requested estimator in shadowcat(). One of "riemannsum" for integration via Riemannsum or

@@ -4,15 +4,33 @@
 \alias{get_item_index_max_information}
 \title{Maximum Information item selection}
 \usage{
-get_item_index_max_information(available, item_information)
+get_item_index_max_information(available, item_information, estimate, stop_test,
+  alpha, number_answers)
 }
 \arguments{
 \item{available}{vector with indeces of available items}
 
 \item{item_information}{vector with summarized information of each yet available item, with zeros for administered items (returned by get_summarized_information() with pad = TRUE)}
+
+\item{estimate}{Vector containing the theta estimate, with its covariance matrix as an attribute}
+
+\item{stop_test}{rule for when to stop providing new items to patient; should be a list of the form
+list(target = ..., max_n = ..., min_n = ..., cutoffs = ...), 
+where max_n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule), 
+target = vector of maximum acceptable variances per dimension; NULL means no variance target,
+min_n = minimum test length; NULL means no mimimum test length,
+cutoffs = matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
+administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at certain iteration, test stops; 
+NULL means no cut off values}
+
+\item{alpha}{Matrix of alpha parameters, one column per dimension, one row per item. Row names should contain the item keys. Note that so called within-dimensional models still use an alpha matrix, they simply 
+have only one non-zero loading per item.}
+
+\item{number_answers}{The number of answers given to the test (length of administered)}
 }
 \value{
-item index of item with maximum information.
+item Index of item with maximum information. For multi dimensional models, items that only load on dimensions for
+which the variance target has already been reached, will not be returned
 }
 \description{
 Naive item selection based on maximum information only.
