@@ -23,7 +23,7 @@ get_eap_estimate_riemannsum <- function(dimension, likelihood, prior_form, prior
     sum_joint <- sum(joint_distribution)
     sum_joint_times_grid <- colSums(joint_distribution * mid_grid_points)
     eap_theta_estimate <- as.vector(sum_joint_times_grid / sum_joint)
-    
+
     var_eap_theta_estimate <- matrix(0, dimension, dimension)
     for (i in 1:nrow(mid_grid_points)) {
       deviation <- mid_grid_points[i, ] - eap_theta_estimate

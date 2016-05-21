@@ -61,8 +61,8 @@
 #' @param safe_eap Only relevant if estimator is espected_aposteriori. 
 #' TRUE if estimator should switch to maximum aposteriori if the integration algorithm results in an error.
 #' An error may occur if the prior is uniform, estimator is expected aposteriori, and the bounds do not exceed the true theta value, or are too close to it.
-#' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori. One of "riemannsum" for integration via Riemannsum or
-#' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
+#' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori and prior form is normal. One of "riemannsum" for integration via Riemannsum or
+#' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. If prior form is uniform, estimation procedure should always be "riemannsum".
 #' @return a list containing the key of the next item to be administered given a new answer (or "stop_test"), 
 #' updated estimate of theta, updated covariance matrix of theta converted to a vector, and the answers to the administered items (named list)
 #' @importFrom matrixcalc is.positive.definite
