@@ -1951,7 +1951,7 @@ test_that("one dimension, estimator expected_aposteriori, 100 replications per c
 })
 
 
-test_that("three dimensions, maximum_likelihood, no constraints on item selection, 100 replications per condition", {
+test_that("three dimensions, maximum_likelihood, 100 replications per condition", {
   # To be run yet
   replications_per_unique_condition <- 100 
   true_theta_vec <- c(-2, 1, 3)
@@ -2081,7 +2081,7 @@ test_that("three dimensions, maximum_aposteriori, 100 replications per condition
   prior_form <- "uniform"
   prior_parameters <- list(lower_bound = rep(-4, 3), upper_bound = rep(4, 3))
   
-  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, prior_form = prior_form, prior_parameters = prior_parameters)
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, prior_form = prior_form, prior_parameters = prior_parameters, safe_eap = FALSE)
   
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
   
@@ -2098,13 +2098,27 @@ test_that("three dimensions, maximum_aposteriori, 100 replications per condition
   sd_per_condition_dim1 <- aggregate(estimates_and_conditions[, "estimated_theta1"], list(condition_vector), "sd", na.rm = TRUE)
   sd_per_condition_dim2 <- aggregate(estimates_and_conditions[, "estimated_theta2"], list(condition_vector), "sd", na.rm = TRUE)
   sd_per_condition_dim3 <- aggregate(estimates_and_conditions[, "estimated_theta3"], list(condition_vector), "sd", na.rm = TRUE)
+    
+  # five number summary of average theta estimate per condition, dimension 1 (true theta is -2)
+  expect_equal(round(fivenum(average_per_condition_dim1[,"x"]), 3), c(-2.111, -2.044, -2.022, -2.003, -1.951))
+  # five number summary of average theta estimate per condition, dimension 2 (true theta is 1)
+  expect_equal(round(fivenum(average_per_condition_dim2[,"x"]), 3), c(.963, .986, 1.003, 1.021, 1.046))
+  # five number summary of average theta estimate per condition, dimension 3 (true theta is 2)
+  expect_equal(round(fivenum(average_per_condition_dim3[,"x"]), 3), c(2.929, 3.008, 3.037, 3.079, 3.173))
   
-  number_na_per_condition <- aggregate(estimates_and_conditions[, "estimated_theta1"], list(condition_vector), FUN = function(x) { sum(is.na(x)) })
+  # five number summary of observed sd of the theta estimates within each condition, for dimension 1, 2, and 3, respectively
+  expect_equal(round(fivenum(sd_per_condition_dim1[,"x"]), 3), c(.180, .226, .316, .354, .427))
+  expect_equal(round(fivenum(sd_per_condition_dim2[,"x"]), 3), c(.141, .180, .251, .275, .294))
+  expect_equal(round(fivenum(sd_per_condition_dim3[,"x"]), 3), c(.216, .248, .435, .458, .526))
   
- })
+  # five number summary of reported sd of the theta estimate within each condition, for dimension 1, 2, and 3, respectively
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate1"])), 3), c(.161, .209, .298, .334, .563))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), c(.143, .186, .241, .257, .331))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.184, .252, .401, .479, .785)) 
+})
 
 
-test_that("three dimensions, expected_aposteriori, 100 replications per condition, estimation procedure is gauss hermite quadrature", {
+test_that("three dimensions, expected_aposteriori, 100 replications per condition, prior is normal(), estimation procedure is gauss hermite quadrature", {
   #run again
   replications_per_unique_condition <- 100 
   true_theta_vec <- c(-2, 1, 3)
@@ -2156,7 +2170,7 @@ test_that("three dimensions, expected_aposteriori, 100 replications per conditio
   expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.055, .251, .399, .467, 1.025))
 })
 
-test_that("three dimensions, expected_aposteriori, 100 replications per condition, estimation procedure is riemannsum", {
+test_that("three dimensions, expected_aposteriori, 100 replications per condition, prior is normal(), estimation procedure is riemannsum", {
   #run again
   replications_per_unique_condition <- 100 
   true_theta_vec <- c(-2, 1, 3)
@@ -2207,6 +2221,43 @@ test_that("three dimensions, expected_aposteriori, 100 replications per conditio
   expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), c(.001, .189, .246, .262, .356))
   expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.001, .254, .405, .477, 1.060))
 })
+
+test_that("three dimensions, expected_aposteriori, 100 replications per condition, prior is uniform((-4, -4, -4), (4, 4, 4))", {
+  replications_per_unique_condition <- 100 
+  true_theta_vec <- c(-2, 1, 3)
+  number_items_vec <- c(300)
+  number_answer_categories_vec <- c(2, 4)
+  number_dimensions <- 3
+  
+  start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
+  variance_target <- .1^2
+  model_vec <- c("3PLM","GRM","GPCM","SM")
+  estimator_vec <- "expected_aposteriori"
+  information_summary_vec <- c("determinant", "posterior_determinant", "trace", "posterior_trace", "posterior_expected_kullback_leibler")
+  
+  prior_form <- "uniform"
+  prior_parameters <- list(lower_bound = rep(-4, 3), upper_bound = rep(4, 3))
+  
+  estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, prior_form = prior_form, prior_parameters = prior_parameters, safe_eap = FALSE)
+  
+  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
+  
+  condition_vector <- sort(rep(1:(ncol(estimates_and_variance)/replications_per_unique_condition), replications_per_unique_condition))
+  
+  estimates_and_conditions <- cbind(t(estimates_and_variance)[, c("estimated_theta1", "estimated_theta2", "estimated_theta3", "variance_estimate1", "variance_estimate5", "variance_estimate9")], 
+                                    conditions[, c("replication", "number_items", "number_answer_categories", "model", "estimator", "information_summary")], 
+                                    condition_vector)
+  
+  average_per_condition_dim1 <- aggregate(estimates_and_conditions[, "estimated_theta1"], list(condition_vector), "mean", na.rm = TRUE)
+  average_per_condition_dim2 <- aggregate(estimates_and_conditions[, "estimated_theta2"], list(condition_vector), "mean", na.rm = TRUE)
+  average_per_condition_dim3 <- aggregate(estimates_and_conditions[, "estimated_theta3"], list(condition_vector), "mean", na.rm = TRUE)
+  
+  sd_per_condition_dim1 <- aggregate(estimates_and_conditions[, "estimated_theta1"], list(condition_vector), "sd", na.rm = TRUE)
+  sd_per_condition_dim2 <- aggregate(estimates_and_conditions[, "estimated_theta2"], list(condition_vector), "sd", na.rm = TRUE)
+  sd_per_condition_dim3 <- aggregate(estimates_and_conditions[, "estimated_theta3"], list(condition_vector), "sd", na.rm = TRUE)
+  
+ })
+
   
   test_that("items load on all dimensions prior_var_safe_ml is 100", {
     #run again

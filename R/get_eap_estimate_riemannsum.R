@@ -36,7 +36,7 @@ get_eap_estimate_riemannsum <- function(dimension, likelihood, prior_form, prior
   
   trans <- function(grid_points, Sigma) {
     sigma_positive_definite <- nearPD(Sigma)$mat
-    eigen_sigma <- eigen(sigma_positive_definite) 
+    eigen_sigma <- eigen(sigma_positive_definite)
     if (length(eigen_sigma$values) > 1)
       t((eigen_sigma$vectors %*% diag(sqrt(eigen_sigma$values))) %*% t(grid_points))
     else
@@ -67,10 +67,20 @@ get_eap_estimate_riemannsum <- function(dimension, likelihood, prior_form, prior
   }
   
   get_mu_sigma_for_transformation <- function() {
-    if (is.null(adapt) && prior_form == "normal")
+    if (is.null(adapt) && prior_form == "uniform")
+      return(NULL)
+    if (is.null(adapt) && prior_form == "normal") {
       list(mu = prior_parameters$mu, sigma = prior_parameters$Sigma)
-    else
+    }
+    else if (prior_form == "normal") {
       list(mu = adapt$mu, sigma = adapt$Sigma)
+    }
+    else if (prior_form == "uniform") {
+      if (all(diag(adapt$Sigma) < 4))
+        list(mu = adapt$mu, sigma = adapt$Sigma)
+      else
+        list(mu = adapt$mu, sigma = adapt$Sigma / (max(diag(adapt$Sigma)) / 4))
+    }
   }
   
   transform_grid_points <- function(grid_points_untransformed) {

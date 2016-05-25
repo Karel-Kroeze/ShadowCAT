@@ -1,6 +1,8 @@
 # only for whithin R:
 '
 library(testthat)
+library(Matrix)
+library(mvtnorm)
 '
 
 answers <- rep(c(1, 0), 20)
@@ -132,6 +134,22 @@ test_that("uniform prior, 3 dimensions, with adapt", {
   expect_equal(round(attr(eap, "variance"), 3)[1,], c(1.184, -0.085, -0.037))
   expect_equal(round(attr(eap, "variance"), 3)[2,], c(-.085, .257, -.012))
   expect_equal(round(attr(eap, "variance"), 3)[3,], c(-.037, -.012, .106))
+})
+
+test_that("uniform prior, 3 dimensions, with adapt with large variances", {
+  number_dimensions <- 3
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  eap <- get_eap_estimate_riemannsum(dimension = number_dimensions, 
+                                     likelihood = likelihood_or_post_density, 
+                                     prior_form = "uniform", 
+                                     prior_parameters = list(lower_bound = rep(-3, 3), upper_bound = rep(3, 3)), 
+                                     adapt = list(mu = c(0, .5, -.3), Sigma = diag(3) * 150), 
+                                     number_gridpoints = 6,
+                                     answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing, return_log_likelihood_or_post_density = FALSE)
+  expect_equal(as.vector(round(eap, 3)), c(-2.572, -2.375, -1.271))
+  expect_equal(round(attr(eap, "variance"), 3)[1,], c(.944, -.041, -.011))
+  expect_equal(round(attr(eap, "variance"), 3)[2,], c(-.041, .235, -.004))
+  expect_equal(round(attr(eap, "variance"), 3)[3,], c(-.011, -.004, .058))
 })
 
   

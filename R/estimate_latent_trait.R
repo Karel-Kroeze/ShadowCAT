@@ -129,7 +129,7 @@ estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameter
   }
   
   get_updated_estimate_and_variance_map_uniform_prior <- function() {
-    #print(estimate = estimate, length(answers), number_items = nrow(alpha), number_answer_categories = ncol(beta) + 1, model = model, information_summary = information_summary)
+    #print(estimate = estimate, length(answers), number_items = nrow(alpha), number_answer_categories = ncol(beta) + 1, model = model)
     estimate <- constrOptim(theta = move_values_to_means(values = estimate, means = rowMeans(matrix(c(prior_parameters$lower_bound, prior_parameters$upper_bound), ncol = 2)), amount_change = rep(.001, number_dimensions)), 
                             f = likelihood_or_post_density,
                             grad = function(theta, answers, model, items_to_include, number_dimensions, estimator, alpha, beta, guessing, prior_parameters, return_log_likelihood_or_post_density = TRUE, inverse_likelihood_or_post_density) {
