@@ -6,7 +6,7 @@
 \usage{
 get_posterior_expected_kl_information(estimate, model, answers, administered,
   available, number_dimensions, estimator, alpha, beta, guessing, prior_form,
-  prior_parameters, number_itemsteps_per_item, theta_bounds = c(-4, 4),
+  prior_parameters, number_itemsteps_per_item,
   eap_estimation_procedure = "riemannsum")
 }
 \arguments{
@@ -37,8 +37,6 @@ the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bo
 be in matrix form.}
 
 \item{number_itemsteps_per_item}{vector containing the number of non missing cells per row of the beta matrix}
-
-\item{theta_bounds}{Vector of left and right bound of theta values to be evaluated in the numerical integration. Using a sparser range may alleviate stress in higher dimensional tests.}
 
 \item{eap_estimation_procedure}{String indicating the estimation procedure for the expected aposteriori estimate, which is computed
 here if it is not the requested estimator in shadowcat(). One of "riemannsum" for integration via Riemannsum or

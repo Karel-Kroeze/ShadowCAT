@@ -58,7 +58,7 @@
 #' @param upper_bound Vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
 #' Can only be defined when estimator is maximum_likelihood. Setting bounds with maximum likelihood estimation is equivalent to
 #' using maximum aposteriori estimation with a uniform prior.
-#' @param safe_eap Only relevant if estimator is espected_aposteriori. 
+#' @param safe_eap Only relevant if estimator is expected_aposteriori. 
 #' TRUE if estimator should switch to maximum aposteriori if the integration algorithm results in an error.
 #' An error may occur if the prior is uniform, estimator is expected aposteriori, and the bounds do not exceed the true theta value, or are too close to it.
 #' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori and prior form is normal. One of "riemannsum" for integration via Riemannsum or

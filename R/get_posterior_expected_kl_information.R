@@ -25,13 +25,12 @@
 #' the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
 #' be in matrix form.
 #' @param number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix
-#' @param theta_bounds Vector of left and right bound of theta values to be evaluated in the numerical integration. Using a sparser range may alleviate stress in higher dimensional tests.
 #' @param eap_estimation_procedure String indicating the estimation procedure for the expected aposteriori estimate, which is computed
 #' here if it is not the requested estimator in shadowcat(). One of "riemannsum" for integration via Riemannsum or
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
 #' @return Vector with PEKL information for each yet available item.
 #' @export
-get_posterior_expected_kl_information <- function(estimate, model, answers, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior_form, prior_parameters, number_itemsteps_per_item, theta_bounds = c(-4, 4), eap_estimation_procedure = "riemannsum") {
+get_posterior_expected_kl_information <- function(estimate, model, answers, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior_form, prior_parameters, number_itemsteps_per_item, eap_estimation_procedure = "riemannsum") {
   result <- function() {
     # we'll perform a very basic integration over the theta range
     # expand the grid for multidimensional models (number of calculations will be length(theta_values)**Q, which can still get quite high for high dimensionalities.)
@@ -64,20 +63,20 @@ get_posterior_expected_kl_information <- function(estimate, model, answers, admi
   }
   
   get_theta_grid <- function() {
-    theta_values <- get_theta_values()
-    grid <- expand.grid(rep(list(theta_values), number_dimensions))
-    if (prior_form == "uniform")
-      remove_rows_outside_bounds(grid, prior_parameters$lower_bound, prior_parameters$upper_bound)
-    else
-      grid
+    grid_list <- get_grid_list()
+    expand.grid(grid_list)
   }
   
-  get_theta_values <- function() {
-    if (number_dimensions == 1)
-      seq(theta_bounds[1], theta_bounds[2], (theta_bounds[2] - theta_bounds[1]) / 20)
+  get_grid_list <- function() {
+    if (number_dimensions == 1 && prior_form == "uniform")
+      list(seq(prior_parameters$lower_bound, prior_parameters$upper_bound, length.out = 21))
+    else if (number_dimensions == 1 && prior_form == "normal")
+      list(seq(-4, 4, length.out = 21))
+    else if (prior_form == "uniform")
+      lapply(1:number_dimensions, function(dim) { seq(prior_parameters$lower_bound[dim], prior_parameters$upper_bound[dim], length.out = 9) })
     else
-      theta_bounds[1]:theta_bounds[2]
-  }
+      rep(list(-4:4), number_dimensions)
+  }  
   
   result()
 }

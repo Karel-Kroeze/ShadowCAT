@@ -86,7 +86,7 @@ using maximum aposteriori estimation with a uniform prior.}
 Can only be defined when estimator is maximum_likelihood. Setting bounds with maximum likelihood estimation is equivalent to
 using maximum aposteriori estimation with a uniform prior.}
 
-\item{safe_eap}{Only relevant if estimator is espected_aposteriori. 
+\item{safe_eap}{Only relevant if estimator is expected_aposteriori. 
 TRUE if estimator should switch to maximum aposteriori if the integration algorithm results in an error.
 An error may occur if the prior is uniform, estimator is expected aposteriori, and the bounds do not exceed the true theta value, or are too close to it.}
 

@@ -126,8 +126,8 @@ number_non_missing_cells_per_row <- function(x) {
 #' sum(should_be_equal2) == 40 || stop("wrong")
 #' @export
 remove_rows_outside_bounds <- function(matrix_to_evaluate, lower_bound, upper_bound) {
-  matrix_to_evaluate_transformed <- t(matrix_to_evaluate)
-  inside_bounds <- colSums(matrix_to_evaluate_transformed <= upper_bound & matrix_to_evaluate_transformed >= lower_bound) == ncol(matrix_to_evaluate)
+  matrix_to_evaluate_transpose <- t(matrix_to_evaluate)
+  inside_bounds <- colSums(matrix_to_evaluate_transpose <= upper_bound & matrix_to_evaluate_transpose >= lower_bound) == ncol(matrix_to_evaluate)
   matrix_to_evaluate[inside_bounds, , drop = FALSE]
 }
 

@@ -2256,7 +2256,23 @@ test_that("three dimensions, expected_aposteriori, 100 replications per conditio
   sd_per_condition_dim2 <- aggregate(estimates_and_conditions[, "estimated_theta2"], list(condition_vector), "sd", na.rm = TRUE)
   sd_per_condition_dim3 <- aggregate(estimates_and_conditions[, "estimated_theta3"], list(condition_vector), "sd", na.rm = TRUE)
   
- })
+  # five number summary of average theta estimate per condition, dimension 1 (true theta is -2)
+  expect_equal(round(fivenum(average_per_condition_dim1[,"x"]), 3), c(-2.124, -2.071, -2.048, -2.020, -1.992))
+  # five number summary of average theta estimate per condition, dimension 2 (true theta is 1)
+  expect_equal(round(fivenum(average_per_condition_dim2[,"x"]), 3), c(.968, .995, 1.018, 1.032, 1.100))
+  # five number summary of average theta estimate per condition, dimension 3 (true theta is 2)
+  expect_equal(round(fivenum(average_per_condition_dim3[,"x"]), 3), c(2.971, 3.005, 3.027, 3.045, 3.109))
+  
+  # five number summary of observed sd of the theta estimates within each condition, for dimension 1, 2, and 3, respectively
+  expect_equal(round(fivenum(sd_per_condition_dim1[,"x"]), 3), c(.168, .210, .321, .347, .373))
+  expect_equal(round(fivenum(sd_per_condition_dim2[,"x"]), 3), c(.147, .196, .244, .264, .312))
+  expect_equal(round(fivenum(sd_per_condition_dim3[,"x"]), 3), c(.222, .247, .311, .348, .388))
+  
+  # five number summary of reported sd of the theta estimate within each condition, for dimension 1, 2, and 3, respectively
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate1"])), 3), c(.162, .210, .301, .341, .474))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate5"])), 3), c(.142, .187, .243, .259, .338))
+  expect_equal(round(sqrt(fivenum(estimates_and_conditions[, "variance_estimate9"])), 3), c(.138, .249, .356, .406, .487)) 
+})
 
   
   test_that("items load on all dimensions prior_var_safe_ml is 100", {
