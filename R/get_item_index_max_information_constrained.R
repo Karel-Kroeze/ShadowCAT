@@ -6,8 +6,8 @@
 #' The best item that was not already administrated is then selected from this test, and presented to the respondent.
 #'
 #' @param number_items number of items in the test bank
-#' @param administered vector with indeces of administered items
-#' @param available vector with indeces of yet available items
+#' @param administered vector with indices of administered items
+#' @param available vector with indices of yet available items
 #' @param answers vector with person answers
 #' @param lp_constraints data frame with constraints in lp format: the lp_constraints from the list returned by constraints_lp_format()
 #' @param lp_characters data frame with characteristics in lp format: the lp_chars from the list returned by constraints_lp_format()

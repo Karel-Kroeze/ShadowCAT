@@ -3,7 +3,7 @@
 #' @param theta vector with true or estimated theta
 #' @param answers vector with person answers to the administered items
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
-#' @param items_to_include vector with indeces of items to which answers have been given
+#' @param items_to_include vector with indices of items to which answers have been given
 #' @param number_dimensions number of dimensions
 #' @param estimator type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"
 #' @param alpha matrix containing the alpha parameters (for complete test bank)

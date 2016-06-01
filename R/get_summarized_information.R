@@ -16,8 +16,8 @@
 #' @param prior_parameters List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...), or 
 #' the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
 #' be in matrix form.
-#' @param available vector with indeces of yet available items
-#' @param administered vector with indeces of administered items
+#' @param available vector with indices of yet available items
+#' @param administered vector with indices of administered items
 #' @param number_items number of items in test bank
 #' @param number_dimensions number of dimensions
 #' @param estimator type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"

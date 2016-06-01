@@ -4,9 +4,9 @@
 #' 
 #' @param start_items items that are shown to the patient before adaptive proces starts; one of
 #' list(type = 'random', n)
-#' list(type = 'fixed', indeces, n)
+#' list(type = 'fixed', indices, n)
 #' list(type = 'random_by_dimension', n_by_dimension, n)
-#' where n = total number of initial items, indeces = vector of initial item indeces, 
+#' where n = total number of initial items, indices = vector of initial item indices, 
 #' n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
 #' @param information_summary called "objective" by Kroeze; how to summarize information; one of
 #' "determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
@@ -23,8 +23,8 @@
 #' @param prior_parameters List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...), or 
 #' the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
 #' be in matrix form.
-#' @param available vector with indeces of yet available items
-#' @param administered vector with indeces of administered items
+#' @param available vector with indices of yet available items
+#' @param administered vector with indices of administered items
 #' @param number_items number of items in test bank
 #' @param number_dimensions number of dimensions
 #' @param estimator type of estimator to be used, one of "maximum_aposteriori", "expected_aposteriori", or "maximum_likelihood"
@@ -65,7 +65,7 @@ get_next_item <- function(start_items, information_summary, lp_constraints, lp_c
   }
   
   get_start_item_fixed <- function() {
-    start_items$indeces[length(answers) + 1]
+    start_items$indices[length(answers) + 1]
   }
   
   # picks n_by_dimension starting items per dimension (or n_i if n_by_dimension is a length Q vector), assumes that items load on a single dimension, 

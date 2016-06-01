@@ -2,20 +2,20 @@
 % Please edit documentation in R/general_shadowcat_functions.R
 \name{get_subset}
 \alias{get_subset}
-\title{Get subset based on indeces}
+\title{Get subset based on indices}
 \usage{
 get_subset(x, subset)
 }
 \arguments{
 \item{x}{vector or matrix from which a subset is to be taken}
 
-\item{subset}{indeces of elements/rows to be selected}
+\item{subset}{indices of elements/rows to be selected}
 }
 \value{
 subset of x
 }
 \description{
-Get subset based on indeces
+Get subset based on indices
 }
 \examples{
 all(get_subset(c(1, 4, 2, 6, 3), c(2, 5, 3)) == c(4, 3, 2)) || stop("wrong")

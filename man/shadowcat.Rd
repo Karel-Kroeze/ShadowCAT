@@ -32,9 +32,9 @@ More flexibility in Beta parameters might be added in future versions.}
 
 \item{start_items}{items that are shown to the respondent before adaptive proces starts; one of
 list(type = 'random', n)
-list(type = 'fixed', indeces, n)
+list(type = 'fixed', indices, n)
 list(type = 'random_by_dimension', n_by_dimension, n)
-where n = total number of initial items, indeces = vector of initial item indeces, 
+where n = total number of initial items, indices = vector of initial item indices, 
 n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
 If n is 0, only n needs to be defined
 'random_by_dimension' assumes that items load on a single dimension, if any item has a non-zero loading on a dimension, it is considered to be part of that dimension.}

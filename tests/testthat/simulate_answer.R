@@ -1,9 +1,9 @@
-#' Simulates responses on items indicated by indeces, given true theta
+#' Simulates responses on items indicated by indices, given true theta
 #' 
 #' @examples 
 #' items <- simulate_testbank("GPCM")
 #' 
-#' # simulates responses on items indicated by indeces, given true theta
+#' # simulates responses on items indicated by indices, given true theta
 #' simulate_answer(.3, "GPCM", 1, "maximum_aposteriori", items$alpha, items$beta, NULL, number_non_missing_cells_per_row(beta), 3)
 #' 
 #' @param theta vector with true theta
@@ -14,15 +14,15 @@
 #' @param beta matrix of beta parameters
 #' @param guessing vector of guessing parameters
 #' @param number_itemsteps number of itemsteps
-#' @param indeces vector of indeces for which answers should be simulated
+#' @param indices vector of indices for which answers should be simulated
 #' @return vector with responses
-simulate_answer <- function(theta, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps, indeces) {
+simulate_answer <- function(theta, model, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps, indices) {
   result <- function() {
     guessing <- get_guessing()
     # probabilities, generated with true theta.
-    probabilities <- get_probs_and_likelihoods_per_item(theta, model, get_subset(alpha, indeces), get_subset(beta, indeces), get_subset(guessing, indeces), with_likelihoods = FALSE)$P
+    probabilities <- get_probs_and_likelihoods_per_item(theta, model, get_subset(alpha, indices), get_subset(beta, indices), get_subset(guessing, indices), with_likelihoods = FALSE)$P
     cumulative_probabilities <- row_cumsum(probabilities) 
-    random_numbers <- runif(length(indeces))
+    random_numbers <- runif(length(indices))
     
     # answer is the number of categories that have a cumulative probability smaller than random_numbers
     apply(random_numbers > cumulative_probabilities, 1, sum, na.rm=TRUE)

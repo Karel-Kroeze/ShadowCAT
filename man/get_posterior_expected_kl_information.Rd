@@ -16,9 +16,9 @@ get_posterior_expected_kl_information(estimate, model, answers, administered,
 
 \item{answers}{vector with person answers}
 
-\item{administered}{vector with indeces of administered items}
+\item{administered}{vector with indices of administered items}
 
-\item{available}{vector with indeces of available items}
+\item{available}{vector with indices of available items}
 
 \item{number_dimensions}{number of dimensions}
 

@@ -10,9 +10,9 @@ get_item_index_max_information_constrained(number_items, administered,
 \arguments{
 \item{number_items}{number of items in the test bank}
 
-\item{administered}{vector with indeces of administered items}
+\item{administered}{vector with indices of administered items}
 
-\item{available}{vector with indeces of yet available items}
+\item{available}{vector with indices of yet available items}
 
 \item{answers}{vector with person answers}
 

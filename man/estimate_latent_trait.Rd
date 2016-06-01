@@ -22,7 +22,7 @@ be in matrix form.}
 
 \item{model}{String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively}
 
-\item{administered}{Vector with indeces of administered items}
+\item{administered}{Vector with indices of administered items}
 
 \item{number_dimensions}{Number of dimensions}
 

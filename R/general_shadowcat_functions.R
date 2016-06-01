@@ -21,10 +21,10 @@ categorical_to_dummy <- function(unique_values, categorical_vector) {
   sapply(unique_values, FUN = function(value) { as.numeric(categorical_vector == value) })
 }
 
-#' Get subset based on indeces
+#' Get subset based on indices
 #' 
 #' @param x vector or matrix from which a subset is to be taken
-#' @param subset indeces of elements/rows to be selected
+#' @param subset indices of elements/rows to be selected
 #' @return subset of x 
 #' @examples all(get_subset(c(1, 4, 2, 6, 3), c(2, 5, 3)) == c(4, 3, 2)) || stop("wrong")
 #' all(get_subset(matrix(c(1, 4, 2, 6, 3, 8, 6, 9, 0, 1), ncol = 2), c(2, 5, 3)) == matrix(c(4, 3, 2, 6, 1, 9), ncol = 2)) || stop("wrong")
@@ -90,6 +90,28 @@ move_values_to_means <- function(values, means, amount_change) {
     else
       values[i] - amount_change[i]
   } )
+}
+
+#' Check whether NA's exist only at the end of a vector, that is, whether there are no values after the first NA in the vector
+#' 
+#' @param x Vector
+#' @return TRUE if there are only NA's at the end of the vector or no NA at all; FALSE otherwise
+#' @examples na_only_end_vector(c(1:3, NA, NA)) || stop("wrong");
+#' na_only_end_vector(c(1:3, NA, NA, 6)) == FALSE || stop("wrong")
+#' @export
+na_only_end_vector <- function(x) {
+   all(diff(is.na(x)) >= 0)
+}
+
+#' Check whether NA's exist only at the end of each row, that is, whether there are no values after the first NA in the row
+#' 
+#' @param x Matrix
+#' @return TRUE if there are only NA's at the end of each row or no NA at all; FALSE otherwise
+#' @examples na_only_end_rows(matrix(c(1:3, NA, NA, 1:5, 1:4, NA), ncol = 5, byrow = TRUE)) || stop("wrong");
+#' na_only_end_rows(matrix(c(1:3, NA, NA, 1:2, NA, 4:5, 1:4, NA), ncol = 5, byrow = TRUE))  == FALSE || stop("wrong")
+#' @export
+na_only_end_rows <- function(x) {
+  all(apply(x, 1, na_only_end_vector))
 }
 
 #' not in

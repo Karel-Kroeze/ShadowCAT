@@ -8,7 +8,7 @@ get_item_index_max_information(available, item_information, estimate, stop_test,
   alpha, number_answers)
 }
 \arguments{
-\item{available}{vector with indeces of available items}
+\item{available}{vector with indices of available items}
 
 \item{item_information}{vector with summarized information of each yet available item, with zeros for administered items (returned by get_summarized_information() with pad = TRUE)}
 

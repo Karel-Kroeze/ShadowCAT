@@ -34,9 +34,9 @@ get_best_item(information_summary, lp_constraints, lp_characters, estimate,
 the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
 be in matrix form.}
 
-\item{available}{vector with indeces of yet available items}
+\item{available}{vector with indices of yet available items}
 
-\item{administered}{vector with indeces of administered items}
+\item{administered}{vector with indices of administered items}
 
 \item{number_items}{number of items in the test bank}
 

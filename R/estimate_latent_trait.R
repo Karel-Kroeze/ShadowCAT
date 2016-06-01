@@ -67,7 +67,7 @@
 #' the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
 #' be in matrix form.
 #' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively
-#' @param administered Vector with indeces of administered items
+#' @param administered Vector with indices of administered items
 #' @param number_dimensions Number of dimensions
 #' @param estimator Type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"
 #' @param alpha Matrix of alpha paramteres

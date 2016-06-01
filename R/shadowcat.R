@@ -15,9 +15,9 @@
 #' More flexibility in Beta parameters might be added in future versions.
 #' @param start_items items that are shown to the respondent before adaptive proces starts; one of
 #' list(type = 'random', n)
-#' list(type = 'fixed', indeces, n)
+#' list(type = 'fixed', indices, n)
 #' list(type = 'random_by_dimension', n_by_dimension, n)
-#' where n = total number of initial items, indeces = vector of initial item indeces, 
+#' where n = total number of initial items, indices = vector of initial item indices, 
 #' n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
 #' If n is 0, only n needs to be defined
 #' 'random_by_dimension' assumes that items load on a single dimension, if any item has a non-zero loading on a dimension, it is considered to be part of that dimension. 
@@ -102,9 +102,9 @@ shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_ite
   }
   
   # if inititial items have been administered (so we are in the CAT phase), update person estimate after each newly answered item
-  update_person_estimate <- function(estimate, answers_vector, item_indeces_administered, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item, estimator, prior_form, prior_parameters) { 
+  update_person_estimate <- function(estimate, answers_vector, item_indices_administered, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item, estimator, prior_form, prior_parameters) { 
     if (length(answers) > start_items$n)
-      estimate_latent_trait(estimate, answers_vector, prior_form, prior_parameters, model, item_indeces_administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, safe_eap, eap_estimation_procedure)
+      estimate_latent_trait(estimate, answers_vector, prior_form, prior_parameters, model, item_indices_administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, safe_eap, eap_estimation_procedure)
     else
       estimate
   }
@@ -192,6 +192,10 @@ shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_ite
       return(add_error("start_items", "length of n_by_dimension should be a scalar or vector of the length of estimate"))
     if (!row_names_are_equal(rownames(alpha), list(alpha, beta, eta, guessing)))
       add_error("alpha_beta_eta_guessing", "should have equal row names, in same order")
+    if (!is.null(beta) && !na_only_end_rows(beta))
+      add_error("beta", "can only contain NA at the end of rows, no values allowed after an NA in a row")
+    if (!is.null(eta) && !na_only_end_rows(eta))
+      add_error("eta", "can only contain NA at the end of rows, no values allowed after an NA in a row")
     if (length(estimate) != ncol(alpha))
       add_error("estimate", "length should be equal to the number of columns of the alpha matrix")
     if (length(estimate)^2 != length(variance))

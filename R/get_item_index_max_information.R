@@ -3,7 +3,7 @@
 #' Naive item selection based on maximum information only.
 #' 
 #' Selects the item with the highest information.
-#' @param available vector with indeces of available items
+#' @param available vector with indices of available items
 #' @param item_information vector with summarized information of each yet available item, with zeros for administered items (returned by get_summarized_information() with pad = TRUE)
 #' @param estimate Vector containing the theta estimate, with its covariance matrix as an attribute
 #' @param stop_test rule for when to stop providing new items to patient; should be a list of the form
@@ -23,8 +23,8 @@
 get_item_index_max_information <- function(available, item_information, estimate, stop_test, alpha, number_answers) {
   result <- function() {
     uncompleted_dimensions <- get_uncompleted_dimensions()
-    useful_item_indeces <- get_useful_item_indeces(uncompleted_dimensions)  
-    available_and_useful <- get_available_and_useful_items(useful_item_indeces)
+    useful_item_indices <- get_useful_item_indices(uncompleted_dimensions)  
+    available_and_useful <- get_available_and_useful_items(useful_item_indices)
     which(item_information == max(item_information[available_and_useful]))
   }
   
@@ -34,15 +34,15 @@ get_item_index_max_information <- function(available, item_information, estimate
     which(diag(attr(estimate, "variance")) >= stop_test$target)
   }
   
-  get_useful_item_indeces <- function(uncompleted_dimensions) {
+  get_useful_item_indices <- function(uncompleted_dimensions) {
     if (is.null(uncompleted_dimensions))
       return(1:nrow(alpha))
     loadings_larger_than_zero <- t(apply(alpha, 1, function(x) abs(x) > 1e-5 ))
     which(apply(loadings_larger_than_zero, 1, function(single_item_loadings_larger_than_zero) any(which(single_item_loadings_larger_than_zero) %in% uncompleted_dimensions)))
   }
   
-  get_available_and_useful_items <- function(useful_item_indeces) {
-    available_and_useful <- intersect(useful_item_indeces, available)
+  get_available_and_useful_items <- function(useful_item_indices) {
+    available_and_useful <- intersect(useful_item_indices, available)
     if (length(available_and_useful) == 0)
       available
     else

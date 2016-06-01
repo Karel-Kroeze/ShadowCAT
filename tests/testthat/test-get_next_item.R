@@ -67,7 +67,7 @@ test_that("number of answers is 2, number of required starting items 5, start ty
 
 context("start type is fixed")
 
-start_items <- list(type = 'fixed', indeces = c(2, 4, 7:9), n = 5)
+start_items <- list(type = 'fixed', indices = c(2, 4, 7:9), n = 5)
 
 test_that("number of answers is 0, number of required starting items 5, start type fixed", {
   answers <- numeric(0)
@@ -179,10 +179,10 @@ stop_test <- list(max_n = number_items)
 
 guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
 alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
-indeces_shuffled <- with_random_seed(2, sample)(1:50, 50)
-alpha[indeces_shuffled[1:10],2:3] <- 0
-alpha[indeces_shuffled[11:20],c(1,3)] <- 0
-alpha[indeces_shuffled[21:50],1:2] <- 0
+indices_shuffled <- with_random_seed(2, sample)(1:50, 50)
+alpha[indices_shuffled[1:10],2:3] <- 0
+alpha[indices_shuffled[11:20],c(1,3)] <- 0
+alpha[indices_shuffled[21:50],1:2] <- 0
 beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
 number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
 

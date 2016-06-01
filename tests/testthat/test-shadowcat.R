@@ -27,9 +27,9 @@ make_random_seed_exist <- rnorm(1)
 #' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others.
 #' @param start_items items that are shown to the patient before adaptive proces starts; one of
 #' list(type = 'random', n)
-#' list(type = 'fixed', indeces, n)
+#' list(type = 'fixed', indices, n)
 #' list(type = 'random_by_dimension', n_by_dimension, n)
-#' where n = total number of initial items, indeces = vector of initial item indeces, 
+#' where n = total number of initial items, indices = vector of initial item indices, 
 #' n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
 #' If n is 0, only n needs to be defined
 #' @param stop_test rule for when to stop providing new items to patient; should be a list of the form
@@ -127,9 +127,9 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
 #' Options are "determinant", "posterior_determinant", "trace", "posterior_trace", and "posterior_expected_kullback_leibler"
 #' @param start_items list indicating the items that are shown to the patient before adaptive proces starts; one of
 #' list(type = 'random', n)
-#' list(type = 'fixed', indeces, n)
+#' list(type = 'fixed', indices, n)
 #' list(type = 'random_by_dimension', n_by_dimension, n)
-#' where n = total number of initial items, indeces = vector of initial item indeces, 
+#' where n = total number of initial items, indices = vector of initial item indices, 
 #' n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
 #' If n is 0, only n needs to be defined
 #' @param variance_target value equal to the variance of theta at which testing should stop
@@ -156,15 +156,15 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
 #' using maximum aposteriori estimation with a uniform prior.
 #' @param safe_eap Only relevant if estimator is espected_aposteriori. 
 #' TRUE if estimator should switch to maximum aposteriori if the integration algorithm results in an error.
-#' @param return_administered_item_indeces if TRUE, indeces of administered items are added to the output
+#' @param return_administered_item_indices if TRUE, indices of administered items are added to the output
 #' @param min_n value equal to the minimum number of items to administer
 #' @param max_n value equal to the maximum number of items to administer (test stops at this number, even if variance target has not been reached). NULL means max_n is equal to number of items in test bank
 #' @param varying_number_item_steps if TRUE, the simulated number of item steps differs over items. In that case, number_answer_categories_vec (number of itemsteps + 1)
 #' is considered the maxixmum number of categories
 #' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori. One of "riemannsum" for integration via Riemannsum or
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
-#' @return matrix with in each row (= one condition): named vector containing estimated theta, variance of the estimate, and if return_administered_item_indeces is TRUE, the indeces of the administered items
-run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, constraints_and_characts = NULL, guessing = NULL, items_load_one_dimension = TRUE, prior_form = "normal", prior_parameters = list(mu = rep(0, length(number_dimensions)), Sigma = diag(number_dimensions) * 20), lower_bound = NULL, upper_bound = NULL, safe_eap = FALSE, return_administered_item_indeces = FALSE, min_n = NULL, max_n = NULL, varying_number_item_steps = FALSE, eap_estimation_procedure = "riemannsum") {                   
+#' @return matrix with in each row (= one condition): named vector containing estimated theta, variance of the estimate, and if return_administered_item_indices is TRUE, the indices of the administered items
+run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, constraints_and_characts = NULL, guessing = NULL, items_load_one_dimension = TRUE, prior_form = "normal", prior_parameters = list(mu = rep(0, length(number_dimensions)), Sigma = diag(number_dimensions) * 20), lower_bound = NULL, upper_bound = NULL, safe_eap = FALSE, return_administered_item_indices = FALSE, min_n = NULL, max_n = NULL, varying_number_item_steps = FALSE, eap_estimation_procedure = "riemannsum") {                   
   if (number_dimensions > 1 && number_dimensions != length(true_theta_vec))
     stop("number_dimensions is larger than 1 but not equal to the length of true_theta_vec")
   conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
@@ -182,7 +182,7 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
                       estimate_theta <- tryCatch(test_shadowcat(true_theta, prior_form, prior_parameters, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), constraints_and_characts, lower_bound, upper_bound, safe_eap, eap_estimation_procedure = eap_estimation_procedure),
                                                  error = function(e) e)
                       
-                      if (return_administered_item_indeces)
+                      if (return_administered_item_indices)
                         c("estimated_theta" = estimate_theta$estimate,
                           "variance_estimate" = attr(estimate_theta$estimate, "variance"),
                           "items_administered" = as.numeric(sapply(names(estimate_theta$answers), substring, 5)))
@@ -871,11 +871,11 @@ test_that("with constraints max_n 260", {
                            target = c(75, 90)))
   
   test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints_and_characts = list(characteristics = characteristics, constraints = constraints))
-  indeces_administered <- as.numeric(sapply(names(test_outcome$answers), substring, 5))
+  indices_administered <- as.numeric(sapply(names(test_outcome$answers), substring, 5))
   
-  number_depression_items <- sum(indeces_administered <= 100)
-  number_anxiety_items <- sum(indeces_administered > 100 & indeces_administered <= 200)
-  number_somatic_items <- sum(indeces_administered > 200)
+  number_depression_items <- sum(indices_administered <= 100)
+  number_anxiety_items <- sum(indices_administered > 100 & indices_administered <= 200)
+  number_somatic_items <- sum(indices_administered > 200)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(-1.900, 0.949, 1.724))
   expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3], c(.104, .000, .000))
@@ -923,11 +923,11 @@ test_that("with constraints max_n 130", {
                            target = c(75, 90)))
   
   test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints_and_characts = list(characteristics = characteristics, constraints = constraints))
-  indeces_administered <- as.numeric(sapply(names(test_outcome$answers), substring, 5))
+  indices_administered <- as.numeric(sapply(names(test_outcome$answers), substring, 5))
   
-  number_depression_items <- sum(indeces_administered <= 100)
-  number_anxiety_items <- sum(indeces_administered > 100 & indeces_administered <= 200)
-  number_somatic_items <- sum(indeces_administered > 200)
+  number_depression_items <- sum(indices_administered <= 100)
+  number_anxiety_items <- sum(indices_administered > 100 & indices_administered <= 200)
+  number_somatic_items <- sum(indices_administered > 200)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(-2.303, .774, 1.822))
   expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3], c(.146, .000, .000))
@@ -1010,11 +1010,11 @@ test_that("start n is zero, with constraints", {
                            target = c(75, 90)))
   
   test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints_and_characts = list(characteristics = characteristics, constraints = constraints, initital_estimate = rep(.2, number_dimensions), initial_variance = diag(number_dimensions) * 20))
-  indeces_administered <- as.numeric(sapply(names(test_outcome$answers), substring, 5))
+  indices_administered <- as.numeric(sapply(names(test_outcome$answers), substring, 5))
   
-  number_depression_items <- sum(indeces_administered <= 100)
-  number_anxiety_items <- sum(indeces_administered > 100 & indeces_administered <= 200)
-  number_somatic_items <- sum(indeces_administered > 200)
+  number_depression_items <- sum(indices_administered <= 100)
+  number_anxiety_items <- sum(indices_administered > 100 & indices_administered <= 200)
+  number_somatic_items <- sum(indices_administered > 200)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(-1.975, .897, 2.496))
   expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.122, .000, .000))
@@ -1202,6 +1202,9 @@ test_that("invalid input", {
   guessing <- NULL
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
+  beta_wrong_na_pattern <- matrix(with_random_seed(2, rnorm)(number_items * 2), nrow = number_items, ncol = 2, dimnames = list(item_keys, NULL))
+  beta_wrong_na_pattern[1,1] <- NA
+  
   eta <- NULL # only relevant for GPCM model
   
   model <- '3PLM'
@@ -1267,12 +1270,14 @@ test_that("invalid input", {
   error_message_guessing_rownames <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing = matrix(1:10), eta)
   error_message_guessing_ncol <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing = matrix(1:10, ncol = 2, dimnames = list(c("a", "b", "c", "d", "e"), NULL)), eta)
   error_message_unequal_rownames <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing = matrix(1:300, ncol = 1, dimnames = list(str_c("it", 1:300), NULL)), eta)
+  error_message_beta_na_pattern <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta = beta_wrong_na_pattern, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta)
+  error_message_eta_na_pattern <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta = beta_wrong_na_pattern)
   error_message_incorrect_dim_estimate <- shadowcat(answers = NULL, estimate = c(.5, .5), variance = as.vector(diag(2)), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta)
   error_message_incorrect_dim_variance <- shadowcat(answers = NULL, estimate, variance = as.vector(diag(2)), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta)
   error_message_variance_not_positive_definite <- shadowcat(answers = NULL, estimate, variance = as.vector(diag(3)) * -1, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta)
   error_message_model_unknown <- shadowcat(answers = NULL, estimate, variance, model = "PLM", alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta)
   error_message_beta <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta = NULL, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta)
-  error_message_beta_theta <- shadowcat(answers = NULL, estimate, variance, model = "GPCM", alpha, beta = NULL, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta)
+  error_message_beta_theta <- shadowcat(answers = NULL, estimate, variance, model = "GPCM", alpha, beta = NULL, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta) 
   error_message_beta_theta_mismatch <- shadowcat(answers = NULL, estimate, variance, model = "GPCM", alpha, beta = cbind(beta, beta + .1), start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta = cbind(beta, beta + .1))
   error_message_prior_form <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator = "maximum_aposteriori", information_summary, prior_form = NULL, prior_parameters, guessing, eta)
   error_message_prior_parameters <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator = "maximum_aposteriori", information_summary, prior_form, prior_parameters = NULL, guessing, eta)
@@ -1324,6 +1329,8 @@ test_that("invalid input", {
   expect_equal(error_message_guessing_rownames$errors$guessing, "should be a single column matrix with item keys as row names")
   expect_equal(error_message_guessing_ncol$errors$guessing, "should be a single column matrix with item keys as row names")
   expect_equal(error_message_unequal_rownames$errors$alpha_beta_eta_guessing, "should have equal row names, in same order")
+  expect_equal(error_message_beta_na_pattern$errors$beta, "can only contain NA at the end of rows, no values allowed after an NA in a row")
+  expect_equal(error_message_eta_na_pattern$errors$eta, "can only contain NA at the end of rows, no values allowed after an NA in a row")
   expect_equal(error_message_incorrect_dim_estimate$errors$estimate, "length should be equal to the number of columns of the alpha matrix")
   expect_equal(error_message_incorrect_dim_variance$errors$variance, "should have a length equal to the length of estimate squared")
   expect_equal(error_message_variance_not_positive_definite$errors$variance, "matrix is not positive definite") 
@@ -2471,7 +2478,7 @@ test_that("three dimensions, expected_aposteriori, 100 replications per conditio
                              op = '><',
                              target = c(75, 100)))
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, constraints_and_characts = list(characteristics = characteristics, constraints = constraints), prior_var_safe_ml = 100, return_administered_item_indeces = TRUE, max_n = max_n)
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, constraints_and_characts = list(characteristics = characteristics, constraints = constraints), prior_var_safe_ml = 100, return_administered_item_indices = TRUE, max_n = max_n)
     #save(estimates_and_variance, file = "/Users/rivkadevries/Desktop/simulationsCAT/estimates_and_variance_3dim_constraints_maxn130.R")
     
     conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
@@ -2554,7 +2561,7 @@ test_that("three dimensions, expected_aposteriori, 100 replications per conditio
                              op = '><',
                              target = c(75, 90)))
     
-    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, constraints_and_characts = list(characteristics = characteristics, constraints = constraints), prior_var_safe_ml = 100, return_administered_item_indeces = TRUE, max_n = max_n)
+    estimates_and_variance <- with_random_seed(2, run_simulation)(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, constraints_and_characts = list(characteristics = characteristics, constraints = constraints), prior_var_safe_ml = 100, return_administered_item_indices = TRUE, max_n = max_n)
     #save(estimates_and_variance, file = "/Users/rivkadevries/Desktop/simulationsCAT/estimates_and_variance_3dim_constraints_maxn260.R")
     
     conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)

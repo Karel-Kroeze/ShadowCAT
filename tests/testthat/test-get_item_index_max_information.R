@@ -32,10 +32,10 @@ test_that("one dimension", {
   
   test_item_index_max_information <- validate_and_run.test(fn = get_item_index_max_information, available = available, item_information = item_information, estimate = estimate, stop_test = stop_test, alpha = alpha, number_answers = length(administered))
   helper_get_uncompleted_dimensions <- get('get_uncompleted_dimensions', environment(test_item_index_max_information))
-  helper_get_useful_item_indeces <- get('get_useful_item_indeces', environment(test_item_index_max_information))
+  helper_get_useful_item_indices <- get('get_useful_item_indices', environment(test_item_index_max_information))
   
   expect_equal(helper_get_uncompleted_dimensions(), NULL)
-  expect_equal(helper_get_useful_item_indeces(NULL), 1:nrow(alpha))
+  expect_equal(helper_get_useful_item_indices(NULL), 1:nrow(alpha))
   expect_equal(item_index_max_information, 6)
 })
 
@@ -66,10 +66,10 @@ test_that("three dimensions, items load all dimensions, no variance target", {
   
   test_item_index_max_information <- validate_and_run.test(fn = get_item_index_max_information, available = available, item_information = item_information, estimate = estimate, stop_test = stop_test, alpha = alpha, number_answers = length(administered))
   helper_get_uncompleted_dimensions <- get('get_uncompleted_dimensions', environment(test_item_index_max_information))
-  helper_get_useful_item_indeces <- get('get_useful_item_indeces', environment(test_item_index_max_information))
+  helper_get_useful_item_indices <- get('get_useful_item_indices', environment(test_item_index_max_information))
   
   expect_equal(helper_get_uncompleted_dimensions(), NULL)
-  expect_equal(helper_get_useful_item_indeces(NULL), 1:nrow(alpha))
+  expect_equal(helper_get_useful_item_indices(NULL), 1:nrow(alpha))
   expect_equal(item_index_max_information, 29)
 })
 
@@ -100,10 +100,10 @@ test_that("three dimensions, items load all dimensions, with variance target", {
   
   test_item_index_max_information <- validate_and_run.test(fn = get_item_index_max_information, available = available, item_information = item_information, estimate = estimate, stop_test = stop_test, alpha = alpha, number_answers = length(administered))
   helper_get_uncompleted_dimensions <- get('get_uncompleted_dimensions', environment(test_item_index_max_information))
-  helper_get_useful_item_indeces <- get('get_useful_item_indeces', environment(test_item_index_max_information))
+  helper_get_useful_item_indices <- get('get_useful_item_indices', environment(test_item_index_max_information))
   
   expect_equal(helper_get_uncompleted_dimensions(), c(1, 3))
-  expect_equal(helper_get_useful_item_indeces(c(1, 3)), 1:nrow(alpha))
+  expect_equal(helper_get_useful_item_indices(c(1, 3)), 1:nrow(alpha))
   expect_equal(item_index_max_information, 29)
 })
 
@@ -138,11 +138,11 @@ test_that("three dimensions, items load one or two dimensions, no variance targe
   
   test_item_index_max_information <- validate_and_run.test(fn = get_item_index_max_information, available = available, item_information = item_information, estimate = estimate, stop_test = stop_test, alpha = alpha, number_answers = length(administered))
   helper_get_uncompleted_dimensions <- get('get_uncompleted_dimensions', environment(test_item_index_max_information))
-  helper_get_useful_item_indeces <- get('get_useful_item_indeces', environment(test_item_index_max_information))
+  helper_get_useful_item_indices <- get('get_useful_item_indices', environment(test_item_index_max_information))
   helper_get_available_and_useful_items <- get('get_available_and_useful_items', environment(test_item_index_max_information))
   
   expect_equal(helper_get_uncompleted_dimensions(), NULL)
-  expect_equal(helper_get_useful_item_indeces(NULL), 1:nrow(alpha))
+  expect_equal(helper_get_useful_item_indices(NULL), 1:nrow(alpha))
   expect_equal(helper_get_available_and_useful_items(1:nrow(alpha)), available)
   
   expect_equal(item_index_max_information, 6)
@@ -178,11 +178,11 @@ test_that("three dimensions, items load one or two dimensions, with variance tar
   
   test_item_index_max_information <- validate_and_run.test(fn = get_item_index_max_information, available = available, item_information = item_information, estimate = estimate, stop_test = stop_test, alpha = alpha, number_answers = length(administered))
   helper_get_uncompleted_dimensions <- get('get_uncompleted_dimensions', environment(test_item_index_max_information))
-  helper_get_useful_item_indeces <- get('get_useful_item_indeces', environment(test_item_index_max_information))
+  helper_get_useful_item_indices <- get('get_useful_item_indices', environment(test_item_index_max_information))
   helper_get_available_and_useful_items <- get('get_available_and_useful_items', environment(test_item_index_max_information))
   
   expect_equal(helper_get_uncompleted_dimensions(), c(1, 3))
-  expect_equal(helper_get_useful_item_indeces(c(1, 3)), c(1:20, 41:50))
+  expect_equal(helper_get_useful_item_indices(c(1, 3)), c(1:20, 41:50))
   expect_equal(helper_get_available_and_useful_items(c(1:20, 41:50)), c(6:10, 50))
   
   expect_equal(item_index_max_information, 6)
@@ -217,11 +217,11 @@ test_that("no items left that are both available and useful", {
   
   test_item_index_max_information <- validate_and_run.test(fn = get_item_index_max_information, available = available, item_information = item_information, estimate = estimate, stop_test = stop_test, alpha = alpha, number_answers = length(administered))
   helper_get_uncompleted_dimensions <- get('get_uncompleted_dimensions', environment(test_item_index_max_information))
-  helper_get_useful_item_indeces <- get('get_useful_item_indeces', environment(test_item_index_max_information))
+  helper_get_useful_item_indices <- get('get_useful_item_indices', environment(test_item_index_max_information))
   helper_get_available_and_useful_items <- get('get_available_and_useful_items', environment(test_item_index_max_information))
   
   expect_equal(helper_get_uncompleted_dimensions(), c(1, 3))
-  expect_equal(helper_get_useful_item_indeces(c(1, 3)), c(31:50))
+  expect_equal(helper_get_useful_item_indices(c(1, 3)), c(31:50))
   expect_equal(helper_get_available_and_useful_items(c(31:50)), available)
   expect_equal(item_index_max_information, 8)
 })
@@ -255,10 +255,10 @@ test_that("one a single appropriate item", {
   
   test_item_index_max_information <- validate_and_run.test(fn = get_item_index_max_information, available = available, item_information = item_information, estimate = estimate, stop_test = stop_test, alpha = alpha, number_answers = length(administered))
   helper_get_uncompleted_dimensions <- get('get_uncompleted_dimensions', environment(test_item_index_max_information))
-  helper_get_useful_item_indeces <- get('get_useful_item_indeces', environment(test_item_index_max_information))
+  helper_get_useful_item_indices <- get('get_useful_item_indices', environment(test_item_index_max_information))
   
   expect_equal(helper_get_uncompleted_dimensions(), 1)
-  expect_equal(helper_get_useful_item_indeces(1), 50)
+  expect_equal(helper_get_useful_item_indices(1), 50)
   expect_equal(item_index_max_information, 50)
 })
 

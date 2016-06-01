@@ -13,8 +13,8 @@
 #' @param estimate vector with current theta estimate
 #' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param answers vector with person answers
-#' @param administered vector with indeces of administered items
-#' @param available vector with indeces of available items
+#' @param administered vector with indices of administered items
+#' @param available vector with indices of available items
 #' @param number_dimensions number of dimensions
 #' @param estimator type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"
 #' @param alpha matrix containing the alpha parameters

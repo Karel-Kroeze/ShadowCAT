@@ -16,7 +16,7 @@ likelihood_or_post_density(theta, answers = NULL, model, items_to_include,
 
 \item{model}{string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
 
-\item{items_to_include}{vector with indeces of items to which answers have been given}
+\item{items_to_include}{vector with indices of items to which answers have been given}
 
 \item{number_dimensions}{number of dimensions}
 
