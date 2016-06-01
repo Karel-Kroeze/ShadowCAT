@@ -150,7 +150,7 @@ estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameter
                                         prior = prior_parameters,
                                         adapt = adapt,
                                         ip = number_gridpoints(),
-                                        forcePD = FALSE)
+                                        forcePD = TRUE)
     eval.quad(FUN = likelihood_or_post_density, X = Q_dim_grid_quad_points, 
               answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing)
   }
