@@ -127,19 +127,32 @@ test_that("constraints 3", {
 
 context("invalid input")
 
-test_that("characteristics not data frame", {
+test_that("only characteristics defined", {
   number_items <- 50
   max_n <- 30
   
-  #create item characteristics and constraints
-  characteristics <- list(time = with_random_seed(2, rnorm)(number_items),
-                          type = with_random_seed(2, sample)(c('depression', 'insomnia', 'anxiety'), number_items, TRUE),
-                          stressful = rep(c(0, 0, 1, 0, 0), 10),
-                          extra = rep(c(1, 0, 0, 0, 0), 10))
+  characteristics <- data.frame(time = with_random_seed(2, rnorm)(number_items),
+                                type = with_random_seed(2, sample)(c('depression', 'insomnia', 'anxiety'), number_items, TRUE),
+                                stressful = rep(c(0, 0, 1, 0, 0), 10),
+                                extra = rep(c(1, 0, 0, 0, 0), 10))
+  constraints_formatted <- constraints_lp_format(max_n = max_n, number_items = number_items, characteristics = characteristics)
+  expect_equal(constraints_formatted$errors$constraints_and_characteristics,"should either be defined both or not at all")
+})
+
+test_that("characteristics too few rows", {
+  number_items <- 50
+  max_n <- 30
+  
+  characteristics <- data.frame(time = with_random_seed(2, rnorm)(40),
+                                type = with_random_seed(2, sample)(c('depression', 'insomnia', 'anxiety'), 40, TRUE),
+                                stressful = rep(c(0, 0, 1, 0, 0), 8))
   constraints <- list(list(name = 'time',
                            op = '><',
                            target = c(10, 20)),
                       list(name = 'type/depression',
+                           op = '><',
+                           target = c(2, 5)),
+                      list(name = 'type/insomnia',
                            op = '><',
                            target = c(2, 5)),
                       list(name = 'type/anxiety',
@@ -148,12 +161,35 @@ test_that("characteristics not data frame", {
                       list(name = 'stressful',
                            op = '<',
                            target = 3))
-  
   constraints_formatted <- constraints_lp_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
-  expect_equal(constraints_formatted$errors$characteristics, "should be a data.frame with unique column names.")
+  expect_equal(constraints_formatted$errors$characteristics, "should be a data frame with number of rows equal to the number of items in the item bank")
 })
 
-test_that("constraints is not a list", {
+test_that("characteristics is list", {
+  number_items <- 50
+  max_n <- 30
+  
+  characteristics <- list(time = with_random_seed(2, rnorm)(number_items),
+                          type = with_random_seed(2, sample)(c('depression', 'insomnia', 'anxiety'), number_items, TRUE),
+                          stressful = rep(c(0, 0, 1, 0, 0), 10))
+  constraints <- list(list(name = 'time',
+                           op = '><',
+                           target = c(10, 20)),
+                      list(name = 'type/depression',
+                           op = '><',
+                           target = c(2, 5)),
+                      list(name = 'type/insomnia',
+                           op = '><',
+                           target = c(2, 5)),
+                      list(name = 'stressful',
+                           op = '<',
+                           target = 3))
+  constraints_formatted <- constraints_lp_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
+  expect_equal(constraints_formatted$errors$characteristics, "should be a data frame with number of rows equal to the number of items in the item bank")
+})
+
+
+test_that("constraints wrong structure", {
   number_items <- 50
   max_n <- 30
   
@@ -165,59 +201,74 @@ test_that("constraints is not a list", {
   constraints <- data.frame(name = 2)
   
   constraints_formatted <- constraints_lp_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
-  expect_equal(constraints_formatted$errors$constraints, "is of invalid structure, should be list of lists, each sublist containing three elements called name, op, and target.")
+  expect_equal(constraints_formatted$errors$constraints_structure, "should be a list of length three lists, with elements named 'name', 'op', 'target'")
 })
 
-test_that("One of the lists in constraints has length 2", {
+test_that("constraints wrong name elements", {
   number_items <- 50
   max_n <- 30
   
-  #create item characteristics and constraints
   characteristics <- data.frame(time = with_random_seed(2, rnorm)(number_items),
                                 type = with_random_seed(2, sample)(c('depression', 'insomnia', 'anxiety'), number_items, TRUE),
-                                stressful = rep(c(0, 0, 1, 0, 0), 10),
-                                extra = rep(c(1, 0, 0, 0, 0), 10))
+                                stressful = rep(c(0, 0, 1, 0, 0), 10))
   constraints <- list(list(name = 'time',
                            op = '><',
-                           target = c(10, 20)),
-                      list(name = 'type/depression',
-                           op = '><'),
-                      list(name = 'type/anxiety',
-                           op = '><',
-                           target = c(5, 10)),
-                      list(name = 'stressful',
-                           op = '<',
-                           target = 3))
-  
-  constraints_formatted <- constraints_lp_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
-  expect_equal(constraints_formatted$errors$constraints, "is of invalid structure, should be list of lists, each sublist containing three elements called name, op, and target.")
-})
-
-test_that("constraint name is not in characteristics names, constraint operator is invalid", {
-  number_items <- 50
-  max_n <- 30
-  
-  #create item characteristics and constraints
-  characteristics <- data.frame(time = with_random_seed(2, rnorm)(number_items),
-                                type = with_random_seed(2, sample)(c('depression', 'insomnia', 'anxiety'), number_items, TRUE),
-                                stressful = rep(c(0, 0, 1, 0, 0), 10),
-                                extra = rep(c(1, 0, 0, 0, 0), 10))
-  constraints <- list(list(name = 'time',
-                           op = '+',
                            target = c(10, 20)),
                       list(name = 'depression',
                            op = '><',
                            target = c(2, 5)),
-                      list(name = 'anxiety',
+                      list(name = 'insomnia',
                            op = '><',
-                           target = c(5, 10)),
+                           target = c(2, 5)),
                       list(name = 'stressful',
                            op = '<',
-                           target = "5"))
-  
+                           target = 3))
   constraints_formatted <- constraints_lp_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
-  expect_equal(constraints_formatted$errors$constraints_names, "should be contained in names characteristics")
-  expect_equal(constraints_formatted$errors$constraints_op, "containts invalid operator(s)")
-  expect_equal(constraints_formatted$errors$constraints_targets, "must be numeric") 
+  expect_equal(constraints_formatted$errors$constraints_name_elements, "should be defined as described in the details section")
 })
 
+test_that("constraints wrong operator elements", {
+  number_items <- 50
+  max_n <- 30
+  
+  characteristics <- data.frame(time = with_random_seed(2, rnorm)(number_items),
+                                type = with_random_seed(2, sample)(c('depression', 'insomnia', 'anxiety'), number_items, TRUE),
+                                stressful = rep(c(0, 0, 1, 0, 0), 10))
+  constraints <- list(list(name = 'time',
+                           op = c('>', '<'),
+                           target = c(10, 20)),
+                      list(name = 'type/depression',
+                           op = c('>', '<'),
+                           target = c(2, 5)),
+                      list(name = 'type/insomnia',
+                           op = c('>', '<'),
+                           target = c(2, 5)),
+                      list(name = 'stressful',
+                           op = '==',
+                           target = 3))
+  constraints_formatted <- constraints_lp_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
+  expect_equal(constraints_formatted$errors$constraints_operator_elements, "should be defined as described in the details section")
+})
+
+test_that("constraints wrong target elements", {
+  number_items <- 50
+  max_n <- 30
+  
+  characteristics <- data.frame(time = with_random_seed(2, rnorm)(number_items),
+                                type = with_random_seed(2, sample)(c('depression', 'insomnia', 'anxiety'), number_items, TRUE),
+                                stressful = rep(c(0, 0, 1, 0, 0), 10))
+  constraints <- list(list(name = 'time',
+                           op = '><',
+                           target = c(10, 20)),
+                      list(name = 'type/depression',
+                           op = '><',
+                           target = list(2, 5)),
+                      list(name = 'type/insomnia',
+                           op = '><',
+                           target = c(5)),
+                      list(name = 'stressful',
+                           op = '<',
+                           target = "3"))
+  constraints_formatted <- constraints_lp_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
+  expect_equal(constraints_formatted$errors$constraints_target_elements, "should be defined as described in the details section")
+})

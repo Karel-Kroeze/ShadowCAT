@@ -158,8 +158,6 @@ shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_ite
     else
       constraints_lp_format(stop_test$max_n, number_items, constraints_and_characts$characteristics, constraints_and_characts$constraints) 
   }
-  
-  
     
   validate <- function() {
     if (is.null(estimate))
@@ -251,7 +249,19 @@ shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_ite
     if (!is.null(lower_bound) && length(lower_bound) %not_in% c(1, length(estimate)))
       add_error("lower_bound", "length of lower bound should be a scalar or vector of the length of estimate")
     if (!is.null(upper_bound) && length(upper_bound) %not_in% c(1, length(estimate)))
-      add_error("upper_bound", "length of upper bound should be a scalar or vector of the length of estimate") 
+      add_error("upper_bound", "length of upper bound should be a scalar or vector of the length of estimate")
+    if (!no_missing_information(constraints_and_characts$characteristics, constraints_and_characts$constraints))
+      add_error("constraints_and_characts", "constraints and characteristics should either be defined both or not at all")
+    if (!characteristics_correct_format(constraints_and_characts$characteristics, number_items = nrow(alpha)))
+      add_error("characteristics", "should be a data frame with number of rows equal to the number of items in the item bank")
+    if (!constraints_correct_structure(constraints_and_characts$constraints))
+      add_error("constraints_structure", "should be a list of length three lists, with elements named 'name', 'op', 'target'")
+    if (!constraints_correct_names(constraints_and_characts$constraints, constraints_and_characts$characteristics))
+      add_error("constraints_name_elements", "should be defined as described in the details section of constraints_lp_format()")
+    if (!constraints_correct_operators(constraints_and_characts$constraints))
+      add_error("constraints_operator_elements", "should be defined as described in the details section of constraints_lp_format()")
+    if (!constraints_correct_targets(constraints_and_characts$constraints))
+      add_error("constraints_target_elements", "should be defined as described in the details section of constraints_lp_format()")
   }
   
   invalid_result <- function() {

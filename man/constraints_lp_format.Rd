@@ -12,7 +12,7 @@ constraints_lp_format(max_n, number_items, characteristics = NULL,
 
 \item{number_items}{number of items available in the item bank}
 
-\item{characteristics}{\code{data.frame} with characteristics, one row per item, one column per characteristic.}
+\item{characteristics}{\code{data.frame} with characteristics, see \code{details}.}
 
 \item{constraints}{\code{list} of constraints, see \code{details}.}
 }
@@ -23,12 +23,21 @@ the maximum test length is always included as an additional constraint; see \cod
 \description{
 Creates a list with characteristics and constraints which can be used in lp function from lpSolve package.
 }
+\section{Characteristics specification}{
+
+\code{characteristics} should be specified as a data.frame of characteristics. Each row indicates the characteristics of
+one item. Each column indicates how all items score on a certain characteristic.
+Characteristics may be categorical or numeric.
+}
+
 \section{Constraint specification}{
 
 \code{constraints} should be specified as a list of constraints, each constraint is a list with three named values;
-\code{name} the column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as \code{name/value}.
-\code{op} the logoical operator to be used. Valid options are "<", "=", ">" and "><".
-\code{target} the target value, numeric. If the operator is "><", this should be a length two vector in between which the target should fall.
+\code{name} the column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as \code{name/value},
+where \code{name} is the column name of the characteristic and \code{value} is the specific level of the characteristic this constraint applies to. 
+\code{op} the logical operator to be used. Valid options are "<", "=", ">" and "><".
+\code{target} the target value, numeric. It indicates the number of items of the relevant characteristic that should be administered ("="), or
+minimally (">"), maximally ("<"), or minimally and maximally ("><"; vector with two values required) administered.
 }
 
 \section{Return object}{

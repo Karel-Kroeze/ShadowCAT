@@ -1,10 +1,17 @@
 #' Creates a list with characteristics and constraints which can be used in lp function from lpSolve package.
 #' 
+#' @section Characteristics specification:
+#' \code{characteristics} should be specified as a data.frame of characteristics. Each row indicates the characteristics of
+#' one item. Each column indicates how all items score on a certain characteristic.
+#' Characteristics may be categorical or numeric. 
+#' 
 #' @section Constraint specification:
 #' \code{constraints} should be specified as a list of constraints, each constraint is a list with three named values;
-#' \code{name} the column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as \code{name/value}.
-#' \code{op} the logoical operator to be used. Valid options are "<", "=", ">" and "><".
-#' \code{target} the target value, numeric. If the operator is "><", this should be a length two vector in between which the target should fall. 
+#' \code{name} the column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as \code{name/value},
+#' where \code{name} is the column name of the characteristic and \code{value} is the specific level of the characteristic this constraint applies to. 
+#' \code{op} the logical operator to be used. Valid options are "<", "=", ">" and "><".
+#' \code{target} the target value, numeric. It indicates the number of items of the relevant characteristic that should be administered ("="), or
+#' minimally (">"), maximally ("<"), or minimally and maximally ("><"; vector with two values required) administered.
 #' 
 #' @section Return object:
 #' The constraints and characteristics in lp format will be stored within a list. Setting the constraints and characteristics
@@ -49,7 +56,7 @@
 #' 
 #' @param max_n test length at which testing should stop
 #' @param number_items number of items available in the item bank
-#' @param characteristics \code{data.frame} with characteristics, one row per item, one column per characteristic.
+#' @param characteristics \code{data.frame} with characteristics, see \code{details}.
 #' @param constraints \code{list} of constraints, see \code{details}.
 #' @return list containing characteristics and constraints in lp format; 
 #' the maximum test length is always included as an additional constraint; see \code{details}.
@@ -126,28 +133,19 @@ constraints_lp_format <- function(max_n, number_items, characteristics = NULL, c
   }
   
   validate <- function() {
-    if (is.null(characteristics) && !is.null(constraints))
-      return(add_error("characteristics", "is missing while constraints is defined"))
-    if (!is.null(characteristics) && is.null(constraints))
-      return(add_error("constraints", "is missing while characteristics is defined"))
-    if (!is.null(characteristics) && (!is.data.frame(characteristics) || any(is.null(colnames(characteristics)))))
-      return(add_error("characteristics", "should be a data.frame with unique column names."))
-    if (!is.null(constraints) && any(sapply(constraints, FUN = function(constraint){ !is.list(constraint) || length(constraint) != 3 || names(constraint) != c("name", "op", "target") })))
-      return(add_error("constraints", "is of invalid structure, should be list of lists, each sublist containing three elements called name, op, and target."))
-    if (!is.null(characteristics) && !is.null(constraints) && any(sapply(constraints, 
-                                                                         FUN = function(constraint){ constraint$name %not_in% unlist(sapply(colnames(characteristics), 
-                                                                                                                                            FUN = function(key) { 
-                                                                                                                                              if (is.character(characteristics[[key]]) || is.factor(characteristics[[key]]))
-                                                                                                                                                paste(key, unique(characteristics[[key]]), sep = '/')
-                                                                                                                                              else
-                                                                                                                                                key })) 
-                                                                                                     })))
-      add_error("constraints_names", "should be contained in names characteristics")
-    if (!is.null(constraints) && any(sapply(constraints, FUN = function(constraint){ constraint$op %not_in% c("<", "=", ">", "><", "<=", ">=") })))
-      add_error("constraints_operators", "containts invalid operator(s)")
-    if (!is.null(constraints) && any(sapply(constraints, FUN = function(constraint){ !is.numeric(constraint$target) })))
-      add_error("constraints_targets", "must be numeric")
-  }
+    if (!no_missing_information(characteristics, constraints))
+      add_error("constraints_and_characteristics", "should either be defined both or not at all")
+    if (!characteristics_correct_format(characteristics, number_items))
+      add_error("characteristics", "should be a data frame with number of rows equal to the number of items in the item bank")
+    if (!constraints_correct_structure(constraints))
+      add_error("constraints_structure", "should be a list of length three lists, with elements named 'name', 'op', 'target'")
+    if (!constraints_correct_names(constraints, characteristics))
+      add_error("constraints_name_elements", "should be defined as described in the details section")
+    if (!constraints_correct_operators(constraints))
+      add_error("constraints_operator_elements", "should be defined as described in the details section")
+    if (!constraints_correct_targets(constraints))
+      add_error("constraints_target_elements", "should be defined as described in the details section")
+   }
   
   invalid_result <- function() {
     list(characteristics = NA,
@@ -158,3 +156,4 @@ constraints_lp_format <- function(max_n, number_items, characteristics = NULL, c
   
   validate_and_run() 
 }
+

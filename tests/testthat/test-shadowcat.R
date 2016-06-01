@@ -1217,6 +1217,35 @@ test_that("invalid input", {
   estimate <- rep(.5, number_dimensions)
   variance <- as.vector(diag(number_dimensions) * 2)
   
+  characteristics <- data.frame(time = with_random_seed(2, rnorm)(200),
+                                type = with_random_seed(2, sample)(c('depression', 'insomnia', 'anxiety'), 200, TRUE),
+                                stressful = rep(c(0, 0, 1, 0, 0), 200/5))
+  
+  constraints1 <- list(list(name = 'time',
+                            op = c('>', '<')),
+                       list(name = 'depression',
+                            op = c('>', '<'),
+                            target = c(2, 5)),
+                       list(name = 'insomnia',
+                            op = c('>', '<'),
+                            target = c(2, 5)),
+                       list(name = 'stressful',
+                            op = '<',
+                            target = "3"))
+  
+  constraints2 <- list(list(name = 'time',
+                            op = c('>', '<'),
+                            target = c(6, 10)),
+                       list(name = 'depression',
+                            op = c('>', '<'),
+                            target = c(2, 5)),
+                       list(name = 'insomnia',
+                            op = c('>', '<'),
+                            target = c(2, 5)),
+                       list(name = 'stressful',
+                            op = '<',
+                            target = "3"))
+   
   error_message_estimate <- shadowcat(answers = NULL, estimate = NULL, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta)
   error_message_variance <- shadowcat(answers = NULL, estimate, variance = NULL, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta)
   error_message_variance_class <- shadowcat(answers = NULL, estimate, variance = diag(3), model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta)
@@ -1255,7 +1284,7 @@ test_that("invalid input", {
   error_message_prior_parameters_sigma2 <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator = "maximum_aposteriori", information_summary, prior_form = "normal", prior_parameters = list(mu = rep(0, 3), Sigma = as.matrix(rep(.1, 3))), guessing, eta)
   error_message_prior_parameters_sigma3 <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator = "maximum_aposteriori", information_summary, prior_form = "normal", prior_parameters = list(mu = rep(0, 3), Sigma = diag(c(-.1, .1, .5))), guessing, eta)
   error_message_prior_parameters_bounds <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator = "maximum_aposteriori", information_summary, prior_form = "uniform", prior_parameters = list(lower_bound = -3, upper_bound = 3), guessing, eta)
-   error_message_max_n <- shadowcat(answers = NULL, estimate, variance, model = "GPCM", alpha, beta, start_items, stop_test = list("variance" = .6), estimator, information_summary, prior_form, prior_parameters, guessing, eta)
+  error_message_max_n <- shadowcat(answers = NULL, estimate, variance, model = "GPCM", alpha, beta, start_items, stop_test = list("variance" = .6), estimator, information_summary, prior_form, prior_parameters, guessing, eta)
   error_message_max_n_too_large <- shadowcat(answers = NULL, estimate, variance, model = "GPCM", alpha, beta, start_items, stop_test = list(max_n = 500), estimator, information_summary, prior_form, prior_parameters, guessing, eta)
   error_message_invalid_cutoffs <- shadowcat(answers = NULL, estimate, variance, model = "GPCM", alpha, beta, start_items, stop_test = list(max_n = 300, cutoffs = matrix(c(NA, .3, .5, .9), ncol = 1)), estimator, information_summary, prior_form, prior_parameters, guessing, eta)
   error_message_start_items_0 <- shadowcat(answers = NULL, estimate, variance, model = "GPCM", alpha, beta, start_items = list(n = 0), stop_test, estimator, information_summary = "posterior_expected_kullback_leibler", prior_form, prior_parameters, guessing, eta)
@@ -1269,6 +1298,10 @@ test_that("invalid input", {
   error_message_bounds_should_be_null <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta, lower_bound = rep(-3, 3), upper_bound = rep(3, 3))
   error_message_lower_bound <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta, lower_bound = c(-2,-3))
   error_message_upper_bound <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta, upper_bound = c(-2,-3))
+  error_message_only_characteristics <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta, constraints_and_characts = list(characteristics = characteristics))
+  error_message_constraints_structure <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta, constraints_and_characts = list(characteristics = characteristics, constraints = constraints1))
+  error_message_wrong_characts_and_constraints <- shadowcat(answers = NULL, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form, prior_parameters, guessing, eta, constraints_and_characts = list(characteristics = characteristics, constraints = constraints2))
+  
   
   expect_equal(error_message_estimate$errors$estimate, "is missing")
   expect_equal(error_message_variance$errors$variance, "is missing")
@@ -1320,6 +1353,12 @@ test_that("invalid input", {
   expect_equal(error_message_information_summary_unknown$errors$information_summary, "of unknown type")
   expect_equal(error_message_estimator_ml_posterior_mixed$errors$estimator_is_maximum_likelihood, "so using a posterior information summary makes no sense")
   expect_equal(error_message_bounds_should_be_null$errors$bounds, "can only be defined if estimator is maximum likelihood")
+  expect_equal(error_message_only_characteristics$errors$constraints_and_characts, "constraints and characteristics should either be defined both or not at all")  
+  expect_equal(error_message_constraints_structure$errors$constraints_structure, "should be a list of length three lists, with elements named 'name', 'op', 'target'")  
+  expect_equal(error_message_wrong_characts_and_constraints$errors$characteristics, "should be a data frame with number of rows equal to the number of items in the item bank")
+  expect_equal(error_message_wrong_characts_and_constraints$errors$constraints_name_elements, "should be defined as described in the details section of constraints_lp_format()")
+  expect_equal(error_message_wrong_characts_and_constraints$errors$constraints_operator_elements, "should be defined as described in the details section of constraints_lp_format()")
+  expect_equal(error_message_wrong_characts_and_constraints$errors$constraints_target_elements, "should be defined as described in the details section of constraints_lp_format()")  
  })
 
 

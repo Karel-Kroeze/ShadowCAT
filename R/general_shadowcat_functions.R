@@ -229,3 +229,85 @@ sum_loop_outputs <- function(start_object, loop_vector, FUN, ...) {
   }
   start_object
 }
+
+# validate functions constraints and characteristics
+
+#' Check whether characteristics and constraints are either both NULL or both not NULL
+#' 
+#' @param characteristics Data frame with characteristics.
+#' @param constraints List of constraints.
+#' @return TRUE if characteristics and constraints are either both NULL or both not NULL, FALSE otherwise
+#' @export
+no_missing_information <- function(characteristics, constraints) {
+  (is.null(characteristics) && is.null(constraints)) || (!is.null(characteristics) && !is.null(constraints))
+}
+
+#' Check whether characteristics is data frame with correct number of rows
+#' 
+#' @param characteristics Data frame with characteristics
+#' @param number_items Number of items in the item bank
+#' @return TRUE if characteristics is data frame with correct number of rows, FALSE otherwise
+#' @export
+characteristics_correct_format <- function(characteristics, number_items) {
+  if (is.null(characteristics))
+    return(TRUE)
+  is.data.frame(characteristics) && nrow(characteristics) == number_items
+}
+
+#' Check whether elements of constraints have correct structure
+#' 
+#' @param constraints List of constraints.
+#' @return TRUE if elements are lists of length three with correct names, FALSE otherwise
+#' @export
+constraints_correct_structure <- function(constraints) {
+  if (is.null(constraints))
+    return(TRUE)
+  all(sapply(constraints, 
+             function(constraint) { 
+               is.list(constraint) && length(constraint) == 3 && names(constraint) == c("name", "op", "target") }))
+}
+
+#' Check whether the name elements within the constraints elements are correct 
+#' 
+#' @param characteristics Data frame with characteristics
+#' @param constraints List of constraints
+#' @return TRUE if the name elements in constraints are correct, FALSE otherwise
+#' @export
+constraints_correct_names <- function(constraints, characteristics) {
+  if (is.null(constraints) || is.null(characteristics) || !constraints_correct_structure(constraints) || !is.data.frame(characteristics))
+    return(TRUE)
+  characteristic_names <- unlist(sapply(colnames(characteristics), 
+                                        function(key) { 
+                                          if (is.character(characteristics[[key]]) || is.factor(characteristics[[key]]))
+                                            paste(key, unique(characteristics[[key]]), sep = '/')
+                                          else
+                                            key }))
+  
+  all(sapply(constraints, 
+             function(constraint) {  length(constraint$name) == 1 && constraint$name %in% characteristic_names }))
+}
+
+#' Check whether the operator elements within the constraints elements are correct 
+#' 
+#' @param constraints List of constraints
+#' @return TRUE if the operator elements in constraints are correct, FALSE otherwise
+#' @export
+constraints_correct_operators <- function(constraints) {
+  if (is.null(constraints) || !constraints_correct_structure(constraints))
+    return(TRUE)
+  all(sapply(constraints, 
+             function(constraint) { length(constraint$op) == 1 && constraint$op %in% c("<", "=", ">", "><") }))
+}
+
+#' Check whether the target elements within the constraints elements are correct 
+#' 
+#' @param constraints List of constraints
+#' @return TRUE if the target elements in constraints are correct, FALSE otherwise
+#' @export
+constraints_correct_targets <- function(constraints) {
+  if (is.null(constraints) || !constraints_correct_structure(constraints))
+    return(TRUE)
+  all(sapply(constraints, 
+             function(constraint) { 
+               is.numeric(constraint$target) && is.vector(constraint$target) && length(constraint$target) == length(strsplit(constraint$op, split = NULL)[[1]]) }))
+}
