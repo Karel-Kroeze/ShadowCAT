@@ -146,10 +146,10 @@ test_that("uniform prior, 3 dimensions, with adapt with large variances", {
                                      adapt = list(mu = c(0, .5, -.3), Sigma = diag(3) * 150), 
                                      number_gridpoints = 6,
                                      answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing, return_log_likelihood_or_post_density = FALSE)
-  expect_equal(as.vector(round(eap, 3)), c(-2.572, -2.375, -1.271))
-  expect_equal(round(attr(eap, "variance"), 3)[1,], c(.944, -.041, -.011))
-  expect_equal(round(attr(eap, "variance"), 3)[2,], c(-.041, .235, -.004))
-  expect_equal(round(attr(eap, "variance"), 3)[3,], c(-.011, -.004, .058))
+  expect_equal(as.vector(round(eap, 3)), c(-1.483, -1.000, -1.800))
+  expect_equal(round(attr(eap, "variance"), 3)[1,], c(.052, 0, 0))
+  expect_equal(round(attr(eap, "variance"), 3)[2,], c(0, 0, 0))
+  expect_equal(round(attr(eap, "variance"), 3)[3,], c(0, 0, 0))
 })
 
   

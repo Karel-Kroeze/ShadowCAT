@@ -76,10 +76,10 @@ get_eap_estimate_riemannsum <- function(dimension, likelihood, prior_form, prior
       list(mu = adapt$mu, sigma = adapt$Sigma)
     }
     else if (prior_form == "uniform") {
-      if (all(diag(adapt$Sigma) < 4))
+      if (all(diag(adapt$Sigma) < 9))
         list(mu = adapt$mu, sigma = adapt$Sigma)
       else
-        list(mu = adapt$mu, sigma = adapt$Sigma / (max(diag(adapt$Sigma)) / 4))
+        list(mu = adapt$mu, sigma = adapt$Sigma / (max(diag(adapt$Sigma)) / 9))
     }
   }
   
