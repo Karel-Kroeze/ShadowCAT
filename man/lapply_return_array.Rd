@@ -23,9 +23,9 @@ lapply with array as output
 }
 \examples{
 matrix_example <- matrix(1:9, ncol = 3); 
-lapply_return_array(1:3, 
-                    c(3, 3, 3), 
-                    FUN = function(i, matrix_example) { matrix_example[i,] \%*\% t(matrix_example[i,]) }, 
-                    matrix_example = matrix_example)[1, 1, 1] == 1 || stop("wrong")
+ShadowCAT:::lapply_return_array(x = 1:3, 
+                                dim = c(3, 3, 3), 
+                                FUN = function(i, matrix_example) { matrix_example[i,] \%*\% t(matrix_example[i,]) }, 
+                                matrix_example = matrix_example)[1, 1, 1] == 1 || stop("wrong")
 }
 

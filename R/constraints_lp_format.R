@@ -52,7 +52,7 @@
 #'        target = 2))
 #' 
 #' # get list of characteristics and constraintrs in lp format
-#' chars_constraints_lp <- constraints_lp_format(max_n, number_items, characteristics, constraints)
+#' chars_constraints_lp <- ShadowCAT:::constraints_lp_format(max_n, number_items, characteristics, constraints)
 #' 
 #' @param max_n test length at which testing should stop
 #' @param number_items number of items available in the item bank
@@ -60,7 +60,6 @@
 #' @param constraints \code{list} of constraints, see \code{details}.
 #' @return list containing characteristics and constraints in lp format; 
 #' the maximum test length is always included as an additional constraint; see \code{details}.
-#' @export
 constraints_lp_format <- function(max_n, number_items, characteristics = NULL, constraints = NULL) {
   result <- function() {
     characteristics_numeric <- get_characteristics_numeric()

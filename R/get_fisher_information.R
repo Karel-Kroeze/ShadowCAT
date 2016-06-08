@@ -22,7 +22,6 @@
 #' @param guessing matrix containing the quessing parameters
 #' @param number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix
 #' @return array with an information matrix for each item (QxQxK).
-#' @export
 get_fisher_information <- function(estimate, model, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item) {
   # Fisher Information
   # minus the expectation of the second derivative of the log-likelihood

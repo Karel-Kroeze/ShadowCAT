@@ -32,17 +32,17 @@
 #' alpha <- matrix(runif(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
 #' beta <- matrix(rnorm(number_items), nrow = number_items, ncol = 1)
 #' guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
-#' number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
+#' number_itemsteps_per_item <- ShadowCAT:::number_non_missing_cells_per_row(beta)
 #' prior_form <- "normal"
 #' prior_parameters <- list(mu = 0, Sigma = diag(1))
 #'
 #' # obtain estimates
 #' estimator <- "maximum_aposteriori" # maximum a posteriori combined with uniform prior is equivalent to maximum likelihood with bounds
-#' ML <- estimate_latent_trait(estimate, answers, prior_form = "uniform", prior_parameters = list(lower_bound = -4, upper_bound = 4), model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
+#' ML <- ShadowCAT:::estimate_latent_trait(estimate, answers, prior_form = "uniform", prior_parameters = list(lower_bound = -4, upper_bound = 4), model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
 #' estimator <- "maximum_aposteriori"
-#' MAP <- estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
+#' MAP <- ShadowCAT:::estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
 #' estimator <- "expected_aposteriori"
-#' EAP <- estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
+#' EAP <- ShadowCAT:::estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
 #' ML; MAP; EAP
 #' 
 #' # access variance
@@ -56,9 +56,9 @@
 #' prior_parameters <- list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions))
 #' 
 #' estimator <- "maximum_aposteriori"
-#' system.time(estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item))
+#' system.time(ShadowCAT:::estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item))
 #' estimator <- "expected_aposteriori"
-#' system.time(estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item))
+#' system.time(ShadowCAT:::estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item))
 #' 
 #' @param estimate Vector containing theta estimate, with covariance matrix as an attribute
 #' @param answers Vector with person answers
@@ -80,7 +80,6 @@
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
 #' @return vector containing the updated estimate with the covariance matrix as attribute
 #' @importFrom MultiGHQuad init.quad eval.quad
-#' @export
 estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, safe_eap = FALSE, eap_estimation_procedure = "riemannsum") {
   result <- function() {
     get_updated_estimate_and_variance_attribute()

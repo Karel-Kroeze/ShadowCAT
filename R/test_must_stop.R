@@ -10,7 +10,6 @@
 #' @param cutoffs matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
 #' administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at certain iteration, test stops; NULL means no cut off values
 #' @return TRUE if test should stop, FALSE otherwise
-#' @export
 test_must_stop <- function(number_answers, estimate, min_n, max_n, stop_variance_target = NULL, cutoffs = NULL) {
   min_number_items_reached <- is.null(min_n) || number_answers >= min_n
   max_number_items_reached <- number_answers >= max_n

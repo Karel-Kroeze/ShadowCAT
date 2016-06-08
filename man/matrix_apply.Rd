@@ -22,6 +22,7 @@ same a apply, but always in matrix format
 apply with input and output converted to matrix
 }
 \examples{
-( matrix_apply(c(1:5, NA), 2, sum, na.rm = TRUE) == 15 && is.matrix(matrix_apply(c(1:5, NA), 2, sum, na.rm = TRUE)) ) || stop("wrong")
+ShadowCAT:::matrix_apply(c(1:5, NA), 2, sum, na.rm = TRUE) == 15 || stop("wrong")
+is.matrix(ShadowCAT:::matrix_apply(c(1:5, NA), 2, sum, na.rm = TRUE)) || stop("wrong")
 }
 

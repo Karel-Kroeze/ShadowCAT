@@ -19,7 +19,6 @@
 #' @param number_answers The number of answers given to the test (length of administered)
 #' @return item Index of item with maximum information. For multi dimensional models, items that only load on dimensions for
 #' which the variance target has already been reached, will not be returned
-#' @export
 get_item_index_max_information <- function(available, item_information, estimate, stop_test, alpha, number_answers) {
   result <- function() {
     uncompleted_dimensions <- get_uncompleted_dimensions()

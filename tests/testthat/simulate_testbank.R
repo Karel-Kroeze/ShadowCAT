@@ -53,7 +53,7 @@ simulate_testbank <- function(model, number_items = 50, number_dimensions = 1, n
       # spread polytomous items cats -2 to +2.
       spread <- seq(-2, 2, length.out = number_itemsteps)
       beta_multiple_itemsteps <- ( if (model == "GPCM") 
-                                     row_cumsum(t(apply(beta_one_itemstep, 1, function(x) x + spread))) 
+                                     ShadowCAT:::row_cumsum(t(apply(beta_one_itemstep, 1, function(x) x + spread))) 
                                    else
                                      t(apply(beta_one_itemstep, 1, function(x) x + spread)) )
       if (varying_number_item_steps)

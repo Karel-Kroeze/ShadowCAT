@@ -16,7 +16,7 @@ number of non-NA cells per row
 get the number of non-NA cells per row of a matrix
 }
 \examples{
-expect_equal <- number_non_missing_cells_per_row(matrix(c(1,2,NA,NA,2,3,NA,2,3), ncol = 3)) == c(1, 3, 2);
-sum(expect_equal) == 3 || stop("wrong")
+should_be_equal <- ShadowCAT:::number_non_missing_cells_per_row(matrix(c(1,2,NA,NA,2,3,NA,2,3), ncol = 3)) == c(1, 3, 2);
+sum(should_be_equal) == 3 || stop("wrong")
 }
 

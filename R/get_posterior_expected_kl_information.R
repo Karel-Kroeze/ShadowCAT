@@ -29,7 +29,6 @@
 #' here if it is not the requested estimator in shadowcat(). One of "riemannsum" for integration via Riemannsum or
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
 #' @return Vector with PEKL information for each yet available item.
-#' @export
 get_posterior_expected_kl_information <- function(estimate, model, answers, administered, available, number_dimensions, estimator, alpha, beta, guessing, prior_form, prior_parameters, number_itemsteps_per_item, eap_estimation_procedure = "riemannsum") {
   result <- function() {
     # we'll perform a very basic integration over the theta range

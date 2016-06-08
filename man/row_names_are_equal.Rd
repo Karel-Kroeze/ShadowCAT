@@ -18,16 +18,16 @@ TRUE if the row names of all the matrices are equal to row_names, including the 
 Check whether all matrices have equal row names, in same order.
 }
 \examples{
-row_names_are_equal(c("a", "b", "c"), list("matrix1" = matrix(1:3, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
-                                                     "matrix2" = matrix(2:4, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
-                                                     "matrix3" = matrix(3:5, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
-                                                     "matrix4" = NULL)) == TRUE || stop("wrong")
-row_names_are_equal(c("a", "b", "c"), list("matrix1" = matrix(1:3, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
-                                                     "matrix2" = matrix(2:4, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
-                                                     "matrix3" = matrix(3:4, ncol = 1, dimnames = list(c("a", "b"), NULL)),
-                                                     "matrix4" = NULL)) == FALSE || stop("wrong")
-row_names_are_equal(c("a", "b", "c"), list("matrix1" = matrix(1:3, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
-                                           "matrix2" = matrix(2:4, ncol = 1, dimnames = list(c("a", "c", "b"), NULL)),
-                                           "matrix3" = matrix(3:5, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)))) == FALSE || stop("wrong")
+ShadowCAT:::row_names_are_equal(c("a", "b", "c"), list("matrix1" = matrix(1:3, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
+                                                                 "matrix2" = matrix(2:4, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
+                                                                 "matrix3" = matrix(3:5, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
+                                                                 "matrix4" = NULL)) == TRUE || stop("wrong")
+ShadowCAT:::row_names_are_equal(c("a", "b", "c"), list("matrix1" = matrix(1:3, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
+                                                       "matrix2" = matrix(2:4, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
+                                                       "matrix3" = matrix(3:4, ncol = 1, dimnames = list(c("a", "b"), NULL)),
+                                                       "matrix4" = NULL)) == FALSE || stop("wrong")
+ShadowCAT:::row_names_are_equal(c("a", "b", "c"), list("matrix1" = matrix(1:3, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
+                                                       "matrix2" = matrix(2:4, ncol = 1, dimnames = list(c("a", "c", "b"), NULL)),
+                                                       "matrix3" = matrix(3:5, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)))) == FALSE || stop("wrong")
 }
 

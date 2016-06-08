@@ -28,7 +28,7 @@ two_times_two <- function(two, also_two) {
     list(result=NA, errors=errors())
   }
 
-  validate_and_run()
+  ShadowCAT:::validate_and_run()
 }
 two_times_two(2,2) == 4 || stop('not 4')
 two_times_two(3,2)$errors$two == 'should be 2' || stop('wrong result')

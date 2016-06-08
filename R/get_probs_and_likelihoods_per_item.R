@@ -13,7 +13,6 @@
 #' @importFrom mvtnorm dmvnorm
 #' @importFrom Rcpp evalCpp
 #' @useDynLib ShadowCAT
-#' @export
 get_probs_and_likelihoods_per_item <- function(theta, model, alpha, beta, guessing, answers = numeric(0), with_likelihoods) {
   probs_and_likelihoods <- switch(model,
                                   "3PLM" = PROB_3PLM(theta, alpha, beta, guessing, answers, with_likelihoods),

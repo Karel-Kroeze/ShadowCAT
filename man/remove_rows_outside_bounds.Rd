@@ -20,10 +20,10 @@ matrix_to_evaluate without the rows that contain values outside the specified bo
 remove rows of a matrix that contain one or more values outside specified bounds
 }
 \examples{
-should_be_equal1 <- remove_rows_outside_bounds(matrix(-3:3), lower_bound = -2, upper_bound = 2) == matrix(-2:2);
+should_be_equal1 <- ShadowCAT:::remove_rows_outside_bounds(matrix(-3:3), lower_bound = -2, upper_bound = 2) == matrix(-2:2);
 sum(should_be_equal1) == 5 || stop("wrong")
 matrix_to_evaluate <- expand.grid(list(-3:3, -2:2));
-should_be_equal2 <- remove_rows_outside_bounds(matrix_to_evaluate, lower_bound = c(-2, -3), upper_bound = c(2, 1)) == matrix_to_evaluate[c(2:6, 9:13, 16:20, 23:27), ];
+should_be_equal2 <- ShadowCAT:::remove_rows_outside_bounds(matrix_to_evaluate, lower_bound = c(-2, -3), upper_bound = c(2, 1)) == matrix_to_evaluate[c(2:6, 9:13, 16:20, 23:27), ];
 sum(should_be_equal2) == 40 || stop("wrong")
 }
 

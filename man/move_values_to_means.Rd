@@ -20,10 +20,10 @@ values plus or minus amount_change, or values if values is equal to the means
 Move a vector of values in the direction of a vector of means
 }
 \examples{
-move_values_to_means(values = 1, means = 2, amount_change = .1) == 1.1 || stop("wrong") 
-move_values_to_means(values = 3, means = 2, amount_change = .1) == 2.9 || stop("wrong")
-move_values_to_means(values = 2, means = 2, amount_change = .1) == 2 || stop("wrong")
-should_be_equal <- move_values_to_means(values = c(1, 2, 3), means = c(1, 5, -1), amount_change = rep(.1, 3)) == c(1, 2.1, 2.9)
+ShadowCAT:::move_values_to_means(values = 1, means = 2, amount_change = .1) == 1.1 || stop("wrong") 
+ShadowCAT:::move_values_to_means(values = 3, means = 2, amount_change = .1) == 2.9 || stop("wrong")
+ShadowCAT:::move_values_to_means(values = 2, means = 2, amount_change = .1) == 2 || stop("wrong")
+should_be_equal <- ShadowCAT:::move_values_to_means(values = c(1, 2, 3), means = c(1, 5, -1), amount_change = rep(.1, 3)) == c(1, 2.1, 2.9)
 sum(should_be_equal) == 3 || stop("wrong")
 }
 

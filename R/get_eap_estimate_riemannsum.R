@@ -15,7 +15,6 @@
 #' @param ... Any additional arguments to likelihood
 #' @importFrom mvtnorm dmvnorm
 #' @importFrom Matrix nearPD
-#' @export
 get_eap_estimate_riemannsum <- function(dimension, likelihood, prior_form, prior_parameters, adapt = NULL, number_gridpoints = 50, ...) {
   result <- function() {
     mid_grid_points <- get_mid_grid_points() 

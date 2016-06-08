@@ -16,7 +16,7 @@ row sums or sum of x
 get row sums of matrix or sum of vector
 }
 \examples{
-all(row_or_vector_sums(matrix(c(1:10), nrow = 2)) == c(25, 30)) || stop("wrong");
-row_or_vector_sums(1:5) == 15 || stop("wrong")
+all(ShadowCAT:::row_or_vector_sums(matrix(c(1:10), nrow = 2)) == c(25, 30)) || stop("wrong");
+ShadowCAT:::row_or_vector_sums(1:5) == 15 || stop("wrong")
 }
 

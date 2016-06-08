@@ -16,7 +16,7 @@ TRUE if there are only NA's at the end of the vector or no NA at all; FALSE othe
 Check whether NA's exist only at the end of a vector, that is, whether there are no values after the first NA in the vector
 }
 \examples{
-na_only_end_vector(c(1:3, NA, NA)) || stop("wrong");
-na_only_end_vector(c(1:3, NA, NA, 6)) == FALSE || stop("wrong")
+ShadowCAT:::na_only_end_vector(c(1:3, NA, NA)) || stop("wrong");
+ShadowCAT:::na_only_end_vector(c(1:3, NA, NA, 6)) == FALSE || stop("wrong")
 }
 

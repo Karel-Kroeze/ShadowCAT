@@ -18,9 +18,9 @@ Returns the result function instead of the result of the result function
 fn <- function(a) {
   result <- function() helper()
   helper <- function() 2*a
-  validate_and_run()
+  ShadowCAT:::validate_and_run()
 }
-tst <- validate_and_run.test(fn, 4)
+tst <- ShadowCAT:::validate_and_run.test(fn, 4)
 helper <- get('helper', environment(tst))
 helper() == 8 || stop('error')
 }

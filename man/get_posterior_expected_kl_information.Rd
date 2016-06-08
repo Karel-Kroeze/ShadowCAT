@@ -44,6 +44,8 @@ here if it is not the requested estimator in shadowcat(). One of "riemannsum" fo
 }
 \value{
 Vector with PEKL information for each yet available item.
+Kullback Leibler Divergence for given items and pairs of thetas x posterior density.
+returns vector containing information for each yet available item
 }
 \description{
 Kullback-Leibler divergence based on the EAP and ML estimates of ability under the posterior distribution of theta.

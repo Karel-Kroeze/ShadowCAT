@@ -16,7 +16,7 @@ TRUE if there are only NA's at the end of each row or no NA at all; FALSE otherw
 Check whether NA's exist only at the end of each row, that is, whether there are no values after the first NA in the row
 }
 \examples{
-na_only_end_rows(matrix(c(1:3, NA, NA, 1:5, 1:4, NA), ncol = 5, byrow = TRUE)) || stop("wrong");
-na_only_end_rows(matrix(c(1:3, NA, NA, 1:2, NA, 4:5, 1:4, NA), ncol = 5, byrow = TRUE))  == FALSE || stop("wrong")
+ShadowCAT:::na_only_end_rows(matrix(c(1:3, NA, NA, 1:5, 1:4, NA), ncol = 5, byrow = TRUE)) || stop("wrong");
+ShadowCAT:::na_only_end_rows(matrix(c(1:3, NA, NA, 1:2, NA, 4:5, 1:4, NA), ncol = 5, byrow = TRUE))  == FALSE || stop("wrong")
 }
 

@@ -17,7 +17,7 @@ Recursive list apply, given a bunch of vectors, creates lists of lists with the 
  and values determined by fn.
 }
 \examples{
-rsapply(c('a', 'b'), c('f', 'g'), fn=function(x,y) c(x, y))
+ShadowCAT:::rsapply(c('a', 'b'), c('f', 'g'), fn=function(x,y) c(x, y))
 #> list(a=list(f=c('a', 'f'), g=c('a', 'g')), b=list(f=c('b', 'f'), g=c('b', 'g')))
 }
 

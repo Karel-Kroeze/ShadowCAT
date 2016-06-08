@@ -18,7 +18,7 @@ a vector with elements equal to TRUE for each element of x that is not in y
 not in
 }
 \examples{
-expect_equal <- c("a", "b", "g", "k", "b") \%not_in\% c("a", "b", "c") == c(FALSE, FALSE, TRUE, TRUE, FALSE);
-sum(expect_equal) == 5 || stop("wrong")
+should_be_equal <- ShadowCAT:::`\%not_in\%`(c("a", "b", "g", "k", "b"), c("a", "b", "c")) == c(FALSE, FALSE, TRUE, TRUE, FALSE);
+sum(should_be_equal) == 5 || stop("wrong")
 }
 

@@ -18,7 +18,7 @@ a matrix containing the dummy variables, number of columns (dummies) equals the 
 transform categorical vector into dummy variables
 }
 \examples{
-expect_equal <- categorical_to_dummy(c("a", "b", "c"), rep(c("a", "b", "c"), 3))[1,] == rep(c(1, 0, 0), 3);
-sum(expect_equal) == 9 || stop("wrong")
+should_be_equal <- ShadowCAT:::categorical_to_dummy(c("a", "b", "c"), rep(c("a", "b", "c"), 3))[1,] == rep(c(1, 0, 0), 3);
+sum(should_be_equal) == 9 || stop("wrong")
 }
 

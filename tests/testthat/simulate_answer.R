@@ -20,8 +20,8 @@ simulate_answer <- function(theta, model, number_dimensions, estimator, alpha, b
   result <- function() {
     guessing <- get_guessing()
     # probabilities, generated with true theta.
-    probabilities <- get_probs_and_likelihoods_per_item(theta, model, get_subset(alpha, indices), get_subset(beta, indices), get_subset(guessing, indices), with_likelihoods = FALSE)$P
-    cumulative_probabilities <- row_cumsum(probabilities) 
+    probabilities <- ShadowCAT:::get_probs_and_likelihoods_per_item(theta, model, ShadowCAT:::get_subset(alpha, indices), ShadowCAT:::get_subset(beta, indices), ShadowCAT:::get_subset(guessing, indices), with_likelihoods = FALSE)$P
+    cumulative_probabilities <- ShadowCAT:::row_cumsum(probabilities) 
     random_numbers <- runif(length(indices))
     
     # answer is the number of categories that have a cumulative probability smaller than random_numbers

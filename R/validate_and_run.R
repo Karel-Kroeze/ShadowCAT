@@ -20,11 +20,10 @@
 #'     list(result=NA, errors=errors())
 #'   }
 #'
-#'   validate_and_run()
+#'   ShadowCAT:::validate_and_run()
 #' }
 #' two_times_two(2,2) == 4 || stop('not 4')
 #' two_times_two(3,2)$errors$two == 'should be 2' || stop('wrong result')
-#' @export
 validate_and_run <- function() {
   .errors <- list()
   
@@ -65,12 +64,11 @@ errors <- function(){}
 #' fn <- function(a) {
 #'   result <- function() helper()
 #'   helper <- function() 2*a
-#'   validate_and_run()
+#'   ShadowCAT:::validate_and_run()
 #' }
-#' tst <- validate_and_run.test(fn, 4)
+#' tst <- ShadowCAT:::validate_and_run.test(fn, 4)
 #' helper <- get('helper', environment(tst))
 #' helper() == 8 || stop('error')
-#' @export
 validate_and_run.test <- function(fn, ...) {
   test_inner_functions <- TRUE
   fn(...)

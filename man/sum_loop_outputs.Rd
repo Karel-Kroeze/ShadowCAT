@@ -23,8 +23,8 @@ get sum of objects returned by a loop, added to a starting object
 }
 \examples{
 matrix_example <- matrix(1:6, ncol = 2);
-expect_equal <- sum_loop_outputs(matrix(0, 2, 2), 1:3, FUN = function(item, matrix_example) { matrix_example[item,] \%*\% t(matrix_example[item,]) }, matrix_example = matrix_example) == 
-                (matrix_example[1,] \%*\% t(matrix_example[1,]) + matrix_example[2,] \%*\% t(matrix_example[2,]) + matrix_example[3,] \%*\% t(matrix_example[3,]));
-sum(expect_equal) == 4 || stop("wrong")
+should_be_equal <- ShadowCAT:::sum_loop_outputs(matrix(0, 2, 2), 1:3, FUN = function(item, matrix_example) { matrix_example[item,] \%*\% t(matrix_example[item,]) }, matrix_example = matrix_example) == 
+                   (matrix_example[1,] \%*\% t(matrix_example[1,]) + matrix_example[2,] \%*\% t(matrix_example[2,]) + matrix_example[3,] \%*\% t(matrix_example[3,]));
+sum(should_be_equal) == 4 || stop("wrong")
 }
 
