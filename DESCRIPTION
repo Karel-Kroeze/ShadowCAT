@@ -19,8 +19,8 @@ Imports:
     MultiGHQuad,
     lpSolve,
     matrixcalc,
-    Matrix
+    Matrix,
+    stringr
 Suggests:
     testthat (>= 0.8.1),
-    stringr
 RoxygenNote: 5.0.1

@@ -18,19 +18,19 @@ shadowcat(answers, estimate, variance, model, alpha, beta, start_items,
 
 \item{variance}{(co)variance matrix of the estimate, as vector}
 
-\item{model}{String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
+\item{model}{One of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
 
 \item{alpha}{Matrix of alpha parameters, one column per dimension, one row per item. Row names should contain the item keys. Note that so called within-dimensional models still use an alpha matrix, they simply 
 have only one non-zero loading per item.}
 
 \item{beta}{Matrix of beta parameters, one column per item step, one row per item. Row names should contain the item keys. Note that ShadowCAT expects answer categories to be sequential,
 and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, and equal to the position of the 'location' of the beta parameter in the Beta matrix.
-The matrix will have a number of columns equal to the largest number of answer categories, items with fewer answer categories should be 
+The matrix will have a number of columns equal to the largest number of item steps over items, items with fewer answer categories should be 
 right-padded with \code{NA}. \code{NA} values between answer categories are not allowed, and will lead to errors.
 Beta matrix can be set to NULL if model is GPCM and eta is defined
 More flexibility in Beta parameters might be added in future versions.}
 
-\item{start_items}{items that are shown to the respondent before adaptive proces starts; one of
+\item{start_items}{List indicating the items that are shown to the respondent before adaptive proces starts; one of
 list(type = 'random', n)
 list(type = 'fixed', indices, n)
 list(type = 'random_by_dimension', n_by_dimension, n)
@@ -39,7 +39,7 @@ n_by_dimension = scalar of number of initial items per dimension, or vector with
 If n is 0, only n needs to be defined
 'random_by_dimension' assumes that items load on a single dimension, if any item has a non-zero loading on a dimension, it is considered to be part of that dimension.}
 
-\item{stop_test}{rule for when to stop providing new items to patient; should be a list of the form
+\item{stop_test}{List indicating rules for when to stop providing new items to respondent; should be a list of the form
 list(target = ..., max_n = ..., min_n = ..., cutoffs = ...), 
 where max_n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule), 
 target = vector of maximum acceptable variances per dimension; NULL means no variance target,
@@ -48,9 +48,9 @@ cutoffs = matrix containing cut off values per dimension (columns) and test iter
 administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at certain iteration, test stops; 
 NULL means no cut off values}
 
-\item{estimator}{type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"}
+\item{estimator}{Type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"}
 
-\item{information_summary}{called "objective" by Kroeze; how to summarize information; one of
+\item{information_summary}{How to summarize Fisher information, used for selection of item with maximum information; one of
 "determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
 "posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior_information + info_QxQ_k) for each yet available item k
 "trace": compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
@@ -94,7 +94,7 @@ An error may occur if the prior is uniform, estimator is expected aposteriori, a
 "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. If prior form is uniform, estimation procedure should always be "riemannsum".}
 }
 \value{
-a list containing the key of the next item to be administered given a new answer (or "stop_test"), 
+List containing the key of the next item to be administered given a new answer, an indicator for whether the test should be continued,
 updated estimate of theta, updated covariance matrix of theta converted to a vector, and the answers to the administered items (named list)
 }
 \description{
