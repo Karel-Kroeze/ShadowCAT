@@ -12,9 +12,10 @@
 #' @param prior_parameters List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...).
 #' Sigma should always be in matrix form.
 #' @param return_log_likelihood_or_post_density if TRUE, log of likelihood or posterior density is returned, else likelihood or posterior density on original scale
-#' @param inverse_likelihood_or_post_density should likelihood or posterior density values be reversed (useful for minimization, also reverses derivatives)
-#' @return the likelihood (estimator is maximum_likelihood) or posterior density with normal prior (estimator is not maximum_likelihood) of theta, with first and second derivatives as attributes
-likelihood_or_post_density <- function(theta, answers = NULL, model, items_to_include, number_dimensions, estimator, alpha, beta, guessing, prior_parameters = NULL, return_log_likelihood_or_post_density = TRUE, inverse_likelihood_or_post_density = FALSE) {
+#' @param inverse_likelihood_or_post_density If TRUE, likelihood or posterior density value is reversed (useful for minimization, also reverses derivatives)
+#' @param with_derivatives If TRUE, first and second derivatives are added to the return value as attributes
+#' @return the likelihood (estimator is maximum_likelihood) or posterior density with normal prior (estimator is not maximum_likelihood) of theta, if requested with first and second derivatives as attributes
+likelihood_or_post_density <- function(theta, answers = NULL, model, items_to_include, number_dimensions, estimator, alpha, beta, guessing, prior_parameters = NULL, return_log_likelihood_or_post_density = TRUE, inverse_likelihood_or_post_density = FALSE, with_derivatives = TRUE) {
   number_items <- length(items_to_include)
   alpha <- get_subset(alpha, items_to_include)
   beta <- get_subset(beta, items_to_include)
@@ -23,8 +24,10 @@ likelihood_or_post_density <- function(theta, answers = NULL, model, items_to_in
   result <- function() {
     probs_and_likelihoods <- get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing, answers, TRUE) 
     log_likelihood_or_post_density <- get_log_likelihood_or_post_density(probs_and_likelihoods) * (-1) ^ inverse_likelihood_or_post_density
-    attr(log_likelihood_or_post_density, "gradient") <- get_first_derivative(probs_and_likelihoods) * (-1) ^ inverse_likelihood_or_post_density
-    attr(log_likelihood_or_post_density, "hessian") <- get_second_derivative(probs_and_likelihoods) * (-1) ^ inverse_likelihood_or_post_density
+    if (with_derivatives) {
+      attr(log_likelihood_or_post_density, "gradient") <- get_first_derivative(probs_and_likelihoods) * (-1) ^ inverse_likelihood_or_post_density
+      attr(log_likelihood_or_post_density, "hessian") <- get_second_derivative(probs_and_likelihoods) * (-1) ^ inverse_likelihood_or_post_density
+    }
     if (return_log_likelihood_or_post_density)  
       log_likelihood_or_post_density
     else

@@ -151,7 +151,7 @@ estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameter
                                         ip = number_gridpoints(),
                                         forcePD = TRUE)
     eval.quad(FUN = likelihood_or_post_density, X = Q_dim_grid_quad_points, 
-              answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing)
+              answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing, with_derivative = FALSE)
   }
   
   get_updated_estimate_and_variance_eap_riemannsum <- function() {
@@ -162,7 +162,7 @@ estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameter
                prior_parameters = prior_parameters,
                adapt = adapt,
                number_gridpoints = number_gridpoints(),
-               answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing, return_log_likelihood_or_post_density = FALSE)
+               answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing, return_log_likelihood_or_post_density = FALSE, with_derivative = FALSE)
   }
   
   number_gridpoints <- function() {

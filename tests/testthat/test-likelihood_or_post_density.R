@@ -311,7 +311,7 @@ test_that("model is SM, 3 dimensions, 4 categories, estimator is expected_aposte
   expect_equal(round(attr(post_density, "hessian")[1,], 3), c(-9.229, -9.184, -10.147))
 }) 
 
-test_that("model is SM, 3 dimensions, varying number of categories, estimator is expected_aposteriori, deriv is true", {
+test_that("model is SM, 3 dimensions, varying number of categories, estimator is expected_aposteriori", {
   theta <- c(1.8, -1.4, 2.5)
   model <- "SM"
   administered <- 1:50
@@ -339,6 +339,34 @@ test_that("model is SM, 3 dimensions, varying number of categories, estimator is
   expect_equal(round(post_density[1], 3), -226.666)
   expect_equal(round(attr(post_density, "gradient"), 3), matrix(c(-37.975, -42.21, -36.426), ncol = 3))
   expect_equal(round(attr(post_density, "hessian")[1,], 3), c(-1.872, -3.647, -3.411))
+}) 
+
+test_that("No derivatives computed", {
+  theta <- c(1.8, -1.4, 2.5)
+  model <- "SM"
+  administered <- 1:50
+  number_dimensions <- 3
+  estimator <- "expected_aposteriori"
+  answers <- c(rep(0,5), rep(1,5), rep(c(1:3),9), rep(c(0:2), 4), 3)
+  prior_parameters <-  list(mu = c(0, 0, 0), Sigma = matrix(c(1.2, 1.5, 1.7, 1.5, .9, 1.5, 1.7, 1.5, 1.1), ncol = 3))
+  
+  number_items <- 50
+  max_number_answer_categories <- 5
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  temp_vector <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  eta <- t(apply(temp_vector, 1, function(x) x + seq(-2, 2, length.out = (max_number_answer_categories - 1))))
+  eta[c(1, 5:10), 3:4] <- NA
+  eta[c(40:45), 4] <- NA
+  beta <- row_cumsum(eta)
+  guessing <- NULL
+  
+  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior_parameters = prior_parameters, with_derivatives = FALSE)
+  
+  expect_equal(dim(post_density), c(1, 1))
+  expect_equal(dim(attr(post_density, "gradient")), NULL)
+  expect_equal(dim(attr(post_density, "hessian")), NULL)
+  
+  expect_equal(round(post_density[1], 3), -226.666)
 }) 
 
 
