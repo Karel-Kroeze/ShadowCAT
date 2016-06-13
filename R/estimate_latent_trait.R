@@ -167,7 +167,7 @@ estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameter
   
   number_gridpoints <- function() {
     if (number_dimensions < 5) 
-      switch(number_dimensions, 50, 15, 6, 4)
+      switch(number_dimensions, 20, 15, 6, 4)
     else
       3
   }

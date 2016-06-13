@@ -177,10 +177,10 @@ test_that("estimator is expected_aposteriori, 1 dimension, 2 categories, normal 
   estimated_latent_trait_gauss_hermite <- estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, eap_estimation_procedure = "gauss_hermite_quad")
   estimated_latent_trait_riemann <- estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item,, eap_estimation_procedure = "riemannsum")
   
-  expect_equal(round(as.vector(estimated_latent_trait_gauss_hermite), 3), -.689)
+  expect_equal(round(as.vector(estimated_latent_trait_gauss_hermite), 3), -.695)
   expect_equal(round(as.vector(estimated_latent_trait_riemann), 3), -.689)
-  expect_equal(as.vector(round(attr(estimated_latent_trait_gauss_hermite, "variance"), 3)), .205)
-  expect_equal(as.vector(round(attr(estimated_latent_trait_riemann, "variance"), 3)), .205)
+  expect_equal(as.vector(round(attr(estimated_latent_trait_gauss_hermite, "variance"), 3)), .208)
+  expect_equal(as.vector(round(attr(estimated_latent_trait_riemann, "variance"), 3)), .204)
 })
 
 test_that("estimator is expected_aposteriori, 1 dimension, 2 categories, uniform", {
@@ -200,7 +200,7 @@ test_that("estimator is expected_aposteriori, 1 dimension, 2 categories, uniform
   prior_form = "uniform"
   prior_parameters = list(lower_bound = -3, upper_bound = 3)
   
-  estimated_latent_trait_riemann <- estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item,, eap_estimation_procedure = "riemannsum")
+  estimated_latent_trait_riemann <- estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, eap_estimation_procedure = "riemannsum")
   
   expect_equal(round(as.vector(estimated_latent_trait_riemann), 3), -.902)
   expect_equal(as.vector(round(attr(estimated_latent_trait_riemann, "variance"), 3)), .305)

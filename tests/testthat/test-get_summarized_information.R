@@ -381,7 +381,7 @@ test_that("First 1 item administered, information_summary is PEKL, one dimension
   
   expect_equal(length(item_information_normal), 50)
   expect_equal(round(item_information_normal[c(1:5, 35:38,47:50)], 3), c(.000, .122, .047, .025, .189, .064, .085, .057, .033, .159, .043, .066, .086))
-  expect_equal(round(item_information_uniform[c(1:5, 35:38,47:50)], 3), c(.000, 3.691, 2.137, .879, 4.892, 1.949, 2.423, 1.872, 1.127, 3.799, 1.432, 2.053, 2.443))
+  expect_equal(round(item_information_uniform[c(1:5, 35:38,47:50)], 3), c(.000, 3.692, 2.137, .879, 4.893, 1.949, 2.424, 1.872, 1.127, 3.800, 1.433, 2.053, 2.443))
 })
 
 

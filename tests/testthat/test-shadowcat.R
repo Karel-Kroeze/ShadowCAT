@@ -378,7 +378,7 @@ test_that("true theta is 2, estimator is expected_aposteriori, U(-1, 1) prior, w
   test_outcome_riemann <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, safe_eap = TRUE)
   
   # riemann
-  expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), .963)
+  expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), .959)
   expect_equal(as.vector(round(attr(test_outcome_riemann$estimate, "variance"), 3)), 0)
   expect_equal(length(test_outcome_riemann$answers), 100)
 })
