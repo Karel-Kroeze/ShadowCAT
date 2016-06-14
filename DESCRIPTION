@@ -14,14 +14,14 @@ License: COPYRIGHTED (until I figure out what license to use.)
 LazyData: true
 LinkingTo: Rcpp
 Imports:
-    Rcpp,
-    mvtnorm,
-    MultiGHQuad,
-    lpSolve,
-    matrixcalc,
-    Matrix,
-    stringr,
-    stats
+    Rcpp (>= 0.12.5),
+    mvtnorm (>= 1.0-5),
+    MultiGHQuad (>= 1.1),
+    lpSolve (>= 5.6.13),
+    matrixcalc(>= 1.0-3),
+    Matrix (>= 1.2-6),
+    stringr (>= 1.0.0),
+    stats (>= 3.3.0)
 Suggests:
     testthat (>= 0.8.1),
 RoxygenNote: 5.0.1
