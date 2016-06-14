@@ -80,6 +80,7 @@
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
 #' @return vector containing the updated estimate with the covariance matrix as attribute
 #' @importFrom MultiGHQuad init.quad eval.quad
+#' @importFrom stats nlm constrOptim
 estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, safe_eap = FALSE, eap_estimation_procedure = "riemannsum") {
   result <- function() {
     get_updated_estimate_and_variance_attribute()

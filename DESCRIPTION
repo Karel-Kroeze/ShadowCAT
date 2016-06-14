@@ -20,7 +20,8 @@ Imports:
     lpSolve,
     matrixcalc,
     Matrix,
-    stringr
+    stringr,
+    stats
 Suggests:
     testthat (>= 0.8.1),
 RoxygenNote: 5.0.1

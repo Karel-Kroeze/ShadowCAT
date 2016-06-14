@@ -12,6 +12,7 @@
 #' is the maximum number of itemsteps.
 #' @return List containing simulated alpha and beta matrix
 #' @importFrom stringr str_c
+#' @importFrom stats runif rnorm
 #' @export
 simulate_testbank <- function(model, number_items = 50, number_dimensions = 1, number_itemsteps = 4, items_load_one_dimension = FALSE, varying_number_item_steps = FALSE){
   result <- function() {
@@ -93,6 +94,7 @@ simulate_testbank <- function(model, number_items = 50, number_dimensions = 1, n
 #' @examples 
 #' item_bank <- simulate_testbank("GPCM")
 #' simulate_answer(theta = .3, model = "GPCM", alpha = item_bank$alpha, beta = item_bank$beta, guessing = NULL, item_keys = "item3")
+#' @importFrom stats runif
 #' @export
 simulate_answer <- function(theta, model, alpha, beta, guessing, item_keys) {
   indices <- match(item_keys, rownames(alpha))
