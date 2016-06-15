@@ -2,25 +2,25 @@
 #' 
 #' Simulate quick and simple itembanks. Only for testing purposess
 #' 
-#' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit,
-#'  sequential or graded response model respectively.
-#' @param number_items Number of items. May be increased if number_items / number_dimensions is not an integer.
+#' @param model Model for which the item bank should be simulated. String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit,
+#'  sequential or graded response model respectively. If model is 3PLM, number of item steps is forced to 1. 
+#' @param number_items Number of items.
 #' @param number_dimensions Number of dimensions.
 #' @param number_itemsteps Number of item steps (number of categories minus 1); forced to 1 if model is 3PLM.
 #' @param items_load_one_dimension If TRUE, force items to load on one dimension each.
 #' @param varying_number_item_steps If TRUE, some item steps are set to NA; in this case number_itemsteps 
 #' is the maximum number of itemsteps.
+#' @param alpha_bounds Vector containing lower and upperbound, respectively, of the uniform distribution from which the alpha values are drawn
 #' @return List containing simulated alpha and beta matrix
 #' @importFrom stringr str_c
 #' @importFrom stats runif rnorm
 #' @export
-simulate_testbank <- function(model, number_items = 50, number_dimensions = 1, number_itemsteps = 4, items_load_one_dimension = FALSE, varying_number_item_steps = FALSE){
+simulate_testbank <- function(model, number_items = 50, number_dimensions = 1, number_itemsteps = 4, items_load_one_dimension = FALSE, varying_number_item_steps = FALSE, alpha_bounds = c(.3, 1.5)) {
   result <- function() {
-    number_items <- get_number_items()
     number_itemsteps <- get_number_itemsteps()
-    alpha <- get_alpha(number_items, number_itemsteps)
+    alpha <- get_alpha(number_itemsteps)
     rownames(alpha) <- str_c("item", 1:number_items)
-    beta <- get_beta(number_items, number_itemsteps)
+    beta <- get_beta(number_itemsteps)
     rownames(beta) <- str_c("item", 1:number_items)
     list(alpha = alpha, beta = beta)
   }
@@ -32,25 +32,15 @@ simulate_testbank <- function(model, number_items = 50, number_dimensions = 1, n
       number_itemsteps
   }
   
-  get_number_items <- function() {
-    # make sure the number of items is divisible by the number of dimensions
-    ceiling(number_items / number_dimensions) * number_dimensions
+  get_alpha <- function(number_itemsteps) {
+    alpha <- matrix(runif(number_items * number_dimensions, alpha_bounds[1], alpha_bounds[2]), nrow = number_items, ncol = number_dimensions)
+    if (number_dimensions > 1 && items_load_one_dimension)
+      make_alpha_load_one_dimension(alpha = alpha)
+    else
+      alpha
   }
   
-  get_alpha <- function(number_items, number_itemsteps) {
-    alpha <- matrix(runif(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
-    if (number_dimensions > 1 && items_load_one_dimension) {
-      set <- number_items / number_dimensions
-      for (dimension in 1:number_dimensions)
-        alpha[((dimension - 1) * set + 1):(dimension * set), (1:number_dimensions)[-dimension]] <- 0
-      alpha
-    }
-    else {
-      alpha
-    }
-  }
-  
-  get_beta <- function(number_items, number_itemsteps) {
+  get_beta <- function(number_itemsteps) {
     beta_one_itemstep <- matrix(rnorm(number_items), nrow = number_items, ncol = 1)
     if (number_itemsteps == 1) {
       beta_one_itemstep
@@ -63,13 +53,22 @@ simulate_testbank <- function(model, number_items = 50, number_dimensions = 1, n
                                   else
                                     beta_multiple_itemsteps <- t(apply(beta_one_itemstep, 1, function(x) x + spread)) 
       if (varying_number_item_steps)
-        induce_varying_number_item_steps(beta_multiple_itemsteps = beta_multiple_itemsteps, number_items = number_items, number_itemsteps = number_itemsteps)
+        induce_varying_number_item_steps(beta_multiple_itemsteps = beta_multiple_itemsteps, number_itemsteps = number_itemsteps)
       else
         beta_multiple_itemsteps
     }  
   }
   
-  induce_varying_number_item_steps <- function(beta_multiple_itemsteps, number_items, number_itemsteps) {
+  make_alpha_load_one_dimension <- function(alpha) {
+    set_size <- ceiling(number_items / number_dimensions)
+    last_set_size <- number_items - (number_dimensions - 1) * set_size
+    for (dimension in 1:(number_dimensions - 1))
+      alpha[((dimension - 1) * set_size + 1):(dimension * set_size), (1:number_dimensions)[-dimension]] <- 0
+    alpha[((number_dimensions - 1) * set_size + 1):nrow(alpha), (1:number_dimensions)[-number_dimensions]] <- 0
+    alpha
+  }
+  
+  induce_varying_number_item_steps <- function(beta_multiple_itemsteps, number_itemsteps) {
     beta_multiple_itemsteps[sample(1:number_items, size = ceiling(number_items / 10)), number_itemsteps] <- NA
     if (number_itemsteps > 2)
       beta_multiple_itemsteps[sample(1:number_items, size = ceiling(number_items / 10)), (number_itemsteps - 1):number_itemsteps] <- NA

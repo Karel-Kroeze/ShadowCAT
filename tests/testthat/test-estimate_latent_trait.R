@@ -175,7 +175,7 @@ test_that("estimator is expected_aposteriori, 1 dimension, 2 categories, normal 
   prior_parameters = list(mu = 0, Sigma = diag(1))
   
   estimated_latent_trait_gauss_hermite <- estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, eap_estimation_procedure = "gauss_hermite_quad")
-  estimated_latent_trait_riemann <- estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item,, eap_estimation_procedure = "riemannsum")
+  estimated_latent_trait_riemann <- estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, eap_estimation_procedure = "riemannsum")
   
   expect_equal(round(as.vector(estimated_latent_trait_gauss_hermite), 3), -.695)
   expect_equal(round(as.vector(estimated_latent_trait_riemann), 3), -.689)

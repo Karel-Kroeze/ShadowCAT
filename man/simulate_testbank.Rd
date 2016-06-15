@@ -6,13 +6,13 @@
 \usage{
 simulate_testbank(model, number_items = 50, number_dimensions = 1,
   number_itemsteps = 4, items_load_one_dimension = FALSE,
-  varying_number_item_steps = FALSE)
+  varying_number_item_steps = FALSE, alpha_bounds = c(0.3, 1.5))
 }
 \arguments{
-\item{model}{String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit,
-sequential or graded response model respectively.}
+\item{model}{Model for which the item bank should be simulated. String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit,
+sequential or graded response model respectively. If model is 3PLM, number of item steps is forced to 1.}
 
-\item{number_items}{Number of items. May be increased if number_items / number_dimensions is not an integer.}
+\item{number_items}{Number of items.}
 
 \item{number_dimensions}{Number of dimensions.}
 
@@ -22,6 +22,8 @@ sequential or graded response model respectively.}
 
 \item{varying_number_item_steps}{If TRUE, some item steps are set to NA; in this case number_itemsteps 
 is the maximum number of itemsteps.}
+
+\item{alpha_bounds}{Vector containing lower and upperbound, respectively, of the uniform distribution from which the alpha values are drawn}
 }
 \value{
 List containing simulated alpha and beta matrix
