@@ -46,24 +46,31 @@ test_that("items load on one dimension and with varying number of item steps", {
 
 context("test simulate_answer")
 
-test_that("one dimension, one itemstep, no guessing, one answer", {
+test_that("one dimension, one itemstep, one answer", {
   alpha_beta <- with_random_seed(1, simulate_testbank)(model = "GPCM", number_items = 50, number_dimensions = 1, number_itemsteps = 1)
   answer <- with_random_seed(1, simulate_answer)(theta = 2, model = "GPCM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = NULL, item_keys = "item5")
   expect_equal(answer, 0)
 })
 
-test_that("three dimensions, four itemsteps, with guessing, one_answer", {
+test_that("three dimensions, four itemsteps, one_answer", {
   number_items <- 50
   alpha_beta <- with_random_seed(1, simulate_testbank)(model = "GPCM", number_items = number_items, number_dimensions = 3, number_itemsteps = 4)
-  guessing <- matrix(rep(.25, number_items), dimnames = list(str_c("item", 1:number_items)))
-  answer <- with_random_seed(1, simulate_answer)(theta = 2, model = "GPCM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = guessing, item_keys = "item5")
+  answer <- with_random_seed(1, simulate_answer)(theta = 2, model = "GPCM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = NULL, item_keys = "item5")
   expect_equal(answer, 3)
 })
 
-test_that("three dimensions, four itemsteps, with guessing, five answers", {
-  number_items <- 50
-  alpha_beta <- with_random_seed(1, simulate_testbank)(model = "GPCM", number_items = number_items, number_dimensions = 3, number_itemsteps = 4)
-  guessing <- matrix(rep(.25, number_items), dimnames = list(str_c("item", 1:number_items)))
-  answer <- with_random_seed(1, simulate_answer)(theta = 2, model = "GPCM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = guessing, item_keys = c("item5", "item2", "item8", "item1", "item18"))
+test_that("three dimensions, four itemsteps, five answers", {
+  alpha_beta <- with_random_seed(1, simulate_testbank)(model = "GPCM", number_items = 50, number_dimensions = 3, number_itemsteps = 4)
+  answer <- with_random_seed(1, simulate_answer)(theta = 2, model = "GPCM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = NULL, item_keys = c("item5", "item2", "item8", "item1", "item18"))
   expect_equal(answer, c(3, 3, 3, 4, 3))
 })
+
+test_that("with guessing", {
+  number_items <- 50
+  alpha_beta <- with_random_seed(1, simulate_testbank)(model = "3PLM", number_items = number_items, number_dimensions = 1, number_itemsteps = 1)
+  guessing <- matrix(rep(.25, number_items), dimnames = list(str_c("item", 1:number_items)))
+  answer <- with_random_seed(1, simulate_answer)(theta = 2, model = "3PLM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = guessing, item_keys = "item5")
+  expect_equal(answer, 1)
+})
+
+

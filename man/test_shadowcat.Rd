@@ -5,10 +5,10 @@
 \title{Simulate a testing routine with shadowcat}
 \usage{
 test_shadowcat(true_theta, prior_form, prior_parameters, model, alpha, beta,
-  guessing, eta, start_items, stop_test, estimator, information_summary,
-  constraints_and_characts = NULL, lower_bound = NULL, upper_bound = NULL,
-  safe_eap = FALSE, initital_estimate = rep(0, ncol(alpha)),
-  initial_variance = diag(ncol(alpha)) * 25,
+  guessing, eta = NULL, start_items, stop_test, estimator,
+  information_summary, constraints_and_characts = NULL, lower_bound = NULL,
+  upper_bound = NULL, safe_eap = FALSE, initital_estimate = rep(0,
+  ncol(alpha)), initial_variance = diag(ncol(alpha)) * 25,
   eap_estimation_procedure = "riemannsum")
 }
 \arguments{
@@ -70,5 +70,14 @@ List as returned by shadowcat after the last answer, with variance element turne
 }
 \description{
 Simulate a testing routine with shadowcat
+}
+\examples{
+# One dimension
+alpha_beta_one_dim <- simulate_testbank(model = "GPCM", number_items = 50, number_dimensions = 1, number_itemsteps = 3)
+test_shadowcat(true_theta = 2, prior_form = "normal", prior_parameters = list(mu = 0, Sigma = diag(1)), model = "SM", alpha = alpha_beta_one_dim$alpha, beta = alpha_beta_one_dim$beta, guessing = NULL, start_items = list(type = 'random', n = 3), stop_test = list(max_n = 20, target = 0.1), estimator = "maximum_aposteriori", information_summary = "posterior_determinant")
+
+# Three dimensions
+alpha_beta_three_dim <- simulate_testbank(model = "GPCM", number_items = 100, number_dimensions = 3, number_itemsteps = 3)
+test_shadowcat(true_theta = c(0, 1, -.5), prior_form = "normal", prior_parameters = list(mu = c(0, 0, 0), Sigma = diag(3)), model = "SM", alpha = alpha_beta_three_dim$alpha, beta = alpha_beta_three_dim$beta, guessing = NULL, start_items = list(type = 'random_by_dimension', n_by_dimension = 3, n = 9), stop_test = list(max_n = 60, target = c(.1, .1, .1)), estimator = "maximum_aposteriori", information_summary = "posterior_determinant")
 }
 

@@ -12,6 +12,8 @@
 #' is the maximum number of itemsteps.
 #' @param alpha_bounds Vector containing lower and upperbound, respectively, of the uniform distribution from which the alpha values are drawn
 #' @return List containing simulated alpha and beta matrix
+#' @examples simulate_testbank(model = "GPCM", number_items = 50, number_dimensions = 2, number_itemsteps = 3)
+#' simulate_testbank(model = "GPCM", number_items = 50, number_dimensions = 3, number_itemsteps = 4, items_load_one_dimension = TRUE, varying_number_item_steps = TRUE)
 #' @importFrom stringr str_c
 #' @importFrom stats runif rnorm
 #' @export
@@ -91,8 +93,17 @@ simulate_testbank <- function(model, number_items = 50, number_dimensions = 1, n
 #' @param item_keys Character vector of item keys for which answers should be simulated.
 #' @return Vector with responses
 #' @examples 
-#' item_bank <- simulate_testbank(model = "GPCM")
-#' simulate_answer(theta = .3, model = "GPCM", alpha = item_bank$alpha, beta = item_bank$beta, guessing = NULL, item_keys = "item3")
+#' alpha_beta <- simulate_testbank(model = "3PLM", number_items = 50)
+#' guessing <- matrix(rep(.2, 50), dimnames = list(rownames(alpha_beta$alpha), NULL))
+#' 
+#' # Without guessing parameter
+#' simulate_answer(theta = .3, model = "3PLM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = NULL, item_keys = "item3")
+#' 
+#' # With guessing parameter
+#' simulate_answer(theta = .3, model = "3PLM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = guessing, item_keys = "item3")
+#' 
+#' # Simulate answers for more than one item
+#' simulate_answer(theta = .3, model = "3PLM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = NULL, item_keys = c("item5", "item2", "item8", "item1", "item18"))
 #' @importFrom stats runif
 #' @export
 simulate_answer <- function(theta, model, alpha, beta, guessing, item_keys) {
@@ -156,8 +167,16 @@ simulate_answer <- function(theta, model, alpha, beta, guessing, item_keys) {
 #' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori. One of "riemannsum" for integration via Riemannsum or
 #' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
 #' @return List as returned by shadowcat after the last answer, with variance element turned into matrix
+#' @examples 
+#' # One dimension
+#' alpha_beta_one_dim <- simulate_testbank(model = "GPCM", number_items = 50, number_dimensions = 1, number_itemsteps = 3)
+#' test_shadowcat(true_theta = 2, prior_form = "normal", prior_parameters = list(mu = 0, Sigma = diag(1)), model = "SM", alpha = alpha_beta_one_dim$alpha, beta = alpha_beta_one_dim$beta, guessing = NULL, start_items = list(type = 'random', n = 3), stop_test = list(max_n = 20, target = 0.1), estimator = "maximum_aposteriori", information_summary = "posterior_determinant")
+#' 
+#' # Three dimensions
+#' alpha_beta_three_dim <- simulate_testbank(model = "GPCM", number_items = 100, number_dimensions = 3, number_itemsteps = 3)
+#' test_shadowcat(true_theta = c(0, 1, -.5), prior_form = "normal", prior_parameters = list(mu = c(0, 0, 0), Sigma = diag(3)), model = "SM", alpha = alpha_beta_three_dim$alpha, beta = alpha_beta_three_dim$beta, guessing = NULL, start_items = list(type = 'random_by_dimension', n_by_dimension = 3, n = 9), stop_test = list(max_n = 60, target = c(.1, .1, .1)), estimator = "maximum_aposteriori", information_summary = "posterior_determinant")
 #' @export
-test_shadowcat <- function(true_theta, prior_form, prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints_and_characts = NULL, lower_bound = NULL, upper_bound = NULL, safe_eap = FALSE, initital_estimate = rep(0, ncol(alpha)), initial_variance = diag(ncol(alpha)) * 25, eap_estimation_procedure = "riemannsum") {
+test_shadowcat <- function(true_theta, prior_form, prior_parameters, model, alpha, beta, guessing, eta = NULL, start_items, stop_test, estimator, information_summary, constraints_and_characts = NULL, lower_bound = NULL, upper_bound = NULL, safe_eap = FALSE, initital_estimate = rep(0, ncol(alpha)), initial_variance = diag(ncol(alpha)) * 25, eap_estimation_procedure = "riemannsum") {
   answers <- NULL
   next_item_and_test_outcome <- shadowcat(answers = answers, estimate = initital_estimate, variance = as.vector(initial_variance), model = model, alpha = alpha, beta = beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters, guessing = guessing, eta = eta, constraints_and_characts = constraints_and_characts, lower_bound = lower_bound, upper_bound = upper_bound, safe_eap = safe_eap, eap_estimation_procedure = eap_estimation_procedure)
   
@@ -167,7 +186,7 @@ test_shadowcat <- function(true_theta, prior_form, prior_parameters, model, alph
     next_item_and_test_outcome <- shadowcat(answers = as.list(next_item_and_test_outcome$answers), estimate = next_item_and_test_outcome$estimate, variance = next_item_and_test_outcome$variance, model = model, alpha = alpha, beta = beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters, guessing = guessing, eta = eta, constraints_and_characts = constraints_and_characts, lower_bound = lower_bound, upper_bound = upper_bound, safe_eap = safe_eap, eap_estimation_procedure = eap_estimation_procedure)  
   }
   
-  attr(next_item_and_test_outcome$estimate, "variance") <- matrix(next_item_and_test_outcome$variance, ncol = ncol(alpha))
+  next_item_and_test_outcome$variance <- matrix(next_item_and_test_outcome$variance, ncol = ncol(alpha))
   next_item_and_test_outcome
 }
 

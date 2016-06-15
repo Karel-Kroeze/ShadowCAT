@@ -109,11 +109,11 @@ run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categ
                       
                       if (return_administered_item_indices)
                         c("estimated_theta" = estimate_theta$estimate,
-                          "variance_estimate" = attr(estimate_theta$estimate, "variance"),
+                          "variance_estimate" = estimate_theta$variance,
                           "items_administered" = as.numeric(sapply(names(estimate_theta$answers), substring, 5)))
                       else
                         c("estimated_theta" = estimate_theta$estimate,
-                          "variance_estimate" =  attr(estimate_theta$estimate, "variance"))               
+                          "variance_estimate" =  estimate_theta$variance)               
                     })
 }
 
@@ -146,7 +146,7 @@ test_that("true theta is 2, estimator is maximum_aposteriori, N(0, 5) prior", {
   test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form, prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), 1.938)
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), .113)
+  expect_equal(as.vector(round(test_outcome$variance, 3)), .113)
   expect_equal(length(test_outcome$answers), 100)
 })
 
@@ -177,7 +177,7 @@ test_that("true theta is 2, estimator is maximum_aposteriori, N(-1, 1) prior", {
   test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form, prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), 1.494)
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), .089)
+  expect_equal(as.vector(round(test_outcome$variance, 3)), .089)
   expect_equal(length(test_outcome$answers), 100)
 })
 
@@ -208,7 +208,7 @@ test_that("true theta is 2, estimator is maximum_aposteriori, U(-1, 1) prior", {
   test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form, prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), 1)
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), .087)
+  expect_equal(as.vector(round(test_outcome$variance, 3)), .087)
   expect_equal(length(test_outcome$answers), 100)
 })
 
@@ -238,7 +238,7 @@ test_that("true theta is 2, estimator is maximum_likelihood", {
   test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = NULL, prior_parameters = NULL, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, lower_bound = lower_bound, upper_bound = upper_bound)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), 2.169)
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), .129)
+  expect_equal(as.vector(round(test_outcome$variance, 3)), .129)
   expect_equal(length(test_outcome$answers), 100) 
 })
 
@@ -272,12 +272,12 @@ test_that("true theta is 2, estimator is expected_aposteriori, N(0, 5) prior", {
   
   # gauss hermite
   expect_equal(as.vector(round(test_outcome_gauss_hermite$estimate, 3)), 1.833)
-  expect_equal(as.vector(round(attr(test_outcome_gauss_hermite$estimate, "variance"), 3)), .087)
+  expect_equal(as.vector(round(test_outcome_gauss_hermite$variance, 3)), .087)
   expect_equal(length(test_outcome_gauss_hermite$answers), 100)
   
   # riemann
   expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), 1.833)
-  expect_equal(as.vector(round(attr(test_outcome_riemann$estimate, "variance"), 3)), .087)
+  expect_equal(as.vector(round(test_outcome_riemann$variance, 3)), .087)
   expect_equal(length(test_outcome_riemann$answers), 100)
 })
 
@@ -310,12 +310,12 @@ test_that("true theta is 2, estimator is expected_aposteriori, N(-1, 1) prior", 
   
   # gauss hermite
   expect_equal(as.vector(round(test_outcome_gauss_hermite$estimate, 3)), 1.522)
-  expect_equal(as.vector(round(attr(test_outcome_gauss_hermite$estimate, "variance"), 3)), .072)
+  expect_equal(as.vector(round(test_outcome_gauss_hermite$variance, 3)), .072)
   expect_equal(length(test_outcome_gauss_hermite$answers), 100)
   
   # riemann
   expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), 1.522)
-  expect_equal(as.vector(round(attr(test_outcome_riemann$estimate, "variance"), 3)), .072)
+  expect_equal(as.vector(round(test_outcome_riemann$variance, 3)), .072)
   expect_equal(length(test_outcome_riemann$answers), 100)
 })
 
@@ -347,7 +347,7 @@ test_that("true theta is 2, estimator is expected_aposteriori, U(-4, 4) prior", 
   
   # riemann
   expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), 2.283)
-  expect_equal(as.vector(round(attr(test_outcome_riemann$estimate, "variance"), 3)), .112)
+  expect_equal(as.vector(round(test_outcome_riemann$variance, 3)), .112)
   expect_equal(length(test_outcome_riemann$answers), 100)
 })
 
@@ -379,7 +379,7 @@ test_that("true theta is 2, estimator is expected_aposteriori, U(-1, 1) prior, w
   
   # riemann
   expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), .959)
-  expect_equal(as.vector(round(attr(test_outcome_riemann$estimate, "variance"), 3)), 0)
+  expect_equal(as.vector(round(test_outcome_riemann$variance, 3)), 0)
   expect_equal(length(test_outcome_riemann$answers), 100)
 })
 
@@ -415,7 +415,7 @@ test_that("true theta is 1, 0, 2, estimator is maximum_aposteriori, N(c(0,0,0), 
   test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.841, -.123, 1.947))
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.064, .000, .000))
+  expect_equal(as.vector(round(test_outcome$variance, 3))[1:3],c(.064, .000, .000))
   expect_equal(length(test_outcome$answers), 300)
 })
 
@@ -451,7 +451,7 @@ test_that("true theta is 1, 0, 2, estimator is maximum_aposteriori, N(c(-1,2,-2)
   test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.672, .219, 1.682))
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.059, .000, .000))
+  expect_equal(as.vector(round(test_outcome$variance, 3))[1:3],c(.059, .000, .000))
   expect_equal(length(test_outcome$answers), 300)
 })
 
@@ -487,8 +487,8 @@ test_that("true theta is 1, 0, 2, estimator is maximum_aposteriori, U(c(-1, -1, 
   test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.677, .059, 1.000))
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.063, .000, .000))
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[7:9],c(.000, .000, .068))
+  expect_equal(as.vector(round(test_outcome$variance, 3))[1:3],c(.063, .000, .000))
+  expect_equal(as.vector(round(test_outcome$variance, 3))[7:9],c(.000, .000, .068))
   expect_equal(length(test_outcome$answers), 300)
 })
 
@@ -521,14 +521,14 @@ test_that("true theta is 1, 0, 2, estimator is maximum_likelihood", {
   test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = NULL, prior_parameters = NULL, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.985, .019, 2.024))
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.066, .000, .000))
+  expect_equal(as.vector(round(test_outcome$variance, 3))[1:3],c(.066, .000, .000))
   expect_equal(length(test_outcome$answers), 300)
   
   # defining prior has no effect on outcome
   test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = "normal", prior_parameters = list(mu = c(0, 0, 0), Sigma = diag(number_dimensions) * 2), model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.985, .019, 2.024))
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.066, .000, .000))
+  expect_equal(as.vector(round(test_outcome$variance, 3))[1:3],c(.066, .000, .000))
   expect_equal(length(test_outcome$answers), 300)  
 })
 
@@ -565,12 +565,12 @@ test_that("true theta is 1, 0, 2, estimator is expected_aposteriori, N(c(0, 0, 0
   
   # gauss hermite
   expect_equal(as.vector(round(test_outcome_gauss_hermite$estimate, 3)), c(.878, .305, 1.455))
-  expect_equal(as.vector(round(attr(test_outcome_gauss_hermite$estimate, "variance"), 3))[1:3],c(.065, .000, .000))
+  expect_equal(as.vector(round(test_outcome_gauss_hermite$variance, 3))[1:3],c(.065, .000, .000))
   expect_equal(length(test_outcome_gauss_hermite$answers), 300)
   
   # riemann
   expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), c(.649, .073, 1.660))
-  expect_equal(as.vector(round(attr(test_outcome_riemann$estimate, "variance"), 3))[1:3],c(.064, .000, .000))
+  expect_equal(as.vector(round(test_outcome_riemann$variance, 3))[1:3],c(.064, .000, .000))
   expect_equal(length(test_outcome_riemann$answers), 300)
 })
 
@@ -607,12 +607,12 @@ test_that("true theta is 1, 0, 2, estimator is expected_aposteriori, N(c(-1, 1, 
   
   # gauss hermite
   expect_equal(as.vector(round(test_outcome_gauss_hermite$estimate, 3)), c(.583, .131, 1.609))
-  expect_equal(as.vector(round(attr(test_outcome_gauss_hermite$estimate, "variance"), 3))[1:3],c(.059, .000, .000))
+  expect_equal(as.vector(round(test_outcome_gauss_hermite$variance, 3))[1:3],c(.059, .000, .000))
   expect_equal(length(test_outcome_gauss_hermite$answers), 300)
   
   # riemann
   expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), c(.627, .206, 1.697))
-  expect_equal(as.vector(round(attr(test_outcome_riemann$estimate, "variance"), 3))[1:3],c(.061, .000, .000))
+  expect_equal(as.vector(round(test_outcome_riemann$variance, 3))[1:3],c(.061, .000, .000))
   expect_equal(length(test_outcome_riemann$answers), 300)
 })
 
@@ -648,7 +648,7 @@ test_that("true theta is 1, 0, 2, estimator is expected_aposteriori, U(c(-4, -4,
   
   # riemann
   expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), c(1.067, .196, 1.987))
-  expect_equal(as.vector(round(attr(test_outcome_riemann$estimate, "variance"), 3))[1:3],c(.068, .000, .000))
+  expect_equal(as.vector(round(test_outcome_riemann$variance, 3))[1:3],c(.068, .000, .000))
   expect_equal(length(test_outcome_riemann$answers), 300)
 })
 
@@ -684,8 +684,8 @@ test_that("true theta is 1, 0, 2, estimator is expected_aposteriori, U(c(-1, -1,
   
   # riemann
   expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), c(.876, -.349, .939))
-  expect_equal(as.vector(round(attr(test_outcome_riemann$estimate, "variance"), 3))[1:3],c(.000, .000, .000))
-  expect_equal(as.vector(round(attr(test_outcome_riemann$estimate, "variance"), 3))[7:9],c(.000, .000, .000))
+  expect_equal(as.vector(round(test_outcome_riemann$variance, 3))[1:3],c(.000, .000, .000))
+  expect_equal(as.vector(round(test_outcome_riemann$variance, 3))[7:9],c(.000, .000, .000))
   expect_equal(length(test_outcome_riemann$answers), 300)
 })
 
@@ -719,7 +719,7 @@ test_that("items load on three dimensions", {
   test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.454, .719, 1.745))
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.178, -.088, -.081))
+  expect_equal(as.vector(round(test_outcome$variance, 3))[1:3],c(.178, -.088, -.081))
   expect_equal(length(test_outcome$answers), 300)
 })
 
@@ -754,7 +754,7 @@ test_that("true theta is 2, 2, 2", {
   test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(2.287, 1.825, 1.672))
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.11, .000, .000))
+  expect_equal(as.vector(round(test_outcome$variance, 3))[1:3],c(.11, .000, .000))
   expect_equal(length(test_outcome$answers), 300)
 })
 
@@ -803,7 +803,7 @@ test_that("with constraints max_n 260", {
   number_somatic_items <- sum(indices_administered > 200)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(-1.900, 0.949, 1.724))
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3], c(.104, .000, .000))
+  expect_equal(as.vector(round(test_outcome$variance, 3))[1:3], c(.104, .000, .000))
   expect_equal(length(test_outcome$answers), 260)
   expect_equal(number_depression_items, 75)
   expect_equal(number_anxiety_items, 95)
@@ -855,7 +855,7 @@ test_that("with constraints max_n 130", {
   number_somatic_items <- sum(indices_administered > 200)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(-2.303, .774, 1.822))
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3], c(.146, .000, .000))
+  expect_equal(as.vector(round(test_outcome$variance, 3))[1:3], c(.146, .000, .000))
   expect_equal(length(test_outcome$answers), 130)
   expect_equal(number_depression_items, 50)
   expect_equal(number_anxiety_items, 5)
@@ -893,7 +893,7 @@ test_that("start n is zero, no constraints", {
   test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, initital_estimate = rep(.2, number_dimensions), initial_variance = diag(number_dimensions) * 20)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(1.114, -0.018, 1.725))
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.068, .000, .000))
+  expect_equal(as.vector(round(test_outcome$variance, 3))[1:3],c(.068, .000, .000))
   expect_equal(length(test_outcome$answers), 300)
 })
 
@@ -942,7 +942,7 @@ test_that("start n is zero, with constraints", {
   number_somatic_items <- sum(indices_administered > 200)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(-1.975, .897, 2.496))
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3))[1:3],c(.122, .000, .000))
+  expect_equal(as.vector(round(test_outcome$variance, 3))[1:3],c(.122, .000, .000))
   expect_equal(length(test_outcome$answers), 130)
   expect_equal(number_depression_items, 50)
   expect_equal(number_anxiety_items, 5)
@@ -978,7 +978,7 @@ test_that("stop rule is number of items", {
   test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), .405)
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), .315)
+  expect_equal(as.vector(round(test_outcome$variance, 3)), .315)
   expect_equal(names(test_outcome$answers), str_c("item", c(10, 30, 48, 7, 24, 5, 17, 6, 45, 47)))
   expect_equal(unname(unlist(test_outcome$answers)), c(1, 0, 1, 1, 0, 1, 0, 1, 0, 1))
 })
@@ -1010,7 +1010,7 @@ test_that("stop rule is variance", {
   test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), 0.329)
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), 0.47)
+  expect_equal(as.vector(round(test_outcome$variance, 3)), 0.47)
   expect_equal(names(test_outcome$answers), str_c("item", c(10, 30, 48, 7, 24, 5, 17)))
   expect_equal(unname(unlist(test_outcome$answers)), c(1, 0, 1, 1, 0, 1, 0))
 })
@@ -1046,7 +1046,7 @@ test_that("items that load on finished dimensions are not administered", {
   item_numbers <- sapply(names(test_outcome$answers), function(item) { as.numeric(substr(x = item, start = 5, stop = nchar(item))) })
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(-.635, .487, .482))
-  expect_equal(diag(round(attr(test_outcome$estimate, "variance"), 3)), c(.250, .221, 1.754))
+  expect_equal(diag(round(test_outcome$variance, 3)), c(.250, .221, 1.754))
   expect_equal(all(item_numbers[9:100] > 100), TRUE)
 })
 
@@ -1078,7 +1078,7 @@ test_that("stop rule is variance and minimum number of items is taken into accou
   test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), 0.405)
-  expect_equal(as.vector(round(attr(test_outcome$estimate, "variance"), 3)), .315)
+  expect_equal(as.vector(round(test_outcome$variance, 3)), .315)
   expect_equal(names(test_outcome$answers), str_c("item", c(10, 30, 48, 7, 24, 5, 17, 6, 45, 47)))
   expect_equal(unname(unlist(test_outcome$answers)), c(1, 0, 1, 1, 0, 1, 0, 1, 0, 1))
 })
@@ -1114,7 +1114,7 @@ test_that("stop rule is cutoff", {
   test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.088, .047, -6.075))
-  expect_equal(diag(round(attr(test_outcome$estimate, "variance"), 3)), c(.214, .223, 5.241))
+  expect_equal(diag(round(test_outcome$variance, 3)), c(.214, .223, 5.241))
   expect_equal(length(test_outcome$answers), 32)
 })
 

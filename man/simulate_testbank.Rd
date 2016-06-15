@@ -31,4 +31,8 @@ List containing simulated alpha and beta matrix
 \description{
 Simulate quick and simple itembanks. Only for testing purposess
 }
+\examples{
+simulate_testbank(model = "GPCM", number_items = 50, number_dimensions = 2, number_itemsteps = 3)
+simulate_testbank(model = "GPCM", number_items = 50, number_dimensions = 3, number_itemsteps = 4, items_load_one_dimension = TRUE, varying_number_item_steps = TRUE)
+}
 
