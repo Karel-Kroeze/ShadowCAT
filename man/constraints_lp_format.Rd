@@ -36,8 +36,9 @@ Characteristics may be categorical or numeric.
 \code{name} the column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as \code{name/value},
 where \code{name} is the column name of the characteristic and \code{value} is the specific level of the characteristic this constraint applies to. 
 \code{op} the logical operator to be used. Valid options are "<", "=", ">" and "><".
-\code{target} the target value, numeric. It indicates the number of items of the relevant characteristic that should be administered ("="), or
-minimally (">"), maximally ("<"), or minimally and maximally ("><"; vector with two values required) administered.
+\code{target} the target value, numeric. For categorical characteristics, it indicates the number of items of the relevant characteristic that should be administered ("="), or
+minimally (">"), maximally ("<"), or minimally and maximally ("><"; vector with two values required) administered. For numeric characteristics,
+it indicates the minimum and/or maximum sum allowed over all administered items, e.g., maximum time allowed.
 }
 
 \section{Return object}{

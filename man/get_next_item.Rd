@@ -13,9 +13,9 @@ get_next_item(start_items, information_summary, lp_constraints, lp_characters,
 \arguments{
 \item{start_items}{items that are shown to the patient before adaptive proces starts; one of
 list(type = 'random', n)
-list(type = 'fixed', indices, n)
+list(type = 'fixed', item_keys, n)
 list(type = 'random_by_dimension', n_by_dimension, n)
-where n = total number of initial items, indices = vector of initial item indices, 
+where n = total number of initial items, item_keys = character vector with keys of initial items, 
 n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension}
 
 \item{information_summary}{called "objective" by Kroeze; how to summarize information; one of

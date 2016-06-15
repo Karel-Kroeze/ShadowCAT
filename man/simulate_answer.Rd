@@ -26,8 +26,8 @@ Vector with responses
 Simulates answer on specified items, given true theta. Only for testing purposes
 }
 \examples{
-alpha_beta <- simulate_testbank(model = "3PLM", number_items = 50)
-guessing <- matrix(rep(.2, 50), dimnames = list(rownames(alpha_beta$alpha), NULL))
+alpha_beta <- simulate_testbank(model = "3PLM", number_items = 50, number_dimensions = 1, number_itemsteps = 1)
+guessing <- matrix(rep(.5, 50), dimnames = list(rownames(alpha_beta$alpha), NULL))
 
 # Without guessing parameter
 simulate_answer(theta = .3, model = "3PLM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = NULL, item_keys = "item3")

@@ -93,8 +93,8 @@ simulate_testbank <- function(model, number_items = 50, number_dimensions = 1, n
 #' @param item_keys Character vector of item keys for which answers should be simulated.
 #' @return Vector with responses
 #' @examples 
-#' alpha_beta <- simulate_testbank(model = "3PLM", number_items = 50)
-#' guessing <- matrix(rep(.2, 50), dimnames = list(rownames(alpha_beta$alpha), NULL))
+#' alpha_beta <- simulate_testbank(model = "3PLM", number_items = 50, number_dimensions = 1, number_itemsteps = 1)
+#' guessing <- matrix(rep(.5, 50), dimnames = list(rownames(alpha_beta$alpha), NULL))
 #' 
 #' # Without guessing parameter
 #' simulate_answer(theta = .3, model = "3PLM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = NULL, item_keys = "item3")
@@ -144,7 +144,7 @@ simulate_answer <- function(theta, model, alpha, beta, guessing, item_keys) {
 #' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others. See \code{shadowcat} for details.
 #' @param start_items List indicating the items that are shown to the respondent before adaptive proces starts. One of
 #' list(type = 'random', n)
-#' list(type = 'fixed', indices, n)
+#' list(type = 'fixed', item_keys, n)
 #' list(type = 'random_by_dimension', n_by_dimension, n)
 #' See \code{shadowcat} for details.
 #' @param stop_test List indicating rules for when to stop providing new items to respondent. Should be of the form
@@ -174,7 +174,7 @@ simulate_answer <- function(theta, model, alpha, beta, guessing, item_keys) {
 #' 
 #' # Three dimensions
 #' alpha_beta_three_dim <- simulate_testbank(model = "GPCM", number_items = 100, number_dimensions = 3, number_itemsteps = 3)
-#' test_shadowcat(true_theta = c(0, 1, -.5), prior_form = "normal", prior_parameters = list(mu = c(0, 0, 0), Sigma = diag(3)), model = "SM", alpha = alpha_beta_three_dim$alpha, beta = alpha_beta_three_dim$beta, guessing = NULL, start_items = list(type = 'random_by_dimension', n_by_dimension = 3, n = 9), stop_test = list(max_n = 60, target = c(.1, .1, .1)), estimator = "maximum_aposteriori", information_summary = "posterior_determinant")
+#' test_shadowcat(true_theta = c(0, 1, -.5), prior_form = "normal", prior_parameters = list(mu = c(0, 0, 0), Sigma = diag(3)), model = "SM", alpha = alpha_beta_three_dim$alpha, beta = alpha_beta_three_dim$beta, guessing = NULL, start_items = list(type = 'random', n = 3), stop_test = list(max_n = 60, target = c(.1, .1, .1)), estimator = "maximum_aposteriori", information_summary = "posterior_determinant")
 #' @export
 test_shadowcat <- function(true_theta, prior_form, prior_parameters, model, alpha, beta, guessing, eta = NULL, start_items, stop_test, estimator, information_summary, constraints_and_characts = NULL, lower_bound = NULL, upper_bound = NULL, safe_eap = FALSE, initital_estimate = rep(0, ncol(alpha)), initial_variance = diag(ncol(alpha)) * 25, eap_estimation_procedure = "riemannsum") {
   answers <- NULL

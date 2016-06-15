@@ -32,9 +32,9 @@ More flexibility in Beta parameters might be added in future versions.}
 
 \item{start_items}{List indicating the items that are shown to the respondent before adaptive proces starts; one of
 list(type = 'random', n)
-list(type = 'fixed', indices, n)
+list(type = 'fixed', item_keys, n)
 list(type = 'random_by_dimension', n_by_dimension, n)
-where n = total number of initial items, indices = vector of initial item indices, 
+where n = total number of initial items, item_keys = character vector with keys of initial items, 
 n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
 If n is 0, only n needs to be defined
 'random_by_dimension' assumes that items load on a single dimension, if any item has a non-zero loading on a dimension, it is considered to be part of that dimension.}
@@ -57,12 +57,12 @@ NULL means no cut off values}
 "posterior_trace": compute trace(info_sofar_QxQ_plus_prior_information + info_QxQ_k) for each yet available item k
 "posterior_expected_kullback_leibler" = compute Posterior expected Kullback-Leibler Information}
 
-\item{prior_form}{String indicating the form of the prior; one of "normal" or "uniform"}
+\item{prior_form}{String indicating the form of the prior; one of "normal" or "uniform". Not required if estimator is maximum_likelihood}
 
 \item{prior_parameters}{List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...), or 
-the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
-be in matrix form. The length of lower_bound and upper_bound should be equal to the number of dimensions.
-For uniform prior in combination with expected eposteriori estimation, true theta should fall within 
+the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). . Not required if estimator is maximum_likelihood.
+Sigma should always be in matrix form. The length of lower_bound and upper_bound should be equal to the number of dimensions.
+For uniform prior in combination with expected aposteriori estimation, true theta should fall within 
 lower_bound and upper_bound and be not too close to one of these bounds. Setting the function argument safe_eap to TRUE
 ensures that the estimation switches to maximum aposteriori if the expected aposteriori estimate fails.}
 
@@ -100,5 +100,46 @@ updated estimate of theta, updated covariance matrix of theta converted to a vec
 \description{
 Returns a list with the key of the next item to be administered given a new answer,
 an updated estimate of theta, updated covariance matrix of theta converted to a vector, and the answers to the administered items
+}
+\examples{
+alpha_beta <- simulate_testbank(model = "GPCM", number_items = 100, number_dimensions = 3, number_itemsteps = 3)
+model <- "GPCM"
+start_items <- list(type = 'fixed', item_keys = c("item33", "item5", "item23"), n = 3)
+stop_test <- list(min_n = 4, max_n = 30, target = c(.1, .1, .1))
+estimator <- "maximum_aposteriori"
+information_summary <- "posterior_determinant"
+prior_form <- "normal"
+prior_parameters <- list(mu = c(0, 0, 0), Sigma = diag(3))
+
+# Initial call: get key of first item to adminster
+call1 <- shadowcat(answers = NULL, estimate = c(0, 0, 0), variance = as.vector(diag(3) * 25), model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters)
+# Second to fourth call: number of start items is set to 3, so no update in theta estimate yet
+call2 <- shadowcat(answers = list(item33 = 2), estimate = call1$estimate, variance = call1$variance, model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters)
+call3 <- shadowcat(answers = list(item33 = 2, item5 = 3), estimate = call2$estimate, variance = call2$variance, model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters)
+call4 <- shadowcat(answers = list(item33 = 2, item5 = 3, item23 = 3), estimate = call3$estimate, variance = call3$variance, model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters)
+# Fifth call: first time theta estimate is updated
+call5 <- shadowcat(answers = list(item33 = 2, item5 = 3, item23 = 3, item84 = 1), estimate = call4$estimate, variance = call4$variance, model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters)
+# Sixth call: use the updated estimate and variance as the current values for estimate and variance
+call6 <- shadowcat(answers = list(item33 = 2, item5 = 3, item23 = 3, item84 = 1, item36 = 2), estimate = call5$estimate, variance = call5$variance, model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters)
+
+# With constraints
+
+constraints_and_characteristics <- list(characteristics = data.frame(content = sample(c('algebra','physics','calculus'), size = 100, replace = TRUE),
+                                                                     time = runif(100),
+                                                                     exclusive = sapply(1:100, FUN = function (x) { if (x \%in\% sample(1:100, size = 4)) 1 else 0 })),
+                                        constraints = list(list(name = 'content/algebra',
+                                                                op = '><',
+                                                                target = c(5, 10)), # ensure number of algebra items is between 5 and 10
+                                                           list(name = 'content/physics',
+                                                                op = '><',
+                                                                target = c(2, 5)), # ensure number of physics items is between 2 and 5
+                                                           list(name = 'time',
+                                                                op = '<',
+                                                                target = 20), # Ensure total tests takes no longer than 20 minutes
+                                                           list(name = 'exclusive',
+                                                                op = '<',
+                                                                target = 2))) # Ensure number of exclusive items equals 2
+                                                             
+shadowcat(answers = NULL, estimate = c(0, 0, 0), variance = as.vector(diag(3) * 25), model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters, constraints_and_characts = constraints_and_characteristics)
 }
 
