@@ -79,19 +79,19 @@ simulate_testbank <- function(model, number_items = 50, number_dimensions = 1, n
 }
 
 
-#' Simulates answers
+#' Simulates answer
 #' 
-#' Simulates answers on specified items, given true theta. Only for testing purposes
+#' Simulates answer on specified items, given true theta. Only for testing purposes
 #' 
 #' @param theta Vector with true theta.
-#' @param model One of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
+#' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
 #' @param alpha Matrix of alpha parameters. See \code{shadowcat} for details.
 #' @param beta Matrix of beta parameters, one column per item step, one row per item. See \code{shadowcat} for details.
 #' @param guessing One column matrix of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.
 #' @param item_keys Character vector of item keys for which answers should be simulated.
 #' @return Vector with responses
 #' @examples 
-#' item_bank <- simulate_testbank("GPCM")
+#' item_bank <- simulate_testbank(model = "GPCM")
 #' simulate_answer(theta = .3, model = "GPCM", alpha = item_bank$alpha, beta = item_bank$beta, guessing = NULL, item_keys = "item3")
 #' @importFrom stats runif
 #' @export
@@ -105,7 +105,7 @@ simulate_answer <- function(theta, model, alpha, beta, guessing, item_keys) {
     random_numbers <- runif(length(indices))
     
     # answer is the number of categories that have a cumulative probability smaller than random_numbers
-    apply(random_numbers > cumulative_probabilities, 1, sum, na.rm=TRUE)
+    apply(random_numbers > cumulative_probabilities, 1, sum, na.rm = TRUE)
   }
   
   get_guessing <- function() {

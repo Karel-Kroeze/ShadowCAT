@@ -2,14 +2,14 @@
 % Please edit documentation in R/simulate_functions.R
 \name{simulate_answer}
 \alias{simulate_answer}
-\title{Simulates answers}
+\title{Simulates answer}
 \usage{
 simulate_answer(theta, model, alpha, beta, guessing, item_keys)
 }
 \arguments{
 \item{theta}{Vector with true theta.}
 
-\item{model}{One of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
+\item{model}{String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
 
 \item{alpha}{Matrix of alpha parameters. See \code{shadowcat} for details.}
 
@@ -23,10 +23,10 @@ simulate_answer(theta, model, alpha, beta, guessing, item_keys)
 Vector with responses
 }
 \description{
-Simulates answers on specified items, given true theta. Only for testing purposes
+Simulates answer on specified items, given true theta. Only for testing purposes
 }
 \examples{
-item_bank <- simulate_testbank("GPCM")
+item_bank <- simulate_testbank(model = "GPCM")
 simulate_answer(theta = .3, model = "GPCM", alpha = item_bank$alpha, beta = item_bank$beta, guessing = NULL, item_keys = "item3")
 }
 
