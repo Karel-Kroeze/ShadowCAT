@@ -12,64 +12,57 @@ test_shadowcat(true_theta, prior_form, prior_parameters, model, alpha, beta,
   eap_estimation_procedure = "riemannsum")
 }
 \arguments{
-\item{true_theta}{True theta value or vector}
+\item{true_theta}{True theta value or vector.}
 
-\item{prior_form}{String indicating the form of the prior; one of "normal" or "uniform"}
+\item{prior_form}{String indicating the form of the prior; one of \code{"normal"} or \code{"uniform"}. Not required if estimator is maximum likelihood.}
 
-\item{prior_parameters}{List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...), or 
-the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
-be in matrix form. The length of lower_bound and upper_bound should be equal to the number of dimensions}
+\item{prior_parameters}{List containing mu and Sigma of the normal prior: \code{list(mu = ..., Sigma = ...)}, or 
+the upper and lower bound of the uniform prior: \code{list(lower_bound = ..., upper_bound = ...)}. Not required if estimator is maximum likelihood.
+See \code{\link{shadowcat}} for details.}
 
-\item{model}{String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
+\item{model}{One of \code{"3PLM"}, \code{"GPCM"}, \code{"SM"} or \code{"GRM"}, for the three-parameter logistic, generalized partial credit, sequential or graded response model, respectively.}
 
-\item{alpha}{Matrix of alpha parameters. See \code{shadowcat} for details.}
+\item{alpha}{Matrix of alpha parameters. See \code{\link{shadowcat}} for details.}
 
-\item{beta}{Matrix of beta parameters. See \code{shadowcat} for details.}
+\item{beta}{Matrix of beta parameters. See \code{\link{shadowcat}} for details.}
 
-\item{guessing}{Matrix with one column of guessing parameters per item. See \code{shadowcat} for details.}
+\item{guessing}{Matrix with one column of guessing parameters per item. See \code{\link{shadowcat}} for details.}
 
-\item{eta}{Matrix of location parameters, optionally used in GPCM model, ignored for all others. See \code{shadowcat} for details.}
+\item{eta}{Matrix of location parameters, optionally used in GPCM model, ignored for all others. See \code{\link{shadowcat}} for details.}
 
-\item{start_items}{List indicating the items that are shown to the respondent before adaptive proces starts. One of
-list(type = 'random', n)
-list(type = 'fixed', item_keys, n)
-list(type = 'random_by_dimension', n_by_dimension, n)
-See \code{shadowcat} for details.}
+\item{start_items}{List indicating the items that should be shown to the respondent before the theta estimate will be updated
+for the first time. See \code{\link{shadowcat}} for details.}
 
-\item{stop_test}{List indicating rules for when to stop providing new items to respondent. Should be of the form
-list(target = ..., max_n = ..., min_n = ..., cutoffs = ...). See \code{shadowcat} for details.}
+\item{stop_test}{List indicating rules for when to terminate the test. See \code{\link{shadowcat}} for details.}
 
-\item{estimator}{Type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori".}
+\item{estimator}{Type of estimator to be used, one of \code{"maximum_likelihood"}, \code{"maximum_aposteriori"}, or \code{"expected_aposteriori"}.}
 
-\item{information_summary}{How to summarize Fisher information, used for selection of item with maximum information. 
-One of "determinant", "posterior_determinant", "trace", "posterior_trace", or "posterior_expected_kullback_leibler". See \code{shadowcat} for details.}
+\item{information_summary}{How to summarize Fisher information, used for selection of item with maximum information. One of
+\code{"determinant"}, \code{"posterior_determinant"}, \code{"trace"}, \code{"posterior_trace"}, or \code{"posterior_expected_kullback_leibler"}.}
 
-\item{constraints_and_characts}{list with constraints and characteristics. See \code{shadowcat} for details.}
+\item{constraints_and_characts}{List with constraints and characteristics. See \code{\link{shadowcat}} for details.}
 
-\item{lower_bound}{Vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values.
-Can only be defined when estimator is maximum_likelihood. Setting bounds with maximum likelihood estimation is equivalent to
-using maximum aposteriori estimation with a uniform prior.}
+\item{lower_bound}{Vector with lower bounds for theta per dimension. See \code{\link{shadowcat}} for details.}
 
-\item{upper_bound}{Vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
-Can only be defined when estimator is maximum_likelihood. Setting bounds with maximum likelihood estimation is equivalent to
-using maximum aposteriori estimation with a uniform prior.}
+\item{upper_bound}{Vector with upper bounds for theta per dimension. See \code{\link{shadowcat}} for details.}
 
-\item{safe_eap}{Only relevant if estimator is expected_aposteriori. 
-TRUE if estimator should switch to maximum aposteriori if the integration algorithm results in an error.
-An error may occur if the prior is uniform, estimator is expected aposteriori, and the bounds do not exceed the true theta value, or are too close to it.}
+\item{safe_eap}{Only relevant if estimator is expected aposteriori. 
+Set to \code{TRUE} if estimator should switch to maximum aposteriori if the integration algorithm results in an error.
+An error may occur if the prior is uniform, estimator is expected aposteriori, and the bounds of the prior do not exceed the true theta value, or are too close to it.}
 
-\item{initital_estimate}{Vector containing the initial theta estimates (starting values)}
+\item{initital_estimate}{Vector containing the initial theta estimate, before any items have been administered.}
 
-\item{initial_variance}{Matrix containing the initial covariance matrix (staring values)}
+\item{initial_variance}{Matrix containing the initial covariance matrix, before any items have been administered.}
 
-\item{eap_estimation_procedure}{String indicating the estimation procedure if estimator is expected aposteriori. One of "riemannsum" for integration via Riemannsum or
-"gauss_hermite_quad" for integration via Gaussian Hermite Quadrature.}
+\item{eap_estimation_procedure}{String indicating the estimation procedure if estimator is expected aposteriori and prior form is normal. One of \code{"riemannsum"} 
+for integration via Riemannsum or \code{"gauss_hermite_quad"} for integration via Gaussian Hermite Quadrature. 
+If prior form is uniform, estimation procedure should always be \code{"riemannsum"}.}
 }
 \value{
-List as returned by shadowcat after the last answer, with variance element turned into matrix
+List as returned by \code{\link{shadowcat}} after test is terminated, with \code{variance} element turned into matrix.
 }
 \description{
-Simulate a testing routine with shadowcat
+Simulate several iterations of getting the key of the new item to administer and the updated theta estimate, and getting an answer to the new item.
 }
 \examples{
 # One dimension

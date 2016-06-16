@@ -1,17 +1,18 @@
 #' Simulate alpha and beta matrices
 #' 
-#' Simulate quick and simple itembanks. Only for testing purposess
+#' Simulate quick and simple itembanks.
 #' 
-#' @param model Model for which the item bank should be simulated. String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit,
-#'  sequential or graded response model respectively. If model is 3PLM, number of item steps is forced to 1. 
+#' @param model Model for which the item bank should be simulated. One of \code{"3PLM"}, \code{"GPCM"}, \code{"SM"} or \code{"GRM"}, 
+#' for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively. 
+#' If model is 3PLM, number of item steps is forced to 1. 
 #' @param number_items Number of items.
 #' @param number_dimensions Number of dimensions.
 #' @param number_itemsteps Number of item steps (number of categories minus 1); forced to 1 if model is 3PLM.
-#' @param items_load_one_dimension If TRUE, force items to load on one dimension each.
-#' @param varying_number_item_steps If TRUE, some item steps are set to NA; in this case number_itemsteps 
+#' @param items_load_one_dimension If \code{TRUE}, force items to load on one dimension each.
+#' @param varying_number_item_steps If \code{TRUE}, some item steps are set to NA; in this case \code{number_itemsteps}
 #' is the maximum number of itemsteps.
-#' @param alpha_bounds Vector containing lower and upperbound, respectively, of the uniform distribution from which the alpha values are drawn
-#' @return List containing simulated alpha and beta matrix
+#' @param alpha_bounds Vector containing lower and upper bound, respectively, of the uniform distribution from which the alpha values are drawn.
+#' @return Named list containing simulated alpha and beta matrix.
 #' @examples simulate_testbank(model = "GPCM", number_items = 50, number_dimensions = 2, number_itemsteps = 3)
 #' simulate_testbank(model = "GPCM", number_items = 50, number_dimensions = 3, number_itemsteps = 4, items_load_one_dimension = TRUE, varying_number_item_steps = TRUE)
 #' @importFrom stringr str_c
@@ -81,17 +82,17 @@ simulate_testbank <- function(model, number_items = 50, number_dimensions = 1, n
 }
 
 
-#' Simulates answer
+#' Simulate answer
 #' 
-#' Simulates answer on specified items, given true theta. Only for testing purposes
+#' Simulate answer on specified items, given true theta.
 #' 
 #' @param theta Vector with true theta.
-#' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
-#' @param alpha Matrix of alpha parameters. See \code{shadowcat} for details.
-#' @param beta Matrix of beta parameters, one column per item step, one row per item. See \code{shadowcat} for details.
+#' @param model String, one of \code{"3PLM"}, \code{"GPCM"}, \code{"SM"} or \code{"GRM"}, for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
+#' @param alpha Matrix of alpha parameters. See \code{\link{shadowcat}} for details.
+#' @param beta Matrix of beta parameters, one column per item step, one row per item. See \code{\link{shadowcat}} for details.
 #' @param guessing One column matrix of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.
 #' @param item_keys Character vector of item keys for which answers should be simulated.
-#' @return Vector with responses
+#' @return Vector with responses.
 #' @examples 
 #' alpha_beta <- simulate_testbank(model = "3PLM", number_items = 50, number_dimensions = 1, number_itemsteps = 1)
 #' guessing <- matrix(rep(.5, 50), dimnames = list(rownames(alpha_beta$alpha), NULL))
@@ -132,41 +133,36 @@ simulate_answer <- function(theta, model, alpha, beta, guessing, item_keys) {
 
 #' Simulate a testing routine with shadowcat
 #' 
-#' @param true_theta True theta value or vector
-#' @param prior_form String indicating the form of the prior; one of "normal" or "uniform"
-#' @param prior_parameters List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...), or 
-#' the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
-#' be in matrix form. The length of lower_bound and upper_bound should be equal to the number of dimensions
-#' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
-#' @param alpha Matrix of alpha parameters. See \code{shadowcat} for details.
-#' @param beta Matrix of beta parameters. See \code{shadowcat} for details.
-#' @param guessing Matrix with one column of guessing parameters per item. See \code{shadowcat} for details.
-#' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others. See \code{shadowcat} for details.
-#' @param start_items List indicating the items that are shown to the respondent before adaptive proces starts. One of
-#' list(type = 'random', n)
-#' list(type = 'fixed', item_keys, n)
-#' list(type = 'random_by_dimension', n_by_dimension, n)
-#' See \code{shadowcat} for details.
-#' @param stop_test List indicating rules for when to stop providing new items to respondent. Should be of the form
-#' list(target = ..., max_n = ..., min_n = ..., cutoffs = ...). See \code{shadowcat} for details.
-#' @param estimator Type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori".
-#' @param information_summary How to summarize Fisher information, used for selection of item with maximum information. 
-#' One of "determinant", "posterior_determinant", "trace", "posterior_trace", or "posterior_expected_kullback_leibler". See \code{shadowcat} for details.
-#' @param constraints_and_characts list with constraints and characteristics. See \code{shadowcat} for details.
-#' @param lower_bound Vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values.
-#' Can only be defined when estimator is maximum_likelihood. Setting bounds with maximum likelihood estimation is equivalent to
-#' using maximum aposteriori estimation with a uniform prior. 
-#' @param upper_bound Vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
-#' Can only be defined when estimator is maximum_likelihood. Setting bounds with maximum likelihood estimation is equivalent to
-#' using maximum aposteriori estimation with a uniform prior.
-#' @param safe_eap Only relevant if estimator is expected_aposteriori. 
-#' TRUE if estimator should switch to maximum aposteriori if the integration algorithm results in an error.
-#' An error may occur if the prior is uniform, estimator is expected aposteriori, and the bounds do not exceed the true theta value, or are too close to it.
-#' @param initital_estimate Vector containing the initial theta estimates (starting values)
-#' @param initial_variance Matrix containing the initial covariance matrix (staring values)
-#' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori. One of "riemannsum" for integration via Riemannsum or
-#' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
-#' @return List as returned by shadowcat after the last answer, with variance element turned into matrix
+#' Simulate several iterations of getting the key of the new item to administer and the updated theta estimate, and getting an answer to the new item.
+#' 
+#' @param true_theta True theta value or vector.
+#' @param prior_form String indicating the form of the prior; one of \code{"normal"} or \code{"uniform"}. Not required if estimator is maximum likelihood.
+#' @param prior_parameters List containing mu and Sigma of the normal prior: \code{list(mu = ..., Sigma = ...)}, or 
+#' the upper and lower bound of the uniform prior: \code{list(lower_bound = ..., upper_bound = ...)}. Not required if estimator is maximum likelihood.
+#' See \code{\link{shadowcat}} for details.
+#' @param model One of \code{"3PLM"}, \code{"GPCM"}, \code{"SM"} or \code{"GRM"}, for the three-parameter logistic, generalized partial credit, sequential or graded response model, respectively.
+#' @param alpha Matrix of alpha parameters. See \code{\link{shadowcat}} for details.
+#' @param beta Matrix of beta parameters. See \code{\link{shadowcat}} for details.
+#' @param guessing Matrix with one column of guessing parameters per item. See \code{\link{shadowcat}} for details.
+#' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others. See \code{\link{shadowcat}} for details.
+#' @param start_items List indicating the items that should be shown to the respondent before the theta estimate will be updated
+#' for the first time. See \code{\link{shadowcat}} for details.
+#' @param stop_test List indicating rules for when to terminate the test. See \code{\link{shadowcat}} for details.
+#' @param estimator Type of estimator to be used, one of \code{"maximum_likelihood"}, \code{"maximum_aposteriori"}, or \code{"expected_aposteriori"}.
+#' @param information_summary How to summarize Fisher information, used for selection of item with maximum information. One of
+#' \code{"determinant"}, \code{"posterior_determinant"}, \code{"trace"}, \code{"posterior_trace"}, or \code{"posterior_expected_kullback_leibler"}.
+#' @param constraints_and_characts List with constraints and characteristics. See \code{\link{shadowcat}} for details.
+#' @param lower_bound Vector with lower bounds for theta per dimension. See \code{\link{shadowcat}} for details.
+#' @param upper_bound Vector with upper bounds for theta per dimension. See \code{\link{shadowcat}} for details.
+#' @param safe_eap Only relevant if estimator is expected aposteriori. 
+#' Set to \code{TRUE} if estimator should switch to maximum aposteriori if the integration algorithm results in an error.
+#' An error may occur if the prior is uniform, estimator is expected aposteriori, and the bounds of the prior do not exceed the true theta value, or are too close to it.
+#' @param initital_estimate Vector containing the initial theta estimate, before any items have been administered.
+#' @param initial_variance Matrix containing the initial covariance matrix, before any items have been administered.
+#' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori and prior form is normal. One of \code{"riemannsum"} 
+#' for integration via Riemannsum or \code{"gauss_hermite_quad"} for integration via Gaussian Hermite Quadrature. 
+#' If prior form is uniform, estimation procedure should always be \code{"riemannsum"}.
+#' @return List as returned by \code{\link{shadowcat}} after test is terminated, with \code{variance} element turned into matrix.
 #' @examples 
 #' # One dimension
 #' alpha_beta_one_dim <- simulate_testbank(model = "GPCM", number_items = 50, number_dimensions = 1, number_itemsteps = 3)
@@ -178,16 +174,16 @@ simulate_answer <- function(theta, model, alpha, beta, guessing, item_keys) {
 #' @export
 test_shadowcat <- function(true_theta, prior_form, prior_parameters, model, alpha, beta, guessing, eta = NULL, start_items, stop_test, estimator, information_summary, constraints_and_characts = NULL, lower_bound = NULL, upper_bound = NULL, safe_eap = FALSE, initital_estimate = rep(0, ncol(alpha)), initial_variance = diag(ncol(alpha)) * 25, eap_estimation_procedure = "riemannsum") {
   answers <- NULL
-  next_item_and_test_outcome <- shadowcat(answers = answers, estimate = initital_estimate, variance = as.vector(initial_variance), model = model, alpha = alpha, beta = beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters, guessing = guessing, eta = eta, constraints_and_characts = constraints_and_characts, lower_bound = lower_bound, upper_bound = upper_bound, safe_eap = safe_eap, eap_estimation_procedure = eap_estimation_procedure)
+  next_item_and_theta_estimate <- shadowcat(answers = answers, estimate = initital_estimate, variance = as.vector(initial_variance), model = model, alpha = alpha, beta = beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters, guessing = guessing, eta = eta, constraints_and_characts = constraints_and_characts, lower_bound = lower_bound, upper_bound = upper_bound, safe_eap = safe_eap, eap_estimation_procedure = eap_estimation_procedure)
   
-  while (next_item_and_test_outcome$continue_test) {
-    new_answer <- simulate_answer(theta = true_theta, model = model, alpha = alpha, beta = beta, guessing = guessing, item_keys = next_item_and_test_outcome$key_new_item)
-    next_item_and_test_outcome$answers[[next_item_and_test_outcome$key_new_item]] <- new_answer
-    next_item_and_test_outcome <- shadowcat(answers = as.list(next_item_and_test_outcome$answers), estimate = next_item_and_test_outcome$estimate, variance = next_item_and_test_outcome$variance, model = model, alpha = alpha, beta = beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters, guessing = guessing, eta = eta, constraints_and_characts = constraints_and_characts, lower_bound = lower_bound, upper_bound = upper_bound, safe_eap = safe_eap, eap_estimation_procedure = eap_estimation_procedure)  
+  while (next_item_and_theta_estimate$continue_test) {
+    new_answer <- simulate_answer(theta = true_theta, model = model, alpha = alpha, beta = beta, guessing = guessing, item_keys = next_item_and_theta_estimate$key_new_item)
+    next_item_and_theta_estimate$answers[[next_item_and_theta_estimate$key_new_item]] <- new_answer
+    next_item_and_theta_estimate <- shadowcat(answers = as.list(next_item_and_theta_estimate$answers), estimate = next_item_and_theta_estimate$estimate, variance = next_item_and_theta_estimate$variance, model = model, alpha = alpha, beta = beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters, guessing = guessing, eta = eta, constraints_and_characts = constraints_and_characts, lower_bound = lower_bound, upper_bound = upper_bound, safe_eap = safe_eap, eap_estimation_procedure = eap_estimation_procedure)  
   }
   
-  next_item_and_test_outcome$variance <- matrix(next_item_and_test_outcome$variance, ncol = ncol(alpha))
-  next_item_and_test_outcome
+  next_item_and_theta_estimate$variance <- matrix(next_item_and_theta_estimate$variance, ncol = ncol(alpha))
+  next_item_and_theta_estimate
 }
 
 

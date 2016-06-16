@@ -1,70 +1,82 @@
-#' Returns a list with the key of the next item to be administered given a new answer,
-#' an updated estimate of theta, updated covariance matrix of theta converted to a vector, and the answers to the administered items
+#' Get new item key and update estimate
+#' 
+#' Get the key of the new item to administer and an update of the theta estimate, based on given answer set.
 #'
-#' @param answers named list of previous answers and new answer, with names being the item keys; should be initialized with NULL
-#' @param estimate vector with estimate of latent trait theta
-#' @param variance (co)variance matrix of the estimate, as vector
-#' @param model One of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
-#' @param alpha Matrix of alpha parameters, one column per dimension, one row per item. Row names should contain the item keys. Note that so called within-dimensional models still use an alpha matrix, they simply 
-#' have only one non-zero loading per item.
-#' @param beta Matrix of beta parameters, one column per item step, one row per item. Row names should contain the item keys. Note that ShadowCAT expects answer categories to be sequential,
-#' and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, and equal to the position of the 'location' of the beta parameter in the Beta matrix.
-#' The matrix will have a number of columns equal to the largest number of item steps over items, items with fewer answer categories should be 
+#' @details
+#' The list \code{constraints_and_characts} should consist of two elements, named \code{characteristics} and \code{constraints}.
+#' \code{characteristics} should be specified as a data frame of characteristics. Each row indicates the characteristics of
+#' one item. Each column indicates how all items score on a certain characteristic. Characteristics may be categorical or numeric. 
+#' \code{constraints} should be specified as a list of constraints, each constraint is a list with three named values:
+#' \itemize{
+#' \item{\code{name}}{The column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as \code{name/value},
+#' where \code{name} is the column name of the characteristic and \code{value} is the specific level of the characteristic this constraint applies to.} 
+#' \item{\code{op}}{The logical operator to be used. Valid options are \code{"<"}, \code{"="}, \code{">"} and \code{"><"}.}
+#' \item{\code{target}}{The target value, numeric. For categorical characteristics, it indicates the number of items of the relevant characteristic that should be administered (\code{"="}), or
+#' minimally (\code{">"}), maximally (\code{"<"}), or minimally and maximally (\code{"><"}; vector with two values required) administered. For numeric characteristics,
+#' it indicates the minimum and/or maximum sum allowed over all administered items, e.g., maximum time allowed.}
+#' }
+#' 
+#' @param answers Named list of previous answers and new answer, with names being the item keys. Should be initialized with \code{NULL}.
+#' @param estimate Vector with current estimate of latent trait theta. Length should be equal to the number of dimensions.
+#' @param variance Current covariance matrix of the estimate, as vector.
+#' @param model One of \code{"3PLM"}, \code{"GPCM"}, \code{"SM"} or \code{"GRM"}, for the three-parameter logistic, generalized partial credit, sequential or graded response model, respectively.
+#' @param alpha Matrix of alpha parameters, one column per dimension, one row per item. Row names should contain the item keys. 
+#' Note that so called within-dimensional models still use an alpha matrix, they simply have only one non-zero loading per item.
+#' @param beta Matrix of beta parameters, one column per item step, one row per item. Row names should contain the item keys. 
+#' Note that ShadowCAT expects answer categories to be sequential, and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, 
+#' and equal to the position of the 'location' of the beta parameter in the beta matrix.
+#' The matrix should have a number of columns equal to the largest number of item steps over items, items with fewer answer categories should be 
 #' right-padded with \code{NA}. \code{NA} values between answer categories are not allowed, and will lead to errors.
-#' Beta matrix can be set to NULL if model is GPCM and eta is defined
-#' More flexibility in Beta parameters might be added in future versions.
-#' @param start_items List indicating the items that are shown to the respondent before adaptive proces starts; one of
-#' list(type = 'random', n)
-#' list(type = 'fixed', item_keys, n)
-#' list(type = 'random_by_dimension', n_by_dimension, n)
-#' where n = total number of initial items, item_keys = character vector with keys of initial items, 
-#' n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
-#' If n is 0, only n needs to be defined
-#' 'random_by_dimension' assumes that items load on a single dimension, if any item has a non-zero loading on a dimension, it is considered to be part of that dimension. 
-#' @param stop_test List indicating rules for when to stop providing new items to respondent; should be a list of the form
-#' list(target = ..., max_n = ..., min_n = ..., cutoffs = ...), 
-#' where max_n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule), 
-#' target = vector of maximum acceptable variances per dimension; NULL means no variance target,
-#' min_n = minimum test length; NULL means no mimimum test length,
-#' cutoffs = matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
-#' administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at certain iteration, test stops; 
-#' NULL means no cut off values
-#' @param estimator Type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"
-#' @param information_summary How to summarize Fisher information, used for selection of item with maximum information; one of
-#' "determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
-#' "posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior_information + info_QxQ_k) for each yet available item k
-#' "trace": compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
-#' "posterior_trace": compute trace(info_sofar_QxQ_plus_prior_information + info_QxQ_k) for each yet available item k
-#' "posterior_expected_kullback_leibler" = compute Posterior expected Kullback-Leibler Information
-#' @param prior_form String indicating the form of the prior; one of "normal" or "uniform". Not required if estimator is maximum_likelihood
-#' @param prior_parameters List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...), or 
-#' the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). . Not required if estimator is maximum_likelihood.
-#' Sigma should always be in matrix form. The length of lower_bound and upper_bound should be equal to the number of dimensions.
+#' Beta matrix can be set to \code{NULL} if model is GPCM and eta is defined.
+#' @param start_items List indicating the items that should be shown to the respondent before the theta estimate will be updated
+#' for the first time. One of
+#' \code{list(type = "random", n = ...)},
+#' \code{list(type = "fixed", item_keys = ..., n = ...)}, or
+#' \code{list(type = "random_by_dimension", n_by_dimension = ..., n = ...)},
+#' where \code{n} is the total number of burn in items, \code{item_keys} is a character vector with keys of the burn in items, 
+#' and \code{n_by_dimension} is the number of burn in items per dimension, or a vector with the number of burn in items for each dimension.
+#' If \code{n} is 0, only \code{n} needs to be defined.
+#' Note that the type \code{"random_by_dimension"} assumes that items load on a single dimension; if any item has a non-zero loading on a dimension, it is considered to be part of that dimension. 
+#' @param stop_test List indicating rules for when to terminate the test. Should be a list of the form
+#' \code{list(target = ..., max_n = ..., min_n = ..., cutoffs = ...)}, 
+#' where \code{target} is a vector indicating the maximum acceptable variance per dimension; \code{NULL} means no variance target,
+#' \code{max_n} is the test length at which the test should be terminated (even if the target has not been reached yet), 
+#' \code{min_n} is the minimum test length; \code{NULL} means no mimimum test length, and
+#' \code{cutoffs} is a matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
+#' administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at a certain iteration, test terminates; 
+#' \code{NULL} means no cut off values.
+#' @param estimator Type of estimator to be used, one of \code{"maximum_likelihood"}, \code{"maximum_aposteriori"}, or \code{"expected_aposteriori"}.
+#' @param information_summary How to summarize Fisher information, used for selection of item with maximum information. One of
+#' \code{"determinant"}, \code{"posterior_determinant"}, \code{"trace"}, \code{"posterior_trace"}, or \code{"posterior_expected_kullback_leibler"}.
+#' @param prior_form String indicating the form of the prior; one of \code{"normal"} or \code{"uniform"}. Not required if estimator is maximum likelihood.
+#' @param prior_parameters List containing mu and Sigma of the normal prior: \code{list(mu = ..., Sigma = ...)}, or 
+#' the upper and lower bound of the uniform prior: \code{list(lower_bound = ..., upper_bound = ...)}. Not required if estimator is maximum likelihood.
+#' The list element \code{Sigma} should always be in matrix form. List elements \code{mu}, \code{lower_bound}, and \code{upper_bound} should always be vectors.
+#' The length of \code{mu}, \code{lower_bound}, and \code{upper_bound} should be equal to the number of dimensions.
 #' For uniform prior in combination with expected aposteriori estimation, true theta should fall within 
-#' lower_bound and upper_bound and be not too close to one of these bounds. Setting the function argument safe_eap to TRUE
-#' ensures that the estimation switches to maximum aposteriori if the expected aposteriori estimate fails. 
+#' \code{lower_bound} and \code{upper_bound} and be not too close to one of these bounds, in order to prevent errors. 
+#' Setting the function argument \code{safe_eap} to \code{TRUE} ensures that the estimation switches to maximum aposteriori if the expected aposteriori estimate fails. 
 #' @param guessing Matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.
 #' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others. Row names should contain the item keys.
-#' @param constraints_and_characts list with constraints and characteristics; NULL means no constraints
-#' constraints should be specified as a list of constraints, each constraint is a list with three named values;
-#' name: the column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as name/value.
-#' op: the logical operator to be used. Valid options are "<", "=", ">" and "><".
-#' target: the target value, numeric. If the operator is "><", this should be a length two vector in between which the target should fall.
-#' characteristics should be a data.frame with characteristics, one row per item (rows in the same order as they are in alpha, beta, etc.), one column per characteristic.
-#' See constraints_lp_format() for details
-#' @param lower_bound Vector with lower bounds for theta per dimension; estimated theta values smaller than the lowerbound values are truncated to the lowerbound values.
-#' Can only be defined when estimator is maximum_likelihood. Setting bounds with maximum likelihood estimation is equivalent to
+#' @param constraints_and_characts List with constraints and characteristics; \code{NULL} means no constraints. See \code{details}.
+#' @param lower_bound Vector with lower bounds for theta per dimension. Estimated theta values smaller than the lower bound values are truncated to the lower bound values.
+#' Can only be defined when estimator is maximum likelihood. Setting bounds with maximum likelihood estimation is equivalent to
 #' using maximum aposteriori estimation with a uniform prior. 
-#' @param upper_bound Vector with upper bounds for theta per dimension; estimated theta values larger than the upperbound values are truncated to the upperbound values
-#' Can only be defined when estimator is maximum_likelihood. Setting bounds with maximum likelihood estimation is equivalent to
+#' @param upper_bound Vector with upper bounds for theta per dimension. Estimated theta values larger than the upper bound values are truncated to the upper bound values.
+#' Can only be defined when estimator is maximum likelihood. Setting bounds with maximum likelihood estimation is equivalent to
 #' using maximum aposteriori estimation with a uniform prior.
-#' @param safe_eap Only relevant if estimator is expected_aposteriori. 
-#' TRUE if estimator should switch to maximum aposteriori if the integration algorithm results in an error.
-#' An error may occur if the prior is uniform, estimator is expected aposteriori, and the bounds do not exceed the true theta value, or are too close to it.
-#' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori and prior form is normal. One of "riemannsum" for integration via Riemannsum or
-#' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. If prior form is uniform, estimation procedure should always be "riemannsum".
-#' @return List containing the key of the next item to be administered given a new answer, an indicator for whether the test should be continued,
-#' updated estimate of theta, updated covariance matrix of theta converted to a vector, and the answers to the administered items (named list)
+#' @param safe_eap Only relevant if estimator is expected aposteriori. 
+#' Set to \code{TRUE} if estimator should switch to maximum aposteriori if the integration algorithm results in an error.
+#' An error may occur if the prior is uniform, estimator is expected aposteriori, and the bounds of the prior do not exceed the true theta value, or are too close to it.
+#' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori and prior form is normal. One of \code{"riemannsum"} for integration via Riemannsum or
+#' \code{"gauss_hermite_quad"} for integration via Gaussian Hermite Quadrature. If prior form is uniform, estimation procedure should always be \code{"riemannsum"}.
+#' @return List containing:
+#' \item{key_new_item}{The key of the next item to be administered given the answers to previous items.}
+#' \item{continue_test}{\code{TRUE} if test should be continued, \code{FALSE} if test should be terminated.}
+#' \item{estimate}{Vector containing the updated theta estimate.}
+#' \item{variance}{Vector containing the updated covariance matrix of theta.}
+#' \item{answers}{Named list containing the answers to the administered items.}
+#' 
 #' @examples
 #' alpha_beta <- simulate_testbank(model = "GPCM", number_items = 100, number_dimensions = 3, number_itemsteps = 3)
 #' model <- "GPCM"
@@ -87,7 +99,6 @@
 #' call6 <- shadowcat(answers = list(item33 = 2, item5 = 3, item23 = 3, item84 = 1, item36 = 2), estimate = call5$estimate, variance = call5$variance, model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters)
 #' 
 #' # With constraints
-#' 
 #' constraints_and_characteristics <- list(characteristics = data.frame(content = sample(c('algebra','physics','calculus'), size = 100, replace = TRUE),
 #'                                                                      time = runif(100),
 #'                                                                      exclusive = sapply(1:100, FUN = function (x) { if (x %in% sample(1:100, size = 4)) 1 else 0 })),

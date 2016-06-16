@@ -9,8 +9,9 @@ simulate_testbank(model, number_items = 50, number_dimensions = 1,
   varying_number_item_steps = FALSE, alpha_bounds = c(0.3, 1.5))
 }
 \arguments{
-\item{model}{Model for which the item bank should be simulated. String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit,
-sequential or graded response model respectively. If model is 3PLM, number of item steps is forced to 1.}
+\item{model}{Model for which the item bank should be simulated. One of \code{"3PLM"}, \code{"GPCM"}, \code{"SM"} or \code{"GRM"}, 
+for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively. 
+If model is 3PLM, number of item steps is forced to 1.}
 
 \item{number_items}{Number of items.}
 
@@ -18,18 +19,18 @@ sequential or graded response model respectively. If model is 3PLM, number of it
 
 \item{number_itemsteps}{Number of item steps (number of categories minus 1); forced to 1 if model is 3PLM.}
 
-\item{items_load_one_dimension}{If TRUE, force items to load on one dimension each.}
+\item{items_load_one_dimension}{If \code{TRUE}, force items to load on one dimension each.}
 
-\item{varying_number_item_steps}{If TRUE, some item steps are set to NA; in this case number_itemsteps 
+\item{varying_number_item_steps}{If \code{TRUE}, some item steps are set to NA; in this case \code{number_itemsteps}
 is the maximum number of itemsteps.}
 
-\item{alpha_bounds}{Vector containing lower and upperbound, respectively, of the uniform distribution from which the alpha values are drawn}
+\item{alpha_bounds}{Vector containing lower and upper bound, respectively, of the uniform distribution from which the alpha values are drawn.}
 }
 \value{
-List containing simulated alpha and beta matrix
+Named list containing simulated alpha and beta matrix.
 }
 \description{
-Simulate quick and simple itembanks. Only for testing purposess
+Simulate quick and simple itembanks.
 }
 \examples{
 simulate_testbank(model = "GPCM", number_items = 50, number_dimensions = 2, number_itemsteps = 3)

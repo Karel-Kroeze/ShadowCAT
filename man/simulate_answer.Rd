@@ -2,28 +2,28 @@
 % Please edit documentation in R/simulate_functions.R
 \name{simulate_answer}
 \alias{simulate_answer}
-\title{Simulates answer}
+\title{Simulate answer}
 \usage{
 simulate_answer(theta, model, alpha, beta, guessing, item_keys)
 }
 \arguments{
 \item{theta}{Vector with true theta.}
 
-\item{model}{String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
+\item{model}{String, one of \code{"3PLM"}, \code{"GPCM"}, \code{"SM"} or \code{"GRM"}, for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
 
-\item{alpha}{Matrix of alpha parameters. See \code{shadowcat} for details.}
+\item{alpha}{Matrix of alpha parameters. See \code{\link{shadowcat}} for details.}
 
-\item{beta}{Matrix of beta parameters, one column per item step, one row per item. See \code{shadowcat} for details.}
+\item{beta}{Matrix of beta parameters, one column per item step, one row per item. See \code{\link{shadowcat}} for details.}
 
 \item{guessing}{One column matrix of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.}
 
 \item{item_keys}{Character vector of item keys for which answers should be simulated.}
 }
 \value{
-Vector with responses
+Vector with responses.
 }
 \description{
-Simulates answer on specified items, given true theta. Only for testing purposes
+Simulate answer on specified items, given true theta.
 }
 \examples{
 alpha_beta <- simulate_testbank(model = "3PLM", number_items = 50, number_dimensions = 1, number_itemsteps = 1)
