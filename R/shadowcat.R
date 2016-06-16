@@ -23,7 +23,7 @@
 #' @param alpha Matrix of alpha parameters, one column per dimension, one row per item. Row names should contain the item keys. 
 #' Note that so called within-dimensional models still use an alpha matrix, they simply have only one non-zero loading per item.
 #' @param beta Matrix of beta parameters, one column per item step, one row per item. Row names should contain the item keys. 
-#' Note that ShadowCAT expects answer categories to be sequential, and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, 
+#' Note that \code{shadowcat} expects answer categories to be sequential, and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, 
 #' and equal to the position of the 'location' of the beta parameter in the beta matrix.
 #' The matrix should have a number of columns equal to the largest number of item steps over items, items with fewer answer categories should be 
 #' right-padded with \code{NA}. \code{NA} values between answer categories are not allowed, and will lead to errors.

@@ -18,33 +18,61 @@ test_shadowcat(true_theta, prior_form, prior_parameters, model, alpha, beta,
 
 \item{prior_parameters}{List containing mu and Sigma of the normal prior: \code{list(mu = ..., Sigma = ...)}, or 
 the upper and lower bound of the uniform prior: \code{list(lower_bound = ..., upper_bound = ...)}. Not required if estimator is maximum likelihood.
-See \code{\link{shadowcat}} for details.}
+The list element \code{Sigma} should always be in matrix form. List elements \code{mu}, \code{lower_bound}, and \code{upper_bound} should always be vectors.
+The length of \code{mu}, \code{lower_bound}, and \code{upper_bound} should be equal to the number of dimensions.
+For uniform prior in combination with expected aposteriori estimation, true theta should fall within 
+\code{lower_bound} and \code{upper_bound} and be not too close to one of these bounds, in order to prevent errors. 
+Setting the function argument \code{safe_eap} to \code{TRUE} ensures that the estimation switches to maximum aposteriori if the expected aposteriori estimate fails.}
 
 \item{model}{One of \code{"3PLM"}, \code{"GPCM"}, \code{"SM"} or \code{"GRM"}, for the three-parameter logistic, generalized partial credit, sequential or graded response model, respectively.}
 
-\item{alpha}{Matrix of alpha parameters. See \code{\link{shadowcat}} for details.}
+\item{alpha}{Matrix of alpha parameters, one column per dimension, one row per item. Row names should contain the item keys. 
+Note that so called within-dimensional models still use an alpha matrix, they simply have only one non-zero loading per item.}
 
-\item{beta}{Matrix of beta parameters. See \code{\link{shadowcat}} for details.}
+\item{beta}{Matrix of beta parameters, one column per item step, one row per item. Row names should contain the item keys. 
+Note that ShadowCAT expects answer categories to be sequential, and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, 
+and equal to the position of the 'location' of the beta parameter in the beta matrix.
+The matrix should have a number of columns equal to the largest number of item steps over items, items with fewer answer categories should be 
+right-padded with \code{NA}. \code{NA} values between answer categories are not allowed, and will lead to errors.
+Beta matrix can be set to \code{NULL} if model is GPCM and eta is defined.}
 
-\item{guessing}{Matrix with one column of guessing parameters per item. See \code{\link{shadowcat}} for details.}
+\item{guessing}{Matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.}
 
-\item{eta}{Matrix of location parameters, optionally used in GPCM model, ignored for all others. See \code{\link{shadowcat}} for details.}
+\item{eta}{Matrix of location parameters, optionally used in GPCM model, ignored for all others. Row names should contain the item keys.}
 
 \item{start_items}{List indicating the items that should be shown to the respondent before the theta estimate will be updated
-for the first time. See \code{\link{shadowcat}} for details.}
+for the first time. One of
+\code{list(type = "random", n = ...)},
+\code{list(type = "fixed", item_keys = ..., n = ...)}, or
+\code{list(type = "random_by_dimension", n_by_dimension = ..., n = ...)},
+where \code{n} is the total number of burn in items, \code{item_keys} is a character vector with keys of the burn in items, 
+and \code{n_by_dimension} is the number of burn in items per dimension, or a vector with the number of burn in items for each dimension.
+If \code{n} is 0, only \code{n} needs to be defined.
+Note that the type \code{"random_by_dimension"} assumes that items load on a single dimension; if any item has a non-zero loading on a dimension, it is considered to be part of that dimension.}
 
-\item{stop_test}{List indicating rules for when to terminate the test. See \code{\link{shadowcat}} for details.}
+\item{stop_test}{List indicating rules for when to terminate the test. Should be a list of the form
+\code{list(target = ..., max_n = ..., min_n = ..., cutoffs = ...)}, 
+where \code{target} is a vector indicating the maximum acceptable variance per dimension; \code{NULL} means no variance target,
+\code{max_n} is the test length at which the test should be terminated (even if the target has not been reached yet), 
+\code{min_n} is the minimum test length; \code{NULL} means no mimimum test length, and
+\code{cutoffs} is a matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
+administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at a certain iteration, test terminates; 
+\code{NULL} means no cut off values.}
 
 \item{estimator}{Type of estimator to be used, one of \code{"maximum_likelihood"}, \code{"maximum_aposteriori"}, or \code{"expected_aposteriori"}.}
 
 \item{information_summary}{How to summarize Fisher information, used for selection of item with maximum information. One of
 \code{"determinant"}, \code{"posterior_determinant"}, \code{"trace"}, \code{"posterior_trace"}, or \code{"posterior_expected_kullback_leibler"}.}
 
-\item{constraints_and_characts}{List with constraints and characteristics. See \code{\link{shadowcat}} for details.}
+\item{constraints_and_characts}{List with constraints and characteristics; \code{NULL} means no constraints. See \code{details}.}
 
-\item{lower_bound}{Vector with lower bounds for theta per dimension. See \code{\link{shadowcat}} for details.}
+\item{lower_bound}{Vector with lower bounds for theta per dimension. Estimated theta values smaller than the lower bound values are truncated to the lower bound values.
+Can only be defined when estimator is maximum likelihood. Setting bounds with maximum likelihood estimation is equivalent to
+using maximum aposteriori estimation with a uniform prior.}
 
-\item{upper_bound}{Vector with upper bounds for theta per dimension. See \code{\link{shadowcat}} for details.}
+\item{upper_bound}{Vector with upper bounds for theta per dimension. Estimated theta values larger than the upper bound values are truncated to the upper bound values.
+Can only be defined when estimator is maximum likelihood. Setting bounds with maximum likelihood estimation is equivalent to
+using maximum aposteriori estimation with a uniform prior.}
 
 \item{safe_eap}{Only relevant if estimator is expected aposteriori. 
 Set to \code{TRUE} if estimator should switch to maximum aposteriori if the integration algorithm results in an error.
@@ -54,9 +82,8 @@ An error may occur if the prior is uniform, estimator is expected aposteriori, a
 
 \item{initial_variance}{Matrix containing the initial covariance matrix, before any items have been administered.}
 
-\item{eap_estimation_procedure}{String indicating the estimation procedure if estimator is expected aposteriori and prior form is normal. One of \code{"riemannsum"} 
-for integration via Riemannsum or \code{"gauss_hermite_quad"} for integration via Gaussian Hermite Quadrature. 
-If prior form is uniform, estimation procedure should always be \code{"riemannsum"}.}
+\item{eap_estimation_procedure}{String indicating the estimation procedure if estimator is expected aposteriori and prior form is normal. One of \code{"riemannsum"} for integration via Riemannsum or
+\code{"gauss_hermite_quad"} for integration via Gaussian Hermite Quadrature. If prior form is uniform, estimation procedure should always be \code{"riemannsum"}.}
 }
 \value{
 List as returned by \code{\link{shadowcat}} after test is terminated, with \code{variance} element turned into matrix.

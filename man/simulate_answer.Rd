@@ -9,13 +9,19 @@ simulate_answer(theta, model, alpha, beta, guessing, item_keys)
 \arguments{
 \item{theta}{Vector with true theta.}
 
-\item{model}{String, one of \code{"3PLM"}, \code{"GPCM"}, \code{"SM"} or \code{"GRM"}, for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
+\item{model}{One of \code{"3PLM"}, \code{"GPCM"}, \code{"SM"} or \code{"GRM"}, for the three-parameter logistic, generalized partial credit, sequential or graded response model, respectively.}
 
-\item{alpha}{Matrix of alpha parameters. See \code{\link{shadowcat}} for details.}
+\item{alpha}{Matrix of alpha parameters, one column per dimension, one row per item. Row names should contain the item keys. 
+Note that so called within-dimensional models still use an alpha matrix, they simply have only one non-zero loading per item.}
 
-\item{beta}{Matrix of beta parameters, one column per item step, one row per item. See \code{\link{shadowcat}} for details.}
+\item{beta}{Matrix of beta parameters, one column per item step, one row per item. Row names should contain the item keys. 
+Note that ShadowCAT expects answer categories to be sequential, and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, 
+and equal to the position of the 'location' of the beta parameter in the beta matrix.
+The matrix should have a number of columns equal to the largest number of item steps over items, items with fewer answer categories should be 
+right-padded with \code{NA}. \code{NA} values between answer categories are not allowed, and will lead to errors.
+Beta matrix can be set to \code{NULL} if model is GPCM and eta is defined.}
 
-\item{guessing}{One column matrix of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.}
+\item{guessing}{Matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.}
 
 \item{item_keys}{Character vector of item keys for which answers should be simulated.}
 }

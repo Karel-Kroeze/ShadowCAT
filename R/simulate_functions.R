@@ -87,11 +87,8 @@ simulate_testbank <- function(model, number_items = 50, number_dimensions = 1, n
 #' Simulate answer on specified items, given true theta.
 #' 
 #' @param theta Vector with true theta.
-#' @param model String, one of \code{"3PLM"}, \code{"GPCM"}, \code{"SM"} or \code{"GRM"}, for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
-#' @param alpha Matrix of alpha parameters. See \code{\link{shadowcat}} for details.
-#' @param beta Matrix of beta parameters, one column per item step, one row per item. See \code{\link{shadowcat}} for details.
-#' @param guessing One column matrix of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.
 #' @param item_keys Character vector of item keys for which answers should be simulated.
+#' @inheritParams shadowcat
 #' @return Vector with responses.
 #' @examples 
 #' alpha_beta <- simulate_testbank(model = "3PLM", number_items = 50, number_dimensions = 1, number_itemsteps = 1)
@@ -136,32 +133,9 @@ simulate_answer <- function(theta, model, alpha, beta, guessing, item_keys) {
 #' Simulate several iterations of getting the key of the new item to administer and the updated theta estimate, and getting an answer to the new item.
 #' 
 #' @param true_theta True theta value or vector.
-#' @param prior_form String indicating the form of the prior; one of \code{"normal"} or \code{"uniform"}. Not required if estimator is maximum likelihood.
-#' @param prior_parameters List containing mu and Sigma of the normal prior: \code{list(mu = ..., Sigma = ...)}, or 
-#' the upper and lower bound of the uniform prior: \code{list(lower_bound = ..., upper_bound = ...)}. Not required if estimator is maximum likelihood.
-#' See \code{\link{shadowcat}} for details.
-#' @param model One of \code{"3PLM"}, \code{"GPCM"}, \code{"SM"} or \code{"GRM"}, for the three-parameter logistic, generalized partial credit, sequential or graded response model, respectively.
-#' @param alpha Matrix of alpha parameters. See \code{\link{shadowcat}} for details.
-#' @param beta Matrix of beta parameters. See \code{\link{shadowcat}} for details.
-#' @param guessing Matrix with one column of guessing parameters per item. See \code{\link{shadowcat}} for details.
-#' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others. See \code{\link{shadowcat}} for details.
-#' @param start_items List indicating the items that should be shown to the respondent before the theta estimate will be updated
-#' for the first time. See \code{\link{shadowcat}} for details.
-#' @param stop_test List indicating rules for when to terminate the test. See \code{\link{shadowcat}} for details.
-#' @param estimator Type of estimator to be used, one of \code{"maximum_likelihood"}, \code{"maximum_aposteriori"}, or \code{"expected_aposteriori"}.
-#' @param information_summary How to summarize Fisher information, used for selection of item with maximum information. One of
-#' \code{"determinant"}, \code{"posterior_determinant"}, \code{"trace"}, \code{"posterior_trace"}, or \code{"posterior_expected_kullback_leibler"}.
-#' @param constraints_and_characts List with constraints and characteristics. See \code{\link{shadowcat}} for details.
-#' @param lower_bound Vector with lower bounds for theta per dimension. See \code{\link{shadowcat}} for details.
-#' @param upper_bound Vector with upper bounds for theta per dimension. See \code{\link{shadowcat}} for details.
-#' @param safe_eap Only relevant if estimator is expected aposteriori. 
-#' Set to \code{TRUE} if estimator should switch to maximum aposteriori if the integration algorithm results in an error.
-#' An error may occur if the prior is uniform, estimator is expected aposteriori, and the bounds of the prior do not exceed the true theta value, or are too close to it.
 #' @param initital_estimate Vector containing the initial theta estimate, before any items have been administered.
 #' @param initial_variance Matrix containing the initial covariance matrix, before any items have been administered.
-#' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori and prior form is normal. One of \code{"riemannsum"} 
-#' for integration via Riemannsum or \code{"gauss_hermite_quad"} for integration via Gaussian Hermite Quadrature. 
-#' If prior form is uniform, estimation procedure should always be \code{"riemannsum"}.
+#' @inheritParams shadowcat
 #' @return List as returned by \code{\link{shadowcat}} after test is terminated, with \code{variance} element turned into matrix.
 #' @examples 
 #' # One dimension
