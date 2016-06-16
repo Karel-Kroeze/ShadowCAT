@@ -50,13 +50,15 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
 #' Options are "maximum_likelihood", "maximum_aposteriori", and "expected_aposteriori"
 #' @param information_summary_vec character vector containing the conditions for the information_summary to be used. Simulations are performed for each model summary in estimator_vec,
 #' Options are "determinant", "posterior_determinant", "trace", "posterior_trace", and "posterior_expected_kullback_leibler"
-#' @param start_items list indicating the items that are shown to the patient before adaptive proces starts; one of
-#' list(type = 'random', n)
-#' list(type = 'fixed', indices, n)
-#' list(type = 'random_by_dimension', n_by_dimension, n)
-#' where n = total number of initial items, indices = vector of initial item indices, 
-#' n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension
-#' If n is 0, only n needs to be defined
+##' @param start_items List indicating the items that should be shown to the respondent before the theta estimate will be updated
+#' for the first time. One of
+#' \code{list(type = "random", n = ...)},
+#' \code{list(type = "fixed", item_keys = ..., n = ...)}, or
+#' \code{list(type = "random_by_dimension", n_by_dimension = ..., n = ...)},
+#' where \code{n} is the total number of burn in items, \code{item_keys} is a character vector with keys of the burn in items, 
+#' and \code{n_by_dimension} is the number of burn in items per dimension, or a vector with the number of burn in items for each dimension.
+#' If \code{n} is 0, only \code{n} needs to be defined.
+#' Note that the type \code{"random_by_dimension"} assumes that items load on a single dimension; if any item has a non-zero loading on a dimension, it is considered to be part of that dimension. 
 #' @param variance_target value equal to the variance of theta at which testing should stop
 #' @param replications_per_unique_condition value equal to the number of replications to be performed within each unique condition
 #' @param number_dimensions value equal to the the number of dimensions of the model (either 1 or the length of true_theta_vec)
@@ -947,6 +949,41 @@ test_that("start n is zero, with constraints", {
   expect_equal(number_depression_items, 50)
   expect_equal(number_anxiety_items, 5)
   expect_equal(number_somatic_items, 75) 
+})
+
+test_that("start items fixed", {  
+  # define true theta for simulation of answers
+  true_theta <- c(1, 0, 2)
+  
+  # define item characteristics
+  number_items <- 300
+  number_dimensions <- 3
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  item_keys <- str_c("item", 1:number_items)
+  
+  guessing <- NULL
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
+  alpha[1:100,2:3] <- 0
+  alpha[101:200,c(1,3)] <- 0
+  alpha[201:300,1:2] <- 0
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
+  
+  eta <- NULL # only relevant for GPCM model
+  
+  model <- '3PLM'
+  start_items <- list(type = "fixed", item_keys = c("item4", "item2", "item1"), n = 3)
+  stop_test <- list(max_n = 300)
+  estimator <- 'maximum_aposteriori'
+  information_summary <- 'posterior_determinant'
+  
+  prior_form = "normal"
+  prior_parameters = list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions) * 20)
+  
+  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, initital_estimate = rep(.2, number_dimensions), initial_variance = diag(number_dimensions) * 20)
+  
+  expect_equal(as.vector(round(test_outcome$estimate, 3)), c(1.068, .190, 2.184))
+  expect_equal(as.vector(round(test_outcome$variance, 3))[1:3],c(.067, .000, .000))
+  expect_equal(length(test_outcome$answers), 300)
 })
 
 context("check stop rule")
