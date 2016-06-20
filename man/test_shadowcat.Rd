@@ -64,7 +64,7 @@ administered yet, second row for when one item has been administered, etc. If es
 \item{information_summary}{How to summarize Fisher information, used for selection of item with maximum information. One of
 \code{"determinant"}, \code{"posterior_determinant"}, \code{"trace"}, \code{"posterior_trace"}, or \code{"posterior_expected_kullback_leibler"}.}
 
-\item{constraints_and_characts}{List with constraints and characteristics; \code{NULL} means no constraints. See \code{details}.}
+\item{constraints_and_characts}{List with constraints and characteristics for Shadow Testing; \code{NULL} means no constraints. See \code{details}.}
 
 \item{lower_bound}{Vector with lower bounds for theta per dimension. Estimated theta values smaller than the lower bound values are truncated to the lower bound values.
 Can only be defined when estimator is maximum likelihood. Setting bounds with maximum likelihood estimation is equivalent to

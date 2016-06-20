@@ -67,7 +67,7 @@ Setting the function argument \code{safe_eap} to \code{TRUE} ensures that the es
 
 \item{eta}{Matrix of location parameters, optionally used in GPCM model, ignored for all others. Row names should contain the item keys.}
 
-\item{constraints_and_characts}{List with constraints and characteristics; \code{NULL} means no constraints. See \code{details}.}
+\item{constraints_and_characts}{List with constraints and characteristics for Shadow Testing; \code{NULL} means no constraints. See \code{details}.}
 
 \item{lower_bound}{Vector with lower bounds for theta per dimension. Estimated theta values smaller than the lower bound values are truncated to the lower bound values.
 Can only be defined when estimator is maximum likelihood. Setting bounds with maximum likelihood estimation is equivalent to
@@ -96,7 +96,8 @@ List containing:
 Get the key of the new item to administer and an update of the theta estimate, based on given answer set.
 }
 \details{
-The list \code{constraints_and_characts} should consist of two elements, named \code{characteristics} and \code{constraints}.
+The argument \code{constraints_and_characts} should be NULL (no constraints on item selection) or a list of characteristics and constraints (Shadow Testing).
+The list should consist of two elements, named \code{characteristics} and \code{constraints}.
 \code{characteristics} should be specified as a data frame of characteristics. Each row indicates the characteristics of
 one item. Each column indicates how all items score on a certain characteristic. Characteristics may be categorical or numeric. 
 \code{constraints} should be specified as a list of constraints, each constraint is a list with three named values:
@@ -130,7 +131,7 @@ call5 <- shadowcat(answers = list(item33 = 2, item5 = 3, item23 = 3, item84 = 1)
 # Sixth call: use the updated estimate and variance as the current values for estimate and variance
 call6 <- shadowcat(answers = list(item33 = 2, item5 = 3, item23 = 3, item84 = 1, item36 = 2), estimate = call5$estimate, variance = call5$variance, model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters)
 
-# With constraints
+# With constraints (shadow testing)
 constraints_and_characteristics <- list(characteristics = data.frame(content = sample(c('algebra','physics','calculus'), size = 100, replace = TRUE),
                                                                      time = runif(100),
                                                                      exclusive = sapply(1:100, FUN = function (x) { if (x \%in\% sample(1:100, size = 4)) 1 else 0 })),
