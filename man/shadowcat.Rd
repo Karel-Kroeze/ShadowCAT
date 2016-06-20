@@ -65,7 +65,9 @@ Setting the function argument \code{safe_eap} to \code{TRUE} ensures that the es
 
 \item{guessing}{Matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.}
 
-\item{eta}{Matrix of location parameters, optionally used in GPCM model, ignored for all others. Row names should contain the item keys.}
+\item{eta}{Matrix of location parameters, optionally used in GPCM model, ignored for all others. Row names should contain the item keys.
+If eta is defined, the beta matrix will be derived from this eta matrix by computing the cumulative sums of the rows of eta; see
+Glas and Dagohoy (2006).}
 
 \item{constraints_and_characts}{List with constraints and characteristics for Shadow Testing; \code{NULL} means no constraints. See \code{details}.}
 
@@ -86,7 +88,8 @@ An error may occur if the prior is uniform, estimator is expected aposteriori, a
 }
 \value{
 List containing:
-\item{key_new_item}{The key of the next item to be administered given the answers to previous items.}
+\item{key_new_item}{The key of the next item to be administered given the answers to previous items. 
+Next item is the item containing the maximum information, taking constraints into account if specified (Shadow Testing).}
 \item{continue_test}{\code{TRUE} if test should be continued, \code{FALSE} if test should be terminated.}
 \item{estimate}{Vector containing the updated theta estimate.}
 \item{variance}{Vector containing the updated covariance matrix of theta.}
@@ -96,12 +99,12 @@ List containing:
 Get the key of the new item to administer and an update of the theta estimate, based on given answer set.
 }
 \details{
-The argument \code{constraints_and_characts} should be NULL (no constraints on item selection) or a list of characteristics and constraints (Shadow Testing).
+The argument \code{constraints_and_characts} should be NULL (no constraints on item selection) or a list of characteristics and constraints (Shadow Testing; Van der Linden, 2000).
 The list should consist of two elements, named \code{characteristics} and \code{constraints}.
 \code{characteristics} should be specified as a data frame of characteristics. Each row indicates the characteristics of
 one item. Each column indicates how all items score on a certain characteristic. Characteristics may be categorical or numeric. 
 \code{constraints} should be specified as a list of constraints, each constraint is a list with three named values:
-\itemize{
+\describe{
 \item{\code{name}}{The column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as \code{name/value},
 where \code{name} is the column name of the characteristic and \code{value} is the specific level of the characteristic this constraint applies to.} 
 \item{\code{op}}{The logical operator to be used. Valid options are \code{"<"}, \code{"="}, \code{">"} and \code{"><"}.}
@@ -149,5 +152,12 @@ constraints_and_characteristics <- list(characteristics = data.frame(content = s
                                                                 target = 2))) # Ensure number of exclusive items equals 2
                                                              
 shadowcat(answers = NULL, estimate = c(0, 0, 0), variance = as.vector(diag(3) * 25), model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters, constraints_and_characts = constraints_and_characteristics)
+}
+\references{
+\itemize{
+\item Glas, C. A. W., & Dagohoy, A. V. T. (2006). A Person Fit Test For Irt Models For Polytomous Items. Psychometrika, 72(2), 159-180.
+\item Van der Linden, W. J. (2000). Constrained adaptive testing with shadow tests. In W. J. van der Linden & C. A. W. Glas (Eds.), Computerized adaptive testing: Theory and practice (pp. 27-52). Dordrecht,
+the Netherlands: Kluwer Academic Publishers. 
+}
 }
 

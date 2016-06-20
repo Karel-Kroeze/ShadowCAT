@@ -38,7 +38,9 @@ Beta matrix can be set to \code{NULL} if model is GPCM and eta is defined.}
 
 \item{guessing}{Matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.}
 
-\item{eta}{Matrix of location parameters, optionally used in GPCM model, ignored for all others. Row names should contain the item keys.}
+\item{eta}{Matrix of location parameters, optionally used in GPCM model, ignored for all others. Row names should contain the item keys.
+If eta is defined, the beta matrix will be derived from this eta matrix by computing the cumulative sums of the rows of eta; see
+Glas and Dagohoy (2006).}
 
 \item{start_items}{List indicating the items that should be shown to the respondent before the theta estimate will be updated
 for the first time. One of
