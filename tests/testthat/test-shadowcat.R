@@ -68,7 +68,7 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
 #' op: the logical operator to be used. Valid options are "<", "=", ">" and "><".
 #' target: the target value, numeric. If the operator is "><", this should be a length two vector in between which the target should fall.
 #' characteristics should be a data.frame with characteristics, one row per item, one column per characteristic.
-#' See constraints_lp_format() for details
+#' See shadowcat() for details
 #' @param guessing matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.
 #' @param items_load_one_dimension if TRUE, items are simulated which load on one dimension. If FALSE, items are simulated which load on all dimensions
 #' @param prior_form String indicating the form of the prior; one of "normal" or "uniform"
@@ -94,19 +94,19 @@ get_conditions <- function(true_theta_vec, number_items_vec, number_answer_categ
 run_simulation <- function(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, start_items, variance_target, replications_per_unique_condition, number_dimensions, constraints_and_characts = NULL, guessing = NULL, items_load_one_dimension = TRUE, prior_form = "normal", prior_parameters = list(mu = rep(0, length(number_dimensions)), Sigma = diag(number_dimensions) * 20), lower_bound = NULL, upper_bound = NULL, safe_eap = FALSE, return_administered_item_indices = FALSE, min_n = NULL, max_n = NULL, varying_number_item_steps = FALSE, eap_estimation_procedure = "riemannsum") {                   
   if (number_dimensions > 1 && number_dimensions != length(true_theta_vec))
     stop("number_dimensions is larger than 1 but not equal to the length of true_theta_vec")
-  conditions <- get_conditions(true_theta_vec, number_items_vec, number_answer_categories_vec, model_vec, estimator_vec, information_summary_vec, replications_per_unique_condition, number_dimensions)
+  conditions <- get_conditions(true_theta_vec = true_theta_vec, number_items_vec = number_items_vec, number_answer_categories_vec = number_answer_categories_vec, model_vec = model_vec, estimator_vec = estimator_vec, information_summary_vec = information_summary_vec, replications_per_unique_condition = replications_per_unique_condition, number_dimensions = number_dimensions)
   
   pbapply::pbsapply(1:nrow(conditions), 
                     FUN = function(condition) {
                       if (is.null(max_n))
                         max_n <- conditions[condition, "number_items"] 
                       stop_test <- list(target = variance_target, max_n = max_n, min_n = min_n)
-                      true_theta <- ( if (number_dimensions == 1) 
-                                        conditions[condition, "true_theta"]
-                                      else
-                                        true_theta_vec )
+                      true_theta <- if (number_dimensions == 1) 
+                                      conditions[condition, "true_theta"]
+                                    else
+                                      true_theta <- true_theta_vec
                       alpha_beta <- simulate_testbank(model = as.character(conditions[condition, "model"]), number_items = conditions[condition, "number_items"], number_dimensions = number_dimensions, number_itemsteps = conditions[condition, "number_answer_categories"] - 1, items_load_one_dimension = items_load_one_dimension, varying_number_item_steps = varying_number_item_steps)
-                      estimate_theta <- tryCatch(test_shadowcat(true_theta, prior_form, prior_parameters, as.character(conditions[condition, "model"]), alpha_beta$alpha, alpha_beta$beta, guessing, eta = NULL, start_items, stop_test, as.character(conditions[condition, "estimator"]), as.character(conditions[condition, "information_summary"]), constraints_and_characts, lower_bound, upper_bound, safe_eap, eap_estimation_procedure = eap_estimation_procedure),
+                      estimate_theta <- tryCatch(test_shadowcat(true_theta = true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model = as.character(conditions[condition, "model"]), alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, stop_test = stop_test, estimator = as.character(conditions[condition, "estimator"]), information_summary = as.character(conditions[condition, "information_summary"]),  guessing = guessing, constraints_and_characts = constraints_and_characts, lower_bound = lower_bound, upper_bound = upper_bound, safe_eap = safe_eap, eap_estimation_procedure = eap_estimation_procedure),
                                                  error = function(e) e)
                       
                       if (return_administered_item_indices)
@@ -134,8 +134,7 @@ test_that("true theta is 2, estimator is maximum_aposteriori, N(0, 5) prior", {
   guessing <- matrix(c(rep(.1, number_items / 2), rep(.2, number_items / 2)), ncol = 1, dimnames = list(item_keys, NULL))
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
-  eta <- NULL # only relevant for GPCM model
-  
+
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 100)
@@ -145,7 +144,7 @@ test_that("true theta is 2, estimator is maximum_aposteriori, N(0, 5) prior", {
   prior_form <- "normal"  
   prior_parameters <- list(mu = 0, Sigma = matrix(5))
   
-  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form, prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form, prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), 1.938)
   expect_equal(as.vector(round(test_outcome$variance, 3)), .113)
@@ -165,8 +164,7 @@ test_that("true theta is 2, estimator is maximum_aposteriori, N(-1, 1) prior", {
   guessing <- matrix(c(rep(.1, number_items / 2), rep(.2, number_items / 2)), ncol = 1, dimnames = list(item_keys, NULL))
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
-  eta <- NULL # only relevant for GPCM model
-  
+
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 100)
@@ -176,7 +174,7 @@ test_that("true theta is 2, estimator is maximum_aposteriori, N(-1, 1) prior", {
   prior_form <- "normal"  
   prior_parameters <- list(mu = -1, Sigma = matrix(1))
   
-  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form, prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form, prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), 1.494)
   expect_equal(as.vector(round(test_outcome$variance, 3)), .089)
@@ -196,8 +194,7 @@ test_that("true theta is 2, estimator is maximum_aposteriori, U(-1, 1) prior", {
   guessing <- matrix(c(rep(.1, number_items / 2), rep(.2, number_items / 2)), ncol = 1, dimnames = list(item_keys, NULL))
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
-  eta <- NULL # only relevant for GPCM model
-  
+
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 100)
@@ -207,7 +204,7 @@ test_that("true theta is 2, estimator is maximum_aposteriori, U(-1, 1) prior", {
   prior_form <- "uniform"  
   prior_parameters <- list(lower_bound = -1, upper_bound = 1)
   
-  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form, prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form, prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), 1)
   expect_equal(as.vector(round(test_outcome$variance, 3)), .087)
@@ -227,8 +224,7 @@ test_that("true theta is 2, estimator is maximum_likelihood", {
   guessing <- matrix(c(rep(.1, number_items / 2), rep(.2, number_items / 2)), dimnames = list(item_keys, NULL))
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
-  eta <- NULL # only relevant for GPCM model
-  
+
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 100)
@@ -237,7 +233,7 @@ test_that("true theta is 2, estimator is maximum_likelihood", {
   lower_bound <- -3
   upper_bound <- 3
   
-  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = NULL, prior_parameters = NULL, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, lower_bound = lower_bound, upper_bound = upper_bound)
+  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = NULL, prior_parameters = NULL, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing, lower_bound = lower_bound, upper_bound = upper_bound)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), 2.169)
   expect_equal(as.vector(round(test_outcome$variance, 3)), .129)
@@ -258,8 +254,7 @@ test_that("true theta is 2, estimator is expected_aposteriori, N(0, 5) prior", {
   guessing <- NULL
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
-  eta <- NULL # only relevant for GPCM model
-  
+
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 100)
@@ -269,8 +264,8 @@ test_that("true theta is 2, estimator is expected_aposteriori, N(0, 5) prior", {
   prior_form <- "normal"  
   prior_parameters <- list(mu = 0, Sigma = matrix(5))
   
-  test_outcome_gauss_hermite <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, eap_estimation_procedure = "gauss_hermite_quad")
-  test_outcome_riemann <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  test_outcome_gauss_hermite <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing, eap_estimation_procedure = "gauss_hermite_quad")
+  test_outcome_riemann <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing)
   
   # gauss hermite
   expect_equal(as.vector(round(test_outcome_gauss_hermite$estimate, 3)), 1.833)
@@ -296,7 +291,6 @@ test_that("true theta is 2, estimator is expected_aposteriori, N(-1, 1) prior", 
   guessing <- NULL
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
-  eta <- NULL # only relevant for GPCM model
   
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
@@ -307,8 +301,8 @@ test_that("true theta is 2, estimator is expected_aposteriori, N(-1, 1) prior", 
   prior_form <- "normal"  
   prior_parameters <- list(mu = -1, Sigma = matrix(1))
   
-  test_outcome_gauss_hermite <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, eap_estimation_procedure = "gauss_hermite_quad")
-  test_outcome_riemann <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  test_outcome_gauss_hermite <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing, eap_estimation_procedure = "gauss_hermite_quad")
+  test_outcome_riemann <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing)
   
   # gauss hermite
   expect_equal(as.vector(round(test_outcome_gauss_hermite$estimate, 3)), 1.522)
@@ -334,8 +328,7 @@ test_that("true theta is 2, estimator is expected_aposteriori, U(-4, 4) prior", 
   guessing <- NULL
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
-  eta <- NULL # only relevant for GPCM model
-  
+
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 100)
@@ -345,7 +338,7 @@ test_that("true theta is 2, estimator is expected_aposteriori, U(-4, 4) prior", 
   prior_form <- "uniform"  
   prior_parameters <- list(lower_bound = -4, upper_bound = 4)
   
-  test_outcome_riemann <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  test_outcome_riemann <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing)
   
   # riemann
   expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), 2.283)
@@ -366,8 +359,7 @@ test_that("true theta is 2, estimator is expected_aposteriori, U(-1, 1) prior, w
   guessing <- NULL
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
-  eta <- NULL # only relevant for GPCM model
-  
+
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 100)
@@ -377,7 +369,7 @@ test_that("true theta is 2, estimator is expected_aposteriori, U(-1, 1) prior, w
   prior_form <- "uniform"  
   prior_parameters <- list(lower_bound = -1, upper_bound = 1)
   
-  test_outcome_riemann <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, safe_eap = TRUE)
+  test_outcome_riemann <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing, safe_eap = TRUE)
   
   # riemann
   expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), .959)
@@ -402,8 +394,6 @@ test_that("true theta is 1, 0, 2, estimator is maximum_aposteriori, N(c(0,0,0), 
   alpha[201:300,1:2] <- 0
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
   
-  eta <- NULL # only relevant for GPCM model
-  
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
@@ -414,7 +404,7 @@ test_that("true theta is 1, 0, 2, estimator is maximum_aposteriori, N(c(0,0,0), 
   prior_form <- "normal"  
   prior_parameters <- list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions) * 20)
   
-  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.841, -.123, 1.947))
   expect_equal(as.vector(round(test_outcome$variance, 3))[1:3],c(.064, .000, .000))
@@ -438,8 +428,6 @@ test_that("true theta is 1, 0, 2, estimator is maximum_aposteriori, N(c(-1,2,-2)
   alpha[201:300,1:2] <- 0
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
   
-  eta <- NULL # only relevant for GPCM model
-  
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
@@ -450,7 +438,7 @@ test_that("true theta is 1, 0, 2, estimator is maximum_aposteriori, N(c(-1,2,-2)
   prior_form <- "normal"  
   prior_parameters <- list(mu = c(-1, 2, -2), Sigma = diag(number_dimensions))
   
-  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.672, .219, 1.682))
   expect_equal(as.vector(round(test_outcome$variance, 3))[1:3],c(.059, .000, .000))
@@ -474,8 +462,6 @@ test_that("true theta is 1, 0, 2, estimator is maximum_aposteriori, U(c(-1, -1, 
   alpha[201:300,1:2] <- 0
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
   
-  eta <- NULL # only relevant for GPCM model
-  
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
@@ -486,7 +472,7 @@ test_that("true theta is 1, 0, 2, estimator is maximum_aposteriori, U(c(-1, -1, 
   prior_form <- "uniform"  
   prior_parameters <- list(lower_bound = c(-1, -1, -1), upper_bound = c(1, 1, 1))
   
-  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.677, .059, 1.000))
   expect_equal(as.vector(round(test_outcome$variance, 3))[1:3],c(.063, .000, .000))
@@ -512,22 +498,20 @@ test_that("true theta is 1, 0, 2, estimator is maximum_likelihood", {
   alpha[201:300,1:2] <- 0
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
   
-  eta <- NULL # only relevant for GPCM model
-  
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
   estimator <- 'maximum_likelihood'
   information_summary <- 'determinant'
   
-  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = NULL, prior_parameters = NULL, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = NULL, prior_parameters = NULL, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.985, .019, 2.024))
   expect_equal(as.vector(round(test_outcome$variance, 3))[1:3],c(.066, .000, .000))
   expect_equal(length(test_outcome$answers), 300)
   
   # defining prior has no effect on outcome
-  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = "normal", prior_parameters = list(mu = c(0, 0, 0), Sigma = diag(number_dimensions) * 2), model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = "normal", prior_parameters = list(mu = c(0, 0, 0), Sigma = diag(number_dimensions) * 2), model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.985, .019, 2.024))
   expect_equal(as.vector(round(test_outcome$variance, 3))[1:3],c(.066, .000, .000))
@@ -551,8 +535,6 @@ test_that("true theta is 1, 0, 2, estimator is expected_aposteriori, N(c(0, 0, 0
   alpha[201:300,1:2] <- 0
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
   
-  eta <- NULL # only relevant for GPCM model
-  
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
@@ -562,8 +544,8 @@ test_that("true theta is 1, 0, 2, estimator is expected_aposteriori, N(c(0, 0, 0
   prior_form <- "normal"  
   prior_parameters <- list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions) * 20)
   
-  test_outcome_gauss_hermite <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, eap_estimation_procedure = "gauss_hermite_quad")
-  test_outcome_riemann <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, eap_estimation_procedure = "riemannsum")
+  test_outcome_gauss_hermite <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing, eap_estimation_procedure = "gauss_hermite_quad")
+  test_outcome_riemann <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing, eap_estimation_procedure = "riemannsum")
   
   # gauss hermite
   expect_equal(as.vector(round(test_outcome_gauss_hermite$estimate, 3)), c(.878, .305, 1.455))
@@ -593,8 +575,6 @@ test_that("true theta is 1, 0, 2, estimator is expected_aposteriori, N(c(-1, 1, 
   alpha[201:300,1:2] <- 0
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
   
-  eta <- NULL # only relevant for GPCM model
-  
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
@@ -604,8 +584,8 @@ test_that("true theta is 1, 0, 2, estimator is expected_aposteriori, N(c(-1, 1, 
   prior_form <- "normal"  
   prior_parameters <- list(mu = c(-1, 1, -2), Sigma = diag(number_dimensions))
   
-  test_outcome_gauss_hermite <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, eap_estimation_procedure = "gauss_hermite_quad")
-  test_outcome_riemann <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, eap_estimation_procedure = "riemannsum")
+  test_outcome_gauss_hermite <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing, eap_estimation_procedure = "gauss_hermite_quad")
+  test_outcome_riemann <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing, eap_estimation_procedure = "riemannsum")
   
   # gauss hermite
   expect_equal(as.vector(round(test_outcome_gauss_hermite$estimate, 3)), c(.583, .131, 1.609))
@@ -635,8 +615,6 @@ test_that("true theta is 1, 0, 2, estimator is expected_aposteriori, U(c(-4, -4,
   alpha[201:300,1:2] <- 0
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
   
-  eta <- NULL # only relevant for GPCM model
-  
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
@@ -646,7 +624,7 @@ test_that("true theta is 1, 0, 2, estimator is expected_aposteriori, U(c(-4, -4,
   prior_form <- "uniform"  
   prior_parameters <- list(lower_bound = c(-4, -4, -4), upper_bound = c(4, 4, 4))
   
-  test_outcome_riemann <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, eap_estimation_procedure = "riemannsum")
+  test_outcome_riemann <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing, eap_estimation_procedure = "riemannsum")
   
   # riemann
   expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), c(1.067, .196, 1.987))
@@ -671,8 +649,6 @@ test_that("true theta is 1, 0, 2, estimator is expected_aposteriori, U(c(-1, -1,
   alpha[201:300,1:2] <- 0
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
   
-  eta <- NULL # only relevant for GPCM model
-  
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
@@ -682,7 +658,7 @@ test_that("true theta is 1, 0, 2, estimator is expected_aposteriori, U(c(-1, -1,
   prior_form <- "uniform"  
   prior_parameters <- list(lower_bound = c(-1, -1, -1), upper_bound = c(1, 1, 1))
   
-  test_outcome_riemann <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, eap_estimation_procedure = "riemannsum", safe_eap = TRUE)
+  test_outcome_riemann <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing, eap_estimation_procedure = "riemannsum", safe_eap = TRUE)
   
   # riemann
   expect_equal(as.vector(round(test_outcome_riemann$estimate, 3)), c(.876, -.349, .939))
@@ -706,8 +682,6 @@ test_that("items load on three dimensions", {
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
   
-  eta <- NULL # only relevant for GPCM model
-  
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
@@ -718,7 +692,7 @@ test_that("items load on three dimensions", {
   prior_form = "normal"
   prior_parameters = list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions) * 20)
   
-  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.454, .719, 1.745))
   expect_equal(as.vector(round(test_outcome$variance, 3))[1:3],c(.178, -.088, -.081))
@@ -742,8 +716,6 @@ test_that("true theta is 2, 2, 2", {
   alpha[201:300,1:2] <- 0
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
   
-  eta <- NULL # only relevant for GPCM model
-  
   model <- '3PLM'
   start_items <- list(type = 'random', n = 3)
   stop_test <- list(max_n = 300)
@@ -753,7 +725,7 @@ test_that("true theta is 2, 2, 2", {
   prior_form = "normal"
   prior_parameters = list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions) * 20)
   
-  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(2.287, 1.825, 1.672))
   expect_equal(as.vector(round(test_outcome$variance, 3))[1:3],c(.11, .000, .000))
@@ -777,8 +749,6 @@ test_that("with constraints max_n 260", {
   alpha[201:300,1:2] <- 0
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
   
-  eta <- NULL # only relevant for GPCM model
-  
   model <- '3PLM'
   start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
   stop_test <- list(max_n = 260)
@@ -797,7 +767,7 @@ test_that("with constraints max_n 260", {
                            op = '><',
                            target = c(75, 90)))
   
-  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints_and_characts = list(characteristics = characteristics, constraints = constraints))
+  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing, constraints_and_characts = list(characteristics = characteristics, constraints = constraints))
   indices_administered <- as.numeric(sapply(names(test_outcome$answers), substring, 5))
   
   number_depression_items <- sum(indices_administered <= 100)
@@ -829,8 +799,6 @@ test_that("with constraints max_n 130", {
   alpha[201:300,1:2] <- 0
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
   
-  eta <- NULL # only relevant for GPCM model
-  
   model <- '3PLM'
   start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
   stop_test <- list(max_n = 130)
@@ -849,7 +817,7 @@ test_that("with constraints max_n 130", {
                            op = '><',
                            target = c(75, 90)))
   
-  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints_and_characts = list(characteristics = characteristics, constraints = constraints))
+  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing, constraints_and_characts = list(characteristics = characteristics, constraints = constraints))
   indices_administered <- as.numeric(sapply(names(test_outcome$answers), substring, 5))
   
   number_depression_items <- sum(indices_administered <= 100)
@@ -881,8 +849,6 @@ test_that("start n is zero, no constraints", {
   alpha[201:300,1:2] <- 0
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
   
-  eta <- NULL # only relevant for GPCM model
-  
   model <- '3PLM'
   start_items <- list(n = 0)
   stop_test <- list(max_n = 300)
@@ -892,7 +858,7 @@ test_that("start n is zero, no constraints", {
   prior_form = "normal"
   prior_parameters = list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions) * 20)
   
-  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, initital_estimate = rep(.2, number_dimensions), initial_variance = diag(number_dimensions) * 20)
+  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing, initital_estimate = rep(.2, number_dimensions), initial_variance = diag(number_dimensions) * 20)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(1.114, -0.018, 1.725))
   expect_equal(as.vector(round(test_outcome$variance, 3))[1:3],c(.068, .000, .000))
@@ -916,8 +882,6 @@ test_that("start n is zero, with constraints", {
   alpha[201:300,1:2] <- 0
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
   
-  eta <- NULL # only relevant for GPCM model
-  
   model <- '3PLM'
   start_items <- list(n = 0)
   stop_test <- list(max_n = 130)
@@ -936,7 +900,7 @@ test_that("start n is zero, with constraints", {
                            op = '><',
                            target = c(75, 90)))
   
-  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, constraints_and_characts = list(characteristics = characteristics, constraints = constraints, initital_estimate = rep(.2, number_dimensions), initial_variance = diag(number_dimensions) * 20))
+  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing, constraints_and_characts = list(characteristics = characteristics, constraints = constraints, initital_estimate = rep(.2, number_dimensions), initial_variance = diag(number_dimensions) * 20))
   indices_administered <- as.numeric(sapply(names(test_outcome$answers), substring, 5))
   
   number_depression_items <- sum(indices_administered <= 100)
@@ -968,8 +932,6 @@ test_that("start items fixed", {
   alpha[201:300,1:2] <- 0
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
   
-  eta <- NULL # only relevant for GPCM model
-  
   model <- '3PLM'
   start_items <- list(type = "fixed", item_keys = c("item4", "item2", "item1"), n = 3)
   stop_test <- list(max_n = 300)
@@ -979,7 +941,7 @@ test_that("start items fixed", {
   prior_form = "normal"
   prior_parameters = list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions) * 20)
   
-  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary, initital_estimate = rep(.2, number_dimensions), initial_variance = diag(number_dimensions) * 20)
+  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing, initital_estimate = rep(.2, number_dimensions), initial_variance = diag(number_dimensions) * 20)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(1.068, .190, 2.184))
   expect_equal(as.vector(round(test_outcome$variance, 3))[1:3],c(.067, .000, .000))
@@ -1001,8 +963,7 @@ test_that("stop rule is number of items", {
   guessing <- matrix(c(rep(.1, number_items / 2), rep(.2, number_items / 2)), ncol = 1, dimnames = list(item_keys, NULL))
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
-  eta <- NULL # only relevant for GPCM model
-  
+
   model <- '3PLM'
   start_items <- list(type = 'random', n = 5)
   stop_test <- list(max_n = 10)
@@ -1012,7 +973,7 @@ test_that("stop rule is number of items", {
   prior_form = "normal"
   prior_parameters = list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions))
   
-  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), .405)
   expect_equal(as.vector(round(test_outcome$variance, 3)), .315)
@@ -1033,8 +994,7 @@ test_that("stop rule is variance", {
   guessing <- matrix(c(rep(.1, number_items / 2), rep(.2, number_items / 2)), ncol = 1, dimnames = list(item_keys, NULL))
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
-  eta <- NULL # only relevant for GPCM model
-  
+
   model <- '3PLM'
   start_items <- list(type = 'random', n = 5)
   stop_test <- list(target = .5, max_n = 50)
@@ -1044,7 +1004,7 @@ test_that("stop rule is variance", {
   prior_form = "normal"
   prior_parameters = list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions))
   
-  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), 0.329)
   expect_equal(as.vector(round(test_outcome$variance, 3)), 0.47)
@@ -1068,8 +1028,7 @@ test_that("items that load on finished dimensions are not administered", {
   alpha[101:300, 3] <- 0
   
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
-  eta <- NULL # only relevant for GPCM model
-  
+
   model <- '3PLM'
   start_items <- list(type = 'random_by_dimension', n_by_dimension = 2, n = 6)
   stop_test <- list(target = c(.1, .1, 2), max_n = 100)
@@ -1079,7 +1038,7 @@ test_that("items that load on finished dimensions are not administered", {
   prior_form = "normal"
   prior_parameters = list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions) * 20)
   
-  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing)
   item_numbers <- sapply(names(test_outcome$answers), function(item) { as.numeric(substr(x = item, start = 5, stop = nchar(item))) })
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(-.635, .487, .482))
@@ -1101,8 +1060,7 @@ test_that("stop rule is variance and minimum number of items is taken into accou
   guessing <- matrix(c(rep(.1, number_items / 2), rep(.2, number_items / 2)), ncol = 1, dimnames = list(item_keys, NULL))
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions, dimnames = list(item_keys, NULL))
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
-  eta <- NULL # only relevant for GPCM model
-  
+
   model <- '3PLM'
   start_items <- list(type = 'random', n = 5)
   stop_test <- list(target = .5, max_n = 50, min_n = 10)
@@ -1112,7 +1070,7 @@ test_that("stop rule is variance and minimum number of items is taken into accou
   prior_form = "normal"
   prior_parameters = list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions))
   
-  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  test_outcome <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), 0.405)
   expect_equal(as.vector(round(test_outcome$variance, 3)), .315)
@@ -1137,8 +1095,6 @@ test_that("stop rule is cutoff", {
   alpha[201:300,1:2] <- 0
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1, dimnames = list(item_keys, NULL))
   
-  eta <- NULL # only relevant for GPCM model
-  
   model <- '3PLM'
   start_items <- list(type = 'random_by_dimension', n_by_dimension = 3, n = 9)
   stop_test <- list(max_n = 300, cutoffs = with_random_seed(2, matrix)(runif(900, 1, 2), ncol = 3))
@@ -1148,7 +1104,7 @@ test_that("stop rule is cutoff", {
   prior_form = "normal"
   prior_parameters = list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions) * 20)
   
-  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, guessing, eta, start_items, stop_test, estimator, information_summary)
+  test_outcome <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing)
   
   expect_equal(as.vector(round(test_outcome$estimate, 3)), c(.088, .047, -6.075))
   expect_equal(diag(round(test_outcome$variance, 3)), c(.214, .223, 5.241))

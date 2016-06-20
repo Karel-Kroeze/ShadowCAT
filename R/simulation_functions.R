@@ -140,13 +140,13 @@ simulate_answer <- function(theta, model, alpha, beta, guessing, item_keys) {
 #' @examples 
 #' # One dimension
 #' alpha_beta_one_dim <- simulate_testbank(model = "GPCM", number_items = 50, number_dimensions = 1, number_itemsteps = 3)
-#' test_shadowcat(true_theta = 2, prior_form = "normal", prior_parameters = list(mu = 0, Sigma = diag(1)), model = "SM", alpha = alpha_beta_one_dim$alpha, beta = alpha_beta_one_dim$beta, guessing = NULL, start_items = list(type = 'random', n = 3), stop_test = list(max_n = 20, target = 0.1), estimator = "maximum_aposteriori", information_summary = "posterior_determinant")
+#' test_shadowcat(true_theta = 2, prior_form = "normal", prior_parameters = list(mu = 0, Sigma = diag(1)), model = "SM", alpha = alpha_beta_one_dim$alpha, beta = alpha_beta_one_dim$beta, start_items = list(type = 'random', n = 3), stop_test = list(max_n = 20, target = 0.1), estimator = "maximum_aposteriori", information_summary = "posterior_determinant")
 #' 
 #' # Three dimensions
 #' alpha_beta_three_dim <- simulate_testbank(model = "GPCM", number_items = 100, number_dimensions = 3, number_itemsteps = 3)
-#' test_shadowcat(true_theta = c(0, 1, -.5), prior_form = "normal", prior_parameters = list(mu = c(0, 0, 0), Sigma = diag(3)), model = "SM", alpha = alpha_beta_three_dim$alpha, beta = alpha_beta_three_dim$beta, guessing = NULL, start_items = list(type = 'random', n = 3), stop_test = list(max_n = 60, target = c(.1, .1, .1)), estimator = "maximum_aposteriori", information_summary = "posterior_determinant")
+#' test_shadowcat(true_theta = c(0, 1, -.5), prior_form = "normal", prior_parameters = list(mu = c(0, 0, 0), Sigma = diag(3)), model = "SM", alpha = alpha_beta_three_dim$alpha, beta = alpha_beta_three_dim$beta, start_items = list(type = 'random', n = 3), stop_test = list(max_n = 60, target = c(.1, .1, .1)), estimator = "maximum_aposteriori", information_summary = "posterior_determinant")
 #' @export
-test_shadowcat <- function(true_theta, prior_form, prior_parameters, model, alpha, beta, guessing, eta = NULL, start_items, stop_test, estimator, information_summary, constraints_and_characts = NULL, lower_bound = NULL, upper_bound = NULL, safe_eap = FALSE, initital_estimate = rep(0, ncol(alpha)), initial_variance = diag(ncol(alpha)) * 25, eap_estimation_procedure = "riemannsum") {
+test_shadowcat <- function(true_theta, prior_form, prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing = NULL, eta = NULL, constraints_and_characts = NULL, lower_bound = NULL, upper_bound = NULL, safe_eap = FALSE, initital_estimate = rep(0, ncol(alpha)), initial_variance = diag(ncol(alpha)) * 25, eap_estimation_procedure = "riemannsum") {
   answers <- NULL
   next_item_and_theta_estimate <- shadowcat(answers = answers, estimate = initital_estimate, variance = as.vector(initial_variance), model = model, alpha = alpha, beta = beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters, guessing = guessing, eta = eta, constraints_and_characts = constraints_and_characts, lower_bound = lower_bound, upper_bound = upper_bound, safe_eap = safe_eap, eap_estimation_procedure = eap_estimation_procedure)
   
