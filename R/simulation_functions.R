@@ -124,7 +124,16 @@ simulate_answer <- function(theta, model, alpha, beta, guessing, item_keys) {
       guessing
   }
   
-  result()
+  validate <- function() {
+    if (length(theta) != ncol(alpha))
+      add_error("theta", "should have length equal to the number of columns of alpha")
+  }
+  
+  invalid_result <- function() {
+    list(errors = errors())
+  }
+  
+  validate_and_run()
 }
 
 
@@ -149,15 +158,29 @@ simulate_answer <- function(theta, model, alpha, beta, guessing, item_keys) {
 test_shadowcat <- function(true_theta, prior_form, prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing = NULL, eta = NULL, constraints_and_characts = NULL, lower_bound = NULL, upper_bound = NULL, safe_eap = FALSE, initital_estimate = rep(0, ncol(alpha)), initial_variance = diag(ncol(alpha)) * 25, eap_estimation_procedure = "riemannsum") {
   answers <- NULL
   next_item_and_theta_estimate <- shadowcat(answers = answers, estimate = initital_estimate, variance = as.vector(initial_variance), model = model, alpha = alpha, beta = beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters, guessing = guessing, eta = eta, constraints_and_characts = constraints_and_characts, lower_bound = lower_bound, upper_bound = upper_bound, safe_eap = safe_eap, eap_estimation_procedure = eap_estimation_procedure)
+  if (!is.null(next_item_and_theta_estimate$errors))
+    return(next_item_and_theta_estimate)
   
-  while (next_item_and_theta_estimate$continue_test) {
-    new_answer <- simulate_answer(theta = true_theta, model = model, alpha = alpha, beta = beta, guessing = guessing, item_keys = next_item_and_theta_estimate$key_new_item)
-    next_item_and_theta_estimate$answers[[next_item_and_theta_estimate$key_new_item]] <- new_answer
-    next_item_and_theta_estimate <- shadowcat(answers = as.list(next_item_and_theta_estimate$answers), estimate = next_item_and_theta_estimate$estimate, variance = next_item_and_theta_estimate$variance, model = model, alpha = alpha, beta = beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters, guessing = guessing, eta = eta, constraints_and_characts = constraints_and_characts, lower_bound = lower_bound, upper_bound = upper_bound, safe_eap = safe_eap, eap_estimation_procedure = eap_estimation_procedure)  
+  result <- function() {
+    while (next_item_and_theta_estimate$continue_test) {
+      new_answer <- simulate_answer(theta = true_theta, model = model, alpha = alpha, beta = beta, guessing = guessing, item_keys = next_item_and_theta_estimate$key_new_item)
+      next_item_and_theta_estimate$answers[[next_item_and_theta_estimate$key_new_item]] <- new_answer
+      next_item_and_theta_estimate <- shadowcat(answers = as.list(next_item_and_theta_estimate$answers), estimate = next_item_and_theta_estimate$estimate, variance = next_item_and_theta_estimate$variance, model = model, alpha = alpha, beta = beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters, guessing = guessing, eta = eta, constraints_and_characts = constraints_and_characts, lower_bound = lower_bound, upper_bound = upper_bound, safe_eap = safe_eap, eap_estimation_procedure = eap_estimation_procedure)  
+    }
+    next_item_and_theta_estimate$variance <- matrix(next_item_and_theta_estimate$variance, ncol = ncol(alpha))
+    next_item_and_theta_estimate
   }
   
-  next_item_and_theta_estimate$variance <- matrix(next_item_and_theta_estimate$variance, ncol = ncol(alpha))
-  next_item_and_theta_estimate
+  validate <- function() {
+    if (length(true_theta) != ncol(alpha))
+      add_error("theta", "should have length equal to the number of columns of alpha")
+  }
+  
+  invalid_result <- function() {
+    list(errors = errors())
+  }
+  
+  validate_and_run()
 }
 
 

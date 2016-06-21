@@ -55,14 +55,14 @@ test_that("one dimension, one itemstep, one answer", {
 test_that("three dimensions, four itemsteps, one_answer", {
   number_items <- 50
   alpha_beta <- with_random_seed(1, simulate_testbank)(model = "GPCM", number_items = number_items, number_dimensions = 3, number_itemsteps = 4)
-  answer <- with_random_seed(1, simulate_answer)(theta = 2, model = "GPCM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = NULL, item_keys = "item5")
-  expect_equal(answer, 3)
+  answer <- with_random_seed(1, simulate_answer)(theta = c(1, 0, 2), model = "GPCM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = NULL, item_keys = "item5")
+  expect_equal(answer, 4)
 })
 
 test_that("three dimensions, four itemsteps, five answers", {
   alpha_beta <- with_random_seed(1, simulate_testbank)(model = "GPCM", number_items = 50, number_dimensions = 3, number_itemsteps = 4)
-  answer <- with_random_seed(1, simulate_answer)(theta = 2, model = "GPCM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = NULL, item_keys = c("item5", "item2", "item8", "item1", "item18"))
-  expect_equal(answer, c(3, 3, 3, 4, 3))
+  answer <- with_random_seed(1, simulate_answer)(theta = c(-2, 2, 3), model = "GPCM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = NULL, item_keys = c("item5", "item2", "item8", "item1", "item18"))
+  expect_equal(answer, c(4, 4, 3, 4, 1))
 })
 
 test_that("with guessing", {
@@ -71,6 +71,45 @@ test_that("with guessing", {
   guessing <- matrix(rep(.25, number_items), dimnames = list(str_c("item", 1:number_items)))
   answer <- with_random_seed(1, simulate_answer)(theta = 2, model = "3PLM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = guessing, item_keys = "item5")
   expect_equal(answer, 1)
+})
+
+test_that("invalid input", {
+  number_items <- 50
+  alpha_beta <- with_random_seed(1, simulate_testbank)(model = "3PLM", number_items = number_items, number_dimensions = 1, number_itemsteps = 1)
+  guessing <- matrix(rep(.25, number_items), dimnames = list(str_c("item", 1:number_items)))
+  error_message_theta <- with_random_seed(1, simulate_answer)(theta = c(1, 1, 1), model = "3PLM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = guessing, item_keys = "item5")
+  expect_equal(error_message_theta$errors$theta, "should have length equal to the number of columns of alpha")
+})
+
+context("test test_shadowcat")
+
+test_that("invalid input", {
+  # define true theta for simulation of answers
+  true_theta <- c(1, 0, 2)
+  
+  # define item characteristics
+  number_items <- 300
+  number_dimensions <- 3
+  number_answer_categories <- 2 # can only be 2 for 3PLM model
+  item_keys <- str_c("item", 1:number_items)
+  model <- '3PLM'
+  
+  alpha_beta <- simulate_testbank(model = model, number_items = number_items, number_dimensions = number_dimensions, number_itemsteps = number_answer_categories - 1)
+  
+  start_items <- list(type = 'random', n = 3)
+  stop_test <- list(max_n = 300)
+  estimator <- 'maximum_aposteriori'
+  information_summary <- 'posterior_determinant'
+  
+  # define prior
+  prior_form <- "uniform"  
+  prior_parameters <- list(lower_bound = c(-1, -1, -1), upper_bound = c(1, 1, 1))
+  
+  error_message_true_theta <- test_shadowcat(true_theta = 2, prior_form = prior_form, prior_parameters = prior_parameters, model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary)
+  expect_equal(error_message_true_theta$errors$theta, "should have length equal to the number of columns of alpha")
+  
+  error_message_true_theta <- test_shadowcat(true_theta = true_theta, prior_form = "exponential", prior_parameters = prior_parameters, model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary)
+  expect_equal(error_message_true_theta$errors$prior_form, "of unknown type")
 })
 
 

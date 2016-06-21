@@ -400,7 +400,7 @@ test_that("true theta is 1, 0, 2, estimator is maximum_aposteriori, N(c(0,0,0), 
   estimator <- 'maximum_aposteriori'
   information_summary <- 'posterior_determinant'
   
-  # define prior covariance matrix
+  # define prior
   prior_form <- "normal"  
   prior_parameters <- list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions) * 20)
   
@@ -434,7 +434,7 @@ test_that("true theta is 1, 0, 2, estimator is maximum_aposteriori, N(c(-1,2,-2)
   estimator <- 'maximum_aposteriori'
   information_summary <- 'posterior_determinant'
   
-  # define prior covariance matrix
+  # define prior
   prior_form <- "normal"  
   prior_parameters <- list(mu = c(-1, 2, -2), Sigma = diag(number_dimensions))
   
@@ -468,7 +468,7 @@ test_that("true theta is 1, 0, 2, estimator is maximum_aposteriori, U(c(-1, -1, 
   estimator <- 'maximum_aposteriori'
   information_summary <- 'posterior_determinant'
   
-  # define prior covariance matrix
+  # define prior
   prior_form <- "uniform"  
   prior_parameters <- list(lower_bound = c(-1, -1, -1), upper_bound = c(1, 1, 1))
   
@@ -688,7 +688,7 @@ test_that("items load on three dimensions", {
   estimator <- 'maximum_aposteriori'
   information_summary <- 'posterior_determinant'
   
-  # define prior covariance matrix
+  # define prior
   prior_form = "normal"
   prior_parameters = list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions) * 20)
   
@@ -1131,7 +1131,7 @@ test_that("invalid input", {
   estimator <- 'maximum_aposteriori'
   information_summary <- 'posterior_determinant'
   
-  # define prior covariance matrix
+  # define prior
   prior_form = "normal"
   prior_parameters = list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions) * 20)
   
