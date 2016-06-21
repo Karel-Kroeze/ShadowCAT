@@ -76,9 +76,17 @@ test_that("with guessing", {
 test_that("invalid input", {
   number_items <- 50
   alpha_beta <- with_random_seed(1, simulate_testbank)(model = "3PLM", number_items = number_items, number_dimensions = 1, number_itemsteps = 1)
-  guessing <- matrix(rep(.25, number_items), dimnames = list(str_c("item", 1:number_items)))
-  error_message_theta <- with_random_seed(1, simulate_answer)(theta = c(1, 1, 1), model = "3PLM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = guessing, item_keys = "item5")
-  expect_equal(error_message_theta$errors$theta, "should have length equal to the number of columns of alpha")
+  guessing <- matrix(rep(.25, number_items), dimnames = list(str_c("i", 1:number_items)))
+  error_messages <- simulate_answer(theta = c(1, 1, 1), model = "PLM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = guessing, item_keys = "ite5")
+  expect_equal(error_messages$errors$theta, "should have length equal to the number of columns of alpha")
+  expect_equal(error_messages$errors$model, "of unknown type")
+  expect_equal(error_messages$errors$alpha_beta_eta_guessing, "should have equal row names, in same order")
+  expect_equal(error_messages$errors$item_keys, "unknown")
+  
+  error_message_alpha <- simulate_answer(theta = c(1, 1, 1), model = "PLM", alpha = .1, beta = alpha_beta$beta, guessing = guessing, item_keys = "ite5")
+  error_message_beta <- simulate_answer(theta = c(1, 1, 1), model = "PLM", alpha = alpha_beta$alpha, beta = .1, guessing = guessing, item_keys = "ite5")
+  expect_equal(error_message_alpha$errors$alpha, "should be a matrix with item keys as row names")
+  expect_equal(error_message_beta$errors$beta, "should be a matrix with item keys as row names")
 })
 
 context("test test_shadowcat")

@@ -125,8 +125,22 @@ simulate_answer <- function(theta, model, alpha, beta, guessing, item_keys) {
   }
   
   validate <- function() {
+    if (!is.matrix(alpha) || is.null(rownames(alpha)))
+      return(add_error("alpha", "should be a matrix with item keys as row names"))
+    if (!is.matrix(beta) || is.null(rownames(beta)))
+      return(add_error("beta", "should be a matrix with item keys as row names"))
     if (length(theta) != ncol(alpha))
       add_error("theta", "should have length equal to the number of columns of alpha")
+    if (model %not_in% c("3PLM", "GPCM", "SM", "GRM"))
+      add_error("model", "of unknown type")
+    if (!na_only_end_rows(beta))
+      add_error("beta", "can only contain NA at the end of rows, no values allowed after an NA in a row")
+    if (!is.null(guessing) && (!is.matrix(guessing) || ncol(guessing) != 1 || is.null(rownames(guessing))))
+      add_error("guessing", "should be a single column matrix with item keys as row names")
+    if (!row_names_are_equal(rownames(alpha), list(alpha, beta, guessing)))
+      add_error("alpha_beta_eta_guessing", "should have equal row names, in same order")
+    if (item_keys %not_in% rownames(alpha))
+      add_error("item_keys", "unknown")
   }
   
   invalid_result <- function() {
