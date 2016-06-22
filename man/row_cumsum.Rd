@@ -2,25 +2,28 @@
 % Please edit documentation in R/general_shadowcat_functions.R
 \name{row_cumsum}
 \alias{row_cumsum}
-\title{compute cumulative sums for each row of a matrix}
+\title{Cumulative row sums}
 \usage{
 row_cumsum(x)
 }
 \arguments{
-\item{x}{a vector or matrix; if vector, the vector will be converted to a matrix with one column}
+\item{x}{Vector or matrix. If vector, the vector will be converted to a matrix with one column.}
 }
 \value{
-matrix containing cumulative sums for each row
+Matrix containing cumulative sums for each row.
 }
 \description{
-compute cumulative sums for each row of a matrix
+Compute cumulative sums for each row of a matrix.
 }
 \examples{
-should_be_equal1 <- ShadowCAT:::row_cumsum(matrix(1:12, ncol = 3))[2,] == c(2, 8, 18);
-should_be_equal2 <- ShadowCAT:::row_cumsum(1:12) == matrix(1:12, ncol = 1);
-should_be_equal3 <- ShadowCAT:::row_cumsum(matrix(1:4, nrow = 1)) == matrix(c(1, 3, 6, 10), nrow = 1);
-sum(should_be_equal1) == 3 || stop("wrong")
-sum(should_be_equal2) == 12 || stop("wrong")
-sum(should_be_equal3) == 4 || stop("wrong")
+ShadowCAT:::row_cumsum(matrix(1:12, ncol = 3))
+ShadowCAT:::row_cumsum(1:12)
+ShadowCAT:::row_cumsum(matrix(1:4, nrow = 1))
+
+\dontshow{
+all(ShadowCAT:::row_cumsum(matrix(1:12, ncol = 3))[2,] == c(2, 8, 18)) || stop("wrong")
+all(should_be_equal2 <- ShadowCAT:::row_cumsum(1:12) == matrix(1:12, ncol = 1)) || stop("wrong")
+all(should_be_equal3 <- ShadowCAT:::row_cumsum(matrix(1:4, nrow = 1)) == matrix(c(1, 3, 6, 10), nrow = 1)) || stop("wrong")
+}
 }
 

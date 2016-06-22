@@ -2,28 +2,31 @@
 % Please edit documentation in R/general_shadowcat_functions.R
 \name{remove_rows_outside_bounds}
 \alias{remove_rows_outside_bounds}
-\title{remove rows of a matrix that contain one or more values outside specified bounds}
+\title{Remove rows outside bounds}
 \usage{
 remove_rows_outside_bounds(matrix_to_evaluate, lower_bound, upper_bound)
 }
 \arguments{
-\item{matrix_to_evaluate}{Matrix for which the rows with values outside the bounds should be removed}
+\item{matrix_to_evaluate}{Matrix for which the rows with values outside the bounds should be removed.}
 
-\item{lower_bound}{Vector with lower bounds; length should be equal to the number of columns of matrix_to_evaluate}
+\item{lower_bound}{Vector with lower bounds for each column; length should be equal to the number of columns of matrix_to_evaluate.}
 
-\item{upper_bound}{Vector with upper bounds; length should be equal to the number of columns of matrix_to_evaluate}
+\item{upper_bound}{Vector with upper bounds for each column; length should be equal to the number of columns of matrix_to_evaluate.}
 }
 \value{
-matrix_to_evaluate without the rows that contain values outside the specified bounds
+\code{matrix_to_evaluate} without the rows that contain values outside the specified bounds.
 }
 \description{
-remove rows of a matrix that contain one or more values outside specified bounds
+Remove rows of a matrix that contain one or more values outside specified bounds.
 }
 \examples{
-should_be_equal1 <- ShadowCAT:::remove_rows_outside_bounds(matrix(-3:3), lower_bound = -2, upper_bound = 2) == matrix(-2:2);
-sum(should_be_equal1) == 5 || stop("wrong")
-matrix_to_evaluate <- expand.grid(list(-3:3, -2:2));
-should_be_equal2 <- ShadowCAT:::remove_rows_outside_bounds(matrix_to_evaluate, lower_bound = c(-2, -3), upper_bound = c(2, 1)) == matrix_to_evaluate[c(2:6, 9:13, 16:20, 23:27), ];
-sum(should_be_equal2) == 40 || stop("wrong")
+ShadowCAT:::remove_rows_outside_bounds(matrix(-3:3), lower_bound = -2, upper_bound = 2)
+ShadowCAT:::remove_rows_outside_bounds(expand.grid(list(-3:3, -2:2)), lower_bound = c(-2, -3), upper_bound = c(2, 1))
+
+\dontshow{
+all(ShadowCAT:::remove_rows_outside_bounds(matrix(-3:3), lower_bound = -2, upper_bound = 2) == matrix(-2:2)) || stop("wrong")
+matrix_to_evaluate <- expand.grid(list(-3:3, -2:2))
+all(ShadowCAT:::remove_rows_outside_bounds(matrix_to_evaluate, lower_bound = c(-2, -3), upper_bound = c(2, 1)) == matrix_to_evaluate[c(2:6, 9:13, 16:20, 23:27), ]) || stop("wrong")
+}
 }
 

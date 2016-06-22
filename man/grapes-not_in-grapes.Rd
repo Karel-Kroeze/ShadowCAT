@@ -2,7 +2,7 @@
 % Please edit documentation in R/general_shadowcat_functions.R
 \name{\%not_in\%}
 \alias{\%not_in\%}
-\title{not in}
+\title{Not in}
 \usage{
 x \%not_in\% y
 }
@@ -12,13 +12,15 @@ x \%not_in\% y
 \item{y}{vector for which it is too be checked if it contains the values in x}
 }
 \value{
-a vector with elements equal to TRUE for each element of x that is not in y
+Vector of same length as that of \code{x}, with elements equal to \code{TRUE} for each element of x that is not in y.
 }
 \description{
-not in
+Get logical vector indicating if there no match for the left operant in the right operant.
 }
 \examples{
-should_be_equal <- ShadowCAT:::`\%not_in\%`(c("a", "b", "g", "k", "b"), c("a", "b", "c")) == c(FALSE, FALSE, TRUE, TRUE, FALSE);
-sum(should_be_equal) == 5 || stop("wrong")
+ShadowCAT:::`\%not_in\%`(c("a", "b", "g", "k", "b"), c("a", "b", "c"))
+\dontshow{
+all(ShadowCAT:::`\%not_in\%`(c("a", "b", "g", "k", "b"), c("a", "b", "c")) == c(FALSE, FALSE, TRUE, TRUE, FALSE)) || stop("wrong")
+}
 }
 

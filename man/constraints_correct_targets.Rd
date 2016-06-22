@@ -2,17 +2,17 @@
 % Please edit documentation in R/general_shadowcat_functions.R
 \name{constraints_correct_targets}
 \alias{constraints_correct_targets}
-\title{Check whether the target elements within the constraints elements are correct}
+\title{Check target in constraints}
 \usage{
 constraints_correct_targets(constraints)
 }
 \arguments{
-\item{constraints}{List of constraints}
+\item{constraints}{List of constraints.}
 }
 \value{
-TRUE if the target elements in constraints are correct, FALSE otherwise
+\code{TRUE} if the target elements in constraints are correct, \code{FALSE} otherwise.
 }
 \description{
-Check whether the target elements within the constraints elements are correct
+Check whether the target elements within the constraints elements are correct.
 }
 

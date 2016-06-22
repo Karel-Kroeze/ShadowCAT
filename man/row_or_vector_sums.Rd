@@ -2,21 +2,26 @@
 % Please edit documentation in R/general_shadowcat_functions.R
 \name{row_or_vector_sums}
 \alias{row_or_vector_sums}
-\title{get row sums of matrix or sum of vector}
+\title{Row sum or vector sum}
 \usage{
 row_or_vector_sums(x)
 }
 \arguments{
-\item{x}{matrix of which row sums are to be obtained, or vector of which sum is to be obtained}
+\item{x}{Matrix of which row sums are to be obtained, or vector of which sum is to be obtained.}
 }
 \value{
-row sums or sum of x
+Row sums or sum of x.
 }
 \description{
-get row sums of matrix or sum of vector
+Get row sums of matrix or sum of vector.
 }
 \examples{
+ShadowCAT:::row_or_vector_sums(matrix(c(1:10), nrow = 2))
+ShadowCAT:::row_or_vector_sums(1:5)
+
+\dontshow{
 all(ShadowCAT:::row_or_vector_sums(matrix(c(1:10), nrow = 2)) == c(25, 30)) || stop("wrong");
 ShadowCAT:::row_or_vector_sums(1:5) == 15 || stop("wrong")
+}
 }
 

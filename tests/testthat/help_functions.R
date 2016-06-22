@@ -1,7 +1,10 @@
+#' Run function with set.seed
+#' 
 #' Wraption given function to seeds random with given seed. Resets seed after.
-#' @param seed the seed to use
-#' @param fn the function to call using the given seed
-#' @return function that wraps the given function
+#' 
+#' @param seed The seed to use.
+#' @param fn The function to call using the given seed.
+#' @return Function that wraps the given function.
 #' @examples
 #' foo <- with_random_seed(2, function(a) { runif(a) })
 #' foo(2) == foo(2)

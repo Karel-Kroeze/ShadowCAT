@@ -7,18 +7,22 @@
 get_subset(x, subset)
 }
 \arguments{
-\item{x}{vector or matrix from which a subset is to be taken}
+\item{x}{Vector or matrix from which a subset is to be taken.}
 
-\item{subset}{indices of elements/rows to be selected}
+\item{subset}{Vector with indices of elements/rows to be selected.}
 }
 \value{
-subset of x
+Subset of x.
 }
 \description{
-Get subset based on indices
+Get a subset of a vector or matrix based on a vector of (row) indices.
 }
 \examples{
-all(ShadowCAT:::get_subset(c(1, 4, 2, 6, 3), c(2, 5, 3)) == c(4, 3, 2)) || stop("wrong")
-all(ShadowCAT:::get_subset(matrix(c(1, 4, 2, 6, 3, 8, 6, 9, 0, 1), ncol = 2), c(2, 5, 3)) == matrix(c(4, 3, 2, 6, 1, 9), ncol = 2)) || stop("wrong")
+ShadowCAT:::get_subset(c(1, 4, 2, 6, 3), subset = c(2, 5, 3))
+ShadowCAT:::get_subset(matrix(c(1, 4, 2, 6, 3, 8, 6, 9, 0, 1), ncol = 2), subset = c(2, 5, 3))
+\dontshow{
+all(ShadowCAT:::get_subset(c(1, 4, 2, 6, 3), subset = c(2, 5, 3)) == c(4, 3, 2)) || stop("wrong")
+all(ShadowCAT:::get_subset(matrix(c(1, 4, 2, 6, 3, 8, 6, 9, 0, 1), ncol = 2), subset = c(2, 5, 3)) == matrix(c(4, 3, 2, 6, 1, 9), ncol = 2)) || stop("wrong")
+}
 }
 

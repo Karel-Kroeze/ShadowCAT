@@ -1,26 +1,6 @@
 #' Latent trait estimation
 #' 
-#' maximum likelihood, maximum a posteriori and expected a posteriori estimates.
-#' 
 #' Obtains a latent trait estimate and variance of the estimate.
-#' 
-#' @section Maximum Likelihood and Maximum A Posteriori:
-#' Maximum Likelihood and Maximum A-Posteriori estimates are based on a Newton-type non-linear minimization algorithm,
-#' and handled with package \code{\link{nlm}}.
-#'  
-#' @section Expected A Posteriori:
-#' Expected A-Posteriori estimates require the repeated evaluation of Q nested integrals, where Q is the dimensionality of the test.
-#' This is performed with an adaptive Riemannsum or multidimensional Gauss-Hermite quadrature, the latter handled by package MultiGHQuad, see the documentation there for further details.
-#' Note that the number of quadrature points used rises exponentially with the dimensionality of the test - use of EAP estimates with 
-#' a 3+ dimensional test may not be a good idea.
-#' 
-#' @section Weighted Maximum Likelihood:
-#' TODO: UPDATE WITH REFERENCES - MORE PRECISE DETAILS.
-#' Note that WML estimation is not included. There is no satisfying solution to multidimensional Weighted Maximum Likelihood Estimation,
-#' current WML estimators as used in other sources do not account for the covariance between dimensions. 
-#' 
-#' @section Variance:
-#' Covariance matrix of the estimate is added to the estimate as an attribute.
 #' 
 #' @examples 
 #' number_dimensions <- 1
@@ -60,25 +40,13 @@
 #' estimator <- "expected_aposteriori"
 #' system.time(ShadowCAT:::estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item))
 #' 
-#' @param estimate Vector containing theta estimate, with covariance matrix as an attribute
-#' @param answers Vector with person answers
-#' @param prior_form String indicating the form of the prior; one of "normal" or "uniform"
-#' @param prior_parameters List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...), or 
-#' the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
-#' be in matrix form.
-#' @param model String, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively
-#' @param administered Vector with indices of administered items
-#' @param number_dimensions Number of dimensions
-#' @param estimator Type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"
-#' @param alpha Matrix of alpha paramteres
-#' @param beta Matrix of beta paramteres
-#' @param guessing Matrix of guessing parameters
-#' @param number_itemsteps_per_item Vector containing the number of non missing cells per row of the beta matrix
-#' @param safe_eap Only relevant if estimator is espected_aposteriori. 
-#' TRUE if estimator should switch to maximum aposteriori if the integration algorithm results in an error.
-#' @param eap_estimation_procedure String indicating the estimation procedure if estimator is expected aposteriori. One of "riemannsum" for integration via Riemannsum or
-#' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. 
-#' @return vector containing the updated estimate with the covariance matrix as attribute
+#' @param estimate Vector containing current theta estimate, with covariance matrix as an attribute.
+#' @param answers Vector with answers to administered items.
+#' @param administered Vector with indices of administered items.
+#' @param number_dimensions Number of dimensions.
+#' @param number_itemsteps_per_item Vector containing the number of non missing cells per row of the beta matrix.
+#' @inheritParams shadowcat
+#' @return Vector containing the updated estimate with the covariance matrix as attribute.
 #' @importFrom MultiGHQuad init.quad eval.quad
 #' @importFrom stats nlm constrOptim
 estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, safe_eap = FALSE, eap_estimation_procedure = "riemannsum") {

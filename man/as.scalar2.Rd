@@ -2,19 +2,17 @@
 % Please edit documentation in R/general_shadowcat_functions.R
 \name{as.scalar2}
 \alias{as.scalar2}
-\title{Return as a scalar
-NULL -> NA}
+\title{Return as a scalar}
 \usage{
 as.scalar2(obj)
 }
 \arguments{
-\item{obj}{Any object}
+\item{obj}{Any object.}
 }
 \value{
-NA (if NULL) or obj as a scalar
+\code{obj} as a scalar; \code{NA} if \code{obj} is \code{NULL}.
 }
 \description{
-Return as a scalar
-NULL -> NA
+Same as \code{opencpu.encode::as.scalar}, except that it also turns \code{NULL} into \code{NA}.
 }
 

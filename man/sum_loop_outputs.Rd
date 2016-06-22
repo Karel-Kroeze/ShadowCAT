@@ -2,29 +2,32 @@
 % Please edit documentation in R/general_shadowcat_functions.R
 \name{sum_loop_outputs}
 \alias{sum_loop_outputs}
-\title{get sum of objects returned by a loop, added to a starting object}
+\title{Sum loop outputs}
 \usage{
 sum_loop_outputs(start_object, loop_vector, FUN, ...)
 }
 \arguments{
-\item{start_object}{the object to which the sum is to be added}
+\item{start_object}{The object to which the sum is to be added.}
 
-\item{loop_vector}{the vector to be looped over}
+\item{loop_vector}{The vector to be looped over.}
 
-\item{FUN}{a function of the loop_vector values, returning the object to be added to start_object at each iteration. First argument should be loop values argument}
+\item{FUN}{Function of the loop_vector values, returning the object to be added to \code{start_object} at each iteration. First argument should be loop values argument.}
 
-\item{...}{any additional arguments to FUN}
+\item{...}{Any additional arguments to FUN.}
 }
 \value{
-sum of objects returned by a loop, added to starting object
+Sum of objects returned by a loop, added to starting object.
 }
 \description{
-get sum of objects returned by a loop, added to a starting object
+Get sum of objects returned by a loop, added to a starting object.
 }
 \examples{
-matrix_example <- matrix(1:6, ncol = 2);
-should_be_equal <- ShadowCAT:::sum_loop_outputs(matrix(0, 2, 2), 1:3, FUN = function(item, matrix_example) { matrix_example[item,] \%*\% t(matrix_example[item,]) }, matrix_example = matrix_example) == 
-                   (matrix_example[1,] \%*\% t(matrix_example[1,]) + matrix_example[2,] \%*\% t(matrix_example[2,]) + matrix_example[3,] \%*\% t(matrix_example[3,]));
-sum(should_be_equal) == 4 || stop("wrong")
+matrix_example <- matrix(1:6, ncol = 2)
+ShadowCAT:::sum_loop_outputs(start_object = matrix(0, 2, 2), loop_vector = 1:3, FUN = function(item, matrix_example) { matrix_example[item,] \%*\% t(matrix_example[item,]) }, matrix_example = matrix_example)
+
+ \dontshow{
+all(ShadowCAT:::sum_loop_outputs(start_object = matrix(0, 2, 2), loop_vector = 1:3, FUN = function(item, matrix_example) { matrix_example[item,] \%*\% t(matrix_example[item,]) }, matrix_example = matrix_example) == 
+                   (matrix_example[1,] \%*\% t(matrix_example[1,]) + matrix_example[2,] \%*\% t(matrix_example[2,]) + matrix_example[3,] \%*\% t(matrix_example[3,]))) || stop("wrong")
+}
 }
 

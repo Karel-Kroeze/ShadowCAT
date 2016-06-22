@@ -1,18 +1,21 @@
-#' Creates a list with characteristics and constraints which can be used in lp function from lpSolve package.
+#' Format characteristics and constraints
+#' 
+#' Get a list with characteristics and constraints which can be used in lp function from lpSolve package.
 #' 
 #' @section Characteristics specification:
-#' \code{characteristics} should be specified as a data.frame of characteristics. Each row indicates the characteristics of
-#' one item. Each column indicates how all items score on a certain characteristic.
-#' Characteristics may be categorical or numeric. 
+#' \code{characteristics} should be specified as a data frame of characteristics. Each row indicates the characteristics of
+#' one item. Each column indicates how all items score on a certain characteristic. Characteristics may be categorical or numeric. 
 #' 
 #' @section Constraint specification:
-#' \code{constraints} should be specified as a list of constraints, each constraint is a list with three named values;
-#' \code{name} the column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as \code{name/value},
-#' where \code{name} is the column name of the characteristic and \code{value} is the specific level of the characteristic this constraint applies to. 
-#' \code{op} the logical operator to be used. Valid options are "<", "=", ">" and "><".
-#' \code{target} the target value, numeric. For categorical characteristics, it indicates the number of items of the relevant characteristic that should be administered ("="), or
-#' minimally (">"), maximally ("<"), or minimally and maximally ("><"; vector with two values required) administered. For numeric characteristics,
-#' it indicates the minimum and/or maximum sum allowed over all administered items, e.g., maximum time allowed.
+#' \code{constraints} should be specified as a list of constraints, each constraint is a list with three named values:
+#' \describe{
+#' \item{\code{name}}{The column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as \code{name/value},
+#' where \code{name} is the column name of the characteristic and \code{value} is the specific level of the characteristic this constraint applies to.} 
+#' \item{\code{op}}{The logical operator to be used. Valid options are \code{"<"}, \code{"="}, \code{">"} and \code{"><"}.}
+#' \item{\code{target}}{The target value, numeric. For categorical characteristics, it indicates the number of items of the relevant characteristic that should be administered (\code{"="}), or
+#' minimally (\code{">"}), maximally (\code{"<"}), or minimally and maximally (\code{"><"}; vector with two values required) administered. For numeric characteristics,
+#' it indicates the minimum and/or maximum sum allowed over all administered items, e.g., maximum time allowed.}
+#' }
 #' 
 #' @section Return object:
 #' The constraints and characteristics in lp format will be stored within a list. Setting the constraints and characteristics
@@ -30,7 +33,7 @@
 #' 
 #' # set up some dummy characteristics.
 #' content <- sample(c('algebra','physics','calculus'), number_items, TRUE)
-#' time <- rnorm(number_items)
+#' time <- runif(number_items)
 #' exclusive <- rep(0, number_items)
 #' exclusive[sample(number_items, 4)] <- 1
 #' 
@@ -53,13 +56,13 @@
 #'        target = 2))
 #' 
 #' # get list of characteristics and constraintrs in lp format
-#' chars_constraints_lp <- ShadowCAT:::constraints_lp_format(max_n, number_items, characteristics, constraints)
+#' ShadowCAT:::constraints_lp_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
 #' 
-#' @param max_n test length at which testing should stop
-#' @param number_items number of items available in the item bank
-#' @param characteristics \code{data.frame} with characteristics, see \code{details}.
-#' @param constraints \code{list} of constraints, see \code{details}.
-#' @return list containing characteristics and constraints in lp format; 
+#' @param max_n Test length at which testing should stop.
+#' @param number_items Number of items available in the item bank.
+#' @param characteristics Data frame with characteristics, see \code{details}.
+#' @param constraints List of constraints, see \code{details}.
+#' @return List containing characteristics and constraints in lp format; 
 #' the maximum test length is always included as an additional constraint; see \code{details}.
 constraints_lp_format <- function(max_n, number_items, characteristics = NULL, constraints = NULL) {
   result <- function() {
@@ -78,7 +81,7 @@ constraints_lp_format <- function(max_n, number_items, characteristics = NULL, c
     numeric_characteristics_list <- lapply(colnames(characteristics), 
                                            function(key) {   
                                              if (is.character(characteristics[[key]]) || is.factor(characteristics[[key]])) {
-                                               dummy_matrix <- sapply(unique(characteristics[[key]]), categorical_to_dummy, categorical_vector = characteristics[[key]])
+                                               dummy_matrix <- categorical_to_dummy(characteristics[[key]])
                                                colnames(dummy_matrix) <- paste(key, unique(characteristics[[key]]), sep = '/')
                                                dummy_matrix 
                                             }  

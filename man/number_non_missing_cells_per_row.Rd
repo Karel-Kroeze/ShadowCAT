@@ -2,21 +2,24 @@
 % Please edit documentation in R/general_shadowcat_functions.R
 \name{number_non_missing_cells_per_row}
 \alias{number_non_missing_cells_per_row}
-\title{get the number of non-NA cells per row of a matrix}
+\title{Count non-\code{NA} per row}
 \usage{
 number_non_missing_cells_per_row(x)
 }
 \arguments{
-\item{x}{a matrix}
+\item{x}{Matrix.}
 }
 \value{
-number of non-NA cells per row
+Vector with the number of non-\code{NA} cells per row.
 }
 \description{
-get the number of non-NA cells per row of a matrix
+Get the number of non-\code{NA} cells per row of a matrix.
 }
 \examples{
-should_be_equal <- ShadowCAT:::number_non_missing_cells_per_row(matrix(c(1,2,NA,NA,2,3,NA,2,3), ncol = 3)) == c(1, 3, 2);
-sum(should_be_equal) == 3 || stop("wrong")
+ShadowCAT:::number_non_missing_cells_per_row(matrix(c(1,2,NA,NA,2,3,NA,2,3), ncol = 3))
+
+\dontshow{
+all(ShadowCAT:::number_non_missing_cells_per_row(matrix(c(1,2,NA,NA,2,3,NA,2,3), ncol = 3)) == c(1, 3, 2)) || stop("wrong")
+}
 }
 

@@ -2,30 +2,40 @@
 % Please edit documentation in R/general_shadowcat_functions.R
 \name{lapply_return_array}
 \alias{lapply_return_array}
-\title{lapply with array as output}
+\title{Lapply with array output}
 \usage{
 lapply_return_array(x, dim, FUN, ...)
 }
 \arguments{
-\item{x}{a vector or list; see ? lapply for details}
+\item{x}{A vector or list; see \code{\link{lapply}} for details.}
 
-\item{dim}{vector with dimensions of the returned array}
+\item{dim}{Vector with dimensions of the returned array.}
 
-\item{FUN}{function to be applied to each element of X; see ? lapply for details}
+\item{FUN}{Function to be applied to each element of x; see \code{\link{lapply}} for details.}
 
-\item{...}{any additional arguments to FUN}
+\item{...}{Any additional arguments to FUN.}
 }
 \value{
-lapply output, with output converted to array
+As for \code{\link{lapply}}, but with output converted to array.
 }
 \description{
-lapply with array as output
+Same as lapply, but output of lapply is converted to array.
 }
 \examples{
-matrix_example <- matrix(1:9, ncol = 3); 
+matrix_example <- matrix(1:9, ncol = 3)
 ShadowCAT:::lapply_return_array(x = 1:3, 
                                 dim = c(3, 3, 3), 
                                 FUN = function(i, matrix_example) { matrix_example[i,] \%*\% t(matrix_example[i,]) }, 
-                                matrix_example = matrix_example)[1, 1, 1] == 1 || stop("wrong")
+                                matrix_example = matrix_example)
+\dontshow{
+array_out <- ShadowCAT:::lapply_return_array(x = 1:3, 
+                                            dim = c(3, 3, 3), 
+                                            FUN = function(i, matrix_example) { matrix_example[i,] \%*\% t(matrix_example[i,]) }, 
+                                            matrix_example = matrix_example)
+list_out <- lapply(X = 1:3,
+                   FUN = function(i, matrix_example) { matrix_example[i,] \%*\% t(matrix_example[i,]) },
+                   matrix_example = matrix_example)
+all(array_out[,,1] == list_out[[1]] && array_out[,,2] == list_out[[2]] && array_out[,,3] == list_out[[3]]) || stop("wrong")
+}
 }
 

@@ -2,21 +2,27 @@
 % Please edit documentation in R/general_shadowcat_functions.R
 \name{na_only_end_vector}
 \alias{na_only_end_vector}
-\title{Check whether NA's exist only at the end of a vector, that is, whether there are no values after the first NA in the vector}
+\title{Check \code{NA} pattern in vector}
 \usage{
 na_only_end_vector(x)
 }
 \arguments{
-\item{x}{Vector}
+\item{x}{Vector.}
 }
 \value{
-TRUE if there are only NA's at the end of the vector or no NA at all; FALSE otherwise
+\code{TRUE} if there are only \code{NA}'s at the end of the vector or no \code{NA} at all; \code{FALSE} otherwise.
 }
 \description{
-Check whether NA's exist only at the end of a vector, that is, whether there are no values after the first NA in the vector
+Check whether \code{NA}'s exist only at the end of a vector, that is, 
+whether there are no values after the first \code{NA} in the vector.
 }
 \examples{
+ShadowCAT:::na_only_end_vector(c(1:3, NA, NA))
+ShadowCAT:::na_only_end_vector(c(1:3, NA, NA, 6))
+
+\dontshow{
 ShadowCAT:::na_only_end_vector(c(1:3, NA, NA)) || stop("wrong");
 ShadowCAT:::na_only_end_vector(c(1:3, NA, NA, 6)) == FALSE || stop("wrong")
+}
 }
 

@@ -3,6 +3,15 @@
 #' Get the key of the new item to administer and an update of the theta estimate, based on given answer set.
 #'
 #' @details
+#' Maximum Likelihood and Maximum A-Posteriori estimates are computed using minimization algorithms
+#' as performed by \code{\link{nlm}} and \code{\link{constrOptim}}. Expected A-Posteriori estimates require the 
+#' repeated evaluation of Q nested integrals, where Q is the dimensionality of the test.
+#' This is performed with an adaptive Riemannsum or multidimensional Gauss-Hermite quadrature, the latter 
+#' handled by package \code{MultiGHQuad}, see the documentation there for further details.
+#' Note that the number of grid points used increases strongly with the dimensionality of the test. Use of Expected A-Posteriori 
+#' estimates with a 3+ dimensional test may not be a good idea. Note that WML estimation is not included. There is no satisfying solution to multidimensional 
+#' Weighted Maximum Likelihood Estimation. Current WML estimators as used in other sources do not account for the covariance between dimensions.
+#' 
 #' The argument \code{constraints_and_characts} should be NULL (no constraints on item selection) or a list of characteristics and constraints (Shadow Testing; Van der Linden, 2000).
 #' The list should consist of two elements, named \code{characteristics} and \code{constraints}.
 #' \code{characteristics} should be specified as a data frame of characteristics. Each row indicates the characteristics of
@@ -53,7 +62,7 @@
 #' \code{cutoffs} is a matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
 #' administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at a certain iteration, test terminates; 
 #' \code{NULL} means no cut off values.
-#' @param estimator Type of estimator to be used, one of \code{"maximum_likelihood"}, \code{"maximum_aposteriori"}, or \code{"expected_aposteriori"}.
+#' @param estimator Type of estimator to be used, one of \code{"maximum_likelihood"}, \code{"maximum_aposteriori"}, or \code{"expected_aposteriori"}; see \code{details}.
 #' @param information_summary How to summarize Fisher information, used for selection of item with maximum information. One of
 #' \code{"determinant"}, \code{"posterior_determinant"}, \code{"trace"}, \code{"posterior_trace"}, or \code{"posterior_expected_kullback_leibler"}.
 #' @param prior_form String indicating the form of the prior; one of \code{"normal"} or \code{"uniform"}. Not required if estimator is maximum likelihood.

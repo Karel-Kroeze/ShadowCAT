@@ -2,7 +2,7 @@
 % Please edit documentation in R/general_shadowcat_functions.R
 \name{constraints_correct_structure}
 \alias{constraints_correct_structure}
-\title{Check whether elements of constraints have correct structure}
+\title{Check structure of constraints}
 \usage{
 constraints_correct_structure(constraints)
 }
@@ -10,9 +10,9 @@ constraints_correct_structure(constraints)
 \item{constraints}{List of constraints.}
 }
 \value{
-TRUE if elements are lists of length three with correct names, FALSE otherwise
+\code{TRUE} if elements are lists of length three with correct names, \code{FALSE} otherwise.
 }
 \description{
-Check whether elements of constraints have correct structure
+Check whether elements of constraints have correct structure.
 }
 

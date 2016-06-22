@@ -2,19 +2,19 @@
 % Please edit documentation in R/general_shadowcat_functions.R
 \name{characteristics_correct_format}
 \alias{characteristics_correct_format}
-\title{Check whether characteristics is data frame with correct number of rows}
+\title{Check class and number of rows of characteristics}
 \usage{
 characteristics_correct_format(characteristics, number_items)
 }
 \arguments{
-\item{characteristics}{Data frame with characteristics}
+\item{characteristics}{Data frame with characteristics.}
 
-\item{number_items}{Number of items in the item bank}
+\item{number_items}{Number of items in the item bank.}
 }
 \value{
-TRUE if characteristics is data frame with correct number of rows, FALSE otherwise
+\code{TRUE} if characteristics is data frame with correct number of rows, \code{FALSE} otherwise.
 }
 \description{
-Check whether characteristics is data frame with correct number of rows
+Check whether characteristics is data frame with correct number of rows.
 }
 

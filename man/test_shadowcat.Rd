@@ -55,7 +55,7 @@ where \code{target} is a vector indicating the maximum acceptable variance per d
 administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at a certain iteration, test terminates; 
 \code{NULL} means no cut off values.}
 
-\item{estimator}{Type of estimator to be used, one of \code{"maximum_likelihood"}, \code{"maximum_aposteriori"}, or \code{"expected_aposteriori"}.}
+\item{estimator}{Type of estimator to be used, one of \code{"maximum_likelihood"}, \code{"maximum_aposteriori"}, or \code{"expected_aposteriori"}; see \code{details}.}
 
 \item{information_summary}{How to summarize Fisher information, used for selection of item with maximum information. One of
 \code{"determinant"}, \code{"posterior_determinant"}, \code{"trace"}, \code{"posterior_trace"}, or \code{"posterior_expected_kullback_leibler"}.}

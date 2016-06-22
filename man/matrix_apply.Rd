@@ -2,27 +2,29 @@
 % Please edit documentation in R/general_shadowcat_functions.R
 \name{matrix_apply}
 \alias{matrix_apply}
-\title{apply with input and output converted to matrix}
+\title{Matrix apply}
 \usage{
 matrix_apply(x, margin, FUN, ...)
 }
 \arguments{
-\item{x}{a vector or matrix; if vector, the vector will be converted to a matrix}
+\item{x}{Vector or matrix; if vector, the vector will be converted to a matrix.}
 
-\item{margin}{a vector giving the subscripts which the function will be applied over, see ?apply for details}
+\item{margin}{Vector giving the subscripts the function will be applied over, see \code{\link{apply}} for details.}
 
-\item{FUN}{the funcion to be applied}
+\item{FUN}{The funcion to be applied, see \code{\link{apply}} for details.}
 
-\item{...}{any additional arguments to FUN}
+\item{...}{Any additional arguments to FUN.}
 }
 \value{
-same a apply, but always in matrix format
+Output of apply, but always in matrix format.
 }
 \description{
-apply with input and output converted to matrix
+Apply with input and output converted to matrix
 }
 \examples{
-ShadowCAT:::matrix_apply(c(1:5, NA), 2, sum, na.rm = TRUE) == 15 || stop("wrong")
-is.matrix(ShadowCAT:::matrix_apply(c(1:5, NA), 2, sum, na.rm = TRUE)) || stop("wrong")
+ShadowCAT:::matrix_apply(c(1:5, NA), 2, sum, na.rm = TRUE)
+\dontshow{
+ShadowCAT:::matrix_apply(c(1:5, NA), 2, sum, na.rm = TRUE) == matrix(15) || stop("wrong")
+}
 }
 

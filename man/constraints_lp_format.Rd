@@ -2,43 +2,44 @@
 % Please edit documentation in R/constraints_lp_format.R
 \name{constraints_lp_format}
 \alias{constraints_lp_format}
-\title{Creates a list with characteristics and constraints which can be used in lp function from lpSolve package.}
+\title{Format characteristics and constraints}
 \usage{
 constraints_lp_format(max_n, number_items, characteristics = NULL,
   constraints = NULL)
 }
 \arguments{
-\item{max_n}{test length at which testing should stop}
+\item{max_n}{Test length at which testing should stop.}
 
-\item{number_items}{number of items available in the item bank}
+\item{number_items}{Number of items available in the item bank.}
 
-\item{characteristics}{\code{data.frame} with characteristics, see \code{details}.}
+\item{characteristics}{Data frame with characteristics, see \code{details}.}
 
-\item{constraints}{\code{list} of constraints, see \code{details}.}
+\item{constraints}{List of constraints, see \code{details}.}
 }
 \value{
-list containing characteristics and constraints in lp format; 
+List containing characteristics and constraints in lp format; 
 the maximum test length is always included as an additional constraint; see \code{details}.
 }
 \description{
-Creates a list with characteristics and constraints which can be used in lp function from lpSolve package.
+Get a list with characteristics and constraints which can be used in lp function from lpSolve package.
 }
 \section{Characteristics specification}{
 
-\code{characteristics} should be specified as a data.frame of characteristics. Each row indicates the characteristics of
-one item. Each column indicates how all items score on a certain characteristic.
-Characteristics may be categorical or numeric.
+\code{characteristics} should be specified as a data frame of characteristics. Each row indicates the characteristics of
+one item. Each column indicates how all items score on a certain characteristic. Characteristics may be categorical or numeric.
 }
 
 \section{Constraint specification}{
 
-\code{constraints} should be specified as a list of constraints, each constraint is a list with three named values;
-\code{name} the column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as \code{name/value},
-where \code{name} is the column name of the characteristic and \code{value} is the specific level of the characteristic this constraint applies to. 
-\code{op} the logical operator to be used. Valid options are "<", "=", ">" and "><".
-\code{target} the target value, numeric. For categorical characteristics, it indicates the number of items of the relevant characteristic that should be administered ("="), or
-minimally (">"), maximally ("<"), or minimally and maximally ("><"; vector with two values required) administered. For numeric characteristics,
-it indicates the minimum and/or maximum sum allowed over all administered items, e.g., maximum time allowed.
+\code{constraints} should be specified as a list of constraints, each constraint is a list with three named values:
+\describe{
+\item{\code{name}}{The column name of the characteristic this constraint applies to. For categorical characteristics the level should be specified as \code{name/value},
+where \code{name} is the column name of the characteristic and \code{value} is the specific level of the characteristic this constraint applies to.} 
+\item{\code{op}}{The logical operator to be used. Valid options are \code{"<"}, \code{"="}, \code{">"} and \code{"><"}.}
+\item{\code{target}}{The target value, numeric. For categorical characteristics, it indicates the number of items of the relevant characteristic that should be administered (\code{"="}), or
+minimally (\code{">"}), maximally (\code{"<"}), or minimally and maximally (\code{"><"}; vector with two values required) administered. For numeric characteristics,
+it indicates the minimum and/or maximum sum allowed over all administered items, e.g., maximum time allowed.}
+}
 }
 
 \section{Return object}{
@@ -60,7 +61,7 @@ number_items <- 50
 
 # set up some dummy characteristics.
 content <- sample(c('algebra','physics','calculus'), number_items, TRUE)
-time <- rnorm(number_items)
+time <- runif(number_items)
 exclusive <- rep(0, number_items)
 exclusive[sample(number_items, 4)] <- 1
 
@@ -83,7 +84,7 @@ constraints <- list(
        target = 2))
 
 # get list of characteristics and constraintrs in lp format
-chars_constraints_lp <- ShadowCAT:::constraints_lp_format(max_n, number_items, characteristics, constraints)
+ShadowCAT:::constraints_lp_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
 
 }
 

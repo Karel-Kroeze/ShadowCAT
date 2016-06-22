@@ -2,23 +2,25 @@
 % Please edit documentation in R/general_shadowcat_functions.R
 \name{categorical_to_dummy}
 \alias{categorical_to_dummy}
-\title{transform categorical vector into dummy variables}
+\title{Transform categorical vector into dummy variables}
 \usage{
-categorical_to_dummy(unique_values, categorical_vector)
+categorical_to_dummy(x)
 }
 \arguments{
-\item{unique_values}{a vector containing the unique values of the categorical vector}
-
-\item{categorical_vector}{the categorical vector to be transformed into dummy variables}
+\item{x}{Categorical vector to be transformed into dummy variables.}
 }
 \value{
-a matrix containing the dummy variables, number of columns (dummies) equals the number of unique values
+Matrix containing the dummy variables.
 }
 \description{
-transform categorical vector into dummy variables
+Transform categorical vector into dummy variables, with number of dummy
+variables equal to the number of unique values in the categorical vector.
 }
 \examples{
-should_be_equal <- ShadowCAT:::categorical_to_dummy(c("a", "b", "c"), rep(c("a", "b", "c"), 3))[1,] == rep(c(1, 0, 0), 3);
-sum(should_be_equal) == 9 || stop("wrong")
+x <- rep(c("a", "b", "c"), 3)
+ShadowCAT:::categorical_to_dummy(x)
+\dontshow{
+all(ShadowCAT:::categorical_to_dummy(x)[1,] == rep(c(1, 0, 0), 3)) || stop("wrong")
+}
 }
 

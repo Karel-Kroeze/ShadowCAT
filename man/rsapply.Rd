@@ -2,19 +2,20 @@
 % Please edit documentation in R/general_shadowcat_functions.R
 \name{rsapply}
 \alias{rsapply}
-\title{Recursive list apply, given a bunch of vectors, creates lists of lists with the elements as keys
- and values determined by fn.}
+\title{Recursive list apply}
 \usage{
 rsapply(..., fn)
 }
 \arguments{
-\item{...}{vectors to loop over}
+\item{...}{Vectors to loop over.}
 
-\item{fn}{function to execute for each leaf}
+\item{fn}{Function to execute for each leaf.}
+}
+\value{
+Lists of lists with the elements as keys and values determined by fn.
 }
 \description{
-Recursive list apply, given a bunch of vectors, creates lists of lists with the elements as keys
- and values determined by fn.
+Given a bunch of vectors, creates lists of lists with the elements as keys and values determined by fn.
 }
 \examples{
 ShadowCAT:::rsapply(c('a', 'b'), c('f', 'g'), fn=function(x,y) c(x, y))

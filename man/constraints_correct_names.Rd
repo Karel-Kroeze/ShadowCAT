@@ -2,19 +2,19 @@
 % Please edit documentation in R/general_shadowcat_functions.R
 \name{constraints_correct_names}
 \alias{constraints_correct_names}
-\title{Check whether the name elements within the constraints elements are correct}
+\title{Check names in constraints}
 \usage{
 constraints_correct_names(constraints, characteristics)
 }
 \arguments{
-\item{constraints}{List of constraints}
+\item{constraints}{List of constraints.}
 
-\item{characteristics}{Data frame with characteristics}
+\item{characteristics}{Data frame with characteristics.}
 }
 \value{
-TRUE if the name elements in constraints are correct, FALSE otherwise
+\code{TRUE} if the name elements in constraints are correct, \code{FALSE} otherwise.
 }
 \description{
-Check whether the name elements within the constraints elements are correct
+Check whether the name elements within the constraints elements are correct.
 }
 

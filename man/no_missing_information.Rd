@@ -2,7 +2,7 @@
 % Please edit documentation in R/general_shadowcat_functions.R
 \name{no_missing_information}
 \alias{no_missing_information}
-\title{Check whether characteristics and constraints are either both NULL or both not NULL}
+\title{Check both \code{NULL} or not \code{NULL}}
 \usage{
 no_missing_information(characteristics, constraints)
 }
@@ -12,9 +12,9 @@ no_missing_information(characteristics, constraints)
 \item{constraints}{List of constraints.}
 }
 \value{
-TRUE if characteristics and constraints are either both NULL or both not NULL, FALSE otherwise
+\code{TRUE} if \code{characteristics} and \code{constraints} are either both \code{NULL} or both not \code{NULL}, \code{FALSE} otherwise.
 }
 \description{
-Check whether characteristics and constraints are either both NULL or both not NULL
+Check whether characteristics and constraints are either both \code{NULL} or both not \code{NULL}.
 }
 
