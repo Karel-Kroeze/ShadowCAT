@@ -1,18 +1,22 @@
-#' Compute the expected aposteriori estimate of the latent trait theta, with the posterior covariance matrix as an attribute
+#' Compute EAP estimate with Riemannsum
 #' 
+#' Compute the expected aposteriori estimate and covariance matrix of the latent trait theta. 
 #' Integration approximation occurs via a Riemannsumm, where grid points can be adapted to the location of the
-#' posterior distribution
+#' posterior distribution.
 #' 
-#' @param dimension Number of dimensions
-#' @param likelihood Likelihood function, first argument should be theta
-#' @param prior_form String indicating the form of the prior; one of "normal" or "uniform"
-#' @param prior_parameters List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...), or 
-#' the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
-#' be in matrix form.
+#' @param dimension Number of dimensions of theta.
+#' @param likelihood Likelihood function of theta, where first argument should be theta.
+#' @param prior_form String indicating the form of the prior; one of \code{"normal"} or \code{"uniform"}.
+#' @param prior_parameters List containing mu and Sigma of the normal prior: \code{list(mu = ..., Sigma = ...)}, or 
+#' the upper and lower bound of the uniform prior: \code{list(lower_bound = ..., upper_bound = ...)}.
+#' The list element \code{Sigma} should always be in matrix form. List elements \code{mu}, \code{lower_bound}, and \code{upper_bound} should always be vectors.
+#' The length of \code{mu}, \code{lower_bound}, and \code{upper_bound} should be equal to the number of dimensions.
+#' For uniform prior, true theta should fall within \code{lower_bound} and \code{upper_bound} and be not too close to one of these bounds, in order to prevent errors. 
 #' @param adapt List containing mu and Sigma for the adaptation of the grid points: list(mu = ..., Sigma = ...).
-#' If NULL, adaptation with normal prior is based on the prior parameters, and no adaptation is made with uniform prior.
-#' @param number_gridpoints Value indicating the number of grid points to use for the Riemannsum
-#' @param ... Any additional arguments to likelihood
+#' If \code{NULL}, adaptation with normal prior is based on the prior parameters, and no adaptation is made with uniform prior.
+#' @param number_gridpoints Value indicating the number of grid points per dimension to use for the Riemannsum.
+#' @param ... Any additional arguments to \code{likelihood}.
+#' @return Expected aposteriori estimate of the latent trait theta, with its covariance matrix as an attribute.
 #' @importFrom mvtnorm dmvnorm
 #' @importFrom Matrix nearPD
 get_eap_estimate_riemannsum <- function(dimension, likelihood, prior_form, prior_parameters, adapt = NULL, number_gridpoints = 50, ...) {

@@ -40,7 +40,7 @@ Setting the function argument \code{safe_eap} to \code{TRUE} ensures that the es
 
 \item{number_items}{Number of items in the test bank.}
 
-\item{number_dimensions}{Number of dimensions.}
+\item{number_dimensions}{Number of dimensions of theta.}
 
 \item{estimator}{Type of estimator to be used, one of \code{"maximum_likelihood"}, \code{"maximum_aposteriori"}, or \code{"expected_aposteriori"}; see \code{details}.}
 

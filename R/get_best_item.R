@@ -9,7 +9,7 @@
 #' @param available Vector with indices of yet available items.
 #' @param administered Vector with indices of administered items.
 #' @param number_items Number of items in the test bank.
-#' @param number_dimensions Number of dimensions.
+#' @param number_dimensions Number of dimensions of theta.
 #' @param number_itemsteps_per_item Vector containing the number of non missing cells per row of the beta matrix.
 #' @inheritParams shadowcat
 #' @return Item index of best item.
