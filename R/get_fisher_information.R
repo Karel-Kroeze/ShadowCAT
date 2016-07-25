@@ -2,26 +2,18 @@
 #' 
 #' Fisher Information (expected information) per item.
 #' 
-#' Calculates the Fisher Information (expected information) of the given test, and returns a three dimensional array
-#' of information matrices, where dimensions one and two run along the Q dimensions of the model, and three runs along items.
-#' 
-#' Fisher Information is given as;
+#' @details
+#' Fisher Information is given as:
 #' \deqn{\mathcal{I}(\theta) = - \operatorname{E} \left[\left. \frac{\partial^2}{\partial\theta^2} \log f(X;\theta)\right|\theta \right]}{minus expectation of second derivative of the Log-Likelihood of f(theta)}
-#' 
-#' And is calculated as the weighted sum of second derivatives for all response categories. Information for multiple items is simply the sum of 
+#' and is calculated as the weighted sum of second derivatives for all response categories. Information for multiple items is simply the sum of 
 #' the individual information matrices.
 #' 
-#' Note: get_fisher_information always returns the 'raw' information, information given by prior distributions is added by the calling functions, 
-#' and get_fisher_information(..) is normally called internally.
+#' Note: get_fisher_information always returns the 'raw' information; information given by prior distributions is added by the calling functions.
 #' 
-#' @param estimate vector containing theta estimate
-#' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
-#' @param number_dimensions number of dimensions
-#' @param alpha matrix containing the alpha parameters
-#' @param beta matrix containing the beta parameters
-#' @param guessing matrix containing the quessing parameters
-#' @param number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix
-#' @return array with an information matrix for each item (QxQxK).
+#' @param number_dimensions Number of dimensions of theta.
+#' @param number_itemsteps_per_item Vector containing the number of non missing cells per row of the beta matrix.
+#' @inheritParams shadowcat
+#' @return Three dimensional array of information matrices, where dimensions one and two run along the Q dimensions of the model, and three runs along items.
 get_fisher_information <- function(estimate, model, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item) {
   # Fisher Information
   # minus the expectation of the second derivative of the log-likelihood

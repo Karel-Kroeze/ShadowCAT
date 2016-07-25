@@ -8,37 +8,38 @@ get_fisher_information(estimate, model, number_dimensions, alpha, beta,
   guessing, number_itemsteps_per_item)
 }
 \arguments{
-\item{estimate}{vector containing theta estimate}
+\item{estimate}{Vector with current estimate of latent trait theta. Length should be equal to the number of dimensions.}
 
-\item{model}{string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
+\item{model}{One of \code{"3PLM"}, \code{"GPCM"}, \code{"SM"} or \code{"GRM"}, for the three-parameter logistic, generalized partial credit, sequential or graded response model, respectively.}
 
-\item{number_dimensions}{number of dimensions}
+\item{number_dimensions}{Number of dimensions of theta.}
 
-\item{alpha}{matrix containing the alpha parameters}
+\item{alpha}{Matrix of alpha parameters, one column per dimension, one row per item. Row names should contain the item keys. 
+Note that so called within-dimensional models still use an alpha matrix, they simply have only one non-zero loading per item.}
 
-\item{beta}{matrix containing the beta parameters}
+\item{beta}{Matrix of beta parameters, one column per item step, one row per item. Row names should contain the item keys. 
+Note that \code{shadowcat} expects answer categories to be sequential, and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, 
+and equal to the position of the 'location' of the beta parameter in the beta matrix.
+The matrix should have a number of columns equal to the largest number of item steps over items, items with fewer answer categories should be 
+right-padded with \code{NA}. \code{NA} values between answer categories are not allowed, and will lead to errors.
+Beta matrix can be set to \code{NULL} if model is GPCM and eta is defined.}
 
-\item{guessing}{matrix containing the quessing parameters}
+\item{guessing}{Matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.}
 
-\item{number_itemsteps_per_item}{vector containing the number of non missing cells per row of the beta matrix}
+\item{number_itemsteps_per_item}{Vector containing the number of non missing cells per row of the beta matrix.}
 }
 \value{
-array with an information matrix for each item (QxQxK).
+Three dimensional array of information matrices, where dimensions one and two run along the Q dimensions of the model, and three runs along items.
 }
 \description{
 Fisher Information (expected information) per item.
 }
 \details{
-Calculates the Fisher Information (expected information) of the given test, and returns a three dimensional array
-of information matrices, where dimensions one and two run along the Q dimensions of the model, and three runs along items.
-
-Fisher Information is given as;
+Fisher Information is given as:
 \deqn{\mathcal{I}(\theta) = - \operatorname{E} \left[\left. \frac{\partial^2}{\partial\theta^2} \log f(X;\theta)\right|\theta \right]}{minus expectation of second derivative of the Log-Likelihood of f(theta)}
-
-And is calculated as the weighted sum of second derivatives for all response categories. Information for multiple items is simply the sum of 
+and is calculated as the weighted sum of second derivatives for all response categories. Information for multiple items is simply the sum of 
 the individual information matrices.
 
-Note: get_fisher_information always returns the 'raw' information, information given by prior distributions is added by the calling functions, 
-and get_fisher_information(..) is normally called internally.
+Note: get_fisher_information always returns the 'raw' information; information given by prior distributions is added by the calling functions.
 }
 
