@@ -1,6 +1,6 @@
 #' Format characteristics and constraints
 #' 
-#' Get a list with characteristics and constraints which can be used in lp function from lpSolve package.
+#' Get a list with characteristics and constraints which can be used in \code{lp} function from \code{lpSolve} package.
 #' 
 #' @section Characteristics specification:
 #' \code{characteristics} should be specified as a data frame of characteristics. Each row indicates the characteristics of

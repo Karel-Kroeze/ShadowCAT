@@ -21,7 +21,7 @@ List containing characteristics and constraints in lp format;
 the maximum test length is always included as an additional constraint; see \code{details}.
 }
 \description{
-Get a list with characteristics and constraints which can be used in lp function from lpSolve package.
+Get a list with characteristics and constraints which can be used in \code{lp} function from \code{lpSolve} package.
 }
 \section{Characteristics specification}{
 
