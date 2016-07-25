@@ -18,7 +18,7 @@ get_best_item(information_summary, lp_constraints, lp_characters, estimate,
 
 \item{lp_characters}{Data frame with constraint characteristics in \code{\link{lp}} format: the \code{lp_chars} from the list returned by \code{\link{constraints_lp_format}}. \code{NULL} means no constraints.}
 
-\item{estimate}{Vector with current estimate of latent trait theta. Length should be equal to the number of dimensions.}
+\item{estimate}{Vector containing current theta estimate, with covariance matrix as an attribute.}
 
 \item{model}{One of \code{"3PLM"}, \code{"GPCM"}, \code{"SM"} or \code{"GRM"}, for the three-parameter logistic, generalized partial credit, sequential or graded response model, respectively.}
 

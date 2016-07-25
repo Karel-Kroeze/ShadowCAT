@@ -4,6 +4,7 @@
 #' 
 #' @param lp_constraints Data frame with constraints in \code{\link{lp}} format: the \code{lp_constraints} from the list returned by \code{\link{constraints_lp_format}}. \code{NULL} means no constraints.
 #' @param lp_characters Data frame with constraint characteristics in \code{\link{lp}} format: the \code{lp_chars} from the list returned by \code{\link{constraints_lp_format}}. \code{NULL} means no constraints.
+#' @param estimate Vector containing current theta estimate, with covariance matrix as an attribute.
 #' @param answers Vector with answers to administered items.
 #' @param available Vector with indices of yet available items.
 #' @param administered Vector with indices of administered items.

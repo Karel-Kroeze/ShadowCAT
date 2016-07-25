@@ -12,7 +12,7 @@
 #' estimates with a 3+ dimensional test may not be a good idea. Note that WML estimation is not included. There is no satisfying solution to multidimensional 
 #' Weighted Maximum Likelihood Estimation. Current WML estimators as used in other sources do not account for the covariance between dimensions.
 #' 
-#' The argument \code{constraints_and_characts} should be NULL (no constraints on item selection) or a list of characteristics and constraints (Shadow Testing; Van der Linden, 2000).
+#' The argument \code{constraints_and_characts} should be \code{NULL} (no constraints on item selection) or a list of characteristics and constraints (Shadow Testing; Van der Linden, 2000).
 #' The list should consist of two elements, named \code{characteristics} and \code{constraints}.
 #' \code{characteristics} should be specified as a data frame of characteristics. Each row indicates the characteristics of
 #' one item. Each column indicates how all items score on a certain characteristic. Characteristics may be categorical or numeric. 
