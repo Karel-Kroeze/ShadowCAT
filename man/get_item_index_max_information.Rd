@@ -2,40 +2,39 @@
 % Please edit documentation in R/get_item_index_max_information.R
 \name{get_item_index_max_information}
 \alias{get_item_index_max_information}
-\title{Maximum Information item selection}
+\title{Find item maximum information}
 \usage{
 get_item_index_max_information(available, item_information, estimate, stop_test,
   alpha, number_answers)
 }
 \arguments{
-\item{available}{vector with indices of available items}
+\item{available}{Vector with indices of available items.}
 
-\item{item_information}{vector with summarized information of each yet available item, with zeros for administered items (returned by get_summarized_information() with pad = TRUE)}
+\item{item_information}{Vector with summarized information of each yet available item, with zeros for administered items 
+(as returned by \code{\link{get_summarized_information}} with \code{pad = TRUE}).}
 
-\item{estimate}{Vector containing the theta estimate, with its covariance matrix as an attribute}
+\item{estimate}{Vector containing the theta estimate, with its covariance matrix as an attribute.}
 
-\item{stop_test}{rule for when to stop providing new items to patient; should be a list of the form
-list(target = ..., max_n = ..., min_n = ..., cutoffs = ...), 
-where max_n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule), 
-target = vector of maximum acceptable variances per dimension; NULL means no variance target,
-min_n = minimum test length; NULL means no mimimum test length,
-cutoffs = matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
-administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at certain iteration, test stops; 
-NULL means no cut off values}
+\item{stop_test}{List indicating rules for when to terminate the test. Should be a list of the form
+\code{list(target = ..., max_n = ..., min_n = ..., cutoffs = ...)}, 
+where \code{target} is a vector indicating the maximum acceptable variance per dimension; \code{NULL} means no variance target,
+\code{max_n} is the test length at which the test should be terminated (even if the target has not been reached yet), 
+\code{min_n} is the minimum test length; \code{NULL} means no mimimum test length, and
+\code{cutoffs} is a matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
+administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at a certain iteration, test terminates; 
+\code{NULL} means no cut off values.}
 
-\item{alpha}{Matrix of alpha parameters, one column per dimension, one row per item. Row names should contain the item keys. Note that so called within-dimensional models still use an alpha matrix, they simply 
-have only one non-zero loading per item.}
+\item{alpha}{Matrix of alpha parameters, one column per dimension, one row per item. Row names should contain the item keys. 
+Note that so called within-dimensional models still use an alpha matrix, they simply have only one non-zero loading per item.}
 
-\item{number_answers}{The number of answers given to the test (length of administered)}
+\item{number_answers}{The number of answers given thus far (length of \code{administered}).}
 }
 \value{
-item Index of item with maximum information. For multi dimensional models, items that only load on dimensions for
-which the variance target has already been reached, will not be returned
+Index of item with maximum information.
 }
 \description{
-Naive item selection based on maximum information only.
-}
-\details{
-Selects the item with the highest information.
+Get the index of the item with maximum information from the available items. 
+For multi dimensional models, items that only load on dimensions for
+which the variance target has already been reached, will not be returned.
 }
 

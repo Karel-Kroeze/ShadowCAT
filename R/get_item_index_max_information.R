@@ -1,24 +1,16 @@
-#' Maximum Information item selection
+#' Find item maximum information
 #' 
-#' Naive item selection based on maximum information only.
+#' Get the index of the item with maximum information from the available items. 
+#' For multi dimensional models, items that only load on dimensions for
+#' which the variance target has already been reached, will not be returned.
 #' 
-#' Selects the item with the highest information.
-#' @param available vector with indices of available items
-#' @param item_information vector with summarized information of each yet available item, with zeros for administered items (returned by get_summarized_information() with pad = TRUE)
-#' @param estimate Vector containing the theta estimate, with its covariance matrix as an attribute
-#' @param stop_test rule for when to stop providing new items to patient; should be a list of the form
-#' list(target = ..., max_n = ..., min_n = ..., cutoffs = ...), 
-#' where max_n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule), 
-#' target = vector of maximum acceptable variances per dimension; NULL means no variance target,
-#' min_n = minimum test length; NULL means no mimimum test length,
-#' cutoffs = matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
-#' administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at certain iteration, test stops; 
-#' NULL means no cut off values
-#' @param alpha Matrix of alpha parameters, one column per dimension, one row per item. Row names should contain the item keys. Note that so called within-dimensional models still use an alpha matrix, they simply 
-#' have only one non-zero loading per item.
-#' @param number_answers The number of answers given to the test (length of administered)
-#' @return item Index of item with maximum information. For multi dimensional models, items that only load on dimensions for
-#' which the variance target has already been reached, will not be returned
+#' @param available Vector with indices of available items.
+#' @param item_information Vector with summarized information of each yet available item, with zeros for administered items 
+#' (as returned by \code{\link{get_summarized_information}} with \code{pad = TRUE}).
+#' @param estimate Vector containing the theta estimate, with its covariance matrix as an attribute.
+#' @param number_answers The number of answers given thus far (length of \code{administered}).
+#' @inheritParams shadowcat
+#' @return Index of item with maximum information.
 get_item_index_max_information <- function(available, item_information, estimate, stop_test, alpha, number_answers) {
   result <- function() {
     uncompleted_dimensions <- get_uncompleted_dimensions()

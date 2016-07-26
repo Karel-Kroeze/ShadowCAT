@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_next_item.R
 \name{get_next_item}
 \alias{get_next_item}
-\title{Next item}
+\title{Index next item}
 \usage{
 get_next_item(start_items, information_summary, lp_constraints, lp_characters,
   estimate, model, answers, prior_form, prior_parameters, available,
@@ -11,71 +11,79 @@ get_next_item(start_items, information_summary, lp_constraints, lp_characters,
   eap_estimation_procedure = "riemannsum")
 }
 \arguments{
-\item{start_items}{items that are shown to the patient before adaptive proces starts; one of
-list(type = 'random', n)
-list(type = 'fixed', item_keys, n)
-list(type = 'random_by_dimension', n_by_dimension, n)
-where n = total number of initial items, item_keys = character vector with keys of initial items, 
-n_by_dimension = scalar of number of initial items per dimension, or vector with number of initial items for each dimension}
+\item{start_items}{List indicating the items that should be shown to the respondent before the theta estimate will be updated
+for the first time. One of
+\code{list(type = "random", n = ...)},
+\code{list(type = "fixed", item_keys = ..., n = ...)}, or
+\code{list(type = "random_by_dimension", n_by_dimension = ..., n = ...)},
+where \code{n} is the total number of burn in items, \code{item_keys} is a character vector with keys of the burn in items, 
+and \code{n_by_dimension} is the number of burn in items per dimension, or a vector with the number of burn in items for each dimension.
+If \code{n} is 0, only \code{n} needs to be defined.
+Note that the type \code{"random_by_dimension"} assumes that items load on a single dimension; if any item has a non-zero loading on a dimension, it is considered to be part of that dimension.}
 
-\item{information_summary}{called "objective" by Kroeze; how to summarize information; one of
-"determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
-"posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior_information + info_QxQ_k) for each yet available item k
-"trace": compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
-"posterior_trace": compute trace(info_sofar_QxQ_plus_prior_information + info_QxQ_k) for each yet available item k
-"posterior_expected_kullback_leibler" = compute Posterior expected Kullback-Leibler Information}
+\item{information_summary}{How to summarize Fisher information, used for selection of item with maximum information. One of
+\code{"determinant"}, \code{"posterior_determinant"}, \code{"trace"}, \code{"posterior_trace"}, or \code{"posterior_expected_kullback_leibler"}.}
 
-\item{lp_constraints}{data frame with constraints in lp format: the lp_constraints from the list returned by constraints_lp_format(); NULL means no constraints}
+\item{lp_constraints}{Data frame with constraints in \code{\link{lp}} format: the \code{lp_constraints} from the list returned by \code{\link{constraints_lp_format}}. \code{NULL} means no constraints.}
 
-\item{lp_characters}{data frame with constraint characters in lp format: the lp_chars from the list returned by constraints_lp_format(); NULL means no constraints}
+\item{lp_characters}{Data frame with constraint characteristics in \code{\link{lp}} format: the \code{lp_chars} from the list returned by \code{\link{constraints_lp_format}}. \code{NULL} means no constraints.}
 
-\item{estimate}{vector with current theta estimate}
+\item{estimate}{Vector containing current theta estimate, with covariance matrix as an attribute.}
 
-\item{model}{string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
+\item{model}{One of \code{"3PLM"}, \code{"GPCM"}, \code{"SM"} or \code{"GRM"}, for the three-parameter logistic, generalized partial credit, sequential or graded response model, respectively.}
 
-\item{answers}{vector with person answers}
+\item{answers}{Vector with answers to administered items.}
 
-\item{prior_form}{String indicating the form of the prior; one of "normal" or "uniform"}
+\item{prior_form}{String indicating the form of the prior; one of \code{"normal"} or \code{"uniform"}. Not required if estimator is maximum likelihood.}
 
-\item{prior_parameters}{List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...), or 
-the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
-be in matrix form.}
+\item{prior_parameters}{List containing mu and Sigma of the normal prior: \code{list(mu = ..., Sigma = ...)}, or 
+the upper and lower bound of the uniform prior: \code{list(lower_bound = ..., upper_bound = ...)}. Not required if estimator is maximum likelihood.
+The list element \code{Sigma} should always be in matrix form. List elements \code{mu}, \code{lower_bound}, and \code{upper_bound} should always be vectors.
+The length of \code{mu}, \code{lower_bound}, and \code{upper_bound} should be equal to the number of dimensions.
+For uniform prior in combination with expected aposteriori estimation, true theta should fall within 
+\code{lower_bound} and \code{upper_bound} and be not too close to one of these bounds, in order to prevent errors. 
+Setting the function argument \code{safe_eap} to \code{TRUE} ensures that the estimation switches to maximum aposteriori if the expected aposteriori estimate fails.}
 
-\item{available}{vector with indices of yet available items}
+\item{available}{vector with indices of yet available items.}
 
-\item{administered}{vector with indices of administered items}
+\item{administered}{Vector with indices of administered items.}
 
-\item{number_items}{number of items in test bank}
+\item{number_items}{Number of items in test bank.}
 
-\item{number_dimensions}{number of dimensions}
+\item{number_dimensions}{Number of dimensions in theta.}
 
-\item{estimator}{type of estimator to be used, one of "maximum_aposteriori", "expected_aposteriori", or "maximum_likelihood"}
+\item{estimator}{Type of estimator to be used, one of \code{"maximum_likelihood"}, \code{"maximum_aposteriori"}, or \code{"expected_aposteriori"}; see \code{details}.}
 
-\item{alpha}{matrix containing the alpha parameters}
+\item{alpha}{Matrix of alpha parameters, one column per dimension, one row per item. Row names should contain the item keys. 
+Note that so called within-dimensional models still use an alpha matrix, they simply have only one non-zero loading per item.}
 
-\item{beta}{matrix containing the beta parameters}
+\item{beta}{Matrix of beta parameters, one column per item step, one row per item. Row names should contain the item keys. 
+Note that \code{shadowcat} expects answer categories to be sequential, and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, 
+and equal to the position of the 'location' of the beta parameter in the beta matrix.
+The matrix should have a number of columns equal to the largest number of item steps over items, items with fewer answer categories should be 
+right-padded with \code{NA}. \code{NA} values between answer categories are not allowed, and will lead to errors.
+Beta matrix can be set to \code{NULL} if model is GPCM and eta is defined.}
 
-\item{guessing}{matrix containing the quessing parameters}
+\item{guessing}{Matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.}
 
-\item{number_itemsteps_per_item}{vector containing the number of non missing cells per row of the beta matrix}
+\item{number_itemsteps_per_item}{Vector containing the number of non missing cells per row of the beta matrix}
 
-\item{stop_test}{rule for when to stop providing new items to patient; should be a list of the form
-list(target = ..., max_n = ..., min_n = ..., cutoffs = ...), 
-where max_n = test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule), 
-target = vector of maximum acceptable variances per dimension; NULL means no variance target,
-min_n = minimum test length; NULL means no mimimum test length,
-cutoffs = matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
-administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at certain iteration, test stops; 
-NULL means no cut off values}
+\item{stop_test}{List indicating rules for when to terminate the test. Should be a list of the form
+\code{list(target = ..., max_n = ..., min_n = ..., cutoffs = ...)}, 
+where \code{target} is a vector indicating the maximum acceptable variance per dimension; \code{NULL} means no variance target,
+\code{max_n} is the test length at which the test should be terminated (even if the target has not been reached yet), 
+\code{min_n} is the minimum test length; \code{NULL} means no mimimum test length, and
+\code{cutoffs} is a matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
+administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at a certain iteration, test terminates; 
+\code{NULL} means no cut off values.}
 
-\item{eap_estimation_procedure}{String indicating the estimation procedure for the expected aposteriori estimate, which is computed
-in get_posterior_expected_kl_information() if it is not the requested estimator in shadowcat(). One of "riemannsum" for integration via Riemannsum or
-"gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. Only important here if information_summary is posterior_expected_kl_information.}
+\item{eap_estimation_procedure}{String indicating the estimation procedure if estimator is expected aposteriori and prior form is normal. One of \code{"riemannsum"} for integration via Riemannsum or
+\code{"gauss_hermite_quad"} for integration via Gaussian Hermite Quadrature. If prior form is uniform, estimation procedure should always be \code{"riemannsum"}.}
 }
 \value{
 integer item index next item
 }
 \description{
-Control function to select the next item, takes account of starting conditions.
+Get the index of the next item to adminster, taking starting (burn in) conditions into account.
 }
 

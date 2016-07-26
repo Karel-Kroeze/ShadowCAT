@@ -74,6 +74,6 @@ administered yet, second row for when one item has been administered, etc. If es
 Item index of best item.
 }
 \description{
-Select the item with maximum information from the available items, taking constraints into account.
+Get the index of the item with maximum information from the available items, possibly taking constraints into account.
 }
 

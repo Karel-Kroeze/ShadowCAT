@@ -8,28 +8,35 @@ get_item_index_max_information_constrained(number_items, administered,
   available, answers, lp_constraints, lp_characters, item_information)
 }
 \arguments{
-\item{number_items}{number of items in the test bank}
+\item{number_items}{Number of items in the test bank.}
 
-\item{administered}{vector with indices of administered items}
+\item{administered}{Vector with indices of administered items.}
 
-\item{available}{vector with indices of yet available items}
+\item{available}{Vector with indices of yet available items.}
 
-\item{answers}{vector with person answers}
+\item{answers}{Vector with answers to administered items.}
 
-\item{lp_constraints}{data frame with constraints in lp format: the lp_constraints from the list returned by constraints_lp_format()}
+\item{lp_constraints}{Data frame with constraints in \code{\link{lp}} format: the \code{lp_constraints} from the list returned by \code{\link{constraints_lp_format}}. \code{NULL} means no constraints.}
 
-\item{lp_characters}{data frame with characteristics in lp format: the lp_chars from the list returned by constraints_lp_format()}
+\item{lp_characters}{Data frame with constraint characteristics in \code{\link{lp}} format: the \code{lp_chars} from the list returned by \code{\link{constraints_lp_format}}. \code{NULL} means no constraints.}
 
-\item{item_information}{vector with summarized information of each yet available item, with zeros for administered items (returned by get_summarized_information() with pad = TRUE)}
+\item{item_information}{Vector with summarized information of each yet available item, with zeros for administered items 
+(as returned by \code{\link{get_summarized_information}} with \code{pad = TRUE}).}
 }
 \value{
-integer item index of item with maximum information within constraints
+Item index selected by the Shadow Testing adaptive test assembly procedure.
 }
 \description{
-Based on the Shadow Testing adaptive test assembly procedure by van der Linden (XXX)
+Get the item index selected by the Shadow Testing adaptive test assembly procedure by van der Linden (2000).
 }
 \details{
 At each step in a CAT, a Shadow Test is created consisting of an optimal complete test meeting all constraints.
-The best item that was not already administrated is then selected from this test, and presented to the respondent.
+The best item that was not already administrated is then selected from this test.
+}
+\references{
+\itemize{
+\item Van der Linden, W. J. (2000). Constrained adaptive testing with shadow tests. In W. J. van der Linden & C. A. W. Glas (Eds.), Computerized adaptive testing: Theory and practice (pp. 27-52). Dordrecht,
+the Netherlands: Kluwer Academic Publishers. 
+}
 }
 

@@ -1,18 +1,25 @@
 #' Shadow Test item selection
 #'
-#' Based on the Shadow Testing adaptive test assembly procedure by van der Linden (XXX)
+#' Get the item index selected by the Shadow Testing adaptive test assembly procedure by van der Linden (2000).
 #'
+#' @details
 #' At each step in a CAT, a Shadow Test is created consisting of an optimal complete test meeting all constraints.
-#' The best item that was not already administrated is then selected from this test, and presented to the respondent.
+#' The best item that was not already administrated is then selected from this test.
 #'
-#' @param number_items number of items in the test bank
-#' @param administered vector with indices of administered items
-#' @param available vector with indices of yet available items
-#' @param answers vector with person answers
-#' @param lp_constraints data frame with constraints in lp format: the lp_constraints from the list returned by constraints_lp_format()
-#' @param lp_characters data frame with characteristics in lp format: the lp_chars from the list returned by constraints_lp_format()
-#' @param item_information vector with summarized information of each yet available item, with zeros for administered items (returned by get_summarized_information() with pad = TRUE)
-#' @return integer item index of item with maximum information within constraints
+#' @references
+#' \itemize{
+#' \item Van der Linden, W. J. (2000). Constrained adaptive testing with shadow tests. In W. J. van der Linden & C. A. W. Glas (Eds.), Computerized adaptive testing: Theory and practice (pp. 27-52). Dordrecht,
+#' the Netherlands: Kluwer Academic Publishers. 
+#' }
+#' @param number_items Number of items in the test bank.
+#' @param administered Vector with indices of administered items.
+#' @param available Vector with indices of yet available items.
+#' @param answers Vector with answers to administered items.
+#' @param lp_constraints Data frame with constraints in \code{\link{lp}} format: the \code{lp_constraints} from the list returned by \code{\link{constraints_lp_format}}. \code{NULL} means no constraints.
+#' @param lp_characters Data frame with constraint characteristics in \code{\link{lp}} format: the \code{lp_chars} from the list returned by \code{\link{constraints_lp_format}}. \code{NULL} means no constraints.
+#' @param item_information Vector with summarized information of each yet available item, with zeros for administered items 
+#' (as returned by \code{\link{get_summarized_information}} with \code{pad = TRUE}).
+#' @return Item index selected by the Shadow Testing adaptive test assembly procedure.
 #' @importFrom lpSolve lp
 get_item_index_max_information_constrained <- function(number_items, administered, available, answers, lp_constraints, lp_characters, item_information) {
   administered_binary <- sapply(1:number_items, FUN = function(x) { if (x %in% administered) 1 else 0 } )
