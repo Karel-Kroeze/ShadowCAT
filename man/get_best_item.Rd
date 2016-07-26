@@ -11,8 +11,10 @@ get_best_item(information_summary, lp_constraints, lp_characters, estimate,
   eap_estimation_procedure = "riemannsum")
 }
 \arguments{
-\item{information_summary}{How to summarize Fisher information, used for selection of item with maximum information. One of
-\code{"determinant"}, \code{"posterior_determinant"}, \code{"trace"}, \code{"posterior_trace"}, or \code{"posterior_expected_kullback_leibler"}.}
+\item{information_summary}{How to summarize Fisher information, used for item selection. One of
+\code{"determinant"}, \code{"posterior_determinant"}, \code{"trace"}, \code{"posterior_trace"}, or \code{"posterior_expected_kullback_leibler"}.
+Fisher Information of the test so far (including all administered items) is added to the Fsher Information of the available
+item before the summary is computed.}
 
 \item{lp_constraints}{Data frame with constraints in \code{\link{lp}} format: the \code{lp_constraints} from the list returned by \code{\link{constraints_lp_format}}. \code{NULL} means no constraints.}
 

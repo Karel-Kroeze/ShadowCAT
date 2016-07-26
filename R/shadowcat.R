@@ -63,8 +63,10 @@
 #' administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at a certain iteration, test terminates; 
 #' \code{NULL} means no cut off values.
 #' @param estimator Type of estimator to be used, one of \code{"maximum_likelihood"}, \code{"maximum_aposteriori"}, or \code{"expected_aposteriori"}; see \code{details}.
-#' @param information_summary How to summarize Fisher information, used for selection of item with maximum information. One of
+#' @param information_summary How to summarize Fisher information, used for item selection. One of
 #' \code{"determinant"}, \code{"posterior_determinant"}, \code{"trace"}, \code{"posterior_trace"}, or \code{"posterior_expected_kullback_leibler"}.
+#' Fisher Information of the test so far (including all administered items) is added to the Fsher Information of the available
+#' item before the summary is computed.
 #' @param prior_form String indicating the form of the prior; one of \code{"normal"} or \code{"uniform"}. Not required if estimator is maximum likelihood.
 #' @param prior_parameters List containing mu and Sigma of the normal prior: \code{list(mu = ..., Sigma = ...)}, or 
 #' the upper and lower bound of the uniform prior: \code{list(lower_bound = ..., upper_bound = ...)}. Not required if estimator is maximum likelihood.

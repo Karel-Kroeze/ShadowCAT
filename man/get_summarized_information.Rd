@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_summarized_information.R
 \name{get_summarized_information}
 \alias{get_summarized_information}
-\title{Obtain a vector with information, summarized into one value, for each available item (values of the objective function).}
+\title{Summarize Fisher Information}
 \usage{
 get_summarized_information(information_summary, estimate, model, answers,
   prior_form, prior_parameters, available, administered, number_items,
@@ -11,54 +11,60 @@ get_summarized_information(information_summary, estimate, model, answers,
   eap_estimation_procedure = "riemannsum")
 }
 \arguments{
-\item{information_summary}{called "objective" by Kroeze; how to summarize information; one of
-"determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
-"posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior_information + info_QxQ_k) for each yet available item k
-"trace": compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
-"posterior_trace": compute trace(info_sofar_QxQ_plus_prior_information + info_QxQ_k) for each yet available item k
-"posterior_expected_kullback_leibler" = compute Posterior expected Kullback-Leibler Information}
+\item{information_summary}{How to summarize Fisher information, used for item selection. One of
+\code{"determinant"}, \code{"posterior_determinant"}, \code{"trace"}, \code{"posterior_trace"}, or \code{"posterior_expected_kullback_leibler"}.
+Fisher Information of the test so far (including all administered items) is added to the Fsher Information of the available
+item before the summary is computed.}
 
-\item{estimate}{vector with current theta estimate}
+\item{estimate}{Vector with current theta estimate.}
 
-\item{model}{string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
+\item{model}{One of \code{"3PLM"}, \code{"GPCM"}, \code{"SM"} or \code{"GRM"}, for the three-parameter logistic, generalized partial credit, sequential or graded response model, respectively.}
 
-\item{answers}{vector with person answers}
+\item{answers}{Vector with answers to administered items.}
 
-\item{prior_form}{String indicating the form of the prior; one of "normal" or "uniform"}
+\item{prior_form}{String indicating the form of the prior; one of \code{"normal"} or \code{"uniform"}. Not required if estimator is maximum likelihood.}
 
-\item{prior_parameters}{List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...), or 
-the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
-be in matrix form.}
+\item{prior_parameters}{List containing mu and Sigma of the normal prior: \code{list(mu = ..., Sigma = ...)}, or 
+the upper and lower bound of the uniform prior: \code{list(lower_bound = ..., upper_bound = ...)}. Not required if estimator is maximum likelihood.
+The list element \code{Sigma} should always be in matrix form. List elements \code{mu}, \code{lower_bound}, and \code{upper_bound} should always be vectors.
+The length of \code{mu}, \code{lower_bound}, and \code{upper_bound} should be equal to the number of dimensions.
+For uniform prior in combination with expected aposteriori estimation, true theta should fall within 
+\code{lower_bound} and \code{upper_bound} and be not too close to one of these bounds, in order to prevent errors. 
+Setting the \code{Shadowcat} argument \code{safe_eap} to \code{TRUE} ensures that the estimation switches to maximum aposteriori if the expected aposteriori estimate fails.}
 
-\item{available}{vector with indices of yet available items}
+\item{available}{Vector with indices of yet available items.}
 
-\item{administered}{vector with indices of administered items}
+\item{administered}{Vector with indices of administered items.}
 
-\item{number_items}{number of items in test bank}
+\item{number_items}{Number of items in test bank.}
 
-\item{number_dimensions}{number of dimensions}
+\item{number_dimensions}{Number of dimensions of theta.}
 
-\item{estimator}{type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"}
+\item{estimator}{Type of estimator to be used, one of \code{"maximum_likelihood"}, \code{"maximum_aposteriori"}, or \code{"expected_aposteriori"}; see \code{details}.}
 
-\item{alpha}{matrix containing the alpha parameters}
+\item{alpha}{Matrix of alpha parameters, one column per dimension, one row per item. Row names should contain the item keys. 
+Note that so called within-dimensional models still use an alpha matrix, they simply have only one non-zero loading per item.}
 
-\item{beta}{matrix containing the beta parameters}
+\item{beta}{Matrix of beta parameters, one column per item step, one row per item. Row names should contain the item keys. 
+Note that \code{shadowcat} expects answer categories to be sequential, and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, 
+and equal to the position of the 'location' of the beta parameter in the beta matrix.
+The matrix should have a number of columns equal to the largest number of item steps over items, items with fewer answer categories should be 
+right-padded with \code{NA}. \code{NA} values between answer categories are not allowed, and will lead to errors.
+Beta matrix can be set to \code{NULL} if model is GPCM and eta is defined.}
 
-\item{guessing}{matrix containing the quessing parameters}
+\item{guessing}{Matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.}
 
-\item{number_itemsteps_per_item}{vector containing the number of non missing cells per row of the beta matrix}
+\item{number_itemsteps_per_item}{Vector containing the number of non missing cells per row of the beta matrix.}
 
-\item{pad}{Should the return vector be padded with zeros for items that have already been administered?}
+\item{pad}{If \code{TRUE}, the return vector is padded with zeros for items that have already been administered.}
 
-\item{eap_estimation_procedure}{String indicating the estimation procedure for the expected aposteriori estimate, which is computed
-in get_posterior_expected_kl_information() if it is not the requested estimator in shadowcat(). One of "riemannsum" for integration via Riemannsum or
-"gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. Only important here if information_summary is posterior_expected_kl_information.}
+\item{eap_estimation_procedure}{String indicating the estimation procedure if estimator is expected aposteriori and prior form is normal. One of \code{"riemannsum"} for integration via Riemannsum or
+\code{"gauss_hermite_quad"} for integration via Gaussian Hermite Quadrature. If prior form is uniform, estimation procedure should always be \code{"riemannsum"}.}
 }
 \value{
-vector with information for each available item
+Vector with summarized information for each available item.
 }
 \description{
-Information of the test so far (including all administered items) is added to the information of the available
-item before the summary is computed
+Obtain a vector with information, summarized into one value, for each available item.
 }
 

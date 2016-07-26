@@ -1,35 +1,17 @@
-#' Obtain a vector with information, summarized into one value, for each available item (values of the objective function).
+#' Summarize Fisher Information
 #' 
-#' Information of the test so far (including all administered items) is added to the information of the available
-#' item before the summary is computed 
-#'
-#' @param information_summary called "objective" by Kroeze; how to summarize information; one of
-#' "determinant": compute determinant(info_sofar_QxQ + info_QxQ_k) for each yet available item k
-#' "posterior_determinant": compute determinant(info_sofar_QxQ_plus_prior_information + info_QxQ_k) for each yet available item k
-#' "trace": compute trace((info_sofar_QxQ + info_QxQ_k) for each yet available item k
-#' "posterior_trace": compute trace(info_sofar_QxQ_plus_prior_information + info_QxQ_k) for each yet available item k
-#' "posterior_expected_kullback_leibler" = compute Posterior expected Kullback-Leibler Information
-#' @param estimate vector with current theta estimate
-#' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
-#' @param answers vector with person answers
-#' @param prior_form String indicating the form of the prior; one of "normal" or "uniform"
-#' @param prior_parameters List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...), or 
-#' the upper and lower bound of the uniform prior: list(lower_bound = ..., upper_bound = ...). Sigma should always
-#' be in matrix form.
-#' @param available vector with indices of yet available items
-#' @param administered vector with indices of administered items
-#' @param number_items number of items in test bank
-#' @param number_dimensions number of dimensions
-#' @param estimator type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"
-#' @param alpha matrix containing the alpha parameters
-#' @param beta matrix containing the beta parameters
-#' @param guessing matrix containing the quessing parameters
-#' @param number_itemsteps_per_item vector containing the number of non missing cells per row of the beta matrix
-#' @param pad Should the return vector be padded with zeros for items that have already been administered?
-#' @param eap_estimation_procedure String indicating the estimation procedure for the expected aposteriori estimate, which is computed
-#' in get_posterior_expected_kl_information() if it is not the requested estimator in shadowcat(). One of "riemannsum" for integration via Riemannsum or
-#' "gauss_hermite_quad" for integration via Gaussian Hermite Quadrature. Only important here if information_summary is posterior_expected_kl_information.
-#' @return vector with information for each available item
+#' Obtain a vector with information, summarized into one value, for each available item.
+#' 
+#' @param estimate Vector with current theta estimate.
+#' @param answers Vector with answers to administered items.
+#' @param available Vector with indices of yet available items.
+#' @param administered Vector with indices of administered items.
+#' @param number_items Number of items in test bank.
+#' @param number_dimensions Number of dimensions of theta.
+#' @param number_itemsteps_per_item Vector containing the number of non missing cells per row of the beta matrix.
+#' @param pad If \code{TRUE}, the return vector is padded with zeros for items that have already been administered.
+#' @inheritParams shadowcat
+#' @return Vector with summarized information for each available item.
 get_summarized_information <- function(information_summary, estimate, model, answers, prior_form, prior_parameters, available, administered, number_items, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, pad = TRUE, eap_estimation_procedure = "riemannsum") {
   fisher_information <- get_fisher_information(estimate, model, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item)
   result <- function() {

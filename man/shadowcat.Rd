@@ -50,8 +50,10 @@ administered yet, second row for when one item has been administered, etc. If es
 
 \item{estimator}{Type of estimator to be used, one of \code{"maximum_likelihood"}, \code{"maximum_aposteriori"}, or \code{"expected_aposteriori"}; see \code{details}.}
 
-\item{information_summary}{How to summarize Fisher information, used for selection of item with maximum information. One of
-\code{"determinant"}, \code{"posterior_determinant"}, \code{"trace"}, \code{"posterior_trace"}, or \code{"posterior_expected_kullback_leibler"}.}
+\item{information_summary}{How to summarize Fisher information, used for item selection. One of
+\code{"determinant"}, \code{"posterior_determinant"}, \code{"trace"}, \code{"posterior_trace"}, or \code{"posterior_expected_kullback_leibler"}.
+Fisher Information of the test so far (including all administered items) is added to the Fsher Information of the available
+item before the summary is computed.}
 
 \item{prior_form}{String indicating the form of the prior; one of \code{"normal"} or \code{"uniform"}. Not required if estimator is maximum likelihood.}
 

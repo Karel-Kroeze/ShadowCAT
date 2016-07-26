@@ -21,8 +21,10 @@ and \code{n_by_dimension} is the number of burn in items per dimension, or a vec
 If \code{n} is 0, only \code{n} needs to be defined.
 Note that the type \code{"random_by_dimension"} assumes that items load on a single dimension; if any item has a non-zero loading on a dimension, it is considered to be part of that dimension.}
 
-\item{information_summary}{How to summarize Fisher information, used for selection of item with maximum information. One of
-\code{"determinant"}, \code{"posterior_determinant"}, \code{"trace"}, \code{"posterior_trace"}, or \code{"posterior_expected_kullback_leibler"}.}
+\item{information_summary}{How to summarize Fisher information, used for item selection. One of
+\code{"determinant"}, \code{"posterior_determinant"}, \code{"trace"}, \code{"posterior_trace"}, or \code{"posterior_expected_kullback_leibler"}.
+Fisher Information of the test so far (including all administered items) is added to the Fsher Information of the available
+item before the summary is computed.}
 
 \item{lp_constraints}{Data frame with constraints in \code{\link{lp}} format: the \code{lp_constraints} from the list returned by \code{\link{constraints_lp_format}}. \code{NULL} means no constraints.}
 
