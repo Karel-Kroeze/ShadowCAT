@@ -1,20 +1,20 @@
-#' Get Likelihood or posterior density (with normal prior) over all included items, and derivatives, based on a a given set of items
+#' Likelihood or posterior density
+#'
+#' Get Likelihood or posterior density (with normal prior) over all included items, 
+#' and derivatives, for a given set of answers to items.
 #' 
-#' @param theta vector with true or estimated theta
-#' @param answers vector with person answers to the administered items
-#' @param model string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.
-#' @param items_to_include vector with indices of items to which answers have been given
-#' @param number_dimensions number of dimensions
-#' @param estimator type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"
-#' @param alpha matrix containing the alpha parameters (for complete test bank)
-#' @param beta matrix containing the beta parameters (for complete test bank)
-#' @param guessing matrix containing the quessing parameters (for complete test bank)
-#' @param prior_parameters List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...).
+#' @param theta Vector with true or estimated theta.
+#' @param answers Vector with answers to the administered items.
+#' @param items_to_include Vector with indices of items to which answers have been given.
+#' @param number_dimensions Number of dimensions of theta.
+#' @param prior_parameters List containing mu and Sigma of the normal prior: \code{list(mu = ..., Sigma = ...)}.
 #' Sigma should always be in matrix form.
-#' @param return_log_likelihood_or_post_density if TRUE, log of likelihood or posterior density is returned, else likelihood or posterior density on original scale
-#' @param inverse_likelihood_or_post_density If TRUE, likelihood or posterior density value is reversed (useful for minimization, also reverses derivatives)
-#' @param with_derivatives If TRUE, first and second derivatives are added to the return value as attributes
-#' @return the likelihood (estimator is maximum_likelihood) or posterior density with normal prior (estimator is not maximum_likelihood) of theta, if requested with first and second derivatives as attributes
+#' @param return_log_likelihood_or_post_density If \code{TRUE}, log of likelihood or posterior density is returned, else likelihood or posterior density on original scale.
+#' @param inverse_likelihood_or_post_density If \code{TRUE}, likelihood or posterior density value is reversed (useful for minimization, also reverses derivatives).
+#' @param with_derivatives If \code{TRUE}, first and second derivatives are added to the return value as attributes.
+#' @inheritParams shadowcat
+#' @return The likelihood (estimator is maximum_likelihood) or posterior density with normal prior (estimator is not maximum_likelihood) of theta. 
+#' If requested, first and second derivatives are added as attributes.
 likelihood_or_post_density <- function(theta, answers = NULL, model, items_to_include, number_dimensions, estimator, alpha, beta, guessing, prior_parameters = NULL, return_log_likelihood_or_post_density = TRUE, inverse_likelihood_or_post_density = FALSE, with_derivatives = TRUE) {
   number_items <- length(items_to_include)
   alpha <- get_subset(alpha, items_to_include)

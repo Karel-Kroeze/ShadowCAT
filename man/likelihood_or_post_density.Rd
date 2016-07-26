@@ -2,7 +2,7 @@
 % Please edit documentation in R/likelihood_or_post_density.R
 \name{likelihood_or_post_density}
 \alias{likelihood_or_post_density}
-\title{Get Likelihood or posterior density (with normal prior) over all included items, and derivatives, based on a a given set of items}
+\title{Likelihood or posterior density}
 \usage{
 likelihood_or_post_density(theta, answers = NULL, model, items_to_include,
   number_dimensions, estimator, alpha, beta, guessing,
@@ -10,37 +10,45 @@ likelihood_or_post_density(theta, answers = NULL, model, items_to_include,
   inverse_likelihood_or_post_density = FALSE, with_derivatives = TRUE)
 }
 \arguments{
-\item{theta}{vector with true or estimated theta}
+\item{theta}{Vector with true or estimated theta.}
 
-\item{answers}{vector with person answers to the administered items}
+\item{answers}{Vector with answers to the administered items.}
 
-\item{model}{string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
+\item{model}{One of \code{"3PLM"}, \code{"GPCM"}, \code{"SM"} or \code{"GRM"}, for the three-parameter logistic, generalized partial credit, sequential or graded response model, respectively.}
 
-\item{items_to_include}{vector with indices of items to which answers have been given}
+\item{items_to_include}{Vector with indices of items to which answers have been given.}
 
-\item{number_dimensions}{number of dimensions}
+\item{number_dimensions}{Number of dimensions of theta.}
 
-\item{estimator}{type of estimator to be used, one of "maximum_aposteriori", "maximum_likelihood", or "expected_aposteriori"}
+\item{estimator}{Type of estimator to be used, one of \code{"maximum_likelihood"}, \code{"maximum_aposteriori"}, or \code{"expected_aposteriori"}; see \code{details}.}
 
-\item{alpha}{matrix containing the alpha parameters (for complete test bank)}
+\item{alpha}{Matrix of alpha parameters, one column per dimension, one row per item. Row names should contain the item keys. 
+Note that so called within-dimensional models still use an alpha matrix, they simply have only one non-zero loading per item.}
 
-\item{beta}{matrix containing the beta parameters (for complete test bank)}
+\item{beta}{Matrix of beta parameters, one column per item step, one row per item. Row names should contain the item keys. 
+Note that \code{shadowcat} expects answer categories to be sequential, and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, 
+and equal to the position of the 'location' of the beta parameter in the beta matrix.
+The matrix should have a number of columns equal to the largest number of item steps over items, items with fewer answer categories should be 
+right-padded with \code{NA}. \code{NA} values between answer categories are not allowed, and will lead to errors.
+Beta matrix can be set to \code{NULL} if model is GPCM and eta is defined.}
 
-\item{guessing}{matrix containing the quessing parameters (for complete test bank)}
+\item{guessing}{Matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.}
 
-\item{prior_parameters}{List containing mu and Sigma of the normal prior: list(mu = ..., Sigma = ...).
+\item{prior_parameters}{List containing mu and Sigma of the normal prior: \code{list(mu = ..., Sigma = ...)}.
 Sigma should always be in matrix form.}
 
-\item{return_log_likelihood_or_post_density}{if TRUE, log of likelihood or posterior density is returned, else likelihood or posterior density on original scale}
+\item{return_log_likelihood_or_post_density}{If \code{TRUE}, log of likelihood or posterior density is returned, else likelihood or posterior density on original scale.}
 
-\item{inverse_likelihood_or_post_density}{If TRUE, likelihood or posterior density value is reversed (useful for minimization, also reverses derivatives)}
+\item{inverse_likelihood_or_post_density}{If \code{TRUE}, likelihood or posterior density value is reversed (useful for minimization, also reverses derivatives).}
 
-\item{with_derivatives}{If TRUE, first and second derivatives are added to the return value as attributes}
+\item{with_derivatives}{If \code{TRUE}, first and second derivatives are added to the return value as attributes.}
 }
 \value{
-the likelihood (estimator is maximum_likelihood) or posterior density with normal prior (estimator is not maximum_likelihood) of theta, if requested with first and second derivatives as attributes
+The likelihood (estimator is maximum_likelihood) or posterior density with normal prior (estimator is not maximum_likelihood) of theta. 
+If requested, first and second derivatives are added as attributes.
 }
 \description{
-Get Likelihood or posterior density (with normal prior) over all included items, and derivatives, based on a a given set of items
+Get Likelihood or posterior density (with normal prior) over all included items, 
+and derivatives, for a given set of answers to items.
 }
 
