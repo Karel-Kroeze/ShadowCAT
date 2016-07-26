@@ -109,7 +109,7 @@ simulate_answer <- function(theta, model, alpha, beta, guessing, item_keys) {
   result <- function() {
     guessing <- get_guessing()
     # probabilities, generated with true theta.
-    probabilities <- get_probs_and_likelihoods_per_item(theta = theta, model = model, alpha = get_subset(alpha, indices), beta = get_subset(beta, indices), guessing = get_subset(guessing, indices), with_likelihoods = FALSE)$P
+    probabilities <- get_probs_and_likelihoods_per_item(theta = theta, model = model, alpha = get_subset(alpha, indices), beta = get_subset(beta, indices), guessing = get_subset(guessing, indices), with_likelihoods = FALSE)
     cumulative_probabilities <- row_cumsum(probabilities) 
     random_numbers <- runif(length(indices))
     

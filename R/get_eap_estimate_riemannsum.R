@@ -1,4 +1,4 @@
-#' Compute EAP estimate with Riemannsum
+#' EAP estimate with Riemannsum
 #' 
 #' Compute the expected aposteriori estimate and covariance matrix of the latent trait theta. 
 #' Integration approximation occurs via a Riemannsumm, where grid points can be adapted to the location of the

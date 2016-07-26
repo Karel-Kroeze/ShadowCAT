@@ -1,4 +1,4 @@
-#' Find item maximum information
+#' Item index maximum information
 #' 
 #' Get the index of the item with maximum information from the available items. 
 #' For multi dimensional models, items that only load on dimensions for

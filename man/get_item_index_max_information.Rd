@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_item_index_max_information.R
 \name{get_item_index_max_information}
 \alias{get_item_index_max_information}
-\title{Find item maximum information}
+\title{Item index maximum information}
 \usage{
 get_item_index_max_information(available, item_information, estimate, stop_test,
   alpha, number_answers)

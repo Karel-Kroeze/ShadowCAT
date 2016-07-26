@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_best_item.R
 \name{get_best_item}
 \alias{get_best_item}
-\title{Select best item}
+\title{Find best item}
 \usage{
 get_best_item(information_summary, lp_constraints, lp_characters, estimate,
   model, answers, prior_form, prior_parameters, available, administered,
@@ -32,7 +32,7 @@ The list element \code{Sigma} should always be in matrix form. List elements \co
 The length of \code{mu}, \code{lower_bound}, and \code{upper_bound} should be equal to the number of dimensions.
 For uniform prior in combination with expected aposteriori estimation, true theta should fall within 
 \code{lower_bound} and \code{upper_bound} and be not too close to one of these bounds, in order to prevent errors. 
-Setting the function argument \code{safe_eap} to \code{TRUE} ensures that the estimation switches to maximum aposteriori if the expected aposteriori estimate fails.}
+Setting the \code{Shadowcat} argument \code{safe_eap} to \code{TRUE} ensures that the estimation switches to maximum aposteriori if the expected aposteriori estimate fails.}
 
 \item{available}{Vector with indices of yet available items.}
 

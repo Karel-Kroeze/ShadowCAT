@@ -2,33 +2,38 @@
 % Please edit documentation in R/get_probs_and_likelihoods_per_item.R
 \name{get_probs_and_likelihoods_per_item}
 \alias{get_probs_and_likelihoods_per_item}
-\title{get list containing probabilities of scoring in each answer category for each item, and
-likelihood with derivative per item}
+\title{Probabilities and likelihoods}
 \usage{
 get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing,
   answers = numeric(0), with_likelihoods)
 }
 \arguments{
-\item{theta}{vector with true or estimated theta}
+\item{theta}{Vector with true or estimated theta.}
 
-\item{model}{string, one of '3PLM', 'GPCM', 'SM' or 'GRM', for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively.}
+\item{model}{One of \code{"3PLM"}, \code{"GPCM"}, \code{"SM"} or \code{"GRM"}, for the three-parameter logistic, generalized partial credit, sequential or graded response model, respectively.}
 
-\item{alpha}{matrix containing the alpha parameters (if with_likelihoods, only of administered items)}
+\item{alpha}{Matrix of alpha parameters, one column per dimension, one row per item. Row names should contain the item keys. 
+Note that so called within-dimensional models still use an alpha matrix, they simply have only one non-zero loading per item.}
 
-\item{beta}{matrix containing the beta parameters of administered items (if with_likelihoods, only of administered items)}
+\item{beta}{Matrix of beta parameters, one column per item step, one row per item. Row names should contain the item keys. 
+Note that \code{shadowcat} expects answer categories to be sequential, and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, 
+and equal to the position of the 'location' of the beta parameter in the beta matrix.
+The matrix should have a number of columns equal to the largest number of item steps over items, items with fewer answer categories should be 
+right-padded with \code{NA}. \code{NA} values between answer categories are not allowed, and will lead to errors.
+Beta matrix can be set to \code{NULL} if model is GPCM and eta is defined.}
 
-\item{guessing}{matrix containing the quessing parameters of administered items (if with_likelihoods, only of administered items)}
+\item{guessing}{Matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.}
 
-\item{answers}{if with_likelihoods = TRUE, vector with person answers to the administered items; else, numeric(0)}
+\item{answers}{If \code{with_likelihoods} is set to \code{TRUE}, vector with answers to the administered items; else, numeric(0).}
 
-\item{with_likelihoods}{if FALSE, only the probability matrix is returned, if TRUE, the likelihoods and derivatives are also returned}
+\item{with_likelihoods}{If \code{FALSE}, only the probability matrix for all answer categories for all items is returned. If \code{TRUE}, the likelihoods 
+for the actually chosen answer categories and derivatives are also returned.}
 }
 \value{
-list with P = matrix with for each included item (rows) the probability of scoring in each answer category (columns), given theta,
-and if with_likelihoods, l = vector of likelihoods per item, d = vector of first derivatives, D = vector of second derivatives
+If \code{with_likelihoods}, list with probability matrix, likelihoods and derivatives. Else, only the probability matrix.
 }
 \description{
-get list containing probabilities of scoring in each answer category for each item, and
-likelihood with derivative per item
+Per item, get probabilities of scoring in each answer category given theta, likelihood for
+the actually chosen answer category, and derivatives.
 }
 

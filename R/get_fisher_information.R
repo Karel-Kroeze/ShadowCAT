@@ -19,7 +19,7 @@ get_fisher_information <- function(estimate, model, number_dimensions, alpha, be
   # minus the expectation of the second derivative of the log-likelihood
   # Expectation -> sum of derivatives for each category, 'weighted' by their probability.
   number_items <- nrow(alpha)
-  probabilities <- get_probs_and_likelihoods_per_item(estimate, model, alpha, beta, guessing, with_likelihoods = FALSE)$P
+  probabilities <- get_probs_and_likelihoods_per_item(estimate, model, alpha, beta, guessing, with_likelihoods = FALSE)
     
   result <- function() {
     second_derivatives <- get_second_derivatives(model)

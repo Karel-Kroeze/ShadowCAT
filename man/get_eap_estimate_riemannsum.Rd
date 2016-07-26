@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_eap_estimate_riemannsum.R
 \name{get_eap_estimate_riemannsum}
 \alias{get_eap_estimate_riemannsum}
-\title{Compute EAP estimate with Riemannsum}
+\title{EAP estimate with Riemannsum}
 \usage{
 get_eap_estimate_riemannsum(dimension, likelihood, prior_form, prior_parameters,
   adapt = NULL, number_gridpoints = 50, ...)

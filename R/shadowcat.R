@@ -72,7 +72,7 @@
 #' The length of \code{mu}, \code{lower_bound}, and \code{upper_bound} should be equal to the number of dimensions.
 #' For uniform prior in combination with expected aposteriori estimation, true theta should fall within 
 #' \code{lower_bound} and \code{upper_bound} and be not too close to one of these bounds, in order to prevent errors. 
-#' Setting the function argument \code{safe_eap} to \code{TRUE} ensures that the estimation switches to maximum aposteriori if the expected aposteriori estimate fails. 
+#' Setting the \code{Shadowcat} argument \code{safe_eap} to \code{TRUE} ensures that the estimation switches to maximum aposteriori if the expected aposteriori estimate fails. 
 #' @param guessing Matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.
 #' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others. Row names should contain the item keys.
 #' If eta is defined, the beta matrix will be derived from this eta matrix by computing the cumulative sums of the rows of eta; see

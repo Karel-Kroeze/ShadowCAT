@@ -1,4 +1,4 @@
-#' Select best item
+#' Find best item
 #' 
 #' Get the index of the item with maximum information from the available items, possibly taking constraints into account.
 #' 
