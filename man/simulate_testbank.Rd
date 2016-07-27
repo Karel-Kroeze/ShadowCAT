@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulation_functions.R
 \name{simulate_testbank}
 \alias{simulate_testbank}
-\title{Simulate alpha and beta matrices}
+\title{Simulate alpha and beta}
 \usage{
 simulate_testbank(model, number_items = 50, number_dimensions = 1,
   number_itemsteps = 4, items_load_one_dimension = FALSE,
@@ -15,13 +15,13 @@ If model is 3PLM, number of item steps is forced to 1.}
 
 \item{number_items}{Number of items.}
 
-\item{number_dimensions}{Number of dimensions.}
+\item{number_dimensions}{Number of dimensions of theta.}
 
 \item{number_itemsteps}{Number of item steps (number of categories minus 1); forced to 1 if model is 3PLM.}
 
 \item{items_load_one_dimension}{If \code{TRUE}, force items to load on one dimension each.}
 
-\item{varying_number_item_steps}{If \code{TRUE}, some item steps are set to NA; in this case \code{number_itemsteps}
+\item{varying_number_item_steps}{If \code{TRUE}, some item steps are set to \code{NA}; in this case \code{number_itemsteps}
 is the maximum number of itemsteps.}
 
 \item{alpha_bounds}{Vector containing lower and upper bound, respectively, of the uniform distribution from which the alpha values are drawn.}

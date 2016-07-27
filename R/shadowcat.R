@@ -158,7 +158,7 @@ shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_ite
     attr(estimate, "variance") <- matrix(variance, ncol = number_dimensions)    
     
     estimate <- update_person_estimate(estimate = estimate, answers_vector = unlist(answers), item_indices_administered = match(item_keys_administered, item_keys), number_dimensions = number_dimensions, alpha = alpha, beta = beta, guessing = guessing, number_itemsteps_per_item = number_itemsteps_per_item, estimator = estimator, prior_form = prior_form, prior_parameters = prior_parameters)
-    continue_test <- !terminate_test(number_answers = length(answers), estimate = estimate, min_n = stop_test$min_n, max_n = stop_test$max_n, stop_variance_target = stop_test$target, cutoffs = stop_test$cutoffs)
+    continue_test <- !terminate_test(number_answers = length(answers), estimate = estimate, min_n = stop_test$min_n, max_n = stop_test$max_n, variance_target = stop_test$target, cutoffs = stop_test$cutoffs)
     if (continue_test) {
       index_new_item <- get_next_item(start_items = start_items, information_summary = information_summary, lp_constraints = lp_constraints_and_characts$lp_constraints, lp_characters = lp_constraints_and_characts$lp_chars, estimate = estimate, model = model, answers = unlist(answers), prior_form = prior_form, prior_parameters = prior_parameters, 
                                       available = match(item_keys_available, item_keys), administered = match(item_keys_administered, item_keys), number_items = number_items, number_dimensions = number_dimensions, estimator = estimator, alpha = alpha, beta = beta, guessing = guessing, number_itemsteps_per_item = number_itemsteps_per_item, stop_test = stop_test, eap_estimation_procedure = eap_estimation_procedure)

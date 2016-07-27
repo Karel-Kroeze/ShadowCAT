@@ -4,25 +4,25 @@
 \alias{terminate_test}
 \title{Terminate test}
 \usage{
-terminate_test(number_answers, estimate, min_n, max_n,
-  stop_variance_target = NULL, cutoffs = NULL)
+terminate_test(number_answers, estimate, max_n, min_n = NULL,
+  variance_target = NULL, cutoffs = NULL)
 }
 \arguments{
-\item{number_answers}{number of answers given}
+\item{number_answers}{Number of answers given.}
 
-\item{estimate}{vector with current theta estimate, with covariance matrix as its attribute}
+\item{estimate}{Vector with current theta estimate, with covariance matrix as its attribute.}
 
-\item{min_n}{minimum test length; NULL means no minimum test length}
+\item{max_n}{Test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule).}
 
-\item{max_n}{test length at which testing should stop (even if target has not been reached yet in case of variance stopping rule)}
+\item{min_n}{Minimum test length; \code{NULL} means no minimum test length.}
 
-\item{stop_variance_target}{a vector with the variance target for each dimension; if null, variance is not taken into account}
+\item{variance_target}{Vector with the variance target for each dimension; \code{NULL} means no variance target.}
 
-\item{cutoffs}{matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
-administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at certain iteration, test stops; NULL means no cut off values}
+\item{cutoffs}{Matrix containing cut off values per dimension (columns) and test iteration (rows). First row contains cut off values for when no items have been
+administered yet, second row for when one item has been administered, etc. If estimate + 3SE < cutoff for each dimension at a certain iteration, test stops; \code{NULL} means no cut off values.}
 }
 \value{
-TRUE if test should stop, FALSE otherwise
+\code{TRUE} if test should stop, \code{FALSE} otherwise.
 }
 \description{
 Control function to check if the test is completed.

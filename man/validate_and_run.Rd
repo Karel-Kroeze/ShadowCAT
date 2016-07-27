@@ -2,16 +2,21 @@
 % Please edit documentation in R/validate_and_run.R
 \name{validate_and_run}
 \alias{validate_and_run}
-\title{Template to structure and test larger methods}
+\title{Validate and run}
 \usage{
 validate_and_run()
 }
 \description{
-First validate is called, if any errors are added, the value of invalid_result is returned, else the value of result.
+Validate input and run calling method. Template to structure and test larger methods.
+}
+\details{
+First \code{validate} is called. If any errors are added, the value of \code{invalid_result} is returned, 
+else the value of \code{result}.
 Loads the following methods into the environment of the calling method:
-  add_error(key, value)
-  errors() #returns list(key=value, key2=value2)
-  validate_and_runner() # Used internally, contains the logic of functions to call.
+\itemize{
+\item \code{add_error(key, value)}
+\item \code{errors()} #returns \code{list(key=value, key2=value2)}
+\item \code{validate_and_runner()} # Used internally, contains the logic of functions to call.}
 }
 \examples{
 two_times_two <- function(two, also_two) {
@@ -30,7 +35,16 @@ two_times_two <- function(two, also_two) {
 
   ShadowCAT:::validate_and_run()
 }
+
+# No errors
+two_times_two(2,2)
+
+# Error
+two_times_two(3,2)
+
+\dontshow{
 two_times_two(2,2) == 4 || stop('not 4')
 two_times_two(3,2)$errors$two == 'should be 2' || stop('wrong result')
+}
 }
 

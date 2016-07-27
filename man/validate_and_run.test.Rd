@@ -2,17 +2,17 @@
 % Please edit documentation in R/validate_and_run.R
 \name{validate_and_run.test}
 \alias{validate_and_run.test}
-\title{Returns the result function instead of the result of the result function}
+\title{Get result function}
 \usage{
 validate_and_run.test(fn, ...)
 }
 \arguments{
-\item{fn}{The function to get the function result of}
+\item{fn}{The function to get the function result of.}
 
-\item{...}{Arguments for fn}
+\item{...}{Arguments for fn.}
 }
 \description{
-Returns the result function instead of the result of the result function
+Returns the result function instead of the result of the result function.
 }
 \examples{
 fn <- function(a) {

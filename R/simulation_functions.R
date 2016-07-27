@@ -1,4 +1,4 @@
-#' Simulate alpha and beta matrices
+#' Simulate alpha and beta
 #' 
 #' Simulate quick and simple itembanks.
 #' 
@@ -6,10 +6,10 @@
 #' for the three-parameter logistic, generalized partial credit, sequential or graded response model respectively. 
 #' If model is 3PLM, number of item steps is forced to 1. 
 #' @param number_items Number of items.
-#' @param number_dimensions Number of dimensions.
+#' @param number_dimensions Number of dimensions of theta.
 #' @param number_itemsteps Number of item steps (number of categories minus 1); forced to 1 if model is 3PLM.
 #' @param items_load_one_dimension If \code{TRUE}, force items to load on one dimension each.
-#' @param varying_number_item_steps If \code{TRUE}, some item steps are set to NA; in this case \code{number_itemsteps}
+#' @param varying_number_item_steps If \code{TRUE}, some item steps are set to \code{NA}; in this case \code{number_itemsteps}
 #' is the maximum number of itemsteps.
 #' @param alpha_bounds Vector containing lower and upper bound, respectively, of the uniform distribution from which the alpha values are drawn.
 #' @return Named list containing simulated alpha and beta matrix.
