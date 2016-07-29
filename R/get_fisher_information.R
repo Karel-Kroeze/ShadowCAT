@@ -10,6 +10,19 @@
 #' 
 #' Note: get_fisher_information always returns the 'raw' information; information given by prior distributions is added by the calling functions.
 #' 
+#' @references 
+#' \itemize{
+#' \item Muraki, E. (1992). A Generized Partial Credit Model: Application of an EM Algorithm. 
+#'  Applied Psychological Measurement, 16(2), 159 - 176. Doi:10.1177/014662169201600206.
+#'  \item Samejima, F. (1970). Estimation of latent trait ability using a response pattern of graded 
+#'  scores. Psychometrika, 35(1), 139 - 139. Doi: 10.1007/BF02290599.
+#' \item Segall, D. O. (2000). Principles of multidimensional adaptive testing. In W. J. van der 
+#'  Linden & en C. A. W. Glas (Eds.), Computerized adaptive testing: Theory and 
+#'  practice (pp. 53 - 74). Dordrecht: Kluwer Academic Publishers.
+#'  \item Tutz, G. (1986). Bradley-Terry-Luce model with an ordered response. Journal of 
+#'  Mathematical Psychology, 30(1), 306 - 316. doi: 10.1016/0022-2496(86)90034-9.
+#' }
+#' 
 #' @param number_dimensions Number of dimensions of theta.
 #' @param number_itemsteps_per_item Vector containing the number of non missing cells per row of the beta matrix.
 #' @inheritParams shadowcat
@@ -61,7 +74,7 @@ get_fisher_information <- function(estimate, model, number_dimensions, alpha, be
   }
 
   get_second_derivatives_sm <- function() {
-    # Sequential Model (Tutz, xxxx)
+    # Sequential Model (Tutz, 1986)
     inner_product_alpha_theta <- as.vector(alpha %*% drop(estimate))
     sapply(1:number_items,
            function(item) {

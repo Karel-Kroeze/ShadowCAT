@@ -6,7 +6,17 @@
 #' @details
 #' Note that even with a simplified grid, the number of quadrature points which have to be calculated for each available item, 
 #' at each step in the CAT is taken to the power Q. Use of KL information is likely to be slow in 3+ dimensional tests.
-#'   
+#'
+#' @references
+#'  \item Chang, H.-H, & Ying, Z. (1996). A Global Information Approach to Computerized Adaptive 
+#'  Testing. Applied Psychological Measurement, 20(3), 213 – 229. doi: 10.1177/014662169602000303.
+#'  \item Mulder, J., & van der Linden, W. J. (2010). Multidimentional Adaptive testing with 
+#'  Kullback-Leibler information item selection. In W. J. van der Linden & C. A. W. Glas (Eds.), 
+#'  Elements of adaptive testing (pp. 77–101). New York: Springer.
+#'  \item Wang, C., Chang, H.-H., & Boughton, K. A. (2010). Kullback-Leibler Information and Its 
+#'  Applications in Multi-Dimensional Adaptive Testing. Psychometrika, 76(1), 13–39. doi:10.1007/s11336-010-9186-0.
+#' }
+#' 
 #' @param estimate Vector containing current theta estimate, with covariance matrix as an attribute.
 #' @param answers Vector with answers to administered items.
 #' @param administered vector with indices of administered items.

@@ -2,6 +2,15 @@
 #' 
 #' Obtain a vector with information, summarized into one value, for each available item.
 #' 
+#' @references
+#' \itemize{
+#' \item Segall, D. O. (1996). Multidimensional adaptive testing. Psychometrika, 61(2), 331 - 354. doi:10.1007/BF02294343.
+#' \item Segall, D. O. (2000). Principles of multidimensional adaptive testing. In W. J. van der 
+#'  Linden & en C. A. W. Glas (Eds.), Computerized adaptive testing: Theory and practice (pp. 53 - 74). Dordrecht: Kluwer Academic Publishers.
+#' \item Van der Linden, W. J. (1999). Multidimensional Adaptive Testing with a Minimum Error-
+#' Variance Criterion. Journal of Educational and Behavioral Statistics, 24(4), 398 - 412. doi:10.3102/10769986024004398.
+#' }
+#' 
 #' @param estimate Vector with current theta estimate.
 #' @param answers Vector with answers to administered items.
 #' @param available Vector with indices of yet available items.
