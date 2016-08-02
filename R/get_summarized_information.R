@@ -31,6 +31,7 @@ get_summarized_information <- function(information_summary, estimate, model, ans
       item_information  
   }
   
+  # If prior is uniform, posterior determinant and posterior trace are equal to determinant and trace
   redefine_information_summary <- function() {
     if (is.null(prior_form) && information_summary %in% c("posterior_determinant", "posterior_trace", "posterior_expected_kl_information"))
       stop("Estimator is maximum likelihood, information summary should be trace or determinant")
