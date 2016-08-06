@@ -6,6 +6,10 @@
 \usage{
 validate_and_run()
 }
+\value{
+If any errors are added, the value of \code{invalid_result} is returned, 
+else the value of \code{result}.
+}
 \description{
 Validate input and run calling method. Template to structure and test larger methods.
 }

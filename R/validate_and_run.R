@@ -39,7 +39,7 @@
 #' two_times_two(2,2) == 4 || stop('not 4')
 #' two_times_two(3,2)$errors$two == 'should be 2' || stop('wrong result')
 #' }
-#' @result If any errors are added, the value of \code{invalid_result} is returned, 
+#' @return If any errors are added, the value of \code{invalid_result} is returned, 
 #' else the value of \code{result}.
 validate_and_run <- function() {
   .errors <- list()
@@ -79,7 +79,7 @@ errors <- function(){}
 #' Returns the result function instead of the result of the result function.
 #' @param fn The function to get the function result of.
 #' @param ... Arguments for fn.
-#' @result The result function from the calling method.
+#' @return The result function from the calling method.
 #' @examples
 #' fn <- function(a) {
 #'   result <- function() helper()

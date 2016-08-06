@@ -4,7 +4,8 @@
 #' the actually chosen answer category, and derivatives.
 #' 
 #' @param theta Vector with true or estimated theta.
-#' @param answers If \code{with_likelihoods} is set to \code{TRUE}, vector with answers to the administered items; else, numeric(0).
+#' @param answers If \code{with_likelihoods} is set to \code{TRUE}, vector with answers to all items included in \code{alpha}, 
+#' \code{beta}, and \code{guessing}; else, numeric(0).
 #' @param with_likelihoods If \code{FALSE}, only the probability matrix for all answer categories for all items is returned. If \code{TRUE}, the likelihoods 
 #' for the actually chosen answer categories and derivatives are also returned.
 #' @return If \code{with_likelihoods}, list with probability matrix, likelihoods and derivatives. Else, only the probability matrix.

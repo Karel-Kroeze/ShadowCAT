@@ -44,7 +44,7 @@ The list element \code{Sigma} should always be in matrix form. List elements \co
 The length of \code{mu}, \code{lower_bound}, and \code{upper_bound} should be equal to the number of dimensions.
 For uniform prior in combination with expected aposteriori estimation, true theta should fall within 
 \code{lower_bound} and \code{upper_bound} and be not too close to one of these bounds, in order to prevent errors. 
-Setting the \code{Shadowcat} argument \code{safe_eap} to \code{TRUE} ensures that the estimation switches to maximum aposteriori if the expected aposteriori estimate fails.}
+Setting the \code{shadowcat} argument \code{safe_eap} to \code{TRUE} ensures that the estimation switches to maximum aposteriori if the expected aposteriori estimate fails.}
 
 \item{available}{vector with indices of yet available items.}
 
@@ -63,8 +63,7 @@ Note that so called within-dimensional models still use an alpha matrix, they si
 Note that \code{shadowcat} expects answer categories to be sequential, and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, 
 and equal to the position of the 'location' of the beta parameter in the beta matrix.
 The matrix should have a number of columns equal to the largest number of item steps over items, items with fewer answer categories should be 
-right-padded with \code{NA}. \code{NA} values between answer categories are not allowed, and will lead to errors.
-Beta matrix can be set to \code{NULL} if model is GPCM and eta is defined.}
+right-padded with \code{NA}. \code{NA} values between answer categories are not allowed, and will lead to errors.}
 
 \item{guessing}{Matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.}
 

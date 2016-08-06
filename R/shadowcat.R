@@ -44,7 +44,6 @@
 #' and equal to the position of the 'location' of the beta parameter in the beta matrix.
 #' The matrix should have a number of columns equal to the largest number of item steps over items, items with fewer answer categories should be 
 #' right-padded with \code{NA}. \code{NA} values between answer categories are not allowed, and will lead to errors.
-#' Beta matrix can be set to \code{NULL} if model is GPCM and eta is defined.
 #' @param start_items List indicating the items that should be shown to the respondent before the theta estimate will be updated
 #' for the first time. One of
 #' \code{list(type = "random", n = ...)},
@@ -74,7 +73,7 @@
 #' The length of \code{mu}, \code{lower_bound}, and \code{upper_bound} should be equal to the number of dimensions.
 #' For uniform prior in combination with expected aposteriori estimation, true theta should fall within 
 #' \code{lower_bound} and \code{upper_bound} and be not too close to one of these bounds, in order to prevent errors. 
-#' Setting the \code{Shadowcat} argument \code{safe_eap} to \code{TRUE} ensures that the estimation switches to maximum aposteriori if the expected aposteriori estimate fails. 
+#' Setting the \code{shadowcat} argument \code{safe_eap} to \code{TRUE} ensures that the estimation switches to maximum aposteriori if the expected aposteriori estimate fails. 
 #' @param guessing Matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.
 #' @param eta Matrix of location parameters, optionally used in GPCM model, ignored for all others. Row names should contain the item keys.
 #' If eta is defined, the beta matrix will be derived from this eta matrix by computing the cumulative sums of the rows of eta; see

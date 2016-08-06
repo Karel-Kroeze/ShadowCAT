@@ -11,6 +11,9 @@ validate_and_run.test(fn, ...)
 
 \item{...}{Arguments for fn.}
 }
+\value{
+The result function from the calling method.
+}
 \description{
 Returns the result function instead of the result of the result function.
 }

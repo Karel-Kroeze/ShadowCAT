@@ -31,8 +31,7 @@ Note that so called within-dimensional models still use an alpha matrix, they si
 Note that \code{shadowcat} expects answer categories to be sequential, and without gaps. That is, the weight parameter in the GPCM model is assumed to be sequential, 
 and equal to the position of the 'location' of the beta parameter in the beta matrix.
 The matrix should have a number of columns equal to the largest number of item steps over items, items with fewer answer categories should be 
-right-padded with \code{NA}. \code{NA} values between answer categories are not allowed, and will lead to errors.
-Beta matrix can be set to \code{NULL} if model is GPCM and eta is defined.}
+right-padded with \code{NA}. \code{NA} values between answer categories are not allowed, and will lead to errors.}
 
 \item{guessing}{Matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.}
 
@@ -62,5 +61,16 @@ Computes the numerical integral of the expectation of KL under the posterior dis
 \details{
 Note that even with a simplified grid, the number of quadrature points which have to be calculated for each available item, 
 at each step in the CAT is taken to the power Q. Use of KL information is likely to be slow in 3+ dimensional tests.
+}
+\references{
+\itemize{
+ \item Chang, H.-H, & Ying, Z. (1996). A Global Information Approach to Computerized Adaptive 
+ Testing. Applied Psychological Measurement, 20(3), 213 - 229. doi: 10.1177/014662169602000303.
+ \item Mulder, J., & van der Linden, W. J. (2010). Multidimentional Adaptive testing with 
+ Kullback-Leibler information item selection. In W. J. van der Linden & C. A. W. Glas (Eds.), 
+ Elements of adaptive testing (pp. 77 - 101). New York: Springer.
+ \item Wang, C., Chang, H.-H., & Boughton, K. A. (2010). Kullback-Leibler Information and Its 
+ Applications in Multi-Dimensional Adaptive Testing. Psychometrika, 76(1), 13 - 39. doi:10.1007/s11336-010-9186-0.
+}
 }
 

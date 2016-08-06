@@ -22,7 +22,7 @@
 get_eap_estimate_riemannsum <- function(dimension, likelihood, prior_form, prior_parameters, adapt = NULL, number_gridpoints = 50, ...) {
   result <- function() {
     mid_grid_points <- get_mid_grid_points() 
-    joint_distribution <- apply(mid_grid_points, 1, get_joint_distribution)
+    joint_distribution <- apply(mid_grid_points, 1, get_likelihood_or_post_density_given_theta)
     sum_joint <- sum(joint_distribution)
     sum_joint_times_grid <- colSums(joint_distribution * mid_grid_points)
     eap_theta_estimate <- as.vector(sum_joint_times_grid / sum_joint)
@@ -106,7 +106,7 @@ get_eap_estimate_riemannsum <- function(dimension, likelihood, prior_form, prior
       grid_points_transformed
   }
   
-  get_joint_distribution <- function(theta) {
+  get_likelihood_or_post_density_given_theta <- function(theta) {
     if (prior_form == "normal")
       likelihood(theta, ...) * dmvnorm(theta, prior_parameters$mu, prior_parameters$Sigma)
     else
