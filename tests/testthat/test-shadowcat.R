@@ -265,7 +265,11 @@ test_that("true theta is 2, estimator is expected_aposteriori, N(0, 5) prior", {
   prior_parameters <- list(mu = 0, Sigma = matrix(5))
   
   test_outcome_gauss_hermite <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing, eap_estimation_procedure = "gauss_hermite_quad")
+  #user  system elapsed 
+  #0.945   0.016   0.972
   test_outcome_riemann <- with_random_seed(2, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing)
+  #user  system elapsed 
+  #0.961   0.012   0.984
   
   # gauss hermite
   expect_equal(as.vector(round(test_outcome_gauss_hermite$estimate, 3)), 1.833)
@@ -545,7 +549,11 @@ test_that("true theta is 1, 0, 2, estimator is expected_aposteriori, N(c(0, 0, 0
   prior_parameters <- list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions) * 20)
   
   test_outcome_gauss_hermite <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing, eap_estimation_procedure = "gauss_hermite_quad")
+  #user  system elapsed 
+  #11.547   0.138  11.809
   test_outcome_riemann <- with_random_seed(3, test_shadowcat)(true_theta, prior_form = prior_form, prior_parameters = prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing, eap_estimation_procedure = "riemannsum")
+  #user  system elapsed 
+  #17.903   0.174  18.292
   
   # gauss hermite
   expect_equal(as.vector(round(test_outcome_gauss_hermite$estimate, 3)), c(.878, .305, 1.455))
