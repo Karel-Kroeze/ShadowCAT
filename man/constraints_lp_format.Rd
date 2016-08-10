@@ -84,7 +84,10 @@ constraints <- list(
        target = 2))
 
 # get list of characteristics and constraintrs in lp format
-ShadowCAT:::constraints_lp_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
+ShadowCAT:::constraints_lp_format(max_n = max_n, 
+                                  number_items = number_items, 
+                                  characteristics = characteristics, 
+                                  constraints = constraints)
 
 }
 

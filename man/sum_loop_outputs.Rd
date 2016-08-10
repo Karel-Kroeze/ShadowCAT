@@ -23,7 +23,10 @@ Get sum of objects returned by a loop, added to a starting object.
 }
 \examples{
 matrix_example <- matrix(1:6, ncol = 2)
-ShadowCAT:::sum_loop_outputs(start_object = matrix(0, 2, 2), loop_vector = 1:3, FUN = function(item, matrix_example) { matrix_example[item,] \%*\% t(matrix_example[item,]) }, matrix_example = matrix_example)
+ShadowCAT:::sum_loop_outputs(start_object = matrix(0, 2, 2), loop_vector = 1:3, 
+                             FUN = function(item, matrix_example) { 
+                                     matrix_example[item,] \%*\% t(matrix_example[item,]) }, 
+                             matrix_example = matrix_example)
 
  \dontshow{
 all(ShadowCAT:::sum_loop_outputs(start_object = matrix(0, 2, 2), loop_vector = 1:3, FUN = function(item, matrix_example) { matrix_example[item,] \%*\% t(matrix_example[item,]) }, matrix_example = matrix_example) == 

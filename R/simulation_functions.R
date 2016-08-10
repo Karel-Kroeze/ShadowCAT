@@ -13,8 +13,10 @@
 #' is the maximum number of itemsteps.
 #' @param alpha_bounds Vector containing lower and upper bound, respectively, of the uniform distribution from which the alpha values are drawn.
 #' @return Named list containing simulated alpha and beta matrix.
-#' @examples simulate_testbank(model = "GPCM", number_items = 50, number_dimensions = 2, number_itemsteps = 3)
-#' simulate_testbank(model = "GPCM", number_items = 50, number_dimensions = 3, number_itemsteps = 4, items_load_one_dimension = TRUE, varying_number_item_steps = TRUE)
+#' @examples 
+#' simulate_testbank(model = "GPCM", number_items = 50, number_dimensions = 2, number_itemsteps = 3)
+#' simulate_testbank(model = "GPCM", number_items = 50, number_dimensions = 3, number_itemsteps = 4, 
+#'                   items_load_one_dimension = TRUE, varying_number_item_steps = TRUE)
 #' @importFrom stringr str_c
 #' @importFrom stats runif rnorm
 #' @export
@@ -91,17 +93,22 @@ simulate_testbank <- function(model, number_items = 50, number_dimensions = 1, n
 #' @inheritParams shadowcat
 #' @return Vector with responses.
 #' @examples 
-#' alpha_beta <- simulate_testbank(model = "3PLM", number_items = 50, number_dimensions = 1, number_itemsteps = 1)
+#' alpha_beta <- simulate_testbank(model = "3PLM", number_items = 50, 
+#'                                 number_dimensions = 1, number_itemsteps = 1)
 #' guessing <- matrix(rep(.5, 50), dimnames = list(rownames(alpha_beta$alpha), NULL))
 #' 
 #' # Without guessing parameter
-#' simulate_answer(theta = .3, model = "3PLM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = NULL, item_keys = "item3")
+#' simulate_answer(theta = .3, model = "3PLM", alpha = alpha_beta$alpha, 
+#'                 beta = alpha_beta$beta, guessing = NULL, item_keys = "item3")
 #' 
 #' # With guessing parameter
-#' simulate_answer(theta = .3, model = "3PLM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = guessing, item_keys = "item3")
+#' simulate_answer(theta = .3, model = "3PLM", alpha = alpha_beta$alpha,
+#'                 beta = alpha_beta$beta, guessing = guessing, item_keys = "item3")
 #' 
 #' # Simulate answers for more than one item
-#' simulate_answer(theta = .3, model = "3PLM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = NULL, item_keys = c("item5", "item2", "item8", "item1", "item18"))
+#' simulate_answer(theta = .3, model = "3PLM", alpha = alpha_beta$alpha, 
+#'                 beta = alpha_beta$beta, guessing = NULL, 
+#'                 item_keys = c("item5", "item2", "item8", "item1", "item18"))
 #' @importFrom stats runif
 #' @export
 simulate_answer <- function(theta, model, alpha, beta, guessing, item_keys) {
@@ -162,12 +169,24 @@ simulate_answer <- function(theta, model, alpha, beta, guessing, item_keys) {
 #' @return List as returned by \code{\link{shadowcat}} after test is terminated, with \code{variance} element turned into matrix.
 #' @examples 
 #' # One dimension
-#' alpha_beta_one_dim <- simulate_testbank(model = "GPCM", number_items = 50, number_dimensions = 1, number_itemsteps = 3)
-#' test_shadowcat(true_theta = 2, prior_form = "normal", prior_parameters = list(mu = 0, Sigma = diag(1)), model = "SM", alpha = alpha_beta_one_dim$alpha, beta = alpha_beta_one_dim$beta, start_items = list(type = 'random', n = 3), stop_test = list(max_n = 20, target = 0.1), estimator = "maximum_aposteriori", information_summary = "posterior_determinant")
+#' alpha_beta_one_dim <- simulate_testbank(model = "GPCM", number_items = 50, 
+#'                                         number_dimensions = 1, number_itemsteps = 3)
+#' test_shadowcat(true_theta = 2, prior_form = "normal", 
+#'                prior_parameters = list(mu = 0, Sigma = diag(1)), model = "SM", 
+#'                alpha = alpha_beta_one_dim$alpha, beta = alpha_beta_one_dim$beta, 
+#'                start_items = list(type = 'random', n = 3), 
+#'                stop_test = list(max_n = 20, target = 0.1), estimator = "maximum_aposteriori", 
+#'                information_summary = "posterior_determinant")
 #' 
 #' # Three dimensions
-#' alpha_beta_three_dim <- simulate_testbank(model = "GPCM", number_items = 100, number_dimensions = 3, number_itemsteps = 3)
-#' test_shadowcat(true_theta = c(0, 1, -.5), prior_form = "normal", prior_parameters = list(mu = c(0, 0, 0), Sigma = diag(3)), model = "SM", alpha = alpha_beta_three_dim$alpha, beta = alpha_beta_three_dim$beta, start_items = list(type = 'random', n = 3), stop_test = list(max_n = 60, target = c(.1, .1, .1)), estimator = "maximum_aposteriori", information_summary = "posterior_determinant")
+#' alpha_beta_three_dim <- simulate_testbank(model = "GPCM", number_items = 100, 
+#'                                           number_dimensions = 3, number_itemsteps = 3)
+#' test_shadowcat(true_theta = c(0, 1, -.5), prior_form = "normal", 
+#'                prior_parameters = list(mu = c(0, 0, 0), Sigma = diag(3)), 
+#'                model = "SM", alpha = alpha_beta_three_dim$alpha, 
+#'                beta = alpha_beta_three_dim$beta, start_items = list(type = 'random', n = 3), 
+#'                stop_test = list(max_n = 60, target = c(.1, .1, .1)), 
+#'                estimator = "maximum_aposteriori", information_summary = "posterior_determinant")
 #' @export
 test_shadowcat <- function(true_theta, prior_form, prior_parameters, model, alpha, beta, start_items, stop_test, estimator, information_summary, guessing = NULL, eta = NULL, constraints_and_characts = NULL, lower_bound = NULL, upper_bound = NULL, safe_eap = FALSE, initital_estimate = rep(0, ncol(alpha)), initial_variance = diag(ncol(alpha)) * 25, eap_estimation_procedure = "riemannsum") {
   answers <- NULL

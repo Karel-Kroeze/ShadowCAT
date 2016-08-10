@@ -25,15 +25,19 @@ Same as lapply, but output of lapply is converted to array.
 matrix_example <- matrix(1:9, ncol = 3)
 ShadowCAT:::lapply_return_array(x = 1:3, 
                                 dim = c(3, 3, 3), 
-                                FUN = function(i, matrix_example) { matrix_example[i,] \%*\% t(matrix_example[i,]) }, 
+                                FUN = function(i, matrix_example) { 
+                                        matrix_example[i,] \%*\% t(matrix_example[i,]) 
+                                      }, 
                                 matrix_example = matrix_example)
 \dontshow{
 array_out <- ShadowCAT:::lapply_return_array(x = 1:3, 
                                             dim = c(3, 3, 3), 
-                                            FUN = function(i, matrix_example) { matrix_example[i,] \%*\% t(matrix_example[i,]) }, 
+                                            FUN = function(i, matrix_example) { 
+                                                    matrix_example[i,] \%*\% t(matrix_example[i,]) }, 
                                             matrix_example = matrix_example)
 list_out <- lapply(X = 1:3,
-                   FUN = function(i, matrix_example) { matrix_example[i,] \%*\% t(matrix_example[i,]) },
+                   FUN = function(i, matrix_example) { 
+                           matrix_example[i,] \%*\% t(matrix_example[i,]) },
                    matrix_example = matrix_example)
 all(array_out[,,1] == list_out[[1]] && array_out[,,2] == list_out[[2]] && array_out[,,3] == list_out[[3]]) || stop("wrong")
 }

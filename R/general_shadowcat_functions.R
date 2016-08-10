@@ -59,15 +59,19 @@ get_subset <- function(x, subset) {
 #' @examples matrix_example <- matrix(1:9, ncol = 3)
 #' ShadowCAT:::lapply_return_array(x = 1:3, 
 #'                                 dim = c(3, 3, 3), 
-#'                                 FUN = function(i, matrix_example) { matrix_example[i,] %*% t(matrix_example[i,]) }, 
+#'                                 FUN = function(i, matrix_example) { 
+#'                                         matrix_example[i,] %*% t(matrix_example[i,]) 
+#'                                       }, 
 #'                                 matrix_example = matrix_example)
 #' \dontshow{
 #' array_out <- ShadowCAT:::lapply_return_array(x = 1:3, 
 #'                                             dim = c(3, 3, 3), 
-#'                                             FUN = function(i, matrix_example) { matrix_example[i,] %*% t(matrix_example[i,]) }, 
+#'                                             FUN = function(i, matrix_example) { 
+#'                                                     matrix_example[i,] %*% t(matrix_example[i,]) }, 
 #'                                             matrix_example = matrix_example)
 #' list_out <- lapply(X = 1:3,
-#'                    FUN = function(i, matrix_example) { matrix_example[i,] %*% t(matrix_example[i,]) },
+#'                    FUN = function(i, matrix_example) { 
+#'                            matrix_example[i,] %*% t(matrix_example[i,]) },
 #'                    matrix_example = matrix_example)
 #' all(array_out[,,1] == list_out[[1]] && array_out[,,2] == list_out[[2]] && array_out[,,3] == list_out[[3]]) || stop("wrong")
 #' }
@@ -104,7 +108,9 @@ matrix_apply <- function(x, margin, FUN, ...) {
 #' @examples ShadowCAT:::move_values_to_means(values = 1, means = 2, amount_change = .1)
 #' ShadowCAT:::move_values_to_means(values = 3, means = 2, amount_change = .1)
 #' ShadowCAT:::move_values_to_means(values = 2, means = 2, amount_change = .1)
-#' ShadowCAT:::move_values_to_means(values = c(1, 2, 3), means = c(1, 5, -1), amount_change = rep(.1, 3))
+#' ShadowCAT:::move_values_to_means(values = c(1, 2, 3), 
+#'                                  means = c(1, 5, -1), 
+#'                                  amount_change = rep(.1, 3))
 #' 
 #' \dontshow{
 #' ShadowCAT:::move_values_to_means(values = 1, means = 2, amount_change = .1) == 1.1 || stop("wrong") 
@@ -198,7 +204,9 @@ number_non_missing_cells_per_row <- function(x) {
 #' @param upper_bound Vector with upper bounds for each column; length should be equal to the number of columns of matrix_to_evaluate.
 #' @return \code{matrix_to_evaluate} without the rows that contain values outside the specified bounds.
 #' @examples ShadowCAT:::remove_rows_outside_bounds(matrix(-3:3), lower_bound = -2, upper_bound = 2)
-#' ShadowCAT:::remove_rows_outside_bounds(expand.grid(list(-3:3, -2:2)), lower_bound = c(-2, -3), upper_bound = c(2, 1))
+#' ShadowCAT:::remove_rows_outside_bounds(expand.grid(list(-3:3, -2:2)), 
+#'                                        lower_bound = c(-2, -3), 
+#'                                        upper_bound = c(2, 1))
 #' 
 #' \dontshow{
 #' all(ShadowCAT:::remove_rows_outside_bounds(matrix(-3:3), lower_bound = -2, upper_bound = 2) == matrix(-2:2)) || stop("wrong")
@@ -263,17 +271,39 @@ row_or_vector_sums <- function(x) {
 #' @param row_names Character vector of row names to use as the standard.
 #' @param list_of_matrices_to_check List containing the matrices for which the row names should be checked. NULL elements in the list are ignored.
 #' @return \code{TRUE} if the row names of all the matrices are equal to \code{row_names}, including the order; \code{FALSE} otherwise.
-#' @examples ShadowCAT:::row_names_are_equal(c("a", "b", "c"), list("matrix1" = matrix(1:3, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
-#'                                                                  "matrix2" = matrix(2:4, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
-#'                                                                  "matrix3" = matrix(3:5, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
-#'                                                                  "matrix4" = NULL))
-#' ShadowCAT:::row_names_are_equal(c("a", "b", "c"), list("matrix1" = matrix(1:3, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
-#'                                                        "matrix2" = matrix(2:4, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
-#'                                                        "matrix3" = matrix(3:4, ncol = 1, dimnames = list(c("a", "b"), NULL)),
-#'                                                        "matrix4" = NULL))
-#' ShadowCAT:::row_names_are_equal(c("a", "b", "c"), list("matrix1" = matrix(1:3, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
-#'                                                        "matrix2" = matrix(2:4, ncol = 1, dimnames = list(c("a", "c", "b"), NULL)),
-#'                                                        "matrix3" = matrix(3:5, ncol = 1, dimnames = list(c("a", "b", "c"), NULL))))
+#' @examples 
+#' ShadowCAT:::row_names_are_equal(c("a", "b", "c"), 
+#'                                 list("matrix1" = matrix(1:3, 
+#'                                                         ncol = 1, 
+#'                                                         dimnames = list(c("a", "b", "c"), NULL)),
+#'                                      "matrix2" = matrix(2:4, 
+#'                                                         ncol = 1, 
+#'                                                         dimnames = list(c("a", "b", "c"), NULL)),
+#'                                      "matrix3" = matrix(3:5, 
+#'                                                         ncol = 1, 
+#'                                                         dimnames = list(c("a", "b", "c"), NULL)),
+#'                                      "matrix4" = NULL))
+#' ShadowCAT:::row_names_are_equal(c("a", "b", "c"), 
+#'                                 list("matrix1" = matrix(1:3, 
+#'                                                         ncol = 1, 
+#'                                                         dimnames = list(c("a", "b", "c"), NULL)),
+#'                                      "matrix2" = matrix(2:4, 
+#'                                                         ncol = 1, 
+#'                                                         dimnames = list(c("a", "b", "c"), NULL)),
+#'                                      "matrix3" = matrix(3:4, 
+#'                                                         ncol = 1, 
+#'                                                         dimnames = list(c("a", "b"), NULL)),
+#'                                      "matrix4" = NULL))
+#' ShadowCAT:::row_names_are_equal(c("a", "b", "c"), 
+#'                                 list("matrix1" = matrix(1:3, 
+#'                                                         ncol = 1, 
+#'                                                         dimnames = list(c("a", "b", "c"), NULL)),
+#'                                      "matrix2" = matrix(2:4, 
+#'                                                         ncol = 1, 
+#'                                                         dimnames = list(c("a", "c", "b"), NULL)),
+#'                                      "matrix3" = matrix(3:5, 
+#'                                                         ncol = 1, 
+#'                                                         dimnames = list(c("a", "b", "c"), NULL))))
 #'
 #' 
 #' \dontshow{
@@ -330,7 +360,10 @@ rsapply <- function(..., fn) {
 #' @param ... Any additional arguments to FUN.
 #' @return Sum of objects returned by a loop, added to starting object.
 #' @examples matrix_example <- matrix(1:6, ncol = 2)
-#' ShadowCAT:::sum_loop_outputs(start_object = matrix(0, 2, 2), loop_vector = 1:3, FUN = function(item, matrix_example) { matrix_example[item,] %*% t(matrix_example[item,]) }, matrix_example = matrix_example)
+#' ShadowCAT:::sum_loop_outputs(start_object = matrix(0, 2, 2), loop_vector = 1:3, 
+#'                              FUN = function(item, matrix_example) { 
+#'                                      matrix_example[item,] %*% t(matrix_example[item,]) }, 
+#'                              matrix_example = matrix_example)
 #' 
 #'  \dontshow{
 #' all(ShadowCAT:::sum_loop_outputs(start_object = matrix(0, 2, 2), loop_vector = 1:3, FUN = function(item, matrix_example) { matrix_example[item,] %*% t(matrix_example[item,]) }, matrix_example = matrix_example) == 

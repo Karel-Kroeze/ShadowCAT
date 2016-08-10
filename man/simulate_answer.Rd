@@ -31,16 +31,21 @@ Vector with responses.
 Simulate answer on specified items, given true theta.
 }
 \examples{
-alpha_beta <- simulate_testbank(model = "3PLM", number_items = 50, number_dimensions = 1, number_itemsteps = 1)
+alpha_beta <- simulate_testbank(model = "3PLM", number_items = 50, 
+                                number_dimensions = 1, number_itemsteps = 1)
 guessing <- matrix(rep(.5, 50), dimnames = list(rownames(alpha_beta$alpha), NULL))
 
 # Without guessing parameter
-simulate_answer(theta = .3, model = "3PLM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = NULL, item_keys = "item3")
+simulate_answer(theta = .3, model = "3PLM", alpha = alpha_beta$alpha, 
+                beta = alpha_beta$beta, guessing = NULL, item_keys = "item3")
 
 # With guessing parameter
-simulate_answer(theta = .3, model = "3PLM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = guessing, item_keys = "item3")
+simulate_answer(theta = .3, model = "3PLM", alpha = alpha_beta$alpha,
+                beta = alpha_beta$beta, guessing = guessing, item_keys = "item3")
 
 # Simulate answers for more than one item
-simulate_answer(theta = .3, model = "3PLM", alpha = alpha_beta$alpha, beta = alpha_beta$beta, guessing = NULL, item_keys = c("item5", "item2", "item8", "item1", "item18"))
+simulate_answer(theta = .3, model = "3PLM", alpha = alpha_beta$alpha, 
+                beta = alpha_beta$beta, guessing = NULL, 
+                item_keys = c("item5", "item2", "item8", "item1", "item18"))
 }
 

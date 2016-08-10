@@ -21,7 +21,9 @@ Remove rows of a matrix that contain one or more values outside specified bounds
 }
 \examples{
 ShadowCAT:::remove_rows_outside_bounds(matrix(-3:3), lower_bound = -2, upper_bound = 2)
-ShadowCAT:::remove_rows_outside_bounds(expand.grid(list(-3:3, -2:2)), lower_bound = c(-2, -3), upper_bound = c(2, 1))
+ShadowCAT:::remove_rows_outside_bounds(expand.grid(list(-3:3, -2:2)), 
+                                       lower_bound = c(-2, -3), 
+                                       upper_bound = c(2, 1))
 
 \dontshow{
 all(ShadowCAT:::remove_rows_outside_bounds(matrix(-3:3), lower_bound = -2, upper_bound = 2) == matrix(-2:2)) || stop("wrong")

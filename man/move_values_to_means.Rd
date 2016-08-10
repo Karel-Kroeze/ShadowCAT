@@ -23,7 +23,9 @@ Move a vector of values in the direction of a vector of means.
 ShadowCAT:::move_values_to_means(values = 1, means = 2, amount_change = .1)
 ShadowCAT:::move_values_to_means(values = 3, means = 2, amount_change = .1)
 ShadowCAT:::move_values_to_means(values = 2, means = 2, amount_change = .1)
-ShadowCAT:::move_values_to_means(values = c(1, 2, 3), means = c(1, 5, -1), amount_change = rep(.1, 3))
+ShadowCAT:::move_values_to_means(values = c(1, 2, 3), 
+                                 means = c(1, 5, -1), 
+                                 amount_change = rep(.1, 3))
 
 \dontshow{
 ShadowCAT:::move_values_to_means(values = 1, means = 2, amount_change = .1) == 1.1 || stop("wrong") 

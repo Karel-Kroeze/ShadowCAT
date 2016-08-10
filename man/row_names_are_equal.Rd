@@ -18,17 +18,38 @@ row_names_are_equal(row_names, list_of_matrices_to_check)
 Check whether all matrices have row names equal to the standard.
 }
 \examples{
-ShadowCAT:::row_names_are_equal(c("a", "b", "c"), list("matrix1" = matrix(1:3, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
-                                                                 "matrix2" = matrix(2:4, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
-                                                                 "matrix3" = matrix(3:5, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
-                                                                 "matrix4" = NULL))
-ShadowCAT:::row_names_are_equal(c("a", "b", "c"), list("matrix1" = matrix(1:3, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
-                                                       "matrix2" = matrix(2:4, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
-                                                       "matrix3" = matrix(3:4, ncol = 1, dimnames = list(c("a", "b"), NULL)),
-                                                       "matrix4" = NULL))
-ShadowCAT:::row_names_are_equal(c("a", "b", "c"), list("matrix1" = matrix(1:3, ncol = 1, dimnames = list(c("a", "b", "c"), NULL)),
-                                                       "matrix2" = matrix(2:4, ncol = 1, dimnames = list(c("a", "c", "b"), NULL)),
-                                                       "matrix3" = matrix(3:5, ncol = 1, dimnames = list(c("a", "b", "c"), NULL))))
+ShadowCAT:::row_names_are_equal(c("a", "b", "c"), 
+                                list("matrix1" = matrix(1:3, 
+                                                        ncol = 1, 
+                                                        dimnames = list(c("a", "b", "c"), NULL)),
+                                     "matrix2" = matrix(2:4, 
+                                                        ncol = 1, 
+                                                        dimnames = list(c("a", "b", "c"), NULL)),
+                                     "matrix3" = matrix(3:5, 
+                                                        ncol = 1, 
+                                                        dimnames = list(c("a", "b", "c"), NULL)),
+                                     "matrix4" = NULL))
+ShadowCAT:::row_names_are_equal(c("a", "b", "c"), 
+                                list("matrix1" = matrix(1:3, 
+                                                        ncol = 1, 
+                                                        dimnames = list(c("a", "b", "c"), NULL)),
+                                     "matrix2" = matrix(2:4, 
+                                                        ncol = 1, 
+                                                        dimnames = list(c("a", "b", "c"), NULL)),
+                                     "matrix3" = matrix(3:4, 
+                                                        ncol = 1, 
+                                                        dimnames = list(c("a", "b"), NULL)),
+                                     "matrix4" = NULL))
+ShadowCAT:::row_names_are_equal(c("a", "b", "c"), 
+                                list("matrix1" = matrix(1:3, 
+                                                        ncol = 1, 
+                                                        dimnames = list(c("a", "b", "c"), NULL)),
+                                     "matrix2" = matrix(2:4, 
+                                                        ncol = 1, 
+                                                        dimnames = list(c("a", "c", "b"), NULL)),
+                                     "matrix3" = matrix(3:5, 
+                                                        ncol = 1, 
+                                                        dimnames = list(c("a", "b", "c"), NULL))))
 
 
 \dontshow{

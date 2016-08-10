@@ -56,7 +56,10 @@
 #'        target = 2))
 #' 
 #' # get list of characteristics and constraintrs in lp format
-#' ShadowCAT:::constraints_lp_format(max_n = max_n, number_items = number_items, characteristics = characteristics, constraints = constraints)
+#' ShadowCAT:::constraints_lp_format(max_n = max_n, 
+#'                                   number_items = number_items, 
+#'                                   characteristics = characteristics, 
+#'                                   constraints = constraints)
 #' 
 #' @param max_n Test length at which testing should stop.
 #' @param number_items Number of items available in the item bank.

@@ -99,7 +99,8 @@
 #' \item{answers}{Named list containing the answers to the administered items.}
 #' 
 #' @examples
-#' alpha_beta <- simulate_testbank(model = "GPCM", number_items = 100, number_dimensions = 3, number_itemsteps = 3)
+#' alpha_beta <- simulate_testbank(model = "GPCM", number_items = 100, 
+#'                                 number_dimensions = 3, number_itemsteps = 3)
 #' model <- "GPCM"
 #' start_items <- list(type = 'fixed', item_keys = c("item33", "item5", "item23"), n = 3)
 #' stop_test <- list(min_n = 4, max_n = 30, target = c(.1, .1, .1))
@@ -109,34 +110,74 @@
 #' prior_parameters <- list(mu = c(0, 0, 0), Sigma = diag(3))
 #' 
 #' # Initial call: get key of first item to adminster
-#' call1 <- shadowcat(answers = NULL, estimate = c(0, 0, 0), variance = as.vector(diag(3) * 25), model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters)
+#' call1 <- shadowcat(answers = NULL, estimate = c(0, 0, 0), variance = as.vector(diag(3) * 25), 
+#'                    model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, 
+#'                    start_items = start_items, stop_test = stop_test, 
+#'                    estimator = estimator, information_summary = information_summary,
+#'                    prior_form = prior_form, prior_parameters = prior_parameters)
 #' # Second to fourth call: number of start items is set to 3, so no update in theta estimate yet
-#' call2 <- shadowcat(answers = list(item33 = 2), estimate = call1$estimate, variance = call1$variance, model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters)
-#' call3 <- shadowcat(answers = list(item33 = 2, item5 = 3), estimate = call2$estimate, variance = call2$variance, model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters)
-#' call4 <- shadowcat(answers = list(item33 = 2, item5 = 3, item23 = 3), estimate = call3$estimate, variance = call3$variance, model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters)
+#' call2 <- shadowcat(answers = list(item33 = 2), estimate = call1$estimate,
+#'                    variance = call1$variance, model = model, alpha = alpha_beta$alpha, 
+#'                    beta = alpha_beta$beta, start_items = start_items, 
+#'                    stop_test = stop_test, estimator = estimator, 
+#'                    information_summary = information_summary, 
+#'                    prior_form = prior_form, prior_parameters = prior_parameters)
+#' call3 <- shadowcat(answers = list(item33 = 2, item5 = 3), 
+#'                    estimate = call2$estimate, variance = call2$variance, 
+#'                    model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, 
+#'                    start_items = start_items, stop_test = stop_test,
+#'                    estimator = estimator, information_summary = information_summary, 
+#'                    prior_form = prior_form, prior_parameters = prior_parameters)
+#' call4 <- shadowcat(answers = list(item33 = 2, item5 = 3, item23 = 3), 
+#'                    estimate = call3$estimate, variance = call3$variance,
+#'                    model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, 
+#'                    start_items = start_items, stop_test = stop_test,
+#'                    estimator = estimator, information_summary = information_summary, 
+#'                    prior_form = prior_form, prior_parameters = prior_parameters)
 #' # Fifth call: first time theta estimate is updated
-#' call5 <- shadowcat(answers = list(item33 = 2, item5 = 3, item23 = 3, item84 = 1), estimate = call4$estimate, variance = call4$variance, model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters)
+#' call5 <- shadowcat(answers = list(item33 = 2, item5 = 3, item23 = 3, item84 = 1), 
+#'                    estimate = call4$estimate, variance = call4$variance, model = model, 
+#'                    alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, 
+#'                    stop_test = stop_test, estimator = estimator, 
+#'                    information_summary = information_summary, 
+#'                    prior_form = prior_form, prior_parameters = prior_parameters)
 #' # Sixth call: use the updated estimate and variance as the current values for estimate and variance
-#' call6 <- shadowcat(answers = list(item33 = 2, item5 = 3, item23 = 3, item84 = 1, item36 = 2), estimate = call5$estimate, variance = call5$variance, model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters)
+#' call6 <- shadowcat(answers = list(item33 = 2, item5 = 3, item23 = 3, item84 = 1, item36 = 2), 
+#'                    estimate = call5$estimate, variance = call5$variance, model = model, 
+#'                    alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, 
+#'                    stop_test = stop_test, estimator = estimator, 
+#'                    information_summary = information_summary, 
+#'                    prior_form = prior_form, prior_parameters = prior_parameters)
 #' 
 #' # With constraints (shadow testing)
-#' constraints_and_characteristics <- list(characteristics = data.frame(content = sample(c('algebra','physics','calculus'), size = 100, replace = TRUE),
-#'                                                                      time = runif(100),
-#'                                                                      exclusive = sapply(1:100, FUN = function (x) { if (x %in% sample(1:100, size = 4)) 1 else 0 })),
-#'                                         constraints = list(list(name = 'content/algebra',
-#'                                                                 op = '><',
-#'                                                                 target = c(5, 10)), # ensure number of algebra items is between 5 and 10
-#'                                                            list(name = 'content/physics',
-#'                                                                 op = '><',
-#'                                                                 target = c(2, 5)), # ensure number of physics items is between 2 and 5
-#'                                                            list(name = 'time',
-#'                                                                 op = '<',
-#'                                                                 target = 20), # Ensure total tests takes no longer than 20 minutes
-#'                                                            list(name = 'exclusive',
-#'                                                                 op = '<',
-#'                                                                 target = 2))) # Ensure number of exclusive items equals 2
-#'                                                              
-#' shadowcat(answers = NULL, estimate = c(0, 0, 0), variance = as.vector(diag(3) * 25), model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, start_items = start_items, stop_test = stop_test, estimator = estimator, information_summary = information_summary, prior_form = prior_form, prior_parameters = prior_parameters, constraints_and_characts = constraints_and_characteristics)
+#' characteristics <- data.frame(content = sample(c('algebra','physics','calculus'), 
+#'                                                size = 100, replace = TRUE),
+#'                               time = runif(100),
+#'                               exclusive = sapply(1:100, 
+#'                                                  function (x) { 
+#'                                                    if ( x %in% sample(1:100, size = 4) ) 1 else 0 
+#'                                                  } ))
+#' constraints <- list(list(name = 'content/algebra',
+#'                          op = '><',
+#'                          target = c(5, 10)), # ensure number of algebra items is between 5 and 10
+#'                     list(name = 'content/physics',
+#'                          op = '><',
+#'                          target = c(2, 5)), # ensure number of physics items is between 2 and 5
+#'                     list(name = 'time',
+#'                          op = '<',
+#'                          target = 20), # Ensure total tests takes no longer than 20 minutes
+#'                     list(name = 'exclusive',
+#'                          op = '<',
+#'                          target = 2)) # Ensure number of exclusive items equals 2
+#' constraints_and_characteristics <- list(characteristics = characteristics,
+#'                                         constraints = constraints)
+#'   
+#' shadowcat(answers = NULL, estimate = c(0, 0, 0), variance = as.vector(diag(3) * 25), 
+#'           model = model, alpha = alpha_beta$alpha, beta = alpha_beta$beta, 
+#'           start_items = start_items, stop_test = stop_test, estimator = estimator, 
+#'           information_summary = information_summary, prior_form = prior_form, 
+#'           prior_parameters = prior_parameters, 
+#'           constraints_and_characts = constraints_and_characteristics)
 #' @importFrom matrixcalc is.positive.definite
 #' @export
 shadowcat <- function(answers, estimate, variance, model, alpha, beta, start_items, stop_test, estimator, information_summary, prior_form = NULL, prior_parameters = NULL, guessing = NULL, eta = NULL, constraints_and_characts = NULL, lower_bound = NULL, upper_bound = NULL, safe_eap = FALSE, eap_estimation_procedure = "riemannsum") {      
