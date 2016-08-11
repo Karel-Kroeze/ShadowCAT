@@ -7,3 +7,7 @@ Gemfile.lock
 .gitignore
 .lintr
 vendor
+^circle\.yml$
+.o$
+.so$
+.dll$

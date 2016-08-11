@@ -12,5 +12,11 @@ ShadowCAT.Rcheck
 
 # R Builds
 *.tar.gz
-
 local
+
+# intermediate C++ files
+*.o
+*.so
+
+# compiled c++
+*.dll
