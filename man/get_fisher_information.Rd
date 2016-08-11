@@ -35,8 +35,7 @@ Fisher Information (expected information) per item.
 }
 \details{
 Fisher Information is given as: 
- \deqn{\mathcal{I}(\theta) = - \operatorname{E} \left[\left. \frac{\partial^2}{\partial\theta^2} \log f(X;\theta)\right|\theta \right]} 
-{minus expectation of second derivative of the Log-Likelihood of f(theta)}
+ \deqn{\mathcal{I}(\theta) = - \operatorname{E} \left[\left. \frac{\partial^2}{\partial\theta^2} \log f(X;\theta)\right|\theta \right]}{minus expectation of second derivative of the Log-Likelihood of f(theta)}
 and is calculated as the weighted sum of second derivatives for all response categories. Information for multiple items is simply the sum of 
 the individual information matrices.
 
