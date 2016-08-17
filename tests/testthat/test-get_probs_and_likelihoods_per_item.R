@@ -3,10 +3,6 @@
 library(testthat)
 '
 
-# 1 item
-# wisselend aantal item steps
-# met alleen probs / likelihoods
-
 make_random_seed_exist <- rnorm(1)
 
 context("3PLM model")
@@ -38,6 +34,32 @@ test_that("model is 3PLM, 1 dimension, 2 categories", {
   expect_equal(length(probs_and_likelihoods_per_item$derivatives2), 50)
 })
 
+test_that("model is 3PLM, 1 dimension, 2 categories, 1 item", {
+  theta <- .5
+  model <- "3PLM"
+  administered <- 1:50
+  number_dimensions <- 1 
+  number_items <- 1
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  guessing <- .1 
+  answers <- 1
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
+  
+  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta = theta, model = model, alpha = alpha, beta = beta, guessing = guessing, 
+                                                                       number_dimensions = number_dimensions, number_items = number_items, number_itemsteps_per_item = number_itemsteps_per_item, 
+                                                                       answers = answers, with_likelihoods = TRUE, with_derivatives = TRUE)
+  
+  expect_equal(round(probs_and_likelihoods_per_item$probabilities[1,], 3), c(.293, .707))
+  expect_equal(dim(probs_and_likelihoods_per_item$probabilities), c(1, 2))
+  expect_equal(round(probs_and_likelihoods_per_item$likelihoods, 3), .707)
+  expect_equal(round(probs_and_likelihoods_per_item$derivatives1, 3), .279)
+  expect_equal(round(probs_and_likelihoods_per_item$derivatives2, 3), -.176)
+  expect_equal(length(probs_and_likelihoods_per_item$likelihoods), 1)
+  expect_equal(length(probs_and_likelihoods_per_item$derivatives1), 1)
+  expect_equal(length(probs_and_likelihoods_per_item$derivatives2), 1)
+})
+
 test_that("model is 3PLM, 2 dimensions, 2 categories", {
   theta <- c(.3, .5)
   model <- "3PLM"
@@ -66,6 +88,53 @@ test_that("model is 3PLM, 2 dimensions, 2 categories", {
 })
 
 
+test_that("model is 3PLM, no derivatives", {
+  theta <- c(.3, .5)
+  model <- "3PLM"
+  administered <- 1:50
+  number_dimensions <- 2  
+  number_items <- 50
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
+  answers <- rep(c(1, 0), 25)
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
+  
+  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta = theta, model = model, alpha = alpha, beta = beta, guessing = guessing, 
+                                                                       number_dimensions = number_dimensions, number_items = number_items, number_itemsteps_per_item = number_itemsteps_per_item, 
+                                                                       answers = answers, with_likelihoods = TRUE)
+  
+  expect_equal(round(probs_and_likelihoods_per_item$probabilities[1,], 3), c(.232, .768))
+  expect_equal(round(probs_and_likelihoods_per_item$probabilities[50,], 3), c(.028, .972))
+  expect_equal(dim(probs_and_likelihoods_per_item$probabilities), c(50, 2))
+  expect_equal(round(probs_and_likelihoods_per_item$likelihoods[5:7], 3), c(.742, .297, .452))
+  expect_equal(length(probs_and_likelihoods_per_item$likelihoods), 50)
+  expect_equal(probs_and_likelihoods_per_item$derivatives1, NULL)
+  expect_equal(probs_and_likelihoods_per_item$derivatives2, NULL)
+})
+
+
+test_that("model is 3PLM, no likelihoods and derivatives", {
+  theta <- c(.3, .5)
+  model <- "3PLM"
+  administered <- 1:50
+  number_dimensions <- 2  
+  number_items <- 50
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
+  answers <- rep(c(1, 0), 25)
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
+  
+  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta = theta, model = model, alpha = alpha, beta = beta, guessing = guessing, 
+                                                                       number_dimensions = number_dimensions, number_items = number_items, number_itemsteps_per_item = number_itemsteps_per_item, 
+                                                                       answers = answers)
+  
+  expect_equal(round(probs_and_likelihoods_per_item[1,], 3), c(.232, .768))
+  expect_equal(round(probs_and_likelihoods_per_item[50,], 3), c(.028, .972))
+  expect_equal(dim(probs_and_likelihoods_per_item), c(50, 2))
+})
+
 context("model is GPCM")
 
 test_that("model is GPCM, 1 dimensions, 2 categories", {
@@ -76,7 +145,7 @@ test_that("model is GPCM, 1 dimensions, 2 categories", {
   number_items <- 50
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
-  guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
+  guessing <- NULL 
   answers <- rep(c(1, 0), 25)
   number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   
@@ -93,7 +162,33 @@ test_that("model is GPCM, 1 dimensions, 2 categories", {
   expect_equal(length(probs_and_likelihoods_per_item$likelihoods), 50)
   expect_equal(length(probs_and_likelihoods_per_item$derivatives1), 50)
   expect_equal(length(probs_and_likelihoods_per_item$derivatives2), 50)
-}) 
+})
+
+test_that("model is GPCM, 1 dimensions, 2 categories, 1 item", {
+  theta <- .6
+  model <- "GPCM"
+  administered <- 1:50
+  number_dimensions <- 1
+  number_items <- 1
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  guessing <- NULL 
+  answers <- 1
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
+  
+  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta = theta, model = model, alpha = alpha, beta = beta, guessing = guessing, 
+                                                                       number_dimensions = number_dimensions, number_items = number_items, number_itemsteps_per_item = number_itemsteps_per_item, 
+                                                                       answers = answers, with_likelihoods = TRUE, with_derivatives = TRUE)
+  
+  expect_equal(round(probs_and_likelihoods_per_item$probabilities[1,], 3), c(.23, .77))
+  expect_equal(dim(probs_and_likelihoods_per_item$probabilities), c(1, 2))
+  expect_equal(round(probs_and_likelihoods_per_item$likelihoods, 3), .77)
+  expect_equal(round(probs_and_likelihoods_per_item$derivatives1, 3), .23)
+  expect_equal(round(probs_and_likelihoods_per_item$derivatives2, 3), -.177)
+  expect_equal(length(probs_and_likelihoods_per_item$likelihoods), 1)
+  expect_equal(length(probs_and_likelihoods_per_item$derivatives1), 1)
+  expect_equal(length(probs_and_likelihoods_per_item$derivatives2), 1)
+})
 
 test_that("model is GPCM, 3 dimensions, 4 categories", {
   theta <- c(-2, 1, .4)
@@ -188,6 +283,32 @@ test_that("model is GRM, 1 dimensions, 2 categories", {
   expect_equal(length(probs_and_likelihoods_per_item$derivatives2), 50)
 }) 
 
+test_that("model is GRM, 1 dimensions, 2 categories, i item", {
+  theta <- .5
+  model <- "GRM"
+  administered <- 1:50
+  number_dimensions <- 1 
+  number_items <- 1
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  guessing <- NULL
+  answers <- 1
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
+  
+  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta = theta, model = model, alpha = alpha, beta = beta, guessing = guessing, 
+                                                                       number_dimensions = number_dimensions, number_items = number_items, number_itemsteps_per_item = number_itemsteps_per_item, 
+                                                                       answers = answers, with_likelihoods = TRUE, with_derivatives = TRUE)
+  
+  expect_equal(round(probs_and_likelihoods_per_item$probabilities[1,], 3), c(.239, .761))
+  expect_equal(dim(probs_and_likelihoods_per_item$probabilities), c(1, 2))
+  expect_equal(round(probs_and_likelihoods_per_item$likelihoods, 3), .761)
+  expect_equal(round(probs_and_likelihoods_per_item$derivatives1, 3), .239)
+  expect_equal(round(probs_and_likelihoods_per_item$derivatives2, 3), -.182)
+  expect_equal(length(probs_and_likelihoods_per_item$likelihoods), 1)
+  expect_equal(length(probs_and_likelihoods_per_item$derivatives1), 1)
+  expect_equal(length(probs_and_likelihoods_per_item$derivatives2), 1)
+}) 
+
 test_that("model is GRM, 3 dimensions, 4 categories", {
   theta <- c(.2, 2, 2.5)
   model <- "GRM"
@@ -278,6 +399,33 @@ test_that("model is SM, 1 dimension, 2 categories", {
   expect_equal(length(probs_and_likelihoods_per_item$likelihoods), 50)
   expect_equal(length(probs_and_likelihoods_per_item$derivatives1), 50)
   expect_equal(length(probs_and_likelihoods_per_item$derivatives2), 50)
+})
+
+test_that("model is SM, 1 dimension, 2 categories, 1 item", {
+  theta <- -2.3
+  model <- "SM"
+  administered <- 1:50
+  number_dimensions <- 1
+  number_items <- 1
+  number_answer_categories <- 2
+  alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
+  beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
+  guessing <- NULL 
+  answers <- 1
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
+  
+  probs_and_likelihoods_per_item <- get_probs_and_likelihoods_per_item(theta = theta, model = model, alpha = alpha, beta = beta, guessing = guessing, 
+                                                                       number_dimensions = number_dimensions, number_items = number_items, number_itemsteps_per_item = number_itemsteps_per_item, 
+                                                                       answers = answers, with_likelihoods = TRUE, with_derivatives = TRUE)
+  
+  expect_equal(round(probs_and_likelihoods_per_item$probabilities[1,], 3), c(.575, .425))
+  expect_equal(dim(probs_and_likelihoods_per_item$probabilities), c(1, 2))
+  expect_equal(round(probs_and_likelihoods_per_item$likelihoods, 3), .425)
+  expect_equal(round(probs_and_likelihoods_per_item$derivatives1, 3), .575)
+  expect_equal(round(probs_and_likelihoods_per_item$derivatives2, 3), -.244)
+  expect_equal(length(probs_and_likelihoods_per_item$likelihoods), 1)
+  expect_equal(length(probs_and_likelihoods_per_item$derivatives1), 1)
+  expect_equal(length(probs_and_likelihoods_per_item$derivatives2), 1)
 }) 
 
 test_that("model is SM, 3 dimensions, 4 categories", {
@@ -309,7 +457,7 @@ test_that("model is SM, 3 dimensions, 4 categories", {
   expect_equal(length(probs_and_likelihoods_per_item$derivatives2), 50)
 }) 
 
-test_that("model is SM, 3 dimensions, varying number of categories, estimator is expected_aposteriori, deriv is true", {
+test_that("model is SM, 3 dimensions, varying number of categories", {
   theta <- c(1.8, -1.4, 2.5)
   model <- "SM"
   administered <- 1:50
