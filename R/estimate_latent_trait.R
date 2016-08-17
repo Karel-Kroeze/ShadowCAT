@@ -68,7 +68,7 @@ estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameter
   get_updated_estimate_and_variance_ml <- function() {
     # for now, simple nlm (TODO: look at optim, and possible reintroducing pure N-R).
     # We want a maximum, but nlm produces minima -> reverse function call.
-    estimate <- nlm(f = likelihood_or_post_density, p = estimate, answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = estimator, alpha = alpha, beta = beta, guessing = guessing, prior_parameters = prior_parameters, inverse_likelihood_or_post_density = TRUE)$estimate
+    estimate <- nlm(f = likelihood_or_post_density, p = estimate, answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = estimator, alpha = alpha, beta = beta, guessing = guessing, number_itemsteps_per_item = number_itemsteps_per_item, prior_parameters = prior_parameters, inverse_likelihood_or_post_density = TRUE)$estimate
     fisher_information_items <- get_fisher_information(estimate, model, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item)
     fisher_information_test_so_far <- apply(fisher_information_items[,,administered, drop = FALSE], c(1, 2), sum)
     attr(estimate, "variance") <- solve(fisher_information_test_so_far)
@@ -89,7 +89,7 @@ estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameter
   
   get_updated_estimate_and_variance_map_normal_prior <- function() {
     estimate <- nlm(f = likelihood_or_post_density, p = estimate, 
-                    answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = estimator, alpha = alpha, beta = beta, guessing = guessing, prior_parameters = prior_parameters, inverse_likelihood_or_post_density = TRUE)$estimate
+                    answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = estimator, alpha = alpha, beta = beta, guessing = guessing, number_itemsteps_per_item = number_itemsteps_per_item, prior_parameters = prior_parameters, inverse_likelihood_or_post_density = TRUE)$estimate
     fisher_information_items <- get_fisher_information(estimate, model, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item)
     fisher_information_test_so_far <- apply(fisher_information_items[,,administered, drop = FALSE], c(1, 2), sum) + solve(prior_parameters$Sigma)
     attr(estimate, "variance") <- solve(fisher_information_test_so_far)
@@ -99,13 +99,13 @@ estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameter
   get_updated_estimate_and_variance_map_uniform_prior <- function() {
     estimate <- constrOptim(theta = move_values_to_means(values = estimate, means = rowMeans(matrix(c(prior_parameters$lower_bound, prior_parameters$upper_bound), ncol = 2)), amount_change = rep(.001, number_dimensions)), 
                             f = likelihood_or_post_density,
-                            grad = function(theta, answers, model, items_to_include, number_dimensions, estimator, alpha, beta, guessing, prior_parameters, return_log_likelihood_or_post_density = TRUE, inverse_likelihood_or_post_density) {
-                              likelihood <- likelihood_or_post_density(theta, answers, model, items_to_include, number_dimensions, estimator, alpha, beta, guessing, prior_parameters, return_log_likelihood_or_post_density, inverse_likelihood_or_post_density)
+                            grad = function(theta, answers, model, items_to_include, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, prior_parameters, return_log_likelihood_or_post_density = TRUE, inverse_likelihood_or_post_density) {
+                              likelihood <- likelihood_or_post_density(theta, answers, model, items_to_include, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, prior_parameters, return_log_likelihood_or_post_density, inverse_likelihood_or_post_density)
                               attr(likelihood, "gradient")
                             },
                             ui = rbind(diag(number_dimensions), -diag(number_dimensions)), 
                             ci = c(prior_parameters$lower_bound, -prior_parameters$upper_bound),
-                            answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing, prior_parameters = NULL, inverse_likelihood_or_post_density = TRUE)$par
+                            answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing, number_itemsteps_per_item = number_itemsteps_per_item, prior_parameters = NULL, inverse_likelihood_or_post_density = TRUE)$par
     fisher_information_items <- get_fisher_information(estimate, model, number_dimensions, alpha, beta, guessing, number_itemsteps_per_item)
     fisher_information_test_so_far <- apply(fisher_information_items[,,administered, drop = FALSE], c(1, 2), sum)
     attr(estimate, "variance") <- solve(fisher_information_test_so_far)
@@ -120,7 +120,7 @@ estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameter
                                         ip = number_gridpoints(),
                                         forcePD = TRUE)
     eval.quad(FUN = likelihood_or_post_density, X = Q_dim_grid_quad_points, 
-              answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing, with_derivative = FALSE)
+              answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing, number_itemsteps_per_item = number_itemsteps_per_item, with_derivative = FALSE)
   }
   
   get_updated_estimate_and_variance_eap_riemannsum <- function() {
@@ -131,7 +131,7 @@ estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameter
                prior_parameters = prior_parameters,
                adapt = adapt,
                number_gridpoints = number_gridpoints(),
-               answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing, return_log_likelihood_or_post_density = FALSE, with_derivative = FALSE)
+               answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing, number_itemsteps_per_item = number_itemsteps_per_item, return_log_likelihood_or_post_density = FALSE, with_derivatives = FALSE)
   }
   
   number_gridpoints <- function() {

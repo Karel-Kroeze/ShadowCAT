@@ -107,9 +107,14 @@ simulate_testbank <- function(model, number_items = 50, number_dimensions = 1, n
 simulate_answer <- function(theta, model, alpha, beta, guessing, item_keys) {
   indices <- match(item_keys, rownames(alpha))
   result <- function() {
-    guessing <- get_guessing()
-    # probabilities, generated with true theta.
-    probabilities <- get_probs_and_likelihoods_per_item(theta = theta, model = model, alpha = get_subset(alpha, indices), beta = get_subset(beta, indices), guessing = get_subset(guessing, indices), with_likelihoods = FALSE)
+    alpha_subset <- get_subset(alpha, indices)
+    beta_subset <- get_subset(beta, indices)
+    number_dimensions <- ncol(alpha_subset)
+    number_items <- nrow(alpha_subset)
+    number_itemsteps_per_item <- number_non_missing_cells_per_row(beta_subset)
+    guessing_subset <- get_guessing()
+    probabilities <- get_probs_and_likelihoods_per_item(theta = theta, model = model, alpha = alpha_subset, beta = beta_subset, guessing = guessing_subset,
+                                                        number_dimensions = number_dimensions, number_items = number_items, number_itemsteps_per_item = number_itemsteps_per_item)
     cumulative_probabilities <- row_cumsum(probabilities) 
     random_numbers <- runif(length(indices))
     
@@ -119,9 +124,8 @@ simulate_answer <- function(theta, model, alpha, beta, guessing, item_keys) {
   
   get_guessing <- function() {
     if (is.null(guessing))
-      matrix(0, nrow = nrow(as.matrix(alpha)), ncol = 1, dimnames = list(rownames(alpha), NULL))
-    else
-      guessing
+      guessing <- matrix(0, nrow = nrow(as.matrix(alpha)), ncol = 1, dimnames = list(rownames(alpha), NULL))
+    get_subset(guessing, indices)
   }
   
   validate <- function() {

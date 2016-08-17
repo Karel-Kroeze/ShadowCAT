@@ -80,7 +80,7 @@ test_that("model is GPCM, 3 dimensions, varying numbers of categories, normal pr
   number_items <- 50
   number_dimensions <- 3
   estimator <- "expected_aposteriori"
-  estimate <- 0
+  estimate <- c(0, 0, 0)
   answers <- rep(c(1, 0), 17)
   administered <-  c(6:20, 31:49)
   available <-  c(1:5, 21:30, 50)
@@ -107,7 +107,7 @@ test_that("model is GPCM, 3 dimensions, varying numbers of categories, uniform p
   number_items <- 50
   number_dimensions <- 3
   estimator <- "expected_aposteriori"
-  estimate <- 0
+  estimate <- c(0, 0, 0)
   answers <- rep(c(1, 0), 17)
   administered <-  c(6:20, 31:49)
   available <-  c(1:5, 21:30, 50)

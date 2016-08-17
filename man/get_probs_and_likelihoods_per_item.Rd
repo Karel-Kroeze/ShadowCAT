@@ -5,7 +5,8 @@
 \title{Probabilities and likelihoods}
 \usage{
 get_probs_and_likelihoods_per_item(theta, model, alpha, beta, guessing,
-  answers = numeric(0), with_likelihoods)
+  number_dimensions, number_items, number_itemsteps_per_item, answers = NULL,
+  with_likelihoods = FALSE, with_derivatives = FALSE)
 }
 \arguments{
 \item{theta}{Vector with true or estimated theta.}
@@ -23,17 +24,42 @@ right-padded with \code{NA}. \code{NA} values between answer categories are not 
 
 \item{guessing}{Matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.}
 
+\item{number_dimensions}{Number of dimensions in theta.}
+
+\item{number_items}{Number of items in alpha, beta, guessing.}
+
+\item{number_itemsteps_per_item}{Vector containing the number of non missing cells per row of the beta matrix.}
+
 \item{answers}{If \code{with_likelihoods} is set to \code{TRUE}, vector with answers to all items included in \code{alpha}, 
-\code{beta}, and \code{guessing}; else, numeric(0).}
+\code{beta}, and \code{guessing}; else, \code{NULL}.}
 
 \item{with_likelihoods}{If \code{FALSE}, only the probability matrix for all answer categories for all items is returned. If \code{TRUE}, the likelihoods 
-for the actually chosen answer categories and derivatives are also returned.}
+for the actually chosen answer categories are also returned.}
+
+\item{with_derivatives}{If \code{FALSE}, only probability matrix and likelihoods are returned. If \code{TRUE}, the first and second derivatives are also returned.
+Ignored if \code{with_likelihoods} is \code{FALSE}.}
 }
 \value{
-If \code{with_likelihoods}, list with probability matrix, likelihoods and derivatives. Else, only the probability matrix.
+If \code{with_likelihoods} is \code{FALSE}, only the probability matrix is returned.
+If \code{with_likelihoods} is \code{TRUE} and \code{with_derivatives} is \code{FALSE}, \code{list} with probability matrix and likelihoods.
+If \code{with_likelihoods} is \code{TRUE} and \code{with_derivatives} is \code{TRUE}, \code{list} with probability matrix, likelihoods and derivatives.
+Else, only the probability matrix.
 }
 \description{
 Per item, get probabilities of scoring in each answer category given theta, likelihood for
 the actually chosen answer category, and derivatives.
+}
+\references{
+\itemize{
+\item Muraki, E. (1992). A Generized Partial Credit Model: Application of an EM Algorithm. 
+ Applied Psychological Measurement, 16(2), 159 - 176. Doi:10.1177/014662169201600206.
+ \item Samejima, F. (1970). Estimation of latent trait ability using a response pattern of graded 
+ scores. Psychometrika, 35(1), 139 - 139. Doi: 10.1007/BF02290599.
+\item Segall, D. O. (2000). Principles of multidimensional adaptive testing. In W. J. van der 
+ Linden & en C. A. W. Glas (Eds.), Computerized adaptive testing: Theory and 
+ practice (pp. 53 - 74). Dordrecht: Kluwer Academic Publishers.
+ \item Tutz, G. (1986). Bradley-Terry-Luce model with an ordered response. Journal of 
+ Mathematical Psychology, 30(1), 306 - 316. doi: 10.1016/0022-2496(86)90034-9.
+}
 }
 

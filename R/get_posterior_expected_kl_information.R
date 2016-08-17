@@ -37,7 +37,7 @@ get_posterior_expected_kl_information <- function(estimate, model, answers, admi
   result <- function() {
     # we'll perform a very basic integration over the theta range
     # expand the grid for multidimensional models (number of calculations will be length(theta_values)**Q, which can still get quite high for high dimensionalities.)
-    probabilities_given_eap_estimate <- get_probs_and_likelihoods_per_item(get_theta_estimate(), model, get_subset(alpha, available), get_subset(beta, available), get_subset(guessing, available), with_likelihoods = FALSE)
+    probabilities_given_eap_estimate <- get_probs_and_likelihoods_per_item(theta = get_theta_estimate(), model = model, alpha = get_subset(alpha, available), beta = get_subset(beta, available), guessing = get_subset(guessing, available), number_dimensions = number_dimensions, number_items = length(available), number_itemsteps_per_item = get_subset(number_itemsteps_per_item, available))
     log_probabilities_given_eap_estimate <- log(probabilities_given_eap_estimate)
     theta_grid <- get_theta_grid()
     row_or_vector_sums(apply(theta_grid, 1, kullback_leibler_divergence, probabilities_given_eap_estimate = probabilities_given_eap_estimate, log_probabilities_given_eap_estimate = log_probabilities_given_eap_estimate))
@@ -53,8 +53,8 @@ get_posterior_expected_kl_information <- function(estimate, model, answers, admi
   #' Kullback Leibler Divergence for given items and pairs of thetas x posterior density.
   #' returns vector containing information for each yet available item
   kullback_leibler_divergence <- function(theta, probabilities_given_eap_estimate, log_probabilities_given_eap_estimate) {
-    probabilities_given_theta <- get_probs_and_likelihoods_per_item(theta, model, get_subset(alpha, available), get_subset(beta, available), get_subset(guessing, available), with_likelihoods = FALSE)
-    likelihood_or_post_density_theta <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator = estimator_likelihood_or_post_density(), alpha, beta, guessing, prior_parameters = prior_parameters, return_log_likelihood_or_post_density = FALSE)
+    probabilities_given_theta <- get_probs_and_likelihoods_per_item(theta = theta, model = model, alpha = get_subset(alpha, available), beta = get_subset(beta, available), guessing = get_subset(guessing, available), number_dimensions = number_dimensions, number_items = length(available), number_itemsteps_per_item = get_subset(number_itemsteps_per_item, available))
+    likelihood_or_post_density_theta <- likelihood_or_post_density(theta = theta, answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = estimator_likelihood_or_post_density(), alpha = alpha, beta = beta, guessing = guessing, number_itemsteps_per_item = number_itemsteps_per_item, prior_parameters = prior_parameters, return_log_likelihood_or_post_density = FALSE)
     rowSums(probabilities_given_eap_estimate * (log_probabilities_given_eap_estimate - log(probabilities_given_theta)), na.rm = TRUE) * likelihood_or_post_density_theta
   }
   

@@ -19,8 +19,9 @@ test_that("model is 3PLM, 2 dimensions, 2 categories, estimator is maximum_likel
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   
-  likelihood <- likelihood_or_post_density(theta, answers = answers, model, administered, number_dimensions, estimator, alpha, beta, guessing)
+  likelihood <- likelihood_or_post_density(theta, answers = answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
     
   expect_equal(length(likelihood), 1)
   expect_equal(dim(attr(likelihood, "gradient")), c(1, 2))
@@ -44,8 +45,9 @@ test_that("model is 3PLM, 1 dimension, 2 categories, estimator is maximum_aposte
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   
-  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior_parameters = prior_parameters)
+  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, prior_parameters = prior_parameters)
     
   expect_equal(dim(post_density), c(1, 1))
   expect_equal(dim(attr(post_density, "gradient")), c(1, 1))
@@ -69,8 +71,9 @@ test_that("model is 3PLM, 3 dimensions, 2 categories, estimator is expected_apos
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   
-  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior_parameters = prior_parameters)
+  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, prior_parameters = prior_parameters)
   
   expect_equal(dim(post_density), c(1, 1))
   expect_equal(dim(attr(post_density, "gradient")), c(1, 3))
@@ -96,8 +99,9 @@ test_that("model is GPCM, 1 dimensions, 2 categories, estimator is maximum_apost
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   
-  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior_parameters = prior_parameters)
+  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, prior_parameters = prior_parameters)
 
   expect_equal(dim(post_density), c(1, 1))
   expect_equal(dim(attr(post_density, "gradient")), c(1, 1))
@@ -124,8 +128,9 @@ test_that("model is GPCM, 3 dimensions, 4 categories, estimator is expected_apos
   eta <- t(apply(temp_vector, 1, function(x) x + seq(-2, 2, length.out = (number_answer_categories - 1))))
   beta <- t(apply(eta, 1, cumsum))
   guessing <- NULL
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   
-  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior_parameters = prior_parameters)
+  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, prior_parameters = prior_parameters)
   
   expect_equal(dim(post_density), c(1, 1))
   expect_equal(dim(attr(post_density, "gradient")), c(1, 3))
@@ -154,8 +159,9 @@ test_that("model is GPCM, 3 dimensions, varying number of categories, estimator 
   eta[c(40:45), 4] <- NA
   beta <- row_cumsum(eta)
   guessing <- NULL
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   
-  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior_parameters = prior_parameters)
+  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, prior_parameters = prior_parameters)
   
   expect_equal(dim(post_density), c(1, 1))
   expect_equal(dim(attr(post_density, "gradient")), c(1, 3))
@@ -184,8 +190,9 @@ test_that("model is GRM, 1 dimension, 2 categories, estimator is expected_aposte
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   
-  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior_parameters = prior_parameters)
+  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, prior_parameters = prior_parameters)
   
   expect_equal(dim(post_density), c(1, 1))
   expect_equal(dim(attr(post_density, "gradient")), c(1, 1))
@@ -212,8 +219,9 @@ test_that("model is GRM, 3 dimensions, 4 categories, estimator is expected_apost
   temp_vector <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
   beta <- t(apply(temp_vector, 1, function(x) x + seq(-2, 2, length.out = (number_answer_categories - 1))))
   guessing <- NULL
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   
-  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior_parameters = prior_parameters)
+  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, prior_parameters = prior_parameters)
 
   expect_equal(dim(post_density), c(1, 1))
   expect_equal(dim(attr(post_density, "gradient")), c(1, 3))
@@ -243,8 +251,9 @@ test_that("model is GRM, 3 dimensions, varying number of categories, estimator i
   eta[c(40:45), 4] <- NA
   beta <- row_cumsum(eta)
   guessing <- NULL
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   
-  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior_parameters = prior_parameters)
+  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, prior_parameters = prior_parameters)
   
   expect_equal(dim(post_density), c(1, 1))
   expect_equal(dim(attr(post_density, "gradient")), c(1, 3))
@@ -272,8 +281,9 @@ test_that("model is SM, 1 dimension, 2 categories, estimator is expected_aposter
   alpha <- matrix(with_random_seed(2, runif)(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
   beta <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))  
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   
-  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior_parameters = prior_parameters)
+  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, prior_parameters = prior_parameters)
   
   expect_equal(dim(post_density), c(1, 1))
   expect_equal(dim(attr(post_density, "gradient")), c(1, 1))
@@ -299,9 +309,11 @@ test_that("model is SM, 3 dimensions, 4 categories, estimator is expected_aposte
   temp_vector <- matrix(with_random_seed(2, rnorm)(number_items), nrow = number_items, ncol = 1)
   beta <- t(apply(temp_vector, 1, function(x) x + seq(-2, 2, length.out = (number_answer_categories - 1))))
   guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   
-  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior_parameters = prior_parameters)
-
+  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, prior_parameters = prior_parameters)
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
+  
   expect_equal(dim(post_density), c(1, 1))
   expect_equal(dim(attr(post_density, "gradient")), c(1, 3))
   expect_equal(dim(attr(post_density, "hessian")), c(3, 3))
@@ -329,8 +341,9 @@ test_that("model is SM, 3 dimensions, varying number of categories, estimator is
   eta[c(40:45), 4] <- NA
   beta <- row_cumsum(eta)
   guessing <- NULL
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   
-  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior_parameters = prior_parameters)
+  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, prior_parameters = prior_parameters)
   
   expect_equal(dim(post_density), c(1, 1))
   expect_equal(dim(attr(post_density, "gradient")), c(1, 3))
@@ -359,8 +372,9 @@ test_that("No derivatives computed", {
   eta[c(40:45), 4] <- NA
   beta <- row_cumsum(eta)
   guessing <- NULL
+  number_itemsteps_per_item <- number_non_missing_cells_per_row(beta)
   
-  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, prior_parameters = prior_parameters, with_derivatives = FALSE)
+  post_density <- likelihood_or_post_density(theta, answers, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item, prior_parameters = prior_parameters, with_derivatives = FALSE)
   
   expect_equal(dim(post_density), c(1, 1))
   expect_equal(dim(attr(post_density, "gradient")), NULL)

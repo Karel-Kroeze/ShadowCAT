@@ -6,7 +6,8 @@
 \usage{
 likelihood_or_post_density(theta, answers = NULL, model, items_to_include,
   number_dimensions, estimator, alpha, beta, guessing,
-  prior_parameters = NULL, return_log_likelihood_or_post_density = TRUE,
+  number_itemsteps_per_item, prior_parameters = NULL,
+  return_log_likelihood_or_post_density = TRUE,
   inverse_likelihood_or_post_density = FALSE, with_derivatives = TRUE)
 }
 \arguments{
@@ -32,6 +33,8 @@ The matrix should have a number of columns equal to the largest number of item s
 right-padded with \code{NA}. \code{NA} values between answer categories are not allowed, and will lead to errors.}
 
 \item{guessing}{Matrix with one column of guessing parameters per item. Row names should contain the item keys. Optionally used in 3PLM model, ignored for all others.}
+
+\item{number_itemsteps_per_item}{Vector containing the number of non missing cells per row of the beta matrix.}
 
 \item{prior_parameters}{List containing mu and Sigma of the normal prior: \code{list(mu = ..., Sigma = ...)}.
 Sigma should always be in matrix form.}
