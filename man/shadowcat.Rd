@@ -11,7 +11,8 @@ shadowcat(answers, estimate, variance, model, alpha, beta, start_items,
   safe_eap = FALSE, eap_estimation_procedure = "riemannsum")
 }
 \arguments{
-\item{answers}{Named list of previous answers and new answer, with names being the item keys. Should be initialized with \code{NULL}.}
+\item{answers}{Named list of previous answers and new answer, with names being the item keys. Should be initialized with \code{NULL}.
+Answer options should start at 0.}
 
 \item{estimate}{Vector with current estimate of latent trait theta. Length should be equal to the number of dimensions.}
 

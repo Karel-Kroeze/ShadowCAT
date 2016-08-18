@@ -34,6 +34,7 @@
 #' }
 #' 
 #' @param answers Named list of previous answers and new answer, with names being the item keys. Should be initialized with \code{NULL}.
+#' Answer options should start at 0.
 #' @param estimate Vector with current estimate of latent trait theta. Length should be equal to the number of dimensions.
 #' @param variance Current covariance matrix of the estimate, as vector.
 #' @param model One of \code{"3PLM"}, \code{"GPCM"}, \code{"SM"} or \code{"GRM"}, for the three-parameter logistic, generalized partial credit, sequential or graded response model, respectively.
