@@ -8,6 +8,7 @@ Gemfile.lock
 .lintr
 vendor
 ^circle\.yml$
+^ShadowCAT_0.1.tar.gz$
 .o$
 .so$
 .dll$
