@@ -4,8 +4,10 @@ Title: Multidimensional Computer Adaptive Testing with the Shadow Testing
     Procedure
 Version: 0.1
 Date: 2016-08-10
-Author: Karel A. Kroeze, Rivka M. de Vries (Roqua), Alwin W. Stegeman.
-Maintainer: Rivka M. de Vries <rivkamdevries@gmail.com>
+Authors@R: as.person(c(
+    "Rivka M. de Vries <rivkamdevries@gmail.com> [aut, cre]",
+    "Karel A. Kroeze <k.a.kroeze@utwente.nl> [aut]",
+    "Alwin W. Stegeman < stegeman.alwin@gmail.com> [ctb]"))
 Description: Allows application and simulation of Computer Adaptive
     tests. Options include; 4 models (3PLM, GPCM, GRM, SM), 3 estimators (ML, MAP,
     EAP), Fisher Information and Kullback-Leibler Distance based item selection,
