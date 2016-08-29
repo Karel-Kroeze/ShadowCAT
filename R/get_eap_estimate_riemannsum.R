@@ -4,8 +4,6 @@
 #' Integration approximation occurs via a Riemannsumm, where grid points can be adapted to the location of the
 #' posterior distribution.
 #' 
-#' @param dimension Number of dimensions of theta.
-#' @param likelihood Likelihood function of theta, where first argument should be theta.
 #' @param prior_form String indicating the form of the prior; one of \code{"normal"} or \code{"uniform"}.
 #' @param prior_parameters List containing mu and Sigma of the normal prior: \code{list(mu = ..., Sigma = ...)}, or 
 #' the upper and lower bound of the uniform prior: \code{list(lower_bound = ..., upper_bound = ...)}.
@@ -15,19 +13,22 @@
 #' @param adapt List containing mu and Sigma for the adaptation of the grid points: list(mu = ..., Sigma = ...).
 #' If \code{NULL}, adaptation with normal prior is based on the prior parameters, and no adaptation is made with uniform prior.
 #' @param number_gridpoints Value indicating the number of grid points per dimension to use for the Riemannsum.
-#' @param ... Any additional arguments to \code{likelihood}.
 #' @return Expected aposteriori estimate of the latent trait theta, with its covariance matrix as an attribute.
 #' @importFrom mvtnorm dmvnorm
 #' @importFrom Matrix nearPD
-get_eap_estimate_riemannsum <- function(dimension, likelihood, prior_form, prior_parameters, adapt = NULL, number_gridpoints = 50, ...) {
+get_eap_estimate_riemannsum <- function(prior_form, prior_parameters, adapt = NULL, number_gridpoints = 50, alpha, beta, guessing, answers, administered, number_dimensions, model) {
+  alpha <- get_subset(alpha, administered)
+  beta <- get_subset(beta, administered)
+  guessing <- get_subset(guessing, administered)
+  
   result <- function() {
     mid_grid_points <- get_mid_grid_points() 
-    joint_distribution <- apply(mid_grid_points, 1, get_likelihood_or_post_density_given_theta)
+    joint_distribution <- get_joint_distribution(mid_grid_points = mid_grid_points)
     sum_joint <- sum(joint_distribution)
     sum_joint_times_grid <- colSums(joint_distribution * mid_grid_points)
     eap_theta_estimate <- as.vector(sum_joint_times_grid / sum_joint)
 
-    var_eap_theta_estimate <- matrix(0, dimension, dimension)
+    var_eap_theta_estimate <- matrix(0, number_dimensions, number_dimensions)
     for (i in 1:nrow(mid_grid_points)) {
       deviation <- mid_grid_points[i, ] - eap_theta_estimate
       var_eap_theta_estimate <- var_eap_theta_estimate + ( deviation %*% t(deviation) * joint_distribution[i] / sum_joint )
@@ -47,7 +48,7 @@ get_eap_estimate_riemannsum <- function(dimension, likelihood, prior_form, prior
   }
   
   get_list_gridpoints_uniform <- function() {
-    lapply(1:dimension,
+    lapply(1:number_dimensions,
            function(dim) {
              lower_bound <- prior_parameters$lower_bound[dim]
              upper_bound <- prior_parameters$upper_bound[dim]
@@ -57,7 +58,7 @@ get_eap_estimate_riemannsum <- function(dimension, likelihood, prior_form, prior
   } 
   
   get_list_gridpoints_normal <- function() {
-    lapply(1:dimension,
+    lapply(1:number_dimensions,
            function(dim) {
              seq(-5 + 5/number_gridpoints, 5 - 5/number_gridpoints, 10/number_gridpoints)
            })
@@ -106,12 +107,24 @@ get_eap_estimate_riemannsum <- function(dimension, likelihood, prior_form, prior
       grid_points_transformed
   }
   
-  get_likelihood_or_post_density_given_theta <- function(theta) {
-    if (prior_form == "normal")
-      likelihood(theta, ...) * dmvnorm(theta, prior_parameters$mu, prior_parameters$Sigma)
-    else
-      likelihood(theta, ...)
-  }
-  
+  get_joint_distribution <- function(mid_grid_points) {
+    mu <- if (prior_form == "normal")
+            as.numeric(prior_parameters$mu)
+           else
+             mu <- numeric(0)
+    sigma <- if (prior_form == "normal")
+               as.vector(nearPD(prior_parameters$Sigma)$mat)
+             else
+               sigma <- numeric(0)
+    model_number <- switch(model,
+                           "3PLM" = 0,
+                           "GPCM" = 1,
+                           "SM" = 2,
+                           "GRM" = 3)
+           
+    .Call("RjointDistribution", as.vector(t(mid_grid_points)), as.numeric(alpha), as.numeric(beta), as.numeric(guessing), as.numeric(answers), 
+          nrow(mid_grid_points), as.integer(number_dimensions), length(answers), as.integer(prior_form == normal), mu, sigma, as.integer(model_number), package = "ShadowCAT")
+  }  
+    
   result()
 }

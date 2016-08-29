@@ -9,56 +9,36 @@
 #' number_items <- 50
 #' answers <- rep(c(1, 0), 17)
 #' administered <- c(6:20, 31:49)
-#' alpha <- matrix(runif(number_items * number_dimensions, .3, 1.5),
-#'                 nrow = number_items, ncol = number_dimensions)
+#' alpha <- matrix(runif(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
 #' beta <- matrix(rnorm(number_items), nrow = number_items, ncol = 1)
 #' guessing <- c(rep(.1, number_items / 2), rep(.2, number_items / 2))
 #' number_itemsteps_per_item <- ShadowCAT:::number_non_missing_cells_per_row(beta)
 #' prior_form <- "normal"
 #' prior_parameters <- list(mu = 0, Sigma = diag(1))
 #'
-#' # Obtain estimates
-#' # Note that maximum a posteriori combined with uniform prior 
-#' # is equivalent to maximum likelihood with bounds
+#' # obtain estimates
+#' estimator <- "maximum_aposteriori" # maximum a posteriori combined with uniform prior is equivalent to maximum likelihood with bounds
+#' ML <- ShadowCAT:::estimate_latent_trait(estimate, answers, prior_form = "uniform", prior_parameters = list(lower_bound = -4, upper_bound = 4), model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
 #' estimator <- "maximum_aposteriori"
-#' ML <- ShadowCAT:::estimate_latent_trait(estimate, answers, 
-#'                                         prior_form = "uniform", 
-#'                                         prior_parameters = list(lower_bound = -4, upper_bound = 4), 
-#'                                         model, administered, number_dimensions, estimator, 
-#'                                         alpha, beta, guessing, number_itemsteps_per_item)
-#' estimator <- "maximum_aposteriori"
-#' MAP <- ShadowCAT:::estimate_latent_trait(estimate, answers, 
-#'                                          prior_form, prior_parameters, 
-#'                                          model, administered, number_dimensions, estimator,
-#'                                          alpha, beta, guessing, number_itemsteps_per_item)
+#' MAP <- ShadowCAT:::estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
 #' estimator <- "expected_aposteriori"
-#' EAP <- ShadowCAT:::estimate_latent_trait(estimate, answers, 
-#'                                          prior_form, prior_parameters, 
-#'                                          model, administered, number_dimensions, estimator, 
-#'                                          alpha, beta, guessing, number_itemsteps_per_item)
+#' EAP <- ShadowCAT:::estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item)
 #' ML; MAP; EAP
 #' 
 #' # access variance
 #' attr(ML, "variance")
 #' 
-#' # Note that expected_aposteriori takes considerably more time when dimensionality is higher:
+#' # Note that expected_aposteriori takes considerably more time when dimensionality is higher...
 #' number_dimensions <- 5
 #' estimate <- rep(.3, number_dimensions)
-#' alpha <- matrix(runif(number_items * number_dimensions, .3, 1.5), 
-#'                 nrow = number_items, ncol = number_dimensions)
+#' alpha <- matrix(runif(number_items * number_dimensions, .3, 1.5), nrow = number_items, ncol = number_dimensions)
 #' prior_form <- "normal"
 #' prior_parameters <- list(mu = rep(0, number_dimensions), Sigma = diag(number_dimensions))
 #' 
 #' estimator <- "maximum_aposteriori"
-#' system.time(ShadowCAT:::estimate_latent_trait(estimate, answers, 
-#'                                               prior_form, prior_parameters, 
-#'                                               model, administered, number_dimensions, estimator, 
-#'                                               alpha, beta, guessing, number_itemsteps_per_item))
+#' system.time(ShadowCAT:::estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item))
 #' estimator <- "expected_aposteriori"
-#' system.time(ShadowCAT:::estimate_latent_trait(estimate, answers, 
-#'                                               prior_form, prior_parameters,
-#'                                               model, administered, number_dimensions, estimator, 
-#'                                               alpha, beta, guessing, number_itemsteps_per_item))
+#' system.time(ShadowCAT:::estimate_latent_trait(estimate, answers, prior_form, prior_parameters, model, administered, number_dimensions, estimator, alpha, beta, guessing, number_itemsteps_per_item))
 #' 
 #' @param estimate Vector containing current theta estimate, with covariance matrix as an attribute.
 #' @param answers Vector with answers to administered items.
@@ -145,13 +125,11 @@ estimate_latent_trait <- function(estimate, answers, prior_form, prior_parameter
   
   get_updated_estimate_and_variance_eap_riemannsum <- function() {
     adapt <- if (length(answers) > 5 & !is.null(attr(estimate, 'variance'))) list(mu = estimate, Sigma = as.matrix(attr(estimate, "variance")))
-    get_eap_estimate_riemannsum(dimension = number_dimensions, 
-               likelihood = likelihood_or_post_density, 
-               prior_form = prior_form,
-               prior_parameters = prior_parameters,
-               adapt = adapt,
-               number_gridpoints = number_gridpoints(),
-               answers = answers, model = model, items_to_include = administered, number_dimensions = number_dimensions, estimator = "maximum_likelihood", alpha = alpha, beta = beta, guessing = guessing, return_log_likelihood_or_post_density = FALSE, with_derivative = FALSE)
+    get_eap_estimate_riemannsum(prior_form = prior_form,
+                                prior_parameters = prior_parameters,
+                                adapt = adapt,
+                                number_gridpoints = number_gridpoints(),
+                                alpha = alpha, beta = beta, guessing = guessing, answers = answers, administered = administered, number_dimensions = number_dimensions, model = model)
   }
   
   number_gridpoints <- function() {
