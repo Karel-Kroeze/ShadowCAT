@@ -146,7 +146,7 @@ simulate_answer <- function(theta, model, alpha, beta, guessing, item_keys) {
       add_error("guessing", "should be a single column matrix with item keys as row names")
     if (!row_names_are_equal(rownames(alpha), list(alpha, beta, guessing)))
       add_error("alpha_beta_eta_guessing", "should have equal row names, in same order")
-    if (item_keys %not_in% rownames(alpha))
+    if (any(item_keys %not_in% rownames(alpha)))
       add_error("item_keys", "unknown")
   }
   
