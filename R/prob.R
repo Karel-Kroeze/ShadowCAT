@@ -118,20 +118,15 @@ prob <- function(test, person = NULL, theta = NULL, deriv = FALSE, prior = NULL,
 #' @param theta
 #' @param test
 #' @param person
-#' @param should values be reversed (useful for minimization, reverses LL as well as derivatives)
-#' @param posterior If FALSE (default), the result is the Log-Likelihood. 
-#' If inclusion of a prior is desired (e.g. for MAP estimates), set to TRUE.
+#' @param minimize should values be reversed (useful for minimization, reverses LL as well as derivatives)
 #' @return Log-Likelihood, as well as gradient and hessian attributes.
 #' @importFrom stats nlm
-LL <- function(theta, test, person, minimize = FALSE, log = TRUE, posterior = FALSE ){
+LL <- function(theta, test, person, minimize = FALSE, log = TRUE ){
   # subset items that have a response
   test$items <- subset(test$items, person$administered)
   
   # get LL and derivatives.
-  if (posterior)
-    PROB <- prob(test, person, theta, deriv = TRUE) # prior will be taken from person object if prior = NULL (default).
-  else
-    PROB <- prob(test, person, theta, deriv = TRUE, prior = FALSE)
+  PROB <- prob(test, person, theta, deriv = TRUE) 
   
   # prepare output
   out <- PROB$LL * (-1) ^ minimize

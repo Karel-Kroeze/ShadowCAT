@@ -69,15 +69,15 @@ estimate <- function(person, test, ...) {
                                      p = person$estimate,
                                      test = test,
                                      person = person,
-                                     minimize = TRUE, # We want a maximum, but nlm produces minima -> reverse function call. 
-                                     posterior = test$estimator == "MAP")$estimate,
+                                     minimize = TRUE # We want a maximum, but nlm produces minima -> reverse function call. 
+                                     )$estimate,
                          error = function(e) {
-                           #message(paste0(test$estimator, " failed, trying EAP estimate."))
+                           message(paste0(test$estimator, " failed, trying EAP estimate. \n", e$message))
                            test$estimator <- "EAP"
                            return(estimate(person, test)$estimate)
                          },
                          warning = function(w) {
-                           #message(paste0(test$estimator, " failed, trying EAP estimate."))
+                           message(paste0(test$estimator, " failed, trying EAP estimate. \n", w$message))
                            test$estimator <- "EAP"
                            return(estimate(person, test)$estimate)
                          })
