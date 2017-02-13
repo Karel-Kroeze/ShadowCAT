@@ -12,7 +12,7 @@ MI <- function(test, person, objective){
     # fetch highest information available item
     # TODO: This is a very hacky way to stop itemselection on domains that have met variance targets.
     # Needs simplification, optimization and generalization.
-    if (test$stop$type == "variance"){
+    if (test$stop$type == "variance" && test$items$Q > 1){
       # check which domains are completed (should really be held in person object)
       completed_domains <- which(diag(attr(person$estimate, "variance")) < test$stop$target)
       
@@ -25,11 +25,8 @@ MI <- function(test, person, objective){
       # return max item(s) that have not yet been administered, and have 'useful' domain loadings
       out <- which(objective == max(objective[intersect(useful_items, person$available)]))
     } else {
-      
       out <- which(objective == max(objective[person$available]))
     }
-    
-    
     
     # return
     return(out)
