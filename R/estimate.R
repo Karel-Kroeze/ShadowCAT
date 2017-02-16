@@ -82,6 +82,14 @@ estimate <- function(person, test, ...) {
       }
     )
     
+    # enforce boundaries.
+    # TODO: make debug output toggleable
+    # if (any(person$estimate > test$upperBound | person$estimate < test$lowerBound)) cat("Estimate outside boundaries (k =", length(person$responses), "estimate =", paste0(round(person$estimate, 2), collapse = ", "), ").\n")
+    person$estimate[which(person$estimate > test$upperBound)] <-
+      test$upperBound[which(person$estimate > test$upperBound)]
+    person$estimate[which(person$estimate < test$lowerBound)] <-
+      test$lowerBound[which(person$estimate < test$lowerBound)]
+    
     # variance
     # get FI
     # TODO: We should really store info somewhere so we don't have to redo this (when using FI based selection criteria).
@@ -116,6 +124,7 @@ estimate <- function(person, test, ...) {
       adapt = adapt,
       ip = switch(Q, 50, 15, 6, 4, 3)
     )
+    
     person$estimate <-
       eval.quad(
         FUN = LL,
@@ -124,15 +133,15 @@ estimate <- function(person, test, ...) {
         person = person,
         ...
       )
+    
+    # enforce boundaries.
+    # TODO: make debug output toggleable
+    # if (any(person$estimate > test$upperBound | person$estimate < test$lowerBound)) cat("Estimate outside boundaries (k =", length(person$responses), "estimate =", paste0(round(person$estimate, 2), collapse = ", "), ").\n")
+    person$estimate[which(person$estimate > test$upperBound)] <-
+      test$upperBound[which(person$estimate > test$upperBound)]
+    person$estimate[which(person$estimate < test$lowerBound)] <-
+      test$lowerBound[which(person$estimate < test$lowerBound)]
   }
-  
-  # enforce boundaries.
-  # TODO: make debug output toggleable
-  # if (any(person$estimate > test$upperBound | person$estimate < test$lowerBound)) cat("Estimate outside boundaries (k =", length(person$responses), "estimate =", paste0(round(person$estimate, 2), collapse = ", "), ").\n")
-  person$estimate[which(person$estimate > test$upperBound)] <-
-    test$upperBound[which(person$estimate > test$upperBound)]
-  person$estimate[which(person$estimate < test$lowerBound)] <-
-    test$lowerBound[which(person$estimate < test$lowerBound)]
   
   return(invisible(person))
 }
